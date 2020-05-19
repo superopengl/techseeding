@@ -46,7 +46,7 @@ margin: 0 auto 0 auto;
 
 const ItemStyled = styled(List.Item)`
 color: #fff;
-
+cursor: pointer;
 &:hover: {
   color: #fff;
   background-color: rgba(0, 32, 46, 0.3);
@@ -58,7 +58,8 @@ class HomeCarouselArea extends React.Component {
   constructor(props) {
     super(props);
 
-    this.venderData = getVenderData().slice(0, 5);
+    this.carousel = React.createRef();
+    this.venderData = getVenderData().slice(0, 6);
   }
 
   getRankIndex(i) {
@@ -72,12 +73,16 @@ class HomeCarouselArea extends React.Component {
     }
   }
 
+  goTo = (i) => {
+    this.carousel.goTo(i);
+  }
+
   render() {
     return (
       <ContainerStyled gutter={0} style={{position: 'relative'}}>
         <Row>
           <Col span={24}>
-            <Carousel autoplay dotPosition="bottom">
+            <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
               {this.venderData.map(f => (
                 <div key={f.file}>
                   <ImgStyled style={{ backgroundImage: `url(${f.picture})` }}>
@@ -103,7 +108,7 @@ class HomeCarouselArea extends React.Component {
           />
         </SearchRowContainer> */}
         <Row style={{ maxWidth: 1024, position: 'relative', width: '100%', margin: '0 auto 0 auto' }}>
-          <div style={{ position: 'absolute', bottom: 80, right: 0 }}>
+          <div style={{ position: 'absolute', top: -500, right: 0 }}>
             <ListContainer>
               <List
                 size="large"
@@ -111,7 +116,7 @@ class HomeCarouselArea extends React.Component {
                 // footer={<div>Footer</div>}
                 // bordered
                 dataSource={this.venderData}
-                renderItem={(item, i) => <ItemStyled>{i + 1} {item.name}</ItemStyled>}
+                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{i + 1} {item.name}</ItemStyled>}
               />
             </ListContainer>
           </div>

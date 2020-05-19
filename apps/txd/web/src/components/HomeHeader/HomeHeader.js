@@ -19,6 +19,7 @@ border: 0;
 justify-content: space-between;
 border-bottom: 1px solid #f0f0f0;
 align-items: center;
+box-shadow: 0px 2px 8px #888888;
 `;
 
 const MenuContianer = styled.div`

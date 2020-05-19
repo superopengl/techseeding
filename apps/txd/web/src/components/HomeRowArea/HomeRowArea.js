@@ -15,6 +15,7 @@ const RowStyled = styled(Row)`
   margin-bottom: 0rem;
   width: 100%;
   text-align: center;
+  padding: 2rem 0;
 `;
 
 export class HomeRowArea extends React.Component {
@@ -24,7 +25,7 @@ export class HomeRowArea extends React.Component {
     return (
       <RowStyled style={{backgroundColor: bgColor}}>
         <Col span={24}>
-          {this.props.title && <Title style={{paddingTop: '4rem'}}>{this.props.title}</Title>}
+          {this.props.title && <Title>{this.props.title}</Title>}
           <div>{this.props.children}</div>
         </Col>
       </RowStyled>

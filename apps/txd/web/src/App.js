@@ -1,6 +1,6 @@
 import React from 'react';
 // import logo from './logo.svg';
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.less';
 import styled from 'styled-components';
 import HomeMessageArea from './components/HomeMessageArea/HomeMessageArea';
 
@@ -42,11 +42,15 @@ function App() {
   return (
     <LayoutStyled>
       <HomeHeader></HomeHeader>
-      <BarStyled></BarStyled>
+      {/* <BarStyled></BarStyled> */}
       <ContentStyled>
         <HomeCarouselArea></HomeCarouselArea>
         <HomeFeatureArea></HomeFeatureArea>
-        <HomeEventArea></HomeEventArea>
+        <HomeEventArea title="Top Business" bgColor="#f5f5f5" row={1}></HomeEventArea>
+        <HomeEventArea title="Restaurants" bgColor="#ffffff" row={1}></HomeEventArea>
+        <HomeEventArea title="Auto" bgColor="#f5f5f5" row={1}></HomeEventArea>
+        <HomeEventArea title="Life" bgColor="#ffffff" row={2}></HomeEventArea>
+        <HomeEventArea title="Upcoming Events" bgColor="#f5f5f5" row={1}></HomeEventArea>
         <HomeMessageArea></HomeMessageArea>
       </ContentStyled>
       <HomeFooter></HomeFooter>
