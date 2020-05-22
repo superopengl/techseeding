@@ -1,0 +1,10 @@
+RED='\033[0;31m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${ORANGE}UBC${NC}"
+
+alias ubc='cd /Users/jshao/github/ubc'
+alias uweb='cd /Users/jshao/github/ubc/ubc-web'
+alias uapp='cd /Users/jshao/github/ubc/ubc-app'
