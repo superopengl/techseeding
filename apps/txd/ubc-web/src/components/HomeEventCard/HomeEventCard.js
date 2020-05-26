@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import { getVenderData } from '../../services/dataService';
 import styled from 'styled-components';
+import { FacebookFilled, GlobalOutlined, TwitterOutlined, AudioOutlined } from '@ant-design/icons';
 const { Meta } = Card;
+
 
 const CardStyled = styled(Card)`
   width: 240px;
@@ -41,7 +43,7 @@ export class HomeEventCard extends React.Component {
       >
         <MetaStyled title={this.data.eventName} description={this.data.eventDate.format('ddd D MMM YYYY')} />
         <br/>
-        <Button type="default">RSVP</Button>
+        <Button type="link" size="large"><GlobalOutlined /> <FacebookFilled /> <TwitterOutlined /></Button>
       </CardStyled>
     );
   }

@@ -55,8 +55,8 @@ class HomeEventArea extends React.Component {
           ))}
         </RowStyled>
         <RowStyled style={{justifyContent: 'center'}}>
-          {!this.state.collapsed && <Button size="large" shape="circle" onClick={() => this.toggle(true)}><DownOutlined /></Button>}
-          {this.state.collapsed && <Button size="large" shape="circle" onClick={() => this.toggle(false)}><UpOutlined /></Button>}
+          {!this.state.collapsed && <Button block style={{color: '#8c8c8c'}} size="large" type="link" onClick={() => this.toggle(true)}><DownOutlined /></Button>}
+          {this.state.collapsed && <Button block style={{color: '#8c8c8c'}} size="large" type="link" onClick={() => this.toggle(false)}><UpOutlined /></Button>}
         </RowStyled>
       </HomeRowArea>
     );

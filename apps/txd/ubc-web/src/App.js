@@ -25,7 +25,7 @@ const LayoutStyled = styled(Layout)`
 `;
 
 const ContentStyled = styled(Content)`
-  margin: 64px auto 68px auto;
+  margin: 64px auto 0 auto;
   width: 100%;
 `;
 
@@ -46,12 +46,10 @@ function App() {
       <ContentStyled>
         <HomeCarouselArea></HomeCarouselArea>
         <HomeFeatureArea></HomeFeatureArea>
-        <HomeEventArea title="Top Business" bgColor="#f5f5f5" row={1}></HomeEventArea>
-        <HomeEventArea title="Restaurants" bgColor="#ffffff" row={1}></HomeEventArea>
-        <HomeEventArea title="Auto" bgColor="#f5f5f5" row={1}></HomeEventArea>
-        <HomeEventArea title="Life" bgColor="#ffffff" row={2}></HomeEventArea>
-        <HomeEventArea title="Upcoming Events" bgColor="#f5f5f5" row={1}></HomeEventArea>
-        <HomeMessageArea></HomeMessageArea>
+        <HomeEventArea title="Business" bgColor="#f5f5f5" row={1}></HomeEventArea>
+        <HomeEventArea title="Upcoming Events" bgColor="#ffffff" row={1}></HomeEventArea>
+        <HomeEventArea title="Gallery" bgColor="#f5f5f5" row={2}></HomeEventArea>
+        {/* <HomeMessageArea></HomeMessageArea> */}
       </ContentStyled>
       <HomeFooter></HomeFooter>
     </LayoutStyled>

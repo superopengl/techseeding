@@ -48,7 +48,7 @@ const HomeHeader = () => (
     <SiteLogoName>UBC</SiteLogoName>
     {/* <ChLogName>商家联盟</ChLogName> */}
     {/* <img src="logo.jpg" alt="logo" style={{ marginBottom: 2 }}></img> */}
-    <Search
+    {/* <Search
       placeholder="input search text"
       enterButton
       // size="large"
@@ -60,15 +60,16 @@ const HomeHeader = () => (
       />}
       style={{ marginLeft: '4rem', marginRight: '4rem' }}
       onSearch={value => console.log(value)}
-    />
+    /> */}
     <MenuContianer>
       <Menu mode="horizontal" style={{ border: 0 }}>
         {/* <Menu.Item key="services">Services</Menu.Item> */}
         {/* <Menu.Item key="produces">Products</Menu.Item> */}
         <Menu.Item key="home">Home</Menu.Item>
-        <Menu.Item key="event">Event</Menu.Item>
-        <Menu.Item key="about_us">About Us</Menu.Item>
-        <Menu.Item key="sign_up">Contact</Menu.Item>
+        <Menu.Item key="event">Services</Menu.Item>
+        <Menu.Item key="about_us">Business</Menu.Item>
+        <Menu.Item key="about_us">Events</Menu.Item>
+        <Menu.Item key="sign_up">Gallery</Menu.Item>
         <Menu.Item key="log_in"><UserOutlined />Login / Register</Menu.Item>
       </Menu>
     </MenuContianer>

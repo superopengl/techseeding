@@ -107,21 +107,21 @@ class HomeCarouselArea extends React.Component {
             onSearch={value => console.log(value)}
           />
         </SearchRowContainer> */}
-        <Row style={{ maxWidth: 1024, position: 'relative', width: '100%', margin: '0 auto 0 auto' }}>
-          <div style={{ position: 'absolute', top: -500, right: 0 }}>
-            <ListContainer>
+        {/* <Row style={{ position: 'absolute', right: 0, width: '100%', margin: '0 auto 0 auto' }}> */}
+          {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
+            <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
               <List
                 size="large"
-                header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
+                // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
                 // footer={<div>Footer</div>}
                 // bordered
                 dataSource={this.venderData}
                 renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{i + 1} {item.name}</ItemStyled>}
               />
             </ListContainer>
-          </div>
-        </Row>
-        <div style={{ maxWidth: 1024, position: 'absolute', bottom: 10, right: 10 }}>
+          {/* </div> */}
+        {/* </Row> */}
+        <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>
           <PoweredByLogo></PoweredByLogo>
         </div>
 
