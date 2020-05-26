@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
 import PoweredByLogo from '../PoweredByLogo/PoweredByLogo';
+import AnchorLink from 'react-anchor-link-smooth-scroll'
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
 
@@ -43,6 +44,8 @@ font-size: 0.5rem;
 word-wrap: break-word;
 `;
 
+const headerHeight = 64;
+
 const HomeHeader = () => (
   <HeaderStyled>
     <SiteLogoName>UBC</SiteLogoName>
@@ -65,11 +68,11 @@ const HomeHeader = () => (
       <Menu mode="horizontal" style={{ border: 0 }}>
         {/* <Menu.Item key="services">Services</Menu.Item> */}
         {/* <Menu.Item key="produces">Products</Menu.Item> */}
-        <Menu.Item key="home">Home</Menu.Item>
-        <Menu.Item key="event">Services</Menu.Item>
-        <Menu.Item key="about_us">Business</Menu.Item>
-        <Menu.Item key="about_us">Events</Menu.Item>
-        <Menu.Item key="sign_up">Gallery</Menu.Item>
+        <Menu.Item key="home"><AnchorLink offset={headerHeight} href="#home">Home</AnchorLink></Menu.Item>
+        <Menu.Item key="event"><AnchorLink offset={headerHeight} href="#services">Services</AnchorLink></Menu.Item>
+        <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#business">Business</AnchorLink></Menu.Item>
+        <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#events">Events</AnchorLink></Menu.Item>
+        <Menu.Item key="sign_up"><AnchorLink offset={headerHeight} href="#gallery">Gallery</AnchorLink></Menu.Item>
         <Menu.Item key="log_in"><UserOutlined />Login / Register</Menu.Item>
       </Menu>
     </MenuContianer>

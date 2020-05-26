@@ -30,18 +30,18 @@ const ContentStyled = styled(Content)`
 
 const HomePage = () => (
   <LayoutStyled>
-  <HomeHeader></HomeHeader>
-  {/* <BarStyled></BarStyled> */}
-  <ContentStyled>
-    <HomeCarouselArea></HomeCarouselArea>
-    <HomeFeatureArea></HomeFeatureArea>
-    <HomeEventArea title="Business" bgColor="#f5f5f5" row={1}></HomeEventArea>
-    <HomeEventArea title="Upcoming Events" bgColor="#ffffff" row={1}></HomeEventArea>
-    <HomeEventArea title="Gallery" bgColor="#f5f5f5" row={2}></HomeEventArea>
-    {/* <HomeMessageArea></HomeMessageArea> */}
-  </ContentStyled>
-  <HomeFooter></HomeFooter>
-</LayoutStyled>
+    <HomeHeader></HomeHeader>
+    {/* <BarStyled></BarStyled> */}
+    <ContentStyled>
+      <section id="home"><HomeCarouselArea></HomeCarouselArea></section>
+      <section id="services"><HomeFeatureArea></HomeFeatureArea></section>
+      <section id="business"><HomeEventArea title="Business" bgColor="#f5f5f5" row={1}></HomeEventArea></section>
+      <section id="events"><HomeEventArea title="Upcoming Events" bgColor="#ffffff" row={1}></HomeEventArea></section>
+      <section id="gallery"><HomeEventArea title="Gallery" bgColor="#f5f5f5" row={2}></HomeEventArea></section>
+      {/* <HomeMessageArea></HomeMessageArea> */}
+    </ContentStyled>
+    <HomeFooter></HomeFooter>
+  </LayoutStyled>
 );
 
 HomePage.propTypes = {};
