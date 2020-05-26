@@ -1,58 +1,23 @@
 import React from 'react';
 // import logo from './logo.svg';
 import 'antd/dist/antd.less';
-import styled from 'styled-components';
-import HomeMessageArea from './components/HomeMessageArea/HomeMessageArea';
-
 // import './App.css';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import { UserOutlined, UserAddOutlined, SmileOutlined } from '@ant-design/icons';
-import { Carousel } from 'antd';
-import HomeHeader from './components/HomeHeader/HomeHeader';
-import HomeFooter from './components/HomeFooter/HomeFooter';
-import HomeRowArea from './components/HomeRowArea/HomeRowArea';
-import HomeCarouselArea from './components/HomeCarouselArea/HomeCarouselArea';
-import HomeFeatureArea from './components/HomeFeatureArea/HomeFeatureArea';
-import HomeEventArea from './components/HomeEventArea/HomeEventArea';
-const { Header, Content, Footer } = Layout;
-const { Meta } = Card;
-const { Option } = Select;
+import { Route, BrowserRouter } from 'react-router-dom';
+import HomePage from 'pages/HomePage/HomePage';
+import BackdoorPage from 'pages/BackdoorPage/BackdoorPage';
+import Error404 from 'pages/Error404/Error404';
 
-const LayoutStyled = styled(Layout)`
-  margin: 0 auto 0 auto;
-  background-color: #ffffff;
-  text-align: 'center'; 
-`;
 
-const ContentStyled = styled(Content)`
-  margin: 64px auto 0 auto;
-  width: 100%;
-`;
-
-const BarStyled = styled.div`
-  width: 100%;
-  height: 4px;
-  background-color: #00202e;
-  position: fixed;
-  top: 0;
-  z-index: 1000;
-`;
 
 function App() {
   return (
-    <LayoutStyled>
-      <HomeHeader></HomeHeader>
-      {/* <BarStyled></BarStyled> */}
-      <ContentStyled>
-        <HomeCarouselArea></HomeCarouselArea>
-        <HomeFeatureArea></HomeFeatureArea>
-        <HomeEventArea title="Business" bgColor="#f5f5f5" row={1}></HomeEventArea>
-        <HomeEventArea title="Upcoming Events" bgColor="#ffffff" row={1}></HomeEventArea>
-        <HomeEventArea title="Gallery" bgColor="#f5f5f5" row={2}></HomeEventArea>
-        {/* <HomeMessageArea></HomeMessageArea> */}
-      </ContentStyled>
-      <HomeFooter></HomeFooter>
-    </LayoutStyled>
+    <BrowserRouter basename="/">
+      <div>
+        <Route exact path="/" component={HomePage} />
+        <Route exact path="/backdoor" component={BackdoorPage} />
+        <Route component={Error404} />
+      </div>
+    </BrowserRouter>
   );
 }
 
