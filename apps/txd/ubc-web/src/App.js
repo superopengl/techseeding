@@ -15,7 +15,7 @@ function App() {
       <div>
         <Route exact path="/" component={HomePage} />
         <Route exact path="/backdoor" component={BackdoorPage} />
-        <Route component={Error404} />
+        {/* <Route component={Error404} /> */}
       </div>
     </BrowserRouter>
   );

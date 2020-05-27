@@ -51,6 +51,9 @@ cursor: pointer;
   color: #fff;
   background-color: rgba(0, 32, 46, 0.3);
 }
+height: 2.8rem;
+padding-top: 10px !important;
+padding-bottom: 10px !important;
 `;
 
 class HomeCarouselArea extends React.Component {
@@ -59,7 +62,7 @@ class HomeCarouselArea extends React.Component {
     super(props);
 
     this.carousel = React.createRef();
-    this.venderData = getVenderData().slice(0, 6);
+    this.venderData = getVenderData().slice(0, 10);
   }
 
   getRankIndex(i) {
@@ -116,7 +119,7 @@ class HomeCarouselArea extends React.Component {
                 // footer={<div>Footer</div>}
                 // bordered
                 dataSource={this.venderData}
-                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{i + 1} {item.name}</ItemStyled>}
+                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{item.name}</ItemStyled>}
               />
             </ListContainer>
           {/* </div> */}

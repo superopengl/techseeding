@@ -20,7 +20,7 @@ export class Poster extends BaseEntity {
 export class GalleryPicture extends BaseEntity {
     @Column({ nullable: true })
     ordinal: number;
-    
+
     @Column({ nullable: true })
     when: Date;
 

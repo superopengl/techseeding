@@ -35,14 +35,6 @@ font-size: 3rem;
 color: #54b8d5;
 `;
 
-const ChLogName = styled.p`
-color: #54b8d5;
-width: 1rem;
-margin: 0 auto;  
-line-height: 24px;  
-font-size: 0.5rem;
-word-wrap: break-word;
-`;
 
 const headerHeight = 64;
 
@@ -69,11 +61,11 @@ const HomeHeader = () => (
         {/* <Menu.Item key="services">Services</Menu.Item> */}
         {/* <Menu.Item key="produces">Products</Menu.Item> */}
         <Menu.Item key="home"><AnchorLink offset={headerHeight} href="#home">Home</AnchorLink></Menu.Item>
-        <Menu.Item key="event"><AnchorLink offset={headerHeight} href="#services">Services</AnchorLink></Menu.Item>
-        <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#business">Business</AnchorLink></Menu.Item>
-        <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#events">Events</AnchorLink></Menu.Item>
-        <Menu.Item key="sign_up"><AnchorLink offset={headerHeight} href="#gallery">Gallery</AnchorLink></Menu.Item>
-        <Menu.Item key="log_in"><UserOutlined />Login / Register</Menu.Item>
+        <Menu.Item key="events"><AnchorLink offset={headerHeight} href="#events">Events</AnchorLink></Menu.Item>
+        <Menu.Item key="gallery"><AnchorLink offset={headerHeight} href="#gallery">Gallery</AnchorLink></Menu.Item>
+        <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#about">About Us</AnchorLink></Menu.Item>
+        <Menu.Item key="contact"><AnchorLink offset={headerHeight} href="#about">Contact</AnchorLink></Menu.Item>
+        {/* <Menu.Item key="log_in"><UserOutlined />Login / Register</Menu.Item> */}
       </Menu>
     </MenuContianer>
   </HeaderStyled>
