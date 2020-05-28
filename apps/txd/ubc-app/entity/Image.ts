@@ -10,6 +10,12 @@ export class Image extends BaseEntity {
 
     @Column()
     mine: string;
+
+    @Column()
+    lastAccess: Date;
+
+    @Column({type: 'bytea'})
+    base64blob: string;
 }
 
 
