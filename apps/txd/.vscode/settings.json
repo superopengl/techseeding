@@ -1,5 +1,2 @@
 {
-  "files.exclude": {
-    "ubc-app/**/*.js": true
-  }
 }

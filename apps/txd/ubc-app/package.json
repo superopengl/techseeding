@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && cross-env UBC_PORT=5005 node index.js",
+    "start": "npm run build && cd build && cross-env UBC_PORT=5005 node index.js",
     "dev": "cross-env UBC_PORT=5005 ts-node index.ts",
-    "build": "npm run lint && npm run compile",
+    "build": "npm run lint && npm run clean && npm run compile && npm run copy",
+    "clean": "rm -rf build",
     "compile": "tsc",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix"
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "copy": "cp -rf keys build/keys && cp -rf ../ubc-web/build build/www && cp -f ormconfig.json build/ormcofig.json"
   },
   "author": "ubc.techseeding@gmail.com",
   "license": "MIT",
