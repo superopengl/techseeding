@@ -5,6 +5,10 @@ NC='\033[0m'
 
 echo -e "${ORANGE}UBC${NC}"
 
-alias ubc='cd /Users/jshao/github/ubc'
+alias uhome='cd /Users/jshao/github/ubc'
 alias uweb='cd /Users/jshao/github/ubc/ubc-web'
 alias uapp='cd /Users/jshao/github/ubc/ubc-app'
+
+export AWS_PROFILE=ubc
+
+uhome
