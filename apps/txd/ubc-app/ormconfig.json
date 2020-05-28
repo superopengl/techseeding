@@ -1,11 +1,26 @@
-{
-   "type": "postgres",
-   "host": "localhost",
-   "port": 5432,
-   "username": "postgres",
-   "password": "postgres",
-   "database": "ubc",
-   "entities": ["src/entity/*.js"],
-   "logging": true,
-   "synchronize": true
- }
+[
+  {
+    "name": "default",
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "ubc",
+    "entities": ["src/entity/*.js"],
+    "logging": true,
+    "synchronize": true
+  },
+  {
+    "name": "dev",
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "ubc",
+    "entities": ["src/entity/*.js"],
+    "logging": true,
+    "synchronize": true
+  }
+]

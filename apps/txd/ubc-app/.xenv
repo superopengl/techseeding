@@ -1,0 +1,8 @@
+# https://github.com/typeorm/typeorm/blob/master/docs/using-ormconfig.md#using-environment-variables
+XTYPEORM_HOST=localhost
+XTYPEORM_USERNAME=postgres
+XTYPEORM_PASSWORD=postgres
+XTYPEORM_DATABASE=ubc
+XTYPEORM_PORT=5432
+
+UBC_PORT=5005

@@ -2,11 +2,17 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import * as _ from 'lodash';
 import * as httpAssert from 'http-assert';
+// import { galleryRepository } from '../../services/repository';
+
+
 
 export const galleryRouter = express.Router();
 
 galleryRouter.get('/:id', async (req, res) => {
-  res.send(req);
+  // const id = (req.params as any).id;
+  // const gallery = await galleryRepository.find({ id });
+  // httpAssert(gallery, 404);
+  // res.send(gallery);
 });
 
 /**

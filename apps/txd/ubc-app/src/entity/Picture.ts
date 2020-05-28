@@ -1,27 +1,18 @@
-import { Entity, Column , PrimaryGeneratedColumn } from 'typeorm';
-
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
-export class Image {
+export class Picture {
     @PrimaryGeneratedColumn('uuid')
-    posterId: number;
-
+    id: string;
     @Column({ default: new Date() })
     createdAt: Date;
-
     @Column()
     createdBy: string;
-
     @Column()
     fileName: string;
-
     @Column()
     mine: string;
-
     @Column()
     lastAccess: Date;
-
-    @Column({type: 'bytea'})
+    @Column({ type: 'bytea' })
     base64data: string;
 }
-
-
