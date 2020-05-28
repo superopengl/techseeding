@@ -26,6 +26,9 @@ export class Event {
     @Column({ nullable: true })
     location?: string;
 
+    @Column({ nullable: true })
+    ordinal: number;
+
     @OneToOne(() => Picture, {cascade: true})
     @JoinColumn()
     image: Picture;

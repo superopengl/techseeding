@@ -2,7 +2,6 @@ import { createAppInstance } from './src/app';
 import * as https from 'https';
 import * as http from 'http';
 import * as fs from 'fs';
-import './src/services/repository';
 import { connectDatabase } from './src/db';
 
 async function launchApp() {

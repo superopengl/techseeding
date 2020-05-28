@@ -32,6 +32,9 @@ export class Business {
     @Column({ nullable: true })
     website?: string;
 
+    @Column({ nullable: true })
+    ordinal: number;
+
     @OneToOne(() => Picture)
     @JoinColumn()
     image: Picture;

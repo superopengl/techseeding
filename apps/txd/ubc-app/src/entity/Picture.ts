@@ -15,4 +15,6 @@ export class Picture {
     lastAccess: Date;
     @Column({ type: 'bytea' })
     base64data: string;
+    @Column({ nullable: true })
+    ordinal: number;
 }

@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
-import { Image } from './Image';
 
 @Entity()
 export class SysLog {
