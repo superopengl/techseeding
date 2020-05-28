@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && cd build && cross-env UBC_PORT=5005 node index.js",
-    "dev": "cross-env UBC_PORT=5005 ts-node index.ts",
+    "dev": "nodemon -w src --ext ts --exec npm start",
     "build": "npm run lint && npm run clean && npm run compile && npm run copy",
     "clean": "rm -rf build",
     "compile": "tsc",
@@ -17,6 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "cross-env": "^7.0.2",
+    "nodemon": "^2.0.4",
     "ts-node": "^8.10.1",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3"
