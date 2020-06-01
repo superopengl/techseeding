@@ -7,27 +7,44 @@ import * as bodyParser from 'body-parser';
 import * as listEndpoints from 'express-list-endpoints';
 import * as cors from 'cors';
 import * as fileUpload from 'express-fileupload';
+import * as YAML from 'yamljs';
+import { connector } from 'swagger-routes-express';
+import * as api from './api';
+
+function connectSwaggerRoutes(app, ymlFile) {
+  const apiDefinition = YAML.load(ymlFile);
+  const connect = connector(api, apiDefinition);
+  connect(app);
+  return app;
+}
 
 // create and setup express app
 export function createAppInstance(httpsPort) {
   const app = express();
-  app.use(fileUpload({
-    createParentPath: true
-}));
   app.use(cors());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(fileUpload({
+    createParentPath: true
+  }));
+
+  // Redirect HTTP to HTTPS
   app.all('*', (req, res, next) => {
     if (req.secure) {
       return next();
     }
     res.redirect(`https://${req.hostname}${httpsPort === 443 ? '' : `:${httpsPort}`}${req.url}`);
   });
-  app.use('/api', apiRouter);
+
+  // Connect to /api/v*/ with the swagger file
+  connectSwaggerRoutes(app, `${__dirname}/_assets/api.yml`);
+
   app.get('/healthcheck', (req, res) => res.send('OK'));
   app.get('/routelist', (req, res) => res.send(listEndpoints(app)));
-  app.use('/', express.static(__dirname + '/../www'));
-  app.get('*', (req, res) => res.sendFile('index.html', {root: './www'}));
+  app.use('/', express.static(__dirname + '/www'));
+
+  // Debounce to frontend routing
+  app.get('*', (req, res) => res.sendFile('index.html', { root: './www' }));
   app.use(compression({ filter: (req, res) => !req.headers['x-no-compression'] && compression.filter(req, res) }));
 
   console.log(listEndpoints(app));

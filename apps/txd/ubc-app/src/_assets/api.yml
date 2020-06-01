@@ -1,0 +1,40 @@
+swagger: '2.0'
+info: 
+  description: UBC backend API
+  version: '1.0.0'
+  title: 'UBC API'
+basePath: '/api/v1'
+schemes:
+  - http
+  - https
+definitions:
+  PingResponse:
+    type: 'object'
+paths:
+  /image/{imageId}:
+    get:
+      operationId: 'getImage'
+      parameters:
+        - name: imageId
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: ''
+          schema: 
+            $ref: '#/definitions/PingResponse'
+    post:
+      operationId: 'uploadImage'
+      parameters:
+        - name: imageId
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: ''
+          schema: 
+            $ref: '#/definitions/PingResponse'

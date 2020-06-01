@@ -1,8 +1,8 @@
-import { createAppInstance } from './src/app';
+import { createAppInstance } from './app';
 import * as https from 'https';
 import * as http from 'http';
 import * as fs from 'fs';
-import { connectDatabase } from './src/db';
+import { connectDatabase } from './db';
 
 async function launchApp() {
   await connectDatabase();
@@ -13,8 +13,8 @@ async function launchApp() {
   const app = createAppInstance(httpsPort);
   // start https server
   const sslOptions = {
-    key: fs.readFileSync(__dirname + '/keys/localhost.key', 'utf8'),
-    cert: fs.readFileSync(__dirname + '/keys/localhost.crt', 'utf8')
+    key: fs.readFileSync(`${__dirname}/_assets/keys/localhost.key`, 'utf8'),
+    cert: fs.readFileSync(`${__dirname}/_assets/keys/localhost.crt`, 'utf8')
   };
 
   http.createServer(app).listen(httpPort);

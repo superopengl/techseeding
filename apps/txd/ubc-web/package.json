@@ -19,7 +19,9 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "styled-components": "^5.1.0"
+    "styled-components": "^5.1.0",
+    "swagger-routes-express": "^3.1.2",
+    "yamljs": "^0.3.0"
   },
   "scripts": {
     "start": "cross-env PORT=5006 craco start",

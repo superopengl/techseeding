@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import * as httpAssert from 'http-assert';
 import { PictureController } from '../../controllers/PictureController';
 import { Picture } from '../../entity/Picture';
+import { assert } from '../../utils/assert';
 
 export const pictureRouter = express.Router();
 
@@ -15,9 +16,16 @@ pictureRouter.get('/:id', async (req, res) => {
 });
 
 pictureRouter.post('/', async (req, res) => {
-  const picture: Picture = req.body;
-  const controller = new PictureController();
-  controller.create(picture);
+  const file = _.get(req, 'files.file');
+  assert(file, 400, 'File not specified');
+  try {
+    const controller = new PictureController();
+    const location = await controller.upload(file);
+    res.json(location);
+  } catch (err) {
+    console.log(err.message);
+    res.status(422).send(err);
+  }
 });
 
 export default pictureRouter;
