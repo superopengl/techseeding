@@ -8,12 +8,20 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
+      "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/ubc-app/index.js",
+      "args": ["${workspaceFolder}/ubc-app/src/index.ts"],
+      "env": {
+        "TS_NODE_IGNORE": "false",
+        "UBC_PORT": "5005"
+      },
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "cwd": "${workspaceRoot}/ubc-app",
+      "protocol": "inspector",
       "outFiles": [
-        "${workspaceFolder}/**/*.js"
+        "${workspaceFolder}/ubc-app/**/*.js"
       ]
     }
   ]
