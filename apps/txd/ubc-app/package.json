@@ -5,20 +5,22 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && cd build && cross-env UBC_PORT=5005 node index.js",
+    "start:prod": "npm run build && cd build && cross-env node index.js",
+    "start": "npm run build && npm run link-web && cd build && cross-env UBC_PORT=5005 node index.js",
     "dev": "nodemon -w src --ext ts --exec npm start",
     "build": "npm run lint && npm run clean && npm run compile && npm run copy",
     "clean": "rm -rf build",
     "compile": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
-    "copy": "cp -rf src/_assets build/_assets && cp -rf ../ubc-web/build build/www && cp -f ormconfig.json build/ormcofig.json"
+    "copy": "cp -rf src/_assets build/_assets && cp -rf ../ubc-web/build build/www && cp -f ormconfig.json build/ormcofig.json",
+    "link-web": "rm -rf build/www && ln -sfn \"$(pwd)/../ubc-web/build\" build/www"
   },
   "author": "ubc.techseeding@gmail.com",
   "license": "MIT",
   "devDependencies": {
     "cross-env": "^7.0.2",
     "nodemon": "^2.0.4",
-    "ts-node": "^8.10.1",
+    "ts-node": "^8.10.2",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3"
   },
@@ -30,6 +32,7 @@
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.7-alpha.3",
     "express-list-endpoints": "^4.0.1",

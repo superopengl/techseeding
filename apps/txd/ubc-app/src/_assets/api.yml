@@ -25,14 +25,9 @@ paths:
           description: ''
           schema: 
             $ref: '#/definitions/PingResponse'
+  /image:
     post:
       operationId: 'uploadImage'
-      parameters:
-        - name: imageId
-          in: path
-          type: string
-          format: uuid
-          required: true
       responses:
         200:
           description: ''

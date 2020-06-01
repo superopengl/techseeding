@@ -41,10 +41,10 @@ export function createAppInstance(httpsPort) {
 
   app.get('/healthcheck', (req, res) => res.send('OK'));
   app.get('/routelist', (req, res) => res.send(listEndpoints(app)));
-  app.use('/', express.static(__dirname + '/www'));
+  app.use('/', express.static(`${__dirname}/www`));
 
   // Debounce to frontend routing
-  app.get('*', (req, res) => res.sendFile('index.html', { root: './www' }));
+  app.get('*', (req, res) => res.sendFile(`${__dirname}/www/index.html`));
   app.use(compression({ filter: (req, res) => !req.headers['x-no-compression'] && compression.filter(req, res) }));
 
   console.log(listEndpoints(app));

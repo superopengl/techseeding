@@ -14,11 +14,14 @@ export class Picture {
   fileName: string;
 
   @Column()
-  mine: string;
+  mime: string;
 
   @Column({default: new Date()})
   lastAccess?: Date;
 
   @Column()
   location: string;
+
+  @Column()
+  md5: string;
 }

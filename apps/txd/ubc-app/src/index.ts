@@ -3,8 +3,12 @@ import * as https from 'https';
 import * as http from 'http';
 import * as fs from 'fs';
 import { connectDatabase } from './db';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function launchApp() {
+  console.log(`Starting`);
   await connectDatabase();
 
   const httpPort = 80;

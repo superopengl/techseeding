@@ -34,7 +34,7 @@ export class PictureController {
     const picture: Picture = {
       id,
       fileName: id,
-      mine: 'guess',
+      mime: 'guess',
       location
     };
     return await this.repository.save(picture);

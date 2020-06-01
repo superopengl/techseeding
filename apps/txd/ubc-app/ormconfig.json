@@ -7,7 +7,7 @@
     "username": "postgres",
     "password": "postgres",
     "database": "ubc",
-    "entities": ["src/entity/*.js"],
+    "entities": ["src/entity/*.ts"],
     "logging": true,
     "synchronize": true
   },
@@ -19,7 +19,7 @@
     "username": "postgres",
     "password": "postgres",
     "database": "ubc",
-    "entities": ["src/entity/*.js"],
+    "entities": ["src/entity/*.ts"],
     "logging": true,
     "synchronize": true
   }
