@@ -29,15 +29,7 @@ export class PictureController {
   }
 
   async upload(file) {
-    const id = uuidv4();
-    const location = await uploadToS3(file, id);
-    const picture: Picture = {
-      id,
-      fileName: id,
-      mime: 'guess',
-      location
-    };
-    return await this.repository.save(picture);
+
   }
 }
 

@@ -12,12 +12,18 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "args": ["${workspaceFolder}/ubc-app/src/index.ts"],
+      "args": [
+        "${workspaceFolder}/ubc-app/src/index.ts"
+      ],
       "env": {
         "TS_NODE_IGNORE": "false",
         "UBC_PORT": "5005"
       },
-      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "runtimeArgs": [
+        "--nolazy",
+        "-r",
+        "ts-node/register"
+      ],
       "cwd": "${workspaceRoot}/ubc-app",
       "protocol": "inspector",
       "outFiles": [

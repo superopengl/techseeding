@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ImageCardAdminTable from 'components/ImageCardAdminTable/ImageCardAdminTable';
 import { Tabs } from 'antd';
+import ImageUploader from 'components/ImageUploader/ImageUploader'
 const { TabPane } = Tabs;
 
 const ContainerStyled = styled.div`
@@ -14,6 +15,7 @@ function callback(key) {
 }
 
 const BackdoorPage = () => (
+ <div>
   <ContainerStyled>
     <Tabs defaultActiveKey="1" onChange={callback}>
       <TabPane tab="Poster" key="poster">
@@ -30,6 +32,8 @@ const BackdoorPage = () => (
     </TabPane>
     </Tabs>
   </ContainerStyled>
+  <ImageUploader></ImageUploader>
+  </div>
 );
 
 BackdoorPage.propTypes = {};

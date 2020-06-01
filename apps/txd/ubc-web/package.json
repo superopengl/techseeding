@@ -11,6 +11,7 @@
     "axios": "^0.19.2",
     "craco-less": "^1.16.0",
     "lodash": "^4.17.15",
+    "mime-format": "^2.0.0",
     "moment": "^2.25.3",
     "moment-random": "^1.0.5",
     "prop-types": "^15.7.2",
@@ -31,6 +32,7 @@
     "test": "craco test",
     "eject": "react-scripts eject",
     "dev": "yarn && yarn build && yarn start",
+    "watched": "nodemon -w src --ext js --exec npm run build",
     "watch": "npm-watch",
     "g": "npx generate-react-cli component --",
     "p": "npx generate-react-cli component -- --type=page"
@@ -55,6 +57,7 @@
     "cross-env": "^7.0.2",
     "generate-react-cli": "^5.0.0",
     "less-loader": "^6.1.0",
+    "nodemon": "^2.0.4",
     "npm-watch": "^0.6.0"
   },
   "watch": {
