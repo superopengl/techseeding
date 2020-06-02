@@ -2,15 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import PoweredByLogo from '../PoweredByLogo/PoweredByLogo';
 import { Carousel, Row, Col } from 'antd';
-import { getVenderData } from '../../services/dataService';
 import styled from 'styled-components';
 import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
 import { List, Typography, Divider, Input } from 'antd';
+import { getPosterList } from 'services/posterService';
 const { Search } = Input;
 
 const ImgStyled = styled.div`
 background-repeat: no-repeat;
-background-size: cover;
+background-size: contain;
 background-position: center;
 width: 100%;
 overflow: hidden;
@@ -56,13 +56,20 @@ padding-top: 10px !important;
 padding-bottom: 10px !important;
 `;
 
+const CarouselRow = styled(Row)`
+background-image: url("images/background.png");
+background-repeat: repeat;
+background-size: 20%;
+height: 600px;
+`;
+
 class HomeCarouselArea extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.carousel = React.createRef();
-    this.venderData = getVenderData().slice(0, 10);
+    this.posters = getPosterList();
   }
 
   getRankIndex(i) {
@@ -83,18 +90,18 @@ class HomeCarouselArea extends React.Component {
   render() {
     return (
       <ContainerStyled gutter={0} style={{position: 'relative'}}>
-        <Row>
+        <CarouselRow>
           <Col span={24}>
             <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
-              {this.venderData.map(f => (
-                <div key={f.file}>
-                  <ImgStyled style={{ backgroundImage: `url(${f.picture})` }}>
+              {this.posters.map(f => (
+                <div key={f.name}>
+                  <ImgStyled style={{ backgroundImage: `url("${f.path}")` }}>
                   </ImgStyled>
                 </div>
               ))}
             </Carousel>
           </Col>
-        </Row>
+        </CarouselRow>
         {/* <SearchRowContainer>
           <Search
             placeholder="input search text"
@@ -118,15 +125,15 @@ class HomeCarouselArea extends React.Component {
                 // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
                 // footer={<div>Footer</div>}
                 // bordered
-                dataSource={this.venderData}
+                dataSource={this.posters}
                 renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{item.name}</ItemStyled>}
               />
             </ListContainer>
           {/* </div> */}
         {/* </Row> */}
-        <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>
+        {/* <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>
           <PoweredByLogo></PoweredByLogo>
-        </div>
+        </div> */}
 
       </ContainerStyled>
     );

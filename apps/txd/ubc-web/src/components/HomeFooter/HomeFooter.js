@@ -11,12 +11,12 @@ const FooterStyled = styled(Footer)`
 width: 100%;
 text-align: center;
 font-size: 0.8rem;
-color: #cccccc;
-background-color: #00202e;
+color: #f0f0f0;
+background-color: #173875;
 `;
 
 const H3 = styled.h3`
-color: #cccccc;
+color: #f0f0f0;
 `
 
 const HomeFooter = () => (

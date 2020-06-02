@@ -16,7 +16,7 @@ class HomeFeatureCard extends React.Component {
   render() {
     return (
       <Container>
-        <div style={{ fontSize: '5rem', color: '#54b8d5'}}>{this.props.icon}</div>
+        <div style={{ fontSize: '5rem', color: '#81a9de'}}>{this.props.icon}</div>
         <P>
           {this.props.content}
         </P>

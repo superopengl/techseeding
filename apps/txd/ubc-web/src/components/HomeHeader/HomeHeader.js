@@ -29,10 +29,13 @@ float: right;
 margin-bottom: 2px;
 `;
 
-const SiteLogoName = styled.span`
-font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-font-size: 3rem;
-color: #54b8d5;
+const SiteLogo = styled.div`
+height: 64px;
+width: 120px;
+background-image: url("images/logo-full.png");
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
 `;
 
 
@@ -40,7 +43,7 @@ const headerHeight = 64;
 
 const HomeHeader = () => (
   <HeaderStyled>
-    <SiteLogoName>UBC</SiteLogoName>
+    <AnchorLink offset={headerHeight} href="#home"><SiteLogo></SiteLogo></AnchorLink>
     {/* <ChLogName>商家联盟</ChLogName> */}
     {/* <img src="logo.jpg" alt="logo" style={{ marginBottom: 2 }}></img> */}
     {/* <Search

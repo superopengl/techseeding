@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import { getVenderData } from '../../services/dataService';
 import styled from 'styled-components';
 import { FacebookFilled, GlobalOutlined, TwitterOutlined, AudioOutlined } from '@ant-design/icons';
 const { Meta } = Card;
@@ -12,6 +11,10 @@ const CardStyled = styled(Card)`
   height: 360px;
   margin-bottom: 2rem;
   text-align: center;
+
+  &:hover {
+    transform: scale(1.02);
+  }
 `;
 
 const MetaStyled = styled(Meta)`
@@ -31,7 +34,6 @@ border-bottom: 1px solid #f0f0f0;
 export class HomeEventCard extends React.Component {
   constructor(props) {
     super(props);
-    this.venderData = getVenderData();
     this.data = this.props.data
   }
 
@@ -39,11 +41,11 @@ export class HomeEventCard extends React.Component {
     return (
       <CardStyled
         hoverable
-        cover={<CoverImageStyled style={{backgroundImage: `url(${this.data.file})`}} />}
+        cover={<CoverImageStyled style={{backgroundImage: `url("${this.data.path}")`}} />}
       >
-        <MetaStyled title={this.data.eventName} description={this.data.eventDate.format('ddd D MMM YYYY')} />
+        <MetaStyled title={this.data.name} description={this.data.eventDate.format('ddd D MMM YYYY')} />
         <br/>
-        <Button type="link" size="large"><GlobalOutlined /> <FacebookFilled /> <TwitterOutlined /></Button>
+        <Button type="link" size="small">Details</Button>
       </CardStyled>
     );
   }
