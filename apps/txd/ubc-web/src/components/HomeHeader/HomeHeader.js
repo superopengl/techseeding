@@ -36,14 +36,34 @@ background-image: url("images/logo-full.png");
 background-size: contain;
 background-repeat: no-repeat;
 background-position: center;
+display: inline-block;
 `;
 
+const PartnerLogo = styled.div`
+width: 40px;
+height: 40px;
+background-image: url("images/partner.jpg");
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+display: inline-block;
+margin-left: 0.5rem;
+`
+
+const PartnerWithText = styled.div`
+display: inline-block;
+font-size: 0.8rem;
+color: #173875;
+position: relative;
+top: -6px;
+`
 
 const headerHeight = 64;
 
 const HomeHeader = () => (
   <HeaderStyled>
-    <AnchorLink offset={headerHeight} href="#home"><SiteLogo></SiteLogo></AnchorLink>
+    <AnchorLink offset={headerHeight} href="#home" style={{height: 64}}><SiteLogo></SiteLogo><PartnerWithText>partner with</PartnerWithText><PartnerLogo></PartnerLogo></AnchorLink>
+    
     {/* <ChLogName>商家联盟</ChLogName> */}
     {/* <img src="logo.jpg" alt="logo" style={{ marginBottom: 2 }}></img> */}
     {/* <Search

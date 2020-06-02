@@ -45,7 +45,8 @@ margin: 0 auto 0 auto;
 `;
 
 const ItemStyled = styled(List.Item)`
-color: #fff;
+color: #f0f0f0;
+font-weight: bold;
 cursor: pointer;
 &:hover: {
   color: #fff;
@@ -59,7 +60,7 @@ padding-bottom: 10px !important;
 const CarouselRow = styled(Row)`
 background-image: url("images/background.png");
 background-repeat: repeat;
-background-size: 20%;
+background-size: 30%;
 height: 600px;
 `;
 
