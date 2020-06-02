@@ -3,13 +3,13 @@ import { Picture } from './Picture';
 @Entity()
 export class Gallery {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({ default: new Date() })
-  createdAt: Date;
+  createdAt?: Date;
 
-  @Column()
-  createdBy: string;
+  @Column({default: 'system'})
+  createdBy?: string;
 
   @Column({ nullable: true })
   title?: string;
@@ -18,10 +18,10 @@ export class Gallery {
   description?: string;
 
   @Column({ nullable: true })
-  ordinal: number;
+  ordinal?: number;
 
   @Column({ nullable: true })
-  when: Date;
+  when?: Date;
 
   @OneToOne(type => Picture, {cascade: true})
   @JoinColumn()

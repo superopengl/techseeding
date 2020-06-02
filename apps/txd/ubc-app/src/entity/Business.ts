@@ -3,7 +3,7 @@ import { Picture } from './Picture';
 @Entity()
 export class Business {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column({ default: new Date() })
     createdAt: Date;

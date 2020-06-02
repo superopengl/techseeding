@@ -59,7 +59,7 @@ export async function uploadImage(req, res) {
   assert(file, 404, 'No file uploaded');
   const { name, data, mimetype, md5 } = file;
 
-  const imageId = uuidv4();
+  const { imageId } = req.params;
   const location = await uploadToS3(imageId, data);
 
   const picture: Picture = {

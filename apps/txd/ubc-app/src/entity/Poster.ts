@@ -4,7 +4,7 @@ import { Picture } from './Picture';
 @Entity()
 export class Poster {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column({ default: new Date() })
     createdAt: Date;
