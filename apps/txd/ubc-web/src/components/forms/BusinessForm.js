@@ -1,23 +1,23 @@
 import React from 'react';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { GalleryDef } from 'formDefs/GalleryDef';
-import { getGallery, saveGallery } from 'services/galleryService';
+import { BusinessDef } from 'formDefs/BusinessDef';
+import { getBusiness, saveBusiness } from 'services/businessService';
 
-export class GalleryForm extends React.Component {
+export class BusinessForm extends React.Component {
   constructor(props) {
     super(props);
   }
 
   handleSave = async (data) => {
-    await saveGallery(data);
+    await saveBusiness(data);
     this.props.onFinish();
   }
 
   render() {
     return (
       <ImageCardForm
-        fieldDefs={GalleryDef}
-        onFetch={id => getGallery(id)}
+        fieldDefs={BusinessDef}
+        onFetch={id => getBusiness(id)}
         onSave={this.handleSave}
         onCancel={this.props.onCancel}
         {...this.props}
@@ -26,8 +26,8 @@ export class GalleryForm extends React.Component {
   }
 };
 
-GalleryForm.propTypes = {};
+BusinessForm.propTypes = {};
 
-GalleryForm.defaultProps = {};
+BusinessForm.defaultProps = {};
 
-export default GalleryForm;
+export default BusinessForm;

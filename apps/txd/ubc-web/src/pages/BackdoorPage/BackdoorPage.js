@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Tabs } from 'antd';
 import PosterAdminGrid from 'components/grids/PosterAdminGrid';
 import GalleryAdminGrid from 'components/grids/GalleryAdminGrid';
+import BusinessAdminGrid from 'components/grids/BusinessAdminGrid';
+import EventAdminGrid from 'components/grids/EventAdminGrid';
 const { TabPane } = Tabs;
 
 const ContainerStyled = styled.div`
@@ -14,23 +16,23 @@ function callback(key) {
 }
 
 const BackdoorPage = () => (
- <div>
-  <ContainerStyled>
-    <Tabs defaultActiveKey="1" onChange={callback}>
-      <TabPane tab="Poster" key="poster">
-        <PosterAdminGrid/>
-      </TabPane>
-      <TabPane tab="Business" key="business">
-        Content of Tab Pane 2
-    </TabPane>
-      <TabPane tab="Event" key="event">
-        Content of Tab Pane 3
-    </TabPane>
-      <TabPane tab="Gallery" key="gallery">
-        <GalleryAdminGrid/>
-    </TabPane>
-    </Tabs>
-  </ContainerStyled>
+  <div>
+    <ContainerStyled>
+      <Tabs defaultActiveKey="1" onChange={callback}>
+        <TabPane tab="Poster" key="poster">
+          <PosterAdminGrid />
+        </TabPane>
+        <TabPane tab="Business" key="business">
+          <BusinessAdminGrid />
+        </TabPane>
+        <TabPane tab="Event" key="event">
+          <EventAdminGrid />
+        </TabPane>
+        <TabPane tab="Gallery" key="gallery">
+          <GalleryAdminGrid />
+        </TabPane>
+      </Tabs>
+    </ContainerStyled>
   </div>
 );
 

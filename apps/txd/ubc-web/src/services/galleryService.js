@@ -1,4 +1,3 @@
-import data from './fake'
 import { httpGet, httpPost, httpDelete } from './http';
 
 export async function getGallery(id) {

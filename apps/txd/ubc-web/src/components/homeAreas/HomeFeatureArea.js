@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import HomeRowArea from "../HomeRowArea/HomeRowArea";
-import HomeFeatureCard from "../../forms/HomeFeatureCard/HomeFeatureCard";
+import HomeRowArea from "./HomeRowArea";
+import HomeFeatureCard from "../forms/HomeFeatureCard/HomeFeatureCard";
 import styled from 'styled-components';
 import { BulbOutlined, DollarCircleOutlined, RocketOutlined, AudioOutlined } from '@ant-design/icons';
 import { MailOutlined, PhoneOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icons';

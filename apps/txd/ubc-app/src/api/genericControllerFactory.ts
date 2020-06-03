@@ -1,10 +1,7 @@
 
-import * as aws from 'aws-sdk';
-import { createConnection, getRepository, getConnectionManager, Repository } from 'typeorm';
-import { Image } from '../entity/Image';
+import { getRepository } from 'typeorm';
 import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
-import { Poster } from '../entity/Poster';
 
 export function createList(entityType) {
   return async (req, res) => {
@@ -42,7 +39,7 @@ export function createDelete(entityType) {
   return async (req, res) => {
     const { id } = req.params;
     const repo = getRepository(entityType);
-    const result = await repo.delete({ id });
+    await repo.delete({ id });
     res.sendStatus(200);
   };
 }

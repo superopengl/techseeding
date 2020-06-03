@@ -1,23 +1,23 @@
 import React from 'react';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { GalleryDef } from 'formDefs/GalleryDef';
-import { getGallery, saveGallery } from 'services/galleryService';
+import { EventDef } from 'formDefs/EventDef';
+import { getEvent, saveEvent } from 'services/eventService';
 
-export class GalleryForm extends React.Component {
+export class EventForm extends React.Component {
   constructor(props) {
     super(props);
   }
 
   handleSave = async (data) => {
-    await saveGallery(data);
+    await saveEvent(data);
     this.props.onFinish();
   }
 
   render() {
     return (
       <ImageCardForm
-        fieldDefs={GalleryDef}
-        onFetch={id => getGallery(id)}
+        fieldDefs={EventDef}
+        onFetch={id => getEvent(id)}
         onSave={this.handleSave}
         onCancel={this.props.onCancel}
         {...this.props}
@@ -26,8 +26,8 @@ export class GalleryForm extends React.Component {
   }
 };
 
-GalleryForm.propTypes = {};
+EventForm.propTypes = {};
 
-GalleryForm.defaultProps = {};
+EventForm.defaultProps = {};
 
-export default GalleryForm;
+export default EventForm;

@@ -6,9 +6,9 @@ import styled from 'styled-components';
 import { Layout, Card, Select } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
-import HomeCarouselArea from 'components/homeAreas/HomeCarouselArea/HomeCarouselArea';
-import HomeEventArea from 'components/homeAreas/HomeEventArea/HomeEventArea';
-import HomeGalleryArea from 'components/homeAreas/HomeGalleryArea/HomeGalleryArea';
+import HomeCarouselArea from 'components/homeAreas/HomeCarouselArea';
+import HomeEventArea from 'components/homeAreas/HomeEventArea';
+import HomeGalleryArea from 'components/homeAreas/HomeGalleryArea';
 const { Content } = Layout;
 
 const LayoutStyled = styled(Layout)`

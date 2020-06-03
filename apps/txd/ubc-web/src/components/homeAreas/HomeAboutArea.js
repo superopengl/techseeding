@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import HomeRowArea from "../HomeRowArea/HomeRowArea";
+import HomeRowArea from "./HomeRowArea";
 
 export class HomeAboutArea extends React.Component {
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { listGallery } from 'services/galleryService';
 import styled from 'styled-components';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import HomeRowArea from "components/homeAreas/HomeRowArea/HomeRowArea";
+import HomeRowArea from "components/homeAreas/HomeRowArea";
 import { getImageUrl } from 'util/getImageUrl';
 
 const RowStyled = styled(Row)`

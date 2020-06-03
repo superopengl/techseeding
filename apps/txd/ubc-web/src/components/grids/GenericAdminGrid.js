@@ -1,25 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Row, Col } from 'antd';
-import { listPoster, deletePoster } from 'services/posterService';
-import {
-  HomeOutlined,
-  SettingFilled,
-  SmileOutlined,
-  SyncOutlined,
-  LoadingOutlined,
-  PlusOutlined
-} from '@ant-design/icons';
-import PosterForm from 'components/forms/PosterForm';
+import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { message } from 'antd';
-import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
-import { Typography, Space, Badge, Button, Modal } from 'antd';
+import { Typography, Badge, Modal, Popconfirm } from 'antd';
 import { getImageUrl } from 'util/getImageUrl';
 import styled from 'styled-components';
 
 const { Meta } = Card;
-const { Text, Link } = Typography;
 
 const BadgeStyled = styled(Badge)`
 margin-right: 0.5rem;
@@ -88,36 +77,44 @@ export class GenericAdminGrid extends React.Component {
   handleEditModalOk = async () => {
     await this.loadList();
     this.setState({
-      targetId: undefined,
+      // targetId: undefined,
       editModalVisible: false
     });
   }
 
   handleModalCancel = () => {
     this.setState({
-      targetId: undefined,
+      // targetId: undefined,
       editModalVisible: false
     });
   }
 
   render() {
     const { list, editModalVisible, targetId } = this.state;
-    if (!list) {
-      return <LoadingOutlined style={{ fontSize: '5rem' }} />
-    }
+    // if (!list) {
+    //   return <LoadingOutlined style={{ fontSize: '5rem' }} />
+    // }
 
     const CardEditorComponent = this.props.cardEditorComponent;
 
     return (
       <div>
         {/* <em>targetId = {targetId}</em> */}
-        <Row gutter={20}>
-          {list.map((item, i) => (
+        <Row gutter={20} style={{ paddingBottom: 20 }}>
+          {list && list.map((item, i) => (
             <Col key={i} span={8}>
               <CardStyled hoverable style={{ width: this.props.readWidth }}
                 cover={<img alt="example" src={getImageUrl(item.imageId)} />}
                 actions={[
-                  <Text type="danger"><DeleteOutlined key="delete" onClick={() => this.delete(item.id)} /></Text>,
+                  <Popconfirm
+                    title={`Are you sure delete this ${this.props.name}?`}
+                    onConfirm={() => this.delete(item.id)}
+                    okButtonProps={{danger: true}}
+                    okText="Yes, delete!"
+                    cancelText="No, cancel"
+                  >
+                    <a href="#"><DeleteOutlined key="delete" style={{ color: 'red' }} /></a>
+                  </Popconfirm>,
                   <EditOutlined key="edit" onClick={() => this.edit(item.id)} />,
                 ]}
               >

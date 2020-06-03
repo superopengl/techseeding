@@ -1,4 +1,5 @@
 import * as axios from 'axios';
+import { message } from 'antd';
 
 function trimSlash(str) {
   return str ? str.replace(/^\/+/, '').replace(/\/+$/, '') : str;
@@ -23,11 +24,11 @@ async function request(method, path, queryParams, body) {
 
     return response.data;
   } catch (e) {
-    console.error(e);
+    message.error(e.message, 10);
   }
 }
 
-export const httpGet = async (path, querParams = null) => request('GET', path, querParams);
-export const httpPost = async (path, body, querParams = null) => request('POST', path, querParams, body);
-export const httpPut = async (path, body, querParams = null) => request('PUT', path, querParams, body);
-export const httpDelete = async (path, body = null, querParams = null) => request('DELETE', path, querParams, body);
+export const httpGet = async (path, queryParams = null) => request('GET', path, queryParams);
+export const httpPost = async (path, body, queryParams = null) => request('POST', path, queryParams, body);
+export const httpPut = async (path, body, queryParams = null) => request('PUT', path, queryParams, body);
+export const httpDelete = async (path, body = null, queryParams = null) => request('DELETE', path, queryParams, body);

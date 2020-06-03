@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import styled from 'styled-components';
 import { FacebookFilled, GlobalOutlined, TwitterOutlined, AudioOutlined } from '@ant-design/icons';
+import { getImageUrl } from 'util/getImageUrl';
 const { Meta } = Card;
 
 
@@ -34,16 +35,17 @@ border-bottom: 1px solid #f0f0f0;
 export class HomeEventCard extends React.Component {
   constructor(props) {
     super(props);
-    this.data = this.props.data
   }
 
   render() {
+    const {title, description, imageId} = this.props.data;
+
     return (
       <CardStyled
         hoverable
-        cover={<CoverImageStyled style={{backgroundImage: `url("${this.data.path}")`}} />}
+        cover={<CoverImageStyled style={{backgroundImage: `url("${getImageUrl(imageId)}")`}} />}
       >
-        <MetaStyled title={this.data.name} description={this.data.eventDate.format('ddd D MMM YYYY')} />
+        <MetaStyled title={title} description={description} />
         <br/>
         <Button type="link" size="small">Details</Button>
       </CardStyled>

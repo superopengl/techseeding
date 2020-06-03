@@ -1,6 +1,4 @@
-import { string, number } from "prop-types";
-
-export const PosterDef = [
+export const BusinessDef = [
   {
     label: 'Picture',
     name: 'imageId',
@@ -74,7 +72,7 @@ export const PosterDef = [
       }
     ],
     inputProps: {
-      placeholder: 'Website URL',
+      placeholder: 'https://',
     }
   },
   {

@@ -1,6 +1,6 @@
 import { string, number } from "prop-types";
 
-export const PosterDef = [
+export const EventDef = [
   {
     label: 'Picture',
     name: 'imageId',
