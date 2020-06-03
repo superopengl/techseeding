@@ -5,7 +5,7 @@ import ImageCardAdminTable from 'components/ImageCardAdminTable/ImageCardAdminTa
 import { Tabs } from 'antd';
 import ImageUploader from 'components/ImageUploader/ImageUploader'
 import ImageCardEditor from 'components/ImageCardEditor/ImageCardEditor';
-import { GalleryDef } from 'defs/GalleryDef';
+import { GalleryDef } from 'formDefs/GalleryDef';
 import GalleryCardEditor from 'components/GalleryCardEditor/GalleryCardEditor';
 const { TabPane } = Tabs;
 

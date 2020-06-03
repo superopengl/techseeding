@@ -36,7 +36,7 @@ paths:
           description: OK
   /gallery:
     get:
-      operationId: listGallary
+      operationId: listGallery
       responses:
         200:
           description: OK
@@ -47,7 +47,7 @@ paths:
           description: OK
   /gallery/{galleryId}:
     get:
-      operationId: getGallary
+      operationId: getGallery
       parameters:
         - name: imageId
           in: path

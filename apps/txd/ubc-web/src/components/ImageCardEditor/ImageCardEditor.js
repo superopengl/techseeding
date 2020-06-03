@@ -12,12 +12,17 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
+import { EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
+import { Card } from 'antd';
+import { Typography, Space } from 'antd';
+const { Meta } = Card;
+const { Text, Link } = Typography;
 
 const FormButtonStyled = styled(Button)`
 margin-bottom: 1rem;
 `
 
-const Container = styled.div`
+const EditModeContainer = styled.div`
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -30,6 +35,7 @@ export class ImageCardEditor extends React.Component {
     super(props);
 
     this.state = {
+      mode: 'read',
       id: this.props.id,
       loading: false
     }
@@ -55,39 +61,70 @@ export class ImageCardEditor extends React.Component {
     this.setState({ loading: true });
     await this.props.onSave(gallery);
     this.setState({ loading: false });
+    this.changeMode('read');
     message.success({ content: 'Successfully created the gallery card', duration: 5 });
+  }
+
+  delete = async () => {
+    const { id } = this.state;
+    if (id) {
+      this.setState({ loading: true });
+      await this.props.onDelete(id);
+      this.setState({ loading: false });
+      message.success({ content: 'Successfully deleted the gallery card', duration: 5 });
+    }
+  }
+
+  changeMode(mode) {
+    this.setState({ mode })
   }
 
   render() {
     const { fieldDefs, onCancel } = this.props;
-    const { loading, data } = this.state;
+    const { loading, data, mode } = this.state;
+
+    const showCard = mode !== 'edit' && data;
+    const showEdit = mode === 'edit';
+    const otherStatus = !showCard && !showEdit;
 
     return (
-      <Container>
-        {loading ?
-          <LoadingOutlined style={{ fontSize: '5rem' }} /> :
-          <Form style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
-            {fieldDefs.map((fieldDef, i) => {
-              const { inputProps, type, ...field } = fieldDef;
-              return <Form.Item key={i} {...field}>
-                {type === 'uploader' ? <ImageUploader {...inputProps} />
-                  : type === 'number' ? <InputNumber {...inputProps} />
-                    : type === 'textarea' ? <Input.TextArea {...inputProps} />
-                      : <Input {...inputProps} />
-                }
+      <div>
+        {otherStatus && <p>Error status</p>}
+        {showCard && <Card hoverable style={{ width: this.props.cardWidth }}
+          cover={<img alt="example" src={`${process.env.REACT_APP_UBC_S3_URL}/${data.imageId}`} />}
+          actions={[
+            <Text type="danger"><DeleteOutlined type="danger" key="delete" onClick={() => this.delete()} /></Text>,
+            <EditOutlined key="edit" onClick={() => this.changeMode('edit')} />,
+          ]}
+        >
+          <Meta title={data.title} description={data.description} />
+        </Card>}
+        {showEdit && <EditModeContainer>
+          {loading ?
+            <LoadingOutlined style={{ fontSize: '5rem' }} /> :
+            <Form style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
+              {fieldDefs.map((fieldDef, i) => {
+                const { inputProps, type, ...field } = fieldDef;
+                return <Form.Item key={i} {...field}>
+                  {type === 'uploader' ? <ImageUploader {...inputProps} />
+                    : type === 'number' ? <InputNumber {...inputProps} />
+                      : type === 'textarea' ? <Input.TextArea {...inputProps} />
+                        : <Input {...inputProps} />
+                  }
+                </Form.Item>
+              })}
+              <Form.Item>
+                <FormButtonStyled htmlType="submit" type="primary" block>
+                  Submit
+            </FormButtonStyled>
+                <FormButtonStyled htmlType="button" block onClick={() => this.changeMode('read')}>
+                  Cancel
+            </FormButtonStyled>
               </Form.Item>
-            })}
-            <Form.Item>
-              <FormButtonStyled htmlType="submit" type="primary" block>
-                Submit
-            </FormButtonStyled>
-              <FormButtonStyled htmlType="button" block onClick={onCancel}>
-                Cancel
-            </FormButtonStyled>
-            </Form.Item>
-          </Form>
-        }
-      </Container>
+            </Form>
+          }
+        </EditModeContainer>}
+      </div>
     );
   }
 }
