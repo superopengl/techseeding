@@ -10,8 +10,12 @@ import { getImageUrl } from 'util/getImageUrl';
 
 const UploadStyled = styled(Upload)`
 & .ant-upload {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  float: none;
 }
 `
 const { Meta } = Card;

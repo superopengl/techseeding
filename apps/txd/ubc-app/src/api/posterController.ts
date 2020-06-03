@@ -7,11 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Poster } from '../entity/Poster';
 import { createList, createGet, createSave, createDelete } from './genericControllerFactory';
 
-const typeFunc = () => Poster;
-
-export const listPoster = createList(typeFunc);
-
-export const getPoster = createGet(typeFunc);
-export const savePoster = createSave(typeFunc);
-
-export const deletePoster = createDelete(typeFunc);
+export const listPoster = createList(Poster);
+export const getPoster = createGet(Poster);
+export const savePoster = createSave(Poster);
+export const deletePoster = createDelete(Poster);

@@ -1,19 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col } from 'antd';
-import { listPoster } from 'services/posterService';
+import { listPoster, deletePoster } from 'services/posterService';
 import {
   HomeOutlined,
   SettingFilled,
   SmileOutlined,
   SyncOutlined,
   LoadingOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 import PosterCardEditor from 'components/PosterCardEditor/PosterCardEditor';
 import { message } from 'antd';
 import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
-import { Typography, Space, Badge } from 'antd';
+import { Typography, Space, Badge, Button, Modal } from 'antd';
 import { getImageUrl } from 'util/getImageUrl';
 import styled from 'styled-components';
 
@@ -39,7 +40,8 @@ export class PosterAdminGrid extends React.Component {
     super(props);
     this.state = {
       list: undefined,
-      loading: false
+      loading: false,
+      editModalVisible: false
     }
   }
 
@@ -63,44 +65,89 @@ export class PosterAdminGrid extends React.Component {
   delete = async (id) => {
     this.setState({ loading: true });
     console.log('about to delete', this.state);
-    await this.props.onDelete(id);
-    this.setState({ loading: false });
+    await deletePoster(id);
     message.success({ content: 'Successfully deleted the picture', duration: 5 });
     await this.loadList();
   }
 
   edit = (id) => {
+    if (!id) throw new Error('id not specified when editing')
+    this.setState({
+      targetId: id,
+      editModalVisible: true
+    });
+  }
 
+  add = () => {
+    this.setState({
+      targetId: undefined,
+      editModalVisible: true
+    });
+  }
+
+  handleEditModalOk = async () => {
+    await this.loadList();
+    this.setState({
+      targetId: undefined,
+      editModalVisible: false
+    });
+  }
+
+  handleModalCancel = () => {
+    this.setState({
+      targetId: undefined,
+      editModalVisible: false
+    });
   }
 
   render() {
-    const { list } = this.state;
+    const { list, editModalVisible, targetId } = this.state;
     if (!list) {
       return <LoadingOutlined style={{ fontSize: '5rem' }} />
     }
-    return (
-      <Row gutter={20}>
-        {list.map((item, i) => (
-          <Col key={i} span={8}>
-            <CardStyled hoverable style={{ width: this.props.readWidth }}
-              cover={<img alt="example" src={getImageUrl(item.imageId)} />}
-              actions={[
-                <Text type="danger"><DeleteOutlined key="delete" onClick={() => this.delete(item.id)} /></Text>,
-                <EditOutlined key="edit" onClick={() => this.edit(item.id)} />,
-              ]}
-            >
 
-              <Meta title={
-                <div>
-                  {item.ordinal && <BadgeStyled count={item.ordinal} showZero={true} />}
-                  {item.title}
-                </div>}
-                description={item.description} />
-            </CardStyled>
+    return (
+      <div>
+        {/* <em>targetId = {targetId}</em> */}
+        <Row gutter={20}>
+          {list.map((item, i) => (
+            <Col key={i} span={8}>
+              <CardStyled hoverable style={{ width: this.props.readWidth }}
+                cover={<img alt="example" src={getImageUrl(item.imageId)} />}
+                actions={[
+                  <Text type="danger"><DeleteOutlined key="delete" onClick={() => this.delete(item.id)} /></Text>,
+                  <EditOutlined key="edit" onClick={() => this.edit(item.id)} />,
+                ]}
+              >
+
+                <Meta title={
+                  <div>
+                    {item.ordinal && <BadgeStyled count={item.ordinal} showZero={true} />}
+                    {item.title}
+                  </div>}
+                  description={item.description} />
+              </CardStyled>
+            </Col>
+          ))}
+          <Col span={8}>
+            <Card hoverable onClick={() => this.add()}>
+              <PlusOutlined style={{ fontSize: '5rem', margin: 'auto', width: '100%' }} />
+            </Card>
           </Col>
-        ))}
-        <Col span={8}><Card>+</Card></Col>
-      </Row>
+        </Row>
+        <Modal
+          title={targetId ? "Edit" : "New"}
+          visible={editModalVisible}
+          onOk={this.handleEditModalOk}
+          onCancel={this.handleModalCancel}
+          footer={null}
+        >
+          <PosterCardEditor id={this.state.targetId}
+            onFinish={this.handleEditModalOk}
+            onCancel={this.handleModalCancel}
+          ></PosterCardEditor>
+        </Modal>
+      </div>
     );
   }
 }

@@ -6,9 +6,9 @@ import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
 import { Poster } from '../entity/Poster';
 
-export function createList(typeFunc) {
+export function createList(entityType) {
   return async (req, res) => {
-    const repo = getRepository(typeFunc());
+    const repo = getRepository(entityType);
     const entities = await repo.createQueryBuilder('x')
       // .select(['x.id'])
       .orderBy('x.ordinal', 'ASC', 'NULLS LAST')
@@ -19,29 +19,29 @@ export function createList(typeFunc) {
   };
 }
 
-export function createGet(typeFunc) {
+export function createGet(entityType) {
   return async (req, res) => {
     const { id } = req.params;
-    const repo = getRepository(typeFunc());
-    const gallery = await repo.findOne(id);
-    assert(gallery, 404);
-    res.json(gallery);
+    const repo = getRepository(entityType);
+    const item = await repo.findOne(id);
+    assert(item, 404);
+    res.json(item);
   };
 }
 
-export function createSave(typeFunc) {
+export function createSave(entityType) {
   return async (req, res) => {
     const entity = Object.assign({ id: uuidv4() }, req.body); // Allocate id if not specified.
-    const repo = getRepository(typeFunc());
+    const repo = getRepository(entityType);
     await repo.save(entity);
     res.sendStatus(200);
   };
 }
 
-export function createDelete(typeFunc) {
+export function createDelete(entityType) {
   return async (req, res) => {
     const { id } = req.params;
-    const repo = getRepository(typeFunc());
+    const repo = getRepository(entityType);
     const result = await repo.delete({ id });
     res.sendStatus(200);
   };

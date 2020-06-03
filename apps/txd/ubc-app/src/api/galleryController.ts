@@ -7,11 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Gallery } from '../entity/Gallery';
 import { createList, createGet, createSave, createDelete } from './genericControllerFactory';
 
-const typeFunc = () => Gallery;
-
-export const listGallery = createList(typeFunc);
-
-export const getGallery = createGet(typeFunc);
-export const saveGallery = createSave(typeFunc);
-
-export const deleteGallery = createDelete(typeFunc);
+export const listGallery = createList(Gallery);
+export const getGallery = createGet(Gallery);
+export const saveGallery = createSave(Gallery);
+export const deleteGallery = createDelete(Gallery);
