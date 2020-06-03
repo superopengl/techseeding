@@ -5,7 +5,14 @@ import { Upload, message } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import * as mineFormat from 'mime-format';
+import styled from 'styled-components';
 
+const UploadStyled = styled(Upload)`
+& .ant-upload {
+  width: 200px;
+  height: 200px;
+}
+`
 const { Meta } = Card;
 
 export class ImageUploader extends React.Component {
@@ -14,8 +21,13 @@ export class ImageUploader extends React.Component {
     super(props);
 
     this.state = {
-      loading: false
+      loading: false,
+      imageId: this.props.value
     }
+  }
+
+  get imageUrl() {
+    return this.state.imageId ? `${process.env.REACT_APP_UBC_S3_URL}/${this.state.imageId}` : null;
   }
 
   beforeUpload = (file) => {
@@ -59,7 +71,7 @@ export class ImageUploader extends React.Component {
     }
   }
 
-  onRequest = ({}) => {
+  onRequest = ({ }) => {
 
   }
 
@@ -70,25 +82,24 @@ export class ImageUploader extends React.Component {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
-    const { imageUrl } = this.state;
-    const uuid = uuidv4();
+    const { value: imageId } = this.props;
+
     return (
       <div>
-        <Upload
+        {/* <em>{`${process.env.REACT_APP_UBC_S3_URL}/${imageId}`}</em> */}
+        <UploadStyled
           name="file"
           listType="picture-card"
           accept="image/*"
           // className="avatar-uploader"
           showUploadList={false}
-          action={'api/v1/image/' + uuid}
+          action={`image/${imageId}`}
           beforeUpload={this.beforeUpload}
           onChange={this.handleChange}
-          // customRequest={this.onRequest}
+        // customRequest={this.onRequest}
         >
-          {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-        </Upload>
-      <Divider />
-
+          {this.imageUrl ? <img src={this.imageUrl} alt="picture" style={{ width: '100%' }} /> : uploadButton}
+        </UploadStyled>
       </div >
     );
   }

@@ -4,6 +4,9 @@ import styled from 'styled-components';
 import ImageCardAdminTable from 'components/ImageCardAdminTable/ImageCardAdminTable';
 import { Tabs } from 'antd';
 import ImageUploader from 'components/ImageUploader/ImageUploader'
+import ImageCardEditor from 'components/ImageCardEditor/ImageCardEditor';
+import { GalleryDef } from 'defs/GalleryDef';
+import GalleryCardEditor from 'components/GalleryCardEditor/GalleryCardEditor';
 const { TabPane } = Tabs;
 
 const ContainerStyled = styled.div`
@@ -32,7 +35,7 @@ const BackdoorPage = () => (
     </TabPane>
     </Tabs>
   </ContainerStyled>
-  <ImageUploader></ImageUploader>
+  <GalleryCardEditor loading={true}></GalleryCardEditor>
   </div>
 );
 

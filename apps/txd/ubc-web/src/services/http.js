@@ -1,16 +1,21 @@
 import * as axios from 'axios';
 
-const apiEndpoint = ''
+function trimSlash(str) {
+  return str ? str.replace(/^\/+/, '').replace(/\/+$/, '') : str;
+}
+
+const baseURL = trimSlash(process.env.REACT_APP_UBC_API_ENDPOINT);
 
 async function request(method, path, queryParams, body) {
   try {
     const response = await axios({
       method,
-      baseURL: apiEndpoint,
-      url: `${apiEndpoint}/${path}`,
+      baseURL,
+      url: `${baseURL}/${trimSlash(path)}`,
       headers: {
-        'Content-Type': 'application/json',
-        'Accept-Encoding': 'gzip, compress, deflate'
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept-Encoding': 'gzip, compress, deflate',
+        'Authorization': 'Basic ubc.techseeding'
       },
       params: queryParams,
       data: body,
@@ -23,7 +28,7 @@ async function request(method, path, queryParams, body) {
   }
 }
 
-export const httpGet = async (path, params) => request('GET', path, params);
-export const httpPost = async (path, body, params) => request('POST', path, params, body);
-export const httpPut = async (path, body, params) => request('PUT', path, params, body);
-export const httpDelete = async (path, body, params) => request('DELETE', path, params, body);
+export const httpGet = async (path, querParams = null) => request('GET', path, querParams);
+export const httpPost = async (path, body, querParams = null) => request('POST', path, querParams, body);
+export const httpPut = async (path, body, querParams = null) => request('PUT', path, querParams, body);
+export const httpDelete = async (path, body = null, querParams = null) => request('DELETE', path, querParams, body);
