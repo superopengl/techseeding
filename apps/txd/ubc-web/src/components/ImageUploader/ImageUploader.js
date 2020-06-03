@@ -45,21 +45,23 @@ export class ImageUploader extends React.Component {
   }
 
   handleChange = async info => {
-    if (info.file.status === 'uploading') {
-      this.setState({ loading: true });
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      const imageUrl = await this.getBase64(info.file.originFileObj)
-      this.setState({
-        imageUrl,
-        loading: false,
-      });
+    switch (info.file.status) {
+      case 'uploading':
+        this.setState({ loading: true });
+        return;
+      case 'done':
+        // Get this url from response in real world.
+        const imageUrl = await this.getBase64(info.file.originFileObj)
+        this.setState({
+          imageUrl,
+          loading: false,
+        });
 
-      if (this.props.onChange) {
-        this.props.onChange(this.state.postImageId);
-      }
+        if (this.props.onChange) {
+          this.props.onChange(this.state.postImageId);
+        }
+        return;
+      default:
     }
   };
 

@@ -1,5 +1,5 @@
 import { Entity, Column, OneToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
-import { Picture } from './Picture';
+import { Image } from './Image';
 @Entity()
 export class Event {
     @PrimaryGeneratedColumn('uuid')
@@ -29,7 +29,7 @@ export class Event {
     @Column({ nullable: true })
     ordinal: number;
 
-    @OneToOne(() => Picture, {cascade: true})
+    @OneToOne(() => Image, {cascade: true})
     @JoinColumn()
-    image: Picture;
+    image: Image;
 }

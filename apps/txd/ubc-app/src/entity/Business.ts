@@ -1,5 +1,5 @@
 import { Entity, Column, OneToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
-import { Picture } from './Picture';
+import { Image } from './Image';
 @Entity()
 export class Business {
     @PrimaryGeneratedColumn('uuid')
@@ -35,9 +35,9 @@ export class Business {
     @Column({ nullable: true })
     ordinal: number;
 
-    @OneToOne(() => Picture)
+    @OneToOne(() => Image)
     @JoinColumn()
-    image: Picture;
+    image: Image;
 }
 
 

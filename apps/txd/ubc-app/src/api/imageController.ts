@@ -1,13 +1,13 @@
 
 import * as aws from 'aws-sdk';
 import { createConnection, getRepository, getConnectionManager, Repository } from 'typeorm';
-import { Picture } from '../entity/Picture';
+import { Image } from '../entity/Image';
 import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function getImage(req, res) {
   const { imageId } = req.params;
-  const repo = getRepository(Picture);
+  const repo = getRepository(Image);
   const image = repo.findOne(imageId);
   assert(image, 404);
   res.json(image);
@@ -61,7 +61,7 @@ export async function uploadImage(req, res) {
   const { imageId } = req.params;
   const location = await uploadToS3(imageId, data);
 
-  const picture: Picture = {
+  const image: Image = {
     id: imageId,
     fileName: name,
     mime: mimetype,
@@ -69,8 +69,8 @@ export async function uploadImage(req, res) {
     md5
   };
 
-  const repo = getRepository(Picture);
-  await repo.insert(picture);
+  const repo = getRepository(Image);
+  await repo.insert(image);
 
-  res.json(picture);
+  res.json(image);
 }

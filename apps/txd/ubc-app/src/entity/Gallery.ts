@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
-import { Picture } from './Picture';
+import { Image } from './Image';
 @Entity()
 export class Gallery {
   @PrimaryGeneratedColumn('uuid')
@@ -8,7 +8,7 @@ export class Gallery {
   @Column({ default: new Date() })
   createdAt?: Date;
 
-  @Column({default: 'system'})
+  @Column({ default: 'system' })
   createdBy?: string;
 
   @Column({ nullable: true })
@@ -23,7 +23,6 @@ export class Gallery {
   @Column({ nullable: true })
   when?: Date;
 
-  @OneToOne(type => Picture, {cascade: true})
-  @JoinColumn()
-  image: Picture;
+  @Column({ type: 'uuid' })
+  imageId: string;
 }

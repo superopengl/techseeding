@@ -1,7 +1,7 @@
 
 import * as aws from 'aws-sdk';
 import { createConnection, getRepository, getConnectionManager, Repository } from 'typeorm';
-import { Picture } from '../entity/Picture';
+import { Image } from '../entity/Image';
 import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
 import { Gallery } from '../entity/Gallery';
@@ -21,7 +21,7 @@ export async function getGallery(req, res) {
 }
 
 export async function createGallery(req, res) {
-  const gallary = Object.assign({id: uuidv4()}, req.body);
+  const gallary = Object.assign({ id: uuidv4() }, req.body); // Allocate id if not specified.
   const repo = getRepository(Gallery);
   await repo.save(gallary);
   res.sendStatus(200);

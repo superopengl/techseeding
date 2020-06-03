@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
-import { Picture } from './Picture';
+import { Image } from './Image';
 
 @Entity()
 export class Poster {
@@ -21,9 +21,9 @@ export class Poster {
     @Column({ nullable: true })
     ordinal: number;
 
-    @OneToOne(() => Picture, {cascade: true})
+    @OneToOne(() => Image, {cascade: true})
     @JoinColumn()
-    image: Picture;
+    image: Image;
 }
 
 

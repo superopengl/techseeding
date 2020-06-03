@@ -9,7 +9,7 @@ import {
   SyncOutlined,
   LoadingOutlined,
 } from '@ant-design/icons';
-import { getGallery } from 'services/galleryService';
+import { getGallery, saveGallery } from 'services/galleryService';
 
 export class GalleryCardEditor extends React.Component {
   constructor(props) {
@@ -28,8 +28,10 @@ export class GalleryCardEditor extends React.Component {
     }
   }
 
-  onChange(values) {
-    console.log('gallery', values);
+  onChange = async gallery => {
+    this.setState({ loading: true });
+    await saveGallery(gallery);
+    this.setState({ loading: false });
   }
 
   async loadEntity(id) {
