@@ -1,5 +1,3 @@
-import apiRouter from './routers/api';
-
 import * as express from 'express';
 import * as compression from 'compression';
 import { Request, Response } from 'express';
@@ -24,6 +22,13 @@ export function createAppInstance(httpsPort) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
+  app.use((err, req, res, next) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+    res.status(500);
+    res.json({ error: err });
+  });
   app.use(fileUpload({
     createParentPath: true
   }));
@@ -39,7 +44,7 @@ export function createAppInstance(httpsPort) {
   // Connect to /api/v*/ with the swagger file
   connectSwaggerRoutes(app, `${__dirname}/_assets/api.yml`);
 
-  app.get('/healthcheck', (req, res) => res.send('OK'));
+  app.get('/healthcheck', (req, res) => res.send(JSON.stringify(process.env, undefined, 2)));
   app.get('/routelist', (req, res) => res.send(listEndpoints(app)));
   app.use('/', express.static(`${__dirname}/www`));
 

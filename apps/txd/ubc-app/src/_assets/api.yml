@@ -22,9 +22,7 @@ paths:
           required: true
       responses:
         200:
-          description: ''
-          schema: 
-            $ref: '#/definitions/PingResponse'
+          description: OK
     post:
       operationId: 'uploadImage'
       parameters:
@@ -35,6 +33,39 @@ paths:
           required: true
       responses:
         200:
-          description: ''
-          schema: 
-            $ref: '#/definitions/PingResponse'
+          description: OK
+  /gallery:
+    get:
+      operationId: listGallary
+      responses:
+        200:
+          description: OK
+    post:
+      operationId: createGallery
+      responses:
+        200:
+          description: OK
+  /gallery/{galleryId}:
+    get:
+      operationId: getGallary
+      parameters:
+        - name: imageId
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: OK
+    delete:
+      operationId: deleteGallery
+      parameters:
+        - name: imageId
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: OK
+            

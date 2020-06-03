@@ -6,13 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:prod": "npm run build && cd build && cross-env node index.js",
-    "start": "npm run build && npm run link-web && cd build && cross-env UBC_PORT=5005 node index.js",
+    "start": "npm run build && npm run link-web && cd build && cross-env node index.js",
     "dev": "nodemon -w src --ext ts --exec npm start",
     "build": "npm run lint && npm run clean && npm run compile && npm run copy",
     "clean": "rm -rf build",
     "compile": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
-    "copy": "cp -rf src/_assets build/_assets && cp -rf ../ubc-web/build build/www && cp -f ormconfig.json build/ormcofig.json",
+    "copy": "cp -rf src/_assets build/_assets && cp -rf ../ubc-web/build build/www && cp -f .env build/",
     "link-web": "rm -rf build/www && ln -sfn \"$(pwd)/../ubc-web/build\" build/www"
   },
   "author": "ubc.techseeding@gmail.com",
