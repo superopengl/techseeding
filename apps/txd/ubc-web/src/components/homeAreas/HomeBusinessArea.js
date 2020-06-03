@@ -19,7 +19,7 @@ const RowStyled = styled(Row)`
 `;
 
 
-class HomeEventArea extends React.Component {
+class HomeBusinessArea extends React.Component {
   constructor(props) {
     super(props);
 
@@ -29,7 +29,7 @@ class HomeEventArea extends React.Component {
   }
 
   async componentDidMount() {
-    const list = await listEvent();
+    const list = await listBusiness(this.props.group);
     this.setState({
       list
     });
@@ -62,8 +62,8 @@ class HomeEventArea extends React.Component {
   }
 }
 
-HomeEventArea.propTypes = {};
+HomeBusinessArea.propTypes = {};
 
-HomeEventArea.defaultProps = {};
+HomeBusinessArea.defaultProps = {};
 
-export default HomeEventArea;
+export default HomeBusinessArea;

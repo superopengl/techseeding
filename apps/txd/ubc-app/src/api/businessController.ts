@@ -4,7 +4,7 @@ import { Business } from '../entity/Business';
 import { createGet, createSave, createDelete } from './genericControllerFactory';
 
 export const listBusiness = async (req, res) => {
-  const { group } = req.params;
+  const { group } = req.query;
   const repo = getRepository(Business);
 
   let query = await repo.createQueryBuilder('x');

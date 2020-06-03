@@ -32,13 +32,13 @@ const CoverImageStyled = styled.div`
 border-bottom: 1px solid #f0f0f0;
 `;
 
-export class HomeEventCard extends React.Component {
+export class BusinessCard extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const {title, description, imageId} = this.props.data;
+    const {title, description, imageId, website} = this.props.data;
 
     return (
       <CardStyled
@@ -46,15 +46,14 @@ export class HomeEventCard extends React.Component {
         cover={<CoverImageStyled style={{backgroundImage: `url("${getImageUrl(imageId)}")`}} />}
       >
         <MetaStyled title={title} description={description} />
-        <br/>
-        <Button type="link" size="small">Details</Button>
+        {website && <div style={{marginTop: '1rem'}}><a target="_blank" href={website}>Website</a></div>}
       </CardStyled>
     );
   }
 }
 
-HomeEventCard.propTypes = {};
+BusinessCard.propTypes = {};
 
-HomeEventCard.defaultProps = {};
+BusinessCard.defaultProps = {};
 
-export default HomeEventCard;
+export default BusinessCard;
