@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class Image {
   @PrimaryGeneratedColumn('uuid')
-  id?: string;
+  id: string;
 
   @Column({ default: new Date() })
   createdAt?: Date;

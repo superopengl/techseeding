@@ -2,6 +2,17 @@ import { string, number } from "prop-types";
 
 export const GalleryDef = [
   {
+    label: 'Picture',
+    name: 'imageId',
+    type: 'uploader',
+    rules: [
+      {
+        required: true,
+        message: 'Please upload image'
+      }
+    ]
+  },
+  {
     label: 'Title',
     name: 'title',
     rules: [

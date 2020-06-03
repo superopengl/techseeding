@@ -11,6 +11,7 @@ import {
   SyncOutlined,
   LoadingOutlined,
 } from '@ant-design/icons';
+import { message } from 'antd';
 
 const FormButtonStyled = styled(Button)`
 margin-bottom: 1rem;
@@ -27,34 +28,52 @@ max-width: 600px;
 export class ImageCardEditor extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      id: this.props.id,
+      loading: false
+    }
+  }
+
+  componentDidMount() {
+    const { id } = this.state;
+    if (id) {
+      this.loadEntity(id);
+    }
+  }
+
+  async loadEntity(id) {
+    this.setState({ loading: true });
+    const data = await this.props.onFetch(id);
+    this.setState({
+      data,
+      loading: false
+    });
+  }
+
+  onChange = async gallery => {
+    this.setState({ loading: true });
+    await this.props.onSave(gallery);
+    this.setState({ loading: false });
+    message.success({ content: 'Successfully created the gallery card', duration: 5 });
   }
 
   render() {
-    const { fieldDefs, value: initialValues, onChange, onCancel, loading } = this.props;
-
-    // const initialValues={
-    //   imageId: '58edf047-843f-4cac-ab27-68bde08686ab',
-    //   title: 'temp',
-    //   description: 'temp2',
-    //   ordinal: '99',
-    // };
+    const { fieldDefs, onCancel } = this.props;
+    const { loading, data } = this.state;
 
     return (
       <Container>
         {loading ?
           <LoadingOutlined style={{ fontSize: '5rem' }} /> :
-          <Form style={{ width: '100%' }} layout="vertical" onFinish={onChange} initialValues={initialValues}>
-            <Form.Item name="imageId" label="Picture" rules={[{ required: true, message: 'Please upload image' }]}>
-              <ImageUploader></ImageUploader>
-            </Form.Item>
+          <Form style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
             {fieldDefs.map((fieldDef, i) => {
-              const { inputProps, ...field } = fieldDef;
+              const { inputProps, type, ...field } = fieldDef;
               return <Form.Item key={i} {...field}>
-                {field.type === 'number' ?
-                  <InputNumber {...inputProps} /> :
-                  field.type === 'textarea' ?
-                    <Input.TextArea {...inputProps} /> :
-                    <Input {...inputProps} />
+                {type === 'uploader' ? <ImageUploader {...inputProps} />
+                  : type === 'number' ? <InputNumber {...inputProps} />
+                    : type === 'textarea' ? <Input.TextArea {...inputProps} />
+                      : <Input {...inputProps} />
                 }
               </Form.Item>
             })}

@@ -20,15 +20,14 @@ export class ImageUploader extends React.Component {
   constructor(props) {
     super(props);
 
+    const imageId = this.props.value;
+
     this.state = {
       loading: false,
-      imageId: this.props.value,
-      postImageId: this.props.value || uuidv4()
+      imageId,
+      postImageId: imageId || uuidv4(),
+      imageUrl: imageId ? `${process.env.REACT_APP_UBC_S3_URL}/${imageId}` : undefined
     }
-  }
-
-  get imageUrl() {
-    return this.state.imageId ? `${process.env.REACT_APP_UBC_S3_URL}/${this.state.imageId}` : null;
   }
 
   beforeUpload = (file) => {
@@ -50,15 +49,17 @@ export class ImageUploader extends React.Component {
         this.setState({ loading: true });
         return;
       case 'done':
+        const {postImageId} = this.state;
         // Get this url from response in real world.
         const imageUrl = await this.getBase64(info.file.originFileObj)
         this.setState({
           imageUrl,
+          imageId: postImageId,
           loading: false,
         });
 
         if (this.props.onChange) {
-          this.props.onChange(this.state.postImageId);
+          this.props.onChange(postImageId);
         }
         return;
       default:
@@ -72,7 +73,7 @@ export class ImageUploader extends React.Component {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
-    const { postImageId } = this.state;
+    const { imageUrl, postImageId } = this.state;
 
     return (
       <div>
@@ -87,7 +88,7 @@ export class ImageUploader extends React.Component {
           onChange={this.handleChange}
         // customRequest={this.onRequest}
         >
-          {this.imageUrl ? <img src={this.imageUrl} alt="picture" style={{ width: '100%' }} /> : uploadButton}
+          {imageUrl ? <img src={imageUrl} alt="picture" style={{ width: '100%' }} /> : uploadButton}
         </UploadStyled>
       </div >
     );
