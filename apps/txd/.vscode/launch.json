@@ -17,7 +17,7 @@
       ],
       "env": {
         "TS_NODE_IGNORE": "false",
-        "UBC_PORT": "5005"
+        "NODE_ENV": "dev"
       },
       "runtimeArgs": [
         "--nolazy",

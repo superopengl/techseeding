@@ -35,7 +35,7 @@ const BackdoorPage = () => (
     </TabPane>
     </Tabs>
   </ContainerStyled>
-  <GalleryCardEditor loading={true}></GalleryCardEditor>
+  <GalleryCardEditor ></GalleryCardEditor>
   </div>
 );
 

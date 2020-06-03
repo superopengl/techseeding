@@ -42,26 +42,27 @@ export class ImageCardEditor extends React.Component {
     return (
       <Container>
         {loading ?
-          <LoadingOutlined style={{fontSize: '5rem'}} /> :
+          <LoadingOutlined style={{ fontSize: '5rem' }} /> :
           <Form style={{ width: '100%' }} layout="vertical" onFinish={onChange} initialValues={initialValues}>
             <Form.Item name="imageId" label="Picture" rules={[{ required: true, message: 'Please upload image' }]}>
               <ImageUploader></ImageUploader>
             </Form.Item>
-            {fieldDefs.map(field => (
-              <Form.Item {...field}>
+            {fieldDefs.map((fieldDef, i) => {
+              const { inputProps, ...field } = fieldDef;
+              return <Form.Item key={i} {...field}>
                 {field.type === 'number' ?
-                  <InputNumber {...field.inputProps} /> :
+                  <InputNumber {...inputProps} /> :
                   field.type === 'textarea' ?
-                    <Input.TextArea {...field.inputProps} /> :
-                    <Input {...field.inputProps} />
+                    <Input.TextArea {...inputProps} /> :
+                    <Input {...inputProps} />
                 }
               </Form.Item>
-            ))}
+            })}
             <Form.Item>
-              <FormButtonStyled htmlType="submit" type="primary" block wrapperCol={{ offset: -8, span: 24 }}>
+              <FormButtonStyled htmlType="submit" type="primary" block>
                 Submit
             </FormButtonStyled>
-              <FormButtonStyled htmlType="button" block wrapperCol={{ offset: -8, span: 24 }} onClick={onCancel}>
+              <FormButtonStyled htmlType="button" block onClick={onCancel}>
                 Cancel
             </FormButtonStyled>
             </Form.Item>

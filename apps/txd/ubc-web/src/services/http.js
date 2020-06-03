@@ -14,7 +14,6 @@ async function request(method, path, queryParams, body) {
       url: `${baseURL}/${trimSlash(path)}`,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Accept-Encoding': 'gzip, compress, deflate',
         'Authorization': 'Basic ubc.techseeding'
       },
       params: queryParams,

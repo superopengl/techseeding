@@ -22,7 +22,8 @@ export class ImageUploader extends React.Component {
 
     this.state = {
       loading: false,
-      imageId: this.props.value
+      imageId: this.props.value,
+      postImageId: this.props.value || uuidv4()
     }
   }
 
@@ -55,25 +56,12 @@ export class ImageUploader extends React.Component {
         imageUrl,
         loading: false,
       });
+
+      if (this.props.onChange) {
+        this.props.onChange(this.state.postImageId);
+      }
     }
   };
-
-  onUploadSuccess = (body) => {
-    if (this.props.onComplete) {
-      console.log('uploaded', body);
-      this.props.onComplete(null, body);
-    }
-  }
-
-  onUploadError = (err, body) => {
-    if (this.props.onComplete) {
-      this.props.onComplete(err, body);
-    }
-  }
-
-  onRequest = ({ }) => {
-
-  }
 
   render() {
     const uploadButton = (
@@ -82,18 +70,17 @@ export class ImageUploader extends React.Component {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
-    const { value: imageId } = this.props;
+    const { postImageId } = this.state;
 
     return (
       <div>
-        {/* <em>{`${process.env.REACT_APP_UBC_S3_URL}/${imageId}`}</em> */}
         <UploadStyled
           name="file"
           listType="picture-card"
           accept="image/*"
           // className="avatar-uploader"
           showUploadList={false}
-          action={`image/${imageId}`}
+          action={`${process.env.REACT_APP_UBC_API_ENDPOINT}/image/${postImageId}`}
           beforeUpload={this.beforeUpload}
           onChange={this.handleChange}
         // customRequest={this.onRequest}

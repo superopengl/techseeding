@@ -17,12 +17,15 @@ export class GalleryCardEditor extends React.Component {
 
     this.state = {
       id: this.props.id,
-      loading: !!this.props.loading
+      loading: false
     }
   }
 
   componentDidMount() {
-    this.loadEntity(this.state.id);
+    const { id } = this.state;
+    if (id) {
+      this.loadEntity(id);
+    }
   }
 
   onChange(values) {
