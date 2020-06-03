@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { listGallery } from 'services/galleryService';
 import styled from 'styled-components';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import HomeRowArea from "../HomeRowArea/HomeRowArea";
+import HomeRowArea from "components/homeAreas/HomeRowArea/HomeRowArea";
+import { getImageUrl } from 'util/getImageUrl';
 
 const RowStyled = styled(Row)`
   max-width: 1024px;
@@ -37,9 +38,9 @@ export class HomeGalleryArea extends React.Component {
     return (
       <HomeRowArea title="Gallery" bgColor={this.props.bgColor}>
         <RowStyled>
-          {list && list.map(p => (
-            <Col key={p.name} span={6}>
-              <ImageStyled src={p.path} alt={p.name}>
+          {list && list.map((item, i) => (
+            <Col key={i} span={6}>
+              <ImageStyled src={getImageUrl(item.imageId)} alt={item.title}>
               </ImageStyled>
             </Col>
           ))}

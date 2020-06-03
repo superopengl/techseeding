@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import HomeRowArea from '../HomeRowArea/HomeRowArea';
+import HomeRowArea from './homeAreas/HomeRowArea/HomeRowArea';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import styled from 'styled-components';
 const { Option } = Select;

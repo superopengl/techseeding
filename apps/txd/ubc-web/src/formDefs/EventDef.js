@@ -18,11 +18,11 @@ export const PosterDef = [
     rules: [
       {
         required: true,
-        message: 'Please input poster title'
+        message: 'Please input event title'
       }
     ],
     inputProps: {
-      placeholder: 'Poster title',
+      placeholder: 'Event title',
       maxLength: 100,
       allowClear: true
     }
@@ -33,11 +33,12 @@ export const PosterDef = [
     type: 'textarea',
     rules: [
       {
-        required: false
+        required: false,
+        message: 'Please input event description'
       }
     ],
     inputProps: {
-      placeholder: 'Poster description',
+      placeholder: 'Event description',
       maxLength: 300,
       autoSize: true,
       allowClear: true
@@ -54,7 +55,7 @@ export const PosterDef = [
       }
     ],
     inputProps: {
-      placeholder: 'A number used for sorting pictures in the poster carousel',
+      placeholder: 'A number used for sorting events on the home page',
       min: 0
     }
   },

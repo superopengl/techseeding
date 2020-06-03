@@ -10,7 +10,7 @@ import {
   LoadingOutlined,
   PlusOutlined
 } from '@ant-design/icons';
-import PosterCardEditor from 'components/PosterCardEditor/PosterCardEditor';
+import PosterForm from 'components/forms/PosterForm';
 import { message } from 'antd';
 import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
@@ -34,7 +34,7 @@ const CardStyled = styled(Card)`
 margin-bottom: 20px;
 `;
 
-export class PosterAdminGrid extends React.Component {
+export class GenericAdminGrid extends React.Component {
 
   constructor(props) {
     super(props);
@@ -51,7 +51,7 @@ export class PosterAdminGrid extends React.Component {
 
   loadList = async () => {
     this.setState({ loading: true });
-    const list = await listPoster();
+    const list = await this.props.onLoadList();
     this.setState({
       list,
       loading: false
@@ -65,7 +65,7 @@ export class PosterAdminGrid extends React.Component {
   delete = async (id) => {
     this.setState({ loading: true });
     console.log('about to delete', this.state);
-    await deletePoster(id);
+    await this.props.onDelete(id);
     message.success({ content: 'Successfully deleted the picture', duration: 5 });
     await this.loadList();
   }
@@ -106,6 +106,8 @@ export class PosterAdminGrid extends React.Component {
       return <LoadingOutlined style={{ fontSize: '5rem' }} />
     }
 
+    const CardEditorComponent = this.props.cardEditorComponent;
+
     return (
       <div>
         {/* <em>targetId = {targetId}</em> */}
@@ -136,24 +138,24 @@ export class PosterAdminGrid extends React.Component {
           </Col>
         </Row>
         <Modal
-          title={targetId ? "Edit" : "New"}
+          title={`${targetId ? "Edit" : "New"} ${this.props.name}`}
           visible={editModalVisible}
           onOk={this.handleEditModalOk}
           onCancel={this.handleModalCancel}
           footer={null}
         >
-          <PosterCardEditor id={this.state.targetId}
+          <CardEditorComponent id={this.state.targetId}
             onFinish={this.handleEditModalOk}
             onCancel={this.handleModalCancel}
-          ></PosterCardEditor>
+          ></CardEditorComponent>
         </Modal>
       </div>
     );
   }
 }
 
-PosterAdminGrid.propTypes = {};
+GenericAdminGrid.propTypes = {};
 
-PosterAdminGrid.defaultProps = {};
+GenericAdminGrid.defaultProps = {};
 
-export default PosterAdminGrid;
+export default GenericAdminGrid;

@@ -12,8 +12,8 @@ export class Poster {
     @Column({default: 'system'})
     createdBy?: string;
 
-    @Column({ nullable: true })
-    title?: string;
+    @Column()
+    title: string;
 
     @Column({ nullable: true })
     description?: string;

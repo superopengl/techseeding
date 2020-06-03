@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ImageUploader from 'components/ImageUploader/ImageUploader';
+import ImageUploader from 'components/inputs/ImageUploader';
 import { v4 as uuidv4 } from 'uuid';
 import { Divider, Form, Input, InputNumber, Button } from 'antd';
 import styled from 'styled-components';
@@ -16,6 +16,7 @@ import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons
 import { Card } from 'antd';
 import { Typography, Space } from 'antd';
 import { getImageUrl } from 'util/getImageUrl';
+import RadioInput from 'components/inputs/RadioInput';
 const { Meta } = Card;
 const { Text, Link } = Typography;
 
@@ -39,7 +40,7 @@ margin: 0 auto;
 width: 100%;
 `
 
-export class ImageCardEditor extends React.Component {
+export class ImageCardForm extends React.Component {
   constructor(props) {
     super(props);
 
@@ -97,18 +98,19 @@ export class ImageCardEditor extends React.Component {
                 {type === 'uploader' ? <ImageUploader {...inputProps} />
                   : type === 'number' ? <InputNumber {...inputProps} />
                     : type === 'textarea' ? <Input.TextArea {...inputProps} />
+                      : type === 'enum' ? <RadioInput {...inputProps} />
                       : <Input {...inputProps} />
                 }
               </Form.Item>
-            })}
-            <Form.Item>
-              <FormButtonStyled htmlType="submit" type="primary" block>
-                Save
+        })}
+        <Form.Item>
+          <FormButtonStyled htmlType="submit" type="primary" block>
+            Save
             </FormButtonStyled>
-              <FormButtonStyled htmlType="button" type="text" block onClick={onCancel}>
-                Cancel
+          <FormButtonStyled htmlType="button" type="text" block onClick={onCancel}>
+            Cancel
             </FormButtonStyled>
-            </Form.Item>
+        </Form.Item>
           </Form>
         }
       </Container>
@@ -116,8 +118,8 @@ export class ImageCardEditor extends React.Component {
   }
 }
 
-ImageCardEditor.propTypes = {};
+ImageCardForm.propTypes = {};
 
-ImageCardEditor.defaultProps = {};
+ImageCardForm.defaultProps = {};
 
-export default ImageCardEditor;
+export default ImageCardForm;

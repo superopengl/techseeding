@@ -1,10 +1,6 @@
 import data from './fake'
 import { httpGet, httpPost, httpDelete } from './http';
 
-export function getPosterList() {
-  return data.poster;
-}
-
 export async function getPoster(id) {
   return httpGet(`poster/${id}`);
 }

@@ -3,33 +3,23 @@ import { Image } from './Image';
 @Entity()
 export class Event {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id?: string;
 
     @Column({ default: new Date() })
-    createdAt: Date;
+    createdAt?: Date;
+
+    @Column({ default: 'system' })
+    createdBy?: string;
 
     @Column()
-    createdBy: string;
+    title: string;
+
+    @Column()
+    description: string;
 
     @Column({ nullable: true })
-    title?: string;
+    ordinal?: number;
 
-    @Column({ nullable: true })
-    description?: string;
-
-    @Column({ nullable: true })
-    when: Date;
-
-    @Column({ nullable: true })
-    cap: number;
-
-    @Column({ nullable: true })
-    location?: string;
-
-    @Column({ nullable: true })
-    ordinal: number;
-
-    @OneToOne(() => Image, {cascade: true})
-    @JoinColumn()
-    image: Image;
+    @Column({ type: 'uuid' })
+    imageId: Image;
 }

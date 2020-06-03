@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PoweredByLogo from '../PoweredByLogo/PoweredByLogo';
+import PoweredByLogo from '../../PoweredByLogo';
 import { Carousel, Row, Col } from 'antd';
 import styled from 'styled-components';
 import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';

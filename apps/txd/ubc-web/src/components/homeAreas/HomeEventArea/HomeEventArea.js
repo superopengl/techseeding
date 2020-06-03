@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import HomeEventCard from "../HomeEventCard/HomeEventCard";
+import HomeEventCard from "../../forms/HomeEventCard/HomeEventCard";
 import HomeRowArea from "../HomeRowArea/HomeRowArea";
 import momentRandom from 'moment-random';
 import moment from 'moment';

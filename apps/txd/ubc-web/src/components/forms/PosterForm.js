@@ -1,11 +1,11 @@
 import React from 'react';
-import ImageCardEditor from 'components/ImageCardEditor/ImageCardEditor';
+import ImageCardForm from 'components/forms/ImageCardForm';
 import { GalleryDef } from 'formDefs/GalleryDef';
 import { getGallery, saveGallery, deleteGallery } from 'services/galleryService';
 import { PosterDef } from 'formDefs/PosterDef';
 import { getPoster, savePoster, deletePoster } from 'services/posterService';
 
-export class PosterCardEditor extends React.Component {
+export class PosterForm extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -25,7 +25,7 @@ export class PosterCardEditor extends React.Component {
 
   render() {
     return (
-      <ImageCardEditor
+      <ImageCardForm
         fieldDefs={PosterDef}
         onFetch={this.handleFetch}
         onSave={this.handleSave}
@@ -36,8 +36,8 @@ export class PosterCardEditor extends React.Component {
   }
 };
 
-PosterCardEditor.propTypes = {};
+PosterForm.propTypes = {};
 
-PosterCardEditor.defaultProps = {};
+PosterForm.defaultProps = {};
 
-export default PosterCardEditor;
+export default PosterForm;

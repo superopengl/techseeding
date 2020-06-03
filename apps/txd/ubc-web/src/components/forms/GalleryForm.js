@@ -1,16 +1,16 @@
 import React from 'react';
-import ImageCardEditor from 'components/ImageCardEditor/ImageCardEditor';
+import ImageCardForm from 'components/forms/ImageCardForm';
 import { GalleryDef } from 'formDefs/GalleryDef';
 import { getGallery, saveGallery, deleteGallery } from 'services/galleryService';
 
-export class GalleryCardEditor extends React.Component {
+export class GalleryForm extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
     return (
-      <ImageCardEditor
+      <ImageCardForm
         id={this.props.id}
         readWidth={240}
         editWidth={480}
@@ -23,8 +23,8 @@ export class GalleryCardEditor extends React.Component {
   }
 };
 
-GalleryCardEditor.propTypes = {};
+GalleryForm.propTypes = {};
 
-GalleryCardEditor.defaultProps = {};
+GalleryForm.defaultProps = {};
 
-export default GalleryCardEditor;
+export default GalleryForm;

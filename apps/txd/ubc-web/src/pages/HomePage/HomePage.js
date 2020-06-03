@@ -1,23 +1,15 @@
 import React from 'react';
 
 import styled from 'styled-components';
-import HomeMessageArea from 'components/HomeMessageArea/HomeMessageArea';
 
 // import 'App.css';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import { UserOutlined, UserAddOutlined, SmileOutlined } from '@ant-design/icons';
-import { Carousel } from 'antd';
-import HomeHeader from 'components/HomeHeader/HomeHeader';
-import HomeFooter from 'components/HomeFooter/HomeFooter';
-import HomeRowArea from 'components/HomeRowArea/HomeRowArea';
-import HomeCarouselArea from 'components/HomeCarouselArea/HomeCarouselArea';
-import HomeFeatureArea from 'components/HomeFeatureArea/HomeFeatureArea';
-import HomeEventArea from 'components/HomeEventArea/HomeEventArea';
-import HomeAboutArea from 'components/HomeAboutArea/HomeAboutArea';
-import HomeGalleryArea from 'components/HomeGalleryArea/HomeGalleryArea';
-const { Header, Content, Footer } = Layout;
-const { Meta } = Card;
-const { Option } = Select;
+import { Layout, Card, Select } from 'antd';
+import HomeHeader from 'components/HomeHeader';
+import HomeFooter from 'components/HomeFooter';
+import HomeCarouselArea from 'components/homeAreas/HomeCarouselArea/HomeCarouselArea';
+import HomeEventArea from 'components/homeAreas/HomeEventArea/HomeEventArea';
+import HomeGalleryArea from 'components/homeAreas/HomeGalleryArea/HomeGalleryArea';
+const { Content } = Layout;
 
 const LayoutStyled = styled(Layout)`
   margin: 0 auto 0 auto;

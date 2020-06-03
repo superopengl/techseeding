@@ -3,41 +3,31 @@ import { Image } from './Image';
 @Entity()
 export class Business {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id?: string;
 
     @Column({ default: new Date() })
-    createdAt: Date;
+    createdAt?: Date;
+
+    @Column({ default: 'system' })
+    createdBy?: string;
 
     @Column()
-    createdBy: string;
+    title: string;
 
     @Column()
-    businessName?: string;
+    description: string;
 
-    @Column({ nullable: true })
-    description?: string;
-
-    @Column({ nullable: true })
-    abn?: string;
-
-    @Column({ nullable: true })
-    phone?: string;
-
-    @Column({ nullable: true })
-    email?: string;
-
-    @Column({ nullable: true })
-    suburb?: string;
+    @Column()
+    group: string;
 
     @Column({ nullable: true })
     website?: string;
 
     @Column({ nullable: true })
-    ordinal: number;
+    ordinal?: number;
 
-    @OneToOne(() => Image)
-    @JoinColumn()
-    image: Image;
+    @Column({ type: 'uuid' })
+    imageId: Image;
 }
 
 

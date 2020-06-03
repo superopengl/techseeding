@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
-import PoweredByLogo from '../PoweredByLogo/PoweredByLogo';
+import PoweredByLogo from './PoweredByLogo';
 import AnchorLink from 'react-anchor-link-smooth-scroll'
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
