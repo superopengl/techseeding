@@ -6,6 +6,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import * as mineFormat from 'mime-format';
 import styled from 'styled-components';
+import { getImageUrl } from 'util/getImageUrl';
 
 const UploadStyled = styled(Upload)`
 & .ant-upload {
@@ -26,7 +27,7 @@ export class ImageUploader extends React.Component {
       loading: false,
       imageId,
       postImageId: imageId || uuidv4(),
-      imageUrl: imageId ? `${process.env.REACT_APP_UBC_S3_URL}/${imageId}` : undefined
+      imageUrl: getImageUrl(imageId)
     }
   }
 

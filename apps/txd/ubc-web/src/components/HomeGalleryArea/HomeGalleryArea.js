@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getGalleryList } from 'services/galleryService';
+import { listGallery } from 'services/galleryService';
 import styled from 'styled-components';
 import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
 import HomeRowArea from "../HomeRowArea/HomeRowArea";
@@ -18,14 +18,26 @@ const ImageStyled = styled.img`
 export class HomeGalleryArea extends React.Component {
   constructor(props) {
     super(props);
-
-    this.pictures = getGalleryList();
+    this.state = {};
   }
+  
+  componentDidMount(){
+    this.loadList();
+  }
+
+  async loadList(){
+    const list = await listGallery();
+    this.setState({
+      list
+    })
+  }
+
   render() {
+    const {list} = this.state;
     return (
       <HomeRowArea title="Gallery" bgColor={this.props.bgColor}>
         <RowStyled>
-          {this.pictures.map(p => (
+          {list && list.map(p => (
             <Col key={p.name} span={6}>
               <ImageStyled src={p.path} alt={p.name}>
               </ImageStyled>

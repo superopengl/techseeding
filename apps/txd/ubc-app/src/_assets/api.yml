@@ -11,11 +11,11 @@ definitions:
   PingResponse:
     type: 'object'
 paths:
-  /image/{imageId}:
+  /image/{id}:
     get:
       operationId: 'getImage'
       parameters:
-        - name: imageId
+        - name: id
           in: path
           type: string
           format: uuid
@@ -26,7 +26,7 @@ paths:
     post:
       operationId: 'uploadImage'
       parameters:
-        - name: imageId
+        - name: id
           in: path
           type: string
           format: uuid
@@ -41,15 +41,15 @@ paths:
         200:
           description: OK
     post:
-      operationId: createGallery
+      operationId: saveGallery
       responses:
         200:
           description: OK
-  /gallery/{galleryId}:
+  /gallery/{id}:
     get:
       operationId: getGallery
       parameters:
-        - name: imageId
+        - name: id
           in: path
           type: string
           format: uuid
@@ -60,7 +60,41 @@ paths:
     delete:
       operationId: deleteGallery
       parameters:
-        - name: imageId
+        - name: id
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: OK
+  /poster:
+    get:
+      operationId: listPoster
+      responses:
+        200:
+          description: OK
+    post:
+      operationId: savePoster
+      responses:
+        200:
+          description: OK
+  /poster/{id}:
+    get:
+      operationId: getPoster
+      parameters:
+        - name: id
+          in: path
+          type: string
+          format: uuid
+          required: true
+      responses:
+        200:
+          description: OK
+    delete:
+      operationId: deletePoster
+      parameters:
+        - name: id
           in: path
           type: string
           format: uuid

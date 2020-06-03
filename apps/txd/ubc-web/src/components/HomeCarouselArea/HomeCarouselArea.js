@@ -5,7 +5,8 @@ import { Carousel, Row, Col } from 'antd';
 import styled from 'styled-components';
 import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
 import { List, Typography, Divider, Input } from 'antd';
-import { getPosterList } from 'services/posterService';
+import { listPoster } from 'services/posterService';
+import { getImageUrl } from 'util/getImageUrl';
 const { Search } = Input;
 
 const ImgStyled = styled.div`
@@ -70,7 +71,18 @@ class HomeCarouselArea extends React.Component {
     super(props);
 
     this.carousel = React.createRef();
-    this.posters = getPosterList();
+    this.state = {};
+  }
+
+  componentDidMount(){
+    this.loadList();
+  }
+
+  async loadList() {
+    const list = await listPoster();
+    this.setState({
+      list
+    })
   }
 
   getRankIndex(i) {
@@ -89,14 +101,15 @@ class HomeCarouselArea extends React.Component {
   }
 
   render() {
+    const {list} = this.state;
     return (
       <ContainerStyled gutter={0} style={{position: 'relative'}}>
         <CarouselRow>
           <Col span={24}>
             <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
-              {this.posters.map(f => (
-                <div key={f.name}>
-                  <ImgStyled style={{ backgroundImage: `url("${f.path}")` }}>
+              {list && list.map((f, i) => (
+                <div key={i}>
+                  <ImgStyled style={{ backgroundImage: `url("${getImageUrl(f.imageId)}")` }}>
                   </ImgStyled>
                 </div>
               ))}
@@ -120,16 +133,16 @@ class HomeCarouselArea extends React.Component {
         </SearchRowContainer> */}
         {/* <Row style={{ position: 'absolute', right: 0, width: '100%', margin: '0 auto 0 auto' }}> */}
           {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
-            <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
+            {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
               <List
                 size="large"
                 // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
                 // footer={<div>Footer</div>}
                 // bordered
-                dataSource={this.posters}
-                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{item.name}</ItemStyled>}
+                dataSource={list}
+                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{item.title}</ItemStyled>}
               />
-            </ListContainer>
+            </ListContainer>}
           {/* </div> */}
         {/* </Row> */}
         {/* <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>

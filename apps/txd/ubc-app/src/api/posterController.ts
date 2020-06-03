@@ -4,14 +4,14 @@ import { createConnection, getRepository, getConnectionManager, Repository } fro
 import { Image } from '../entity/Image';
 import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
-import { Gallery } from '../entity/Gallery';
+import { Poster } from '../entity/Poster';
 import { createList, createGet, createSave, createDelete } from './genericControllerFactory';
 
-const typeFunc = () => Gallery;
+const typeFunc = () => Poster;
 
-export const listGallery = createList(typeFunc);
+export const listPoster = createList(typeFunc);
 
-export const getGallery = createGet(typeFunc);
-export const saveGallery = createSave(typeFunc);
+export const getPoster = createGet(typeFunc);
+export const savePoster = createSave(typeFunc);
 
-export const deleteGallery = createDelete(typeFunc);
+export const deletePoster = createDelete(typeFunc);

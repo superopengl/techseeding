@@ -12,9 +12,10 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
-import { EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
 import { Typography, Space } from 'antd';
+import { getImageUrl } from 'util/getImageUrl';
 const { Meta } = Card;
 const { Text, Link } = Typography;
 
@@ -22,12 +23,20 @@ const FormButtonStyled = styled(Button)`
 margin-bottom: 1rem;
 `
 
-const EditModeContainer = styled.div`
-display: flex;
-flex-direction: column;
-align-items: center;
-margin: 0 auto;
-max-width: 600px;
+// const EditModeContainer = styled.div`
+// display: flex;
+// flex-direction: column;
+// align-items: center;
+// margin: 0 auto;
+// max-width: 600px;
+// `
+
+const EditModeContainer = styled(Card)`
+// display: flex;
+// flex-direction: column;
+// align-items: center;
+// margin: 0 auto;
+// max-width: 600px;
 `
 
 export class ImageCardEditor extends React.Component {
@@ -35,10 +44,12 @@ export class ImageCardEditor extends React.Component {
     super(props);
 
     this.state = {
-      mode: 'read',
+      mode: this.props.mode || 'edit',
       id: this.props.id,
       loading: false
     }
+
+    console.log('ctor', this.props)
   }
 
   componentDidMount() {
@@ -57,21 +68,24 @@ export class ImageCardEditor extends React.Component {
     });
   }
 
-  onChange = async gallery => {
+  onChange = async entity => {
     this.setState({ loading: true });
-    await this.props.onSave(gallery);
+    // Assign id if exists
+    Object.assign(entity, {id: this.state.id});
+    await this.props.onSave(entity);
     this.setState({ loading: false });
     this.changeMode('read');
-    message.success({ content: 'Successfully created the gallery card', duration: 5 });
+    message.success({ content: 'Successfully created the picture', duration: 5 });
   }
 
   delete = async () => {
     const { id } = this.state;
     if (id) {
       this.setState({ loading: true });
+      console.log('about to delete', this.state);
       await this.props.onDelete(id);
       this.setState({ loading: false });
-      message.success({ content: 'Successfully deleted the gallery card', duration: 5 });
+      message.success({ content: 'Successfully deleted the picture', duration: 5 });
     }
   }
 
@@ -86,12 +100,15 @@ export class ImageCardEditor extends React.Component {
     const showCard = mode !== 'edit' && data;
     const showEdit = mode === 'edit';
     const otherStatus = !showCard && !showEdit;
+    if(otherStatus) {
+      // debugger;
+    }
 
     return (
       <div>
-        {otherStatus && <p>Error status</p>}
-        {showCard && <Card hoverable style={{ width: this.props.cardWidth }}
-          cover={<img alt="example" src={`${process.env.REACT_APP_UBC_S3_URL}/${data.imageId}`} />}
+        {otherStatus && <Text type="danger">Bad status {mode}</Text>}
+        {showCard && <Card hoverable style={{ width: this.props.readWidth }}
+          cover={<img alt="example" src={getImageUrl(data.imageId)} />}
           actions={[
             <Text type="danger"><DeleteOutlined type="danger" key="delete" onClick={() => this.delete()} /></Text>,
             <EditOutlined key="edit" onClick={() => this.changeMode('edit')} />,
@@ -99,7 +116,7 @@ export class ImageCardEditor extends React.Component {
         >
           <Meta title={data.title} description={data.description} />
         </Card>}
-        {showEdit && <EditModeContainer>
+        {showEdit && <EditModeContainer style={{ width: this.props.editWidth }}>
           {loading ?
             <LoadingOutlined style={{ fontSize: '5rem' }} /> :
             <Form style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
@@ -115,9 +132,9 @@ export class ImageCardEditor extends React.Component {
               })}
               <Form.Item>
                 <FormButtonStyled htmlType="submit" type="primary" block>
-                  Submit
+                  Save
             </FormButtonStyled>
-                <FormButtonStyled htmlType="button" block onClick={() => this.changeMode('read')}>
+                <FormButtonStyled htmlType="button" type="text" block onClick={() => this.changeMode('read')}>
                   Cancel
             </FormButtonStyled>
               </Form.Item>

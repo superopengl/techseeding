@@ -7,6 +7,7 @@ import ImageUploader from 'components/ImageUploader/ImageUploader'
 import ImageCardEditor from 'components/ImageCardEditor/ImageCardEditor';
 import { GalleryDef } from 'formDefs/GalleryDef';
 import GalleryCardEditor from 'components/GalleryCardEditor/GalleryCardEditor';
+import PosterAdminGrid from 'components/PosterAdminGrid/PosterAdminGrid';
 const { TabPane } = Tabs;
 
 const ContainerStyled = styled.div`
@@ -22,7 +23,7 @@ const BackdoorPage = () => (
   <ContainerStyled>
     <Tabs defaultActiveKey="1" onChange={callback}>
       <TabPane tab="Poster" key="poster">
-        <ImageCardAdminTable></ImageCardAdminTable>
+        <PosterAdminGrid></PosterAdminGrid>
       </TabPane>
       <TabPane tab="Business" key="business">
         Content of Tab Pane 2
@@ -35,7 +36,6 @@ const BackdoorPage = () => (
     </TabPane>
     </Tabs>
   </ContainerStyled>
-  <GalleryCardEditor ></GalleryCardEditor>
   </div>
 );
 

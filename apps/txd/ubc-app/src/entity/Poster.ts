@@ -7,10 +7,10 @@ export class Poster {
     id: string;
 
     @Column({ default: new Date() })
-    createdAt: Date;
+    createdAt?: Date;
 
-    @Column()
-    createdBy: string;
+    @Column({default: 'system'})
+    createdBy?: string;
 
     @Column({ nullable: true })
     title?: string;
@@ -19,11 +19,10 @@ export class Poster {
     description?: string;
 
     @Column({ nullable: true })
-    ordinal: number;
+    ordinal?: number;
 
-    @OneToOne(() => Image, {cascade: true})
-    @JoinColumn()
-    image: Image;
+    @Column({ type: 'uuid' })
+    imageId: string;
 }
 
 

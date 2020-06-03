@@ -6,9 +6,9 @@ import { assert } from '../utils';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function getImage(req, res) {
-  const { imageId } = req.params;
+  const { id } = req.params;
   const repo = getRepository(Image);
-  const image = repo.findOne(imageId);
+  const image = repo.findOne(id);
   assert(image, 404);
   res.json(image);
 }
@@ -58,11 +58,11 @@ export async function uploadImage(req, res) {
   assert(file, 404, 'No file uploaded');
   const { name, data, mimetype, md5 } = file;
 
-  const { imageId } = req.params;
-  const location = await uploadToS3(imageId, data);
+  const { id } = req.params;
+  const location = await uploadToS3(id, data);
 
   const image: Image = {
-    id: imageId,
+    id,
     fileName: name,
     mime: mimetype,
     location,
