@@ -5,6 +5,9 @@ import PosterAdminGrid from 'components/grids/PosterAdminGrid';
 import GalleryAdminGrid from 'components/grids/GalleryAdminGrid';
 import BusinessAdminGrid from 'components/grids/BusinessAdminGrid';
 import EventAdminGrid from 'components/grids/EventAdminGrid';
+import { Typography } from 'antd';
+
+const { Title } = Typography;
 const { TabPane } = Tabs;
 
 const ContainerStyled = styled.div`
@@ -18,6 +21,7 @@ function callback(key) {
 const BackdoorPage = () => (
   <div>
     <ContainerStyled>
+      <Title>Admin Management Page</Title>
       <Tabs defaultActiveKey="1" onChange={callback}>
         <TabPane tab="Poster" key="poster">
           <PosterAdminGrid />

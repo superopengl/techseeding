@@ -10,6 +10,7 @@ export const PosterAdminGrid = () => (
     onLoadList={listPoster}
     onDelete={deletePoster}
     cardEditorComponent={PosterForm}
+    cardsPerRow={2}
   />
 );
 

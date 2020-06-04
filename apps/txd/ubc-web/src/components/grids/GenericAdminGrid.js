@@ -5,7 +5,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
-import { Badge, Modal, Popconfirm } from 'antd';
+import { Badge, Modal, Popconfirm, Tag } from 'antd';
 import { getImageUrl } from 'util/getImageUrl';
 import styled from 'styled-components';
 
@@ -13,6 +13,8 @@ const { Meta } = Card;
 
 const BadgeStyled = styled(Badge)`
 margin-right: 0.5rem;
+position: relative;
+top: -3px;
 & .ant-badge-count {
   color: #fff;
   background-color: #173875;
@@ -92,9 +94,8 @@ export class GenericAdminGrid extends React.Component {
 
   render() {
     const { list, editModalVisible, targetId } = this.state;
-    // if (!list) {
-    //   return <LoadingOutlined style={{ fontSize: '5rem' }} />
-    // }
+    const { cardsPerRow } = this.props;
+    const span = 24 / cardsPerRow;
 
     const CardEditorComponent = this.props.cardEditorComponent;
 
@@ -103,14 +104,14 @@ export class GenericAdminGrid extends React.Component {
         {/* <em>targetId = {targetId}</em> */}
         <Row gutter={20} style={{ paddingBottom: 20 }}>
           {list && list.map((item, i) => (
-            <Col key={i} span={8}>
+            <Col key={i} span={span}>
               <CardStyled hoverable
-                cover={<img alt="example" src={getImageUrl(item.imageId)} style={{padding: '1px'}} />}
+                cover={<img alt="example" src={getImageUrl(item.imageId)} style={{ padding: '1px' }} />}
                 actions={[
                   <Popconfirm
                     title={`Are you sure delete this ${this.props.name}?`}
                     onConfirm={() => this.delete(item.id)}
-                    okButtonProps={{danger: true}}
+                    okButtonProps={{ danger: true }}
                     okText="Yes, delete!"
                     cancelText="No, cancel"
                   >
@@ -122,14 +123,14 @@ export class GenericAdminGrid extends React.Component {
 
                 <Meta title={
                   <div>
-                    {item.ordinal && <BadgeStyled count={item.ordinal} showZero={true} />}
+                    {item.ordinal !== undefined && <BadgeStyled count={item.ordinal} showZero={true} />}
                     {item.title}
                   </div>}
                   description={item.description} />
               </CardStyled>
             </Col>
           ))}
-          <Col span={8}>
+          <Col span={span}>
             <Card hoverable onClick={() => this.add()}>
               <PlusOutlined style={{ fontSize: '5rem', margin: 'auto', width: '100%' }} />
             </Card>
@@ -160,8 +161,11 @@ GenericAdminGrid.propTypes = {
   ]).isRequired,
   onLoadList: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  cardsPerRow: PropTypes.number.isRequired,
 };
 
-GenericAdminGrid.defaultProps = {};
+GenericAdminGrid.defaultProps = {
+  cardsPerRow: 4
+};
 
 export default GenericAdminGrid;

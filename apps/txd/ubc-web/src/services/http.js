@@ -24,7 +24,7 @@ async function request(method, path, queryParams, body) {
 
     return response.data;
   } catch (e) {
-    message.error(e.message, 10);
+    message.error({ content: e.message, key: e.message, duration: 10 });
   }
 }
 

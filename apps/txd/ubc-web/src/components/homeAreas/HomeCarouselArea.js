@@ -9,7 +9,8 @@ import {
   isTablet,
   MobileView,
   isBrowser,
-  isMobile
+  isMobile,
+  isMobileOnly
 } from "react-device-detect";
 
 const ImgStyled = styled.div`
@@ -18,7 +19,7 @@ background-size: contain;
 background-position: center;
 width: 100%;
 overflow: hidden;
-height: 600px;
+// height: 600px;
 box-shadow: inset 0 -10px 10px -10px #888888;
 
 `
@@ -39,7 +40,6 @@ color: #fff;
 
 const ContainerStyled = styled.div`
 border-bottom: 1px solid #f0f0f0;
-height: 600px;
 `;
 
 
@@ -60,7 +60,6 @@ const CarouselRow = styled(Row)`
 background-image: url("images/background.png");
 background-repeat: repeat;
 background-size: 30%;
-height: 600px;
 `;
 
 class HomeCarouselArea extends React.Component {
@@ -98,16 +97,29 @@ class HomeCarouselArea extends React.Component {
     this.carousel.goTo(i);
   }
 
+  get posterHeight() {
+    switch(true) {
+      case isMobileOnly:
+        return 200;
+      case isTablet:
+        return 400
+      case isBrowser: 
+        return 600
+      default:
+        return 600;
+    }
+  }
+
   render() {
     const { list } = this.state;
     return (
       <ContainerStyled gutter={0} style={{ position: 'relative' }}>
-        <CarouselRow>
+        <CarouselRow style={{height: this.posterHeight}}>
           <Col span={24}>
             <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
               {list && list.map((f, i) => (
                 <div key={i}>
-                  <ImgStyled style={{ backgroundImage: `url("${getImageUrl(f.imageId)}")` }}>
+                  <ImgStyled style={{height: this.posterHeight, backgroundImage: `url("${getImageUrl(f.imageId)}")` }}>
                   </ImgStyled>
                 </div>
               ))}
