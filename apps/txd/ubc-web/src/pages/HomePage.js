@@ -30,25 +30,25 @@ const HomePage = () => (
     <ContentStyled>
       <section id="home"><HomeCarouselArea></HomeCarouselArea></section>
       <section id="business">
-        <HomeBusinessArea title="Top Business" bgColor="#ffffff" group="top" colNum={4}></HomeBusinessArea>
+        <HomeBusinessArea title="Top Business" bgColor="#ffffff" group="top"></HomeBusinessArea>
       </section>
       <section id="business">
-        <HomeBusinessArea title="New Business" bgColor="#f5f5f5" group="new" colNum={4}></HomeBusinessArea>
+        <HomeBusinessArea title="New Business" bgColor="#f5f5f5" group="new"></HomeBusinessArea>
       </section>
       <section id="business">
-        <HomeBusinessArea title="Restaurant" bgColor="#ffffff" group="restaurant" colNum={4}></HomeBusinessArea>
+        <HomeBusinessArea title="Restaurant" bgColor="#ffffff" group="restaurant"></HomeBusinessArea>
       </section>
       <section id="business">
-        <HomeBusinessArea title="Life" bgColor="#f5f5f5" group="life" colNum={4}></HomeBusinessArea>
+        <HomeBusinessArea title="Life" bgColor="#f5f5f5" group="life"></HomeBusinessArea>
       </section>
       <section id="business">
-        <HomeBusinessArea title="Auto" bgColor="#ffffff" group="auto" colNum={4}></HomeBusinessArea>
+        <HomeBusinessArea title="Auto" bgColor="#ffffff" group="auto"></HomeBusinessArea>
       </section>
       <section id="events">
-        <HomeEventArea title="Upcoming Events" bgColor="#f5f5f5" colNum={4}></HomeEventArea>
+        <HomeEventArea title="Upcoming Events" bgColor="#f5f5f5"></HomeEventArea>
       </section>
       <section id="gallery">
-        <HomeGalleryArea title="Gallery" bgColor="#ffffff" colNum={4}></HomeGalleryArea>
+        <HomeGalleryArea title="Gallery" bgColor="#ffffff"></HomeGalleryArea>
       </section>
       {/* <section id="about"><HomeAboutArea bgColor="#ffffff" row={2}></HomeAboutArea></section> */}
       {/* <section id="aboutus"><HomeFeatureArea  bgColor="#f5f5f5"></HomeFeatureArea></section> */}

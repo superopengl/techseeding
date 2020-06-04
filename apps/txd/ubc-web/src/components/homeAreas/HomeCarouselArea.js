@@ -4,6 +4,13 @@ import styled from 'styled-components';
 import { List } from 'antd';
 import { listPoster } from 'services/posterService';
 import { getImageUrl } from 'util/getImageUrl';
+import {
+  BrowserView,
+  isTablet,
+  MobileView,
+  isBrowser,
+  isMobile
+} from "react-device-detect";
 
 const ImgStyled = styled.div`
 background-repeat: no-repeat;
@@ -124,16 +131,18 @@ class HomeCarouselArea extends React.Component {
         </SearchRowContainer> */}
         {/* <Row style={{ position: 'absolute', right: 0, width: '100%', margin: '0 auto 0 auto' }}> */}
         {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
-        {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
-          <List
-            size="large"
-            // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
-            // footer={<div>Footer</div>}
-            // bordered
-            dataSource={list}
-            renderItem={(item, i) => <ItemStyled onClick={() => this.goTo(i)}>{item.title}</ItemStyled>}
-          />
-        </ListContainer>}
+        <BrowserView>
+          {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
+            <List
+              size="large"
+              // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
+              // footer={<div>Footer</div>}
+              // bordered
+              dataSource={list}
+              renderItem={(item, i) => <ItemStyled onClick={() => this.goTo(i)}>{item.title}</ItemStyled>}
+            />
+          </ListContainer>}
+        </BrowserView>
         {/* </div> */}
         {/* </Row> */}
         {/* <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>

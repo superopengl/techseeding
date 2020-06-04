@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row, Col, Button } from 'antd';
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
+import Carousel from 'react-multi-carousel';
+import 'react-multi-carousel/lib/styles.css';
 
 const Title = styled.h1`
   font-size: 2rem;
@@ -48,6 +50,26 @@ width: 100%;
 max-width: 1024px;
 `;
 
+const responsive = {
+  superLargeDesktop: {
+    // the naming can be any, depends on you.
+    breakpoint: { max: 4000, min: 3000 },
+    items: 6
+  },
+  desktop: {
+    breakpoint: { max: 3000, min: 1024 },
+    items: 4
+  },
+  tablet: {
+    breakpoint: { max: 1024, min: 464 },
+    items: 3
+  },
+  mobile: {
+    breakpoint: { max: 464, min: 0 },
+    items: 1
+  }
+};
+
 export class HomeRowArea extends React.Component {
   constructor(props) {
     super(props);
@@ -63,32 +85,31 @@ export class HomeRowArea extends React.Component {
     })
   }
 
-  renderChildComponent = (child, index) => {
-    const { colNum } = this.props;
-    const { collapsed } = this.state;
-    const colSpan = 24 / colNum;
-    return collapsed && index >= colNum ? null : <Col span={colSpan}>{child}</Col>
-  }
-
   render() {
-    const { title, bgColor, children, colNum } = this.props;
-    const totalRows = Math.ceil(children.length / colNum);
+    const { title, bgColor, children, deviceType } = this.props;
 
     return (
       <Container style={{ backgroundColor: bgColor || '#fff' }}>
         <InnerContainer>
-          {/* <Col span={24}>
-          {this.props.title && <Title>{this.props.title}</Title>}
-          <div>{this.props.children}</div>
-        </Col> */}
-          {title && <CenterRowStyled><Title>{title}</Title></CenterRowStyled>}
+          <Col span={24}>
+            {title && <Title>{title}</Title>}
+          </Col>
+          {/* {title && <CenterRowStyled><Title>{title}</Title></CenterRowStyled>}
           <CardRowStyled>
             {React.Children.map(children, this.renderChildComponent)}
           </CardRowStyled>
           {totalRows > 1 && <CenterRowStyled style={{ padding: 0 }}>
             {this.state.collapsed && <ExpandButton icon={<DownOutlined />} type="link" onClick={() => this.toggle(false)}/>}
             {!this.state.collapsed && <ExpandButton icon={<UpOutlined />} type="link" onClick={() => this.toggle(true)}/>}
-          </CenterRowStyled>}
+          </CenterRowStyled>} */}
+
+          <Carousel responsive={responsive}
+            swipeable={true}
+            removeArrowOnDeviceType={["tablet", "mobile"]}
+            deviceType={deviceType}
+          >
+            {children}
+          </Carousel>
         </InnerContainer>
       </Container>
 
@@ -99,11 +120,9 @@ export class HomeRowArea extends React.Component {
 HomeRowArea.propTypes = {
   title: PropTypes.string,
   bgColor: PropTypes.string,
-  colNum: PropTypes.number.isRequired
 };
 
 HomeRowArea.defaultProps = {
-  colNum: 4
 };
 
 export default HomeRowArea;

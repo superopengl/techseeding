@@ -16,7 +16,9 @@
     "moment-random": "^1.0.5",
     "react": "^16.13.1",
     "react-anchor-link-smooth-scroll": "^1.0.12",
+    "react-device-detect": "^1.12.1",
     "react-dom": "^16.13.1",
+    "react-multi-carousel": "^2.5.5",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "styled-components": "^5.1.0",
@@ -57,9 +59,9 @@
     "cross-env": "^7.0.2",
     "generate-react-cli": "^5.0.0",
     "less-loader": "^6.1.0",
-    "prop-types": "^15.7.2",
     "nodemon": "^2.0.4",
-    "npm-watch": "^0.6.0"
+    "npm-watch": "^0.6.0",
+    "prop-types": "^15.7.2"
   },
   "watch": {
     "build": {
