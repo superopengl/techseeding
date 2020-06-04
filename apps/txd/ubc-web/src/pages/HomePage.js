@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 // import 'App.css';
-import { Layout, Card, Select } from 'antd';
+import { Layout } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeCarouselArea from 'components/homeAreas/HomeCarouselArea';

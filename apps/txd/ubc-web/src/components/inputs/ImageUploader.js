@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Card, Divider } from 'antd';
-import { Upload, message } from 'antd';
+import { Upload } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import * as mineFormat from 'mime-format';
@@ -18,7 +17,6 @@ const UploadStyled = styled(Upload)`
   float: none;
 }
 `
-const { Meta } = Card;
 
 export class ImageUploader extends React.Component {
 
@@ -41,7 +39,7 @@ export class ImageUploader extends React.Component {
   }
 
   getBase64 = async (img) => {
-    return new Promise((res, rej) => {
+    return new Promise((res) => {
       const reader = new FileReader();
       reader.addEventListener('load', () => res(reader.result));
       reader.readAsDataURL(img);
@@ -93,14 +91,17 @@ export class ImageUploader extends React.Component {
           onChange={this.handleChange}
         // customRequest={this.onRequest}
         >
-          {imageUrl ? <img src={imageUrl} alt="picture" style={{ width: '100%' }} /> : uploadButton}
+          {imageUrl ? <img src={imageUrl} alt="" style={{ width: '100%' }} /> : uploadButton}
         </UploadStyled>
       </div >
     );
   }
 }
 
-ImageUploader.propTypes = {};
+ImageUploader.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired
+};
 
 ImageUploader.defaultProps = {};
 

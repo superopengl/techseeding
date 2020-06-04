@@ -1,7 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Carousel, Row, Col } from 'antd';
+import { Row } from 'antd';
 
 const Container = styled(Row)`
 background-image: url("logo.jpg");

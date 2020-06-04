@@ -1,12 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
-import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
-import PoweredByLogo from './PoweredByLogo';
+import { Layout, Menu } from 'antd';
 import AnchorLink from 'react-anchor-link-smooth-scroll'
-const { Header, Content, Footer } = Layout;
-const { Search } = Input;
+const { Header } = Layout;
 
 const HeaderStyled = styled(Header)`
 position: fixed;

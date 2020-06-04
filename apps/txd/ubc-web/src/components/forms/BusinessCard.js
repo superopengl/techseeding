@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
+import { Card } from 'antd';
 import styled from 'styled-components';
-import { FacebookFilled, GlobalOutlined, TwitterOutlined, AudioOutlined } from '@ant-design/icons';
 import { getImageUrl } from 'util/getImageUrl';
 const { Meta } = Card;
 
@@ -33,26 +32,33 @@ border-bottom: 1px solid #f0f0f0;
 `;
 
 export class BusinessCard extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
 
   render() {
-    const {title, description, imageId, website} = this.props.data;
+    const { title, description, imageId, website } = this.props.data;
 
     return (
       <CardStyled
         hoverable
-        cover={<CoverImageStyled style={{backgroundImage: `url("${getImageUrl(imageId)}")`}} />}
+        cover={<CoverImageStyled style={{ backgroundImage: `url("${getImageUrl(imageId)}")` }} />}
       >
         <MetaStyled title={title} description={description} />
-        {website && <div style={{marginTop: '1rem'}}><a target="_blank" href={website}>Website</a></div>}
+        {website && <div style={{ marginTop: '1rem' }}>
+          <a target="_blank" rel="noopener noreferrer" href={website}>Website</a>
+        </div>}
       </CardStyled>
     );
   }
 }
 
-BusinessCard.propTypes = {};
+BusinessCard.propTypes = {
+  data: PropTypes.shape({
+    title: PropTypes.string,
+    description: PropTypes.string,
+    website: PropTypes.string,
+    imageId: PropTypes.string.isRequired
+  })
+};
 
 BusinessCard.defaultProps = {};
 

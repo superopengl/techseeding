@@ -1,12 +1,10 @@
 import React from 'react';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { GalleryDef } from 'formDefs/GalleryDef';
+import { GalleryDef } from 'components/forms/formDefs/GalleryDef';
 import { getGallery, saveGallery } from 'services/galleryService';
 
 export class GalleryForm extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
 
   handleSave = async (data) => {
     await saveGallery(data);

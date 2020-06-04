@@ -1,5 +1,3 @@
-import { string, number } from "prop-types";
-
 export const EventDef = [
   {
     label: 'Picture',

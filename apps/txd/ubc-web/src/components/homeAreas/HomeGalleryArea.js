@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { listGallery } from 'services/galleryService';
 import styled from 'styled-components';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
+import { Row, Col } from 'antd';
 import HomeRowArea from "components/homeAreas/HomeRowArea";
 import { getImageUrl } from 'util/getImageUrl';
 
@@ -36,7 +36,7 @@ export class HomeGalleryArea extends React.Component {
   render() {
     const {list} = this.state;
     return (
-      <HomeRowArea title="Gallery" bgColor={this.props.bgColor}>
+      <HomeRowArea {...this.props} title="Gallery">
         <RowStyled>
           {list && list.map((item, i) => (
             <Col key={i} span={6}>
@@ -50,7 +50,9 @@ export class HomeGalleryArea extends React.Component {
   }
 }
 
-HomeGalleryArea.propTypes = {};
+HomeGalleryArea.propTypes = {
+  bgColor: PropTypes.string
+};
 
 HomeGalleryArea.defaultProps = {};
 

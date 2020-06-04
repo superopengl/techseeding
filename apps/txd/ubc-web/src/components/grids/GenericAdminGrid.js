@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Row, Col } from 'antd';
-import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Card } from 'antd';
-import { Typography, Badge, Modal, Popconfirm } from 'antd';
+import { Badge, Modal, Popconfirm } from 'antd';
 import { getImageUrl } from 'util/getImageUrl';
 import styled from 'styled-components';
 
@@ -103,8 +104,8 @@ export class GenericAdminGrid extends React.Component {
         <Row gutter={20} style={{ paddingBottom: 20 }}>
           {list && list.map((item, i) => (
             <Col key={i} span={8}>
-              <CardStyled hoverable style={{ width: this.props.readWidth }}
-                cover={<img alt="example" src={getImageUrl(item.imageId)} />}
+              <CardStyled hoverable
+                cover={<img alt="example" src={getImageUrl(item.imageId)} style={{padding: '1px'}} />}
                 actions={[
                   <Popconfirm
                     title={`Are you sure delete this ${this.props.name}?`}
@@ -151,7 +152,15 @@ export class GenericAdminGrid extends React.Component {
   }
 }
 
-GenericAdminGrid.propTypes = {};
+GenericAdminGrid.propTypes = {
+  name: PropTypes.string.isRequired,
+  cardEditorComponent: PropTypes.oneOfType([
+    PropTypes.instanceOf(React.Component),
+    PropTypes.func
+  ]).isRequired,
+  onLoadList: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
 
 GenericAdminGrid.defaultProps = {};
 

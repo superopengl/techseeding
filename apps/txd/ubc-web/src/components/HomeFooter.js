@@ -1,10 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button, Divider } from 'antd';
+import { Layout, Row, Col, Divider } from 'antd';
 import styled from 'styled-components';
 import { MailOutlined, PhoneOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icons';
 import { TechseedingLogo } from "components/TechseedingLogo";
-const { Header, Content, Footer } = Layout;
+const { Footer } = Layout;
 
 
 const FooterStyled = styled(Footer)`

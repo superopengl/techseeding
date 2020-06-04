@@ -1,12 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { BusinessDef } from 'formDefs/BusinessDef';
+import { BusinessDef } from 'components/forms/formDefs/BusinessDef';
 import { getBusiness, saveBusiness } from 'services/businessService';
 
 export class BusinessForm extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
 
   handleSave = async (data) => {
     await saveBusiness(data);
@@ -26,7 +25,11 @@ export class BusinessForm extends React.Component {
   }
 };
 
-BusinessForm.propTypes = {};
+BusinessForm.propTypes = {
+  id: PropTypes.string,
+  onFinish: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
+};
 
 BusinessForm.defaultProps = {};
 

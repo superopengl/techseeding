@@ -1,12 +1,10 @@
 import React from 'react';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { PosterDef } from 'formDefs/PosterDef';
+import { PosterDef } from 'components/forms/formDefs/PosterDef';
 import { getPoster, savePoster } from 'services/posterService';
 
 export class PosterForm extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
 
   handleSave = async (data) => {
     await savePoster(data);

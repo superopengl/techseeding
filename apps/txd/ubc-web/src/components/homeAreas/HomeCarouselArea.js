@@ -1,13 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import PoweredByLogo from '../PoweredByLogo';
 import { Carousel, Row, Col } from 'antd';
 import styled from 'styled-components';
-import { UserOutlined, UserAddOutlined, SmileOutlined, AudioOutlined } from '@ant-design/icons';
-import { List, Typography, Divider, Input } from 'antd';
+import { List } from 'antd';
 import { listPoster } from 'services/posterService';
 import { getImageUrl } from 'util/getImageUrl';
-const { Search } = Input;
 
 const ImgStyled = styled.div`
 background-repeat: no-repeat;
@@ -37,13 +33,6 @@ border-bottom: 1px solid #f0f0f0;
 height: 600px;
 `;
 
-const SearchRowContainer = styled(Row)`
-background-color:rgba(0, 0, 0, 0);
-position: relative;
-bottom: 500px;
-max-width: 800px;
-margin: 0 auto 0 auto;
-`;
 
 const ItemStyled = styled(List.Item)`
 color: #f0f0f0;

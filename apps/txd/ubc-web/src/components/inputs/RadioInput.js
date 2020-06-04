@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import { Radio } from 'antd';
 
 export class RadioInput extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     const { value, onChange, options } = this.props;
@@ -19,7 +16,16 @@ export class RadioInput extends React.Component {
   }
 }
 
-RadioInput.propTypes = {};
+RadioInput.propTypes = {
+  options: PropTypes.arrayOf(
+    PropTypes.exact({
+      label: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired
+    })
+  ),
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired
+};
 
 RadioInput.defaultProps = {};
 

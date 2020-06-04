@@ -1,24 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImageUploader from 'components/inputs/ImageUploader';
-import { v4 as uuidv4 } from 'uuid';
-import { Divider, Form, Input, InputNumber, Button } from 'antd';
+import { Form, Input, InputNumber, Button } from 'antd';
 import styled from 'styled-components';
 import {
-  HomeOutlined,
-  SettingFilled,
-  SmileOutlined,
-  SyncOutlined,
   LoadingOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
-import { EditOutlined, DeleteOutlined, WarningOutlined } from '@ant-design/icons';
-import { Card } from 'antd';
-import { Typography, Space } from 'antd';
-import { getImageUrl } from 'util/getImageUrl';
 import RadioInput from 'components/inputs/RadioInput';
-const { Meta } = Card;
-const { Text, Link } = Typography;
 
 const FormButtonStyled = styled(Button)`
 margin-bottom: 1rem;
@@ -118,7 +107,11 @@ export class ImageCardForm extends React.Component {
   }
 }
 
-ImageCardForm.propTypes = {};
+ImageCardForm.propTypes = {
+  id: PropTypes.string.isRequired,
+  onFetch: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+};
 
 ImageCardForm.defaultProps = {};
 

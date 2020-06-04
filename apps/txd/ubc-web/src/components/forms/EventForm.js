@@ -1,12 +1,10 @@
 import React from 'react';
 import ImageCardForm from 'components/forms/ImageCardForm';
-import { EventDef } from 'formDefs/EventDef';
+import { EventDef } from 'components/forms/formDefs/EventDef';
 import { getEvent, saveEvent } from 'services/eventService';
 
 export class EventForm extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+
 
   handleSave = async (data) => {
     await saveEvent(data);

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Layout, Menu, Row, Col, Card, Input, Select, Button } from 'antd';
+import { Row, Col } from 'antd';
 
 const Title = styled.h1`
   font-size: 2rem;
@@ -33,7 +33,10 @@ export class HomeRowArea extends React.Component {
   }
 }
 
-HomeRowArea.propTypes = {};
+HomeRowArea.propTypes = {
+  title: PropTypes.string,
+  bgColor: PropTypes.string
+};
 
 HomeRowArea.defaultProps = {};
 
