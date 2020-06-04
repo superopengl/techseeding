@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import ImageUploader from 'components/inputs/ImageUploader';
 import { Form, Input, InputNumber, Button } from 'antd';
 import styled from 'styled-components';
-import {
-  LoadingOutlined,
-} from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import RadioInput from 'components/inputs/RadioInput';
 
@@ -88,18 +86,18 @@ export class ImageCardForm extends React.Component {
                   : type === 'number' ? <InputNumber {...inputProps} />
                     : type === 'textarea' ? <Input.TextArea {...inputProps} />
                       : type === 'enum' ? <RadioInput {...inputProps} />
-                      : <Input {...inputProps} />
+                        : <Input {...inputProps} />
                 }
               </Form.Item>
-        })}
-        <Form.Item>
-          <FormButtonStyled htmlType="submit" type="primary" block>
-            Save
+            })}
+            <Form.Item>
+              <FormButtonStyled htmlType="submit" type="primary" block>
+                Save
             </FormButtonStyled>
-          <FormButtonStyled htmlType="button" type="text" block onClick={onCancel}>
-            Cancel
+              <FormButtonStyled htmlType="button" type="text" block onClick={onCancel}>
+                Cancel
             </FormButtonStyled>
-        </Form.Item>
+            </Form.Item>
           </Form>
         }
       </Container>

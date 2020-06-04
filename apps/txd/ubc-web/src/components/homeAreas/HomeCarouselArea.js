@@ -12,6 +12,8 @@ background-position: center;
 width: 100%;
 overflow: hidden;
 height: 600px;
+box-shadow: inset 0 -10px 10px -10px #888888;
+
 `
 
 const ListContainer = styled.div`
@@ -63,7 +65,7 @@ class HomeCarouselArea extends React.Component {
     this.state = {};
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.loadList();
   }
 
@@ -90,9 +92,9 @@ class HomeCarouselArea extends React.Component {
   }
 
   render() {
-    const {list} = this.state;
+    const { list } = this.state;
     return (
-      <ContainerStyled gutter={0} style={{position: 'relative'}}>
+      <ContainerStyled gutter={0} style={{ position: 'relative' }}>
         <CarouselRow>
           <Col span={24}>
             <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
@@ -121,18 +123,18 @@ class HomeCarouselArea extends React.Component {
           />
         </SearchRowContainer> */}
         {/* <Row style={{ position: 'absolute', right: 0, width: '100%', margin: '0 auto 0 auto' }}> */}
-          {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
-            {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
-              <List
-                size="large"
-                // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
-                // footer={<div>Footer</div>}
-                // bordered
-                dataSource={list}
-                renderItem={(item, i) => <ItemStyled onClick={()=>this.goTo(i)}>{item.title}</ItemStyled>}
-              />
-            </ListContainer>}
-          {/* </div> */}
+        {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
+        {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
+          <List
+            size="large"
+            // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
+            // footer={<div>Footer</div>}
+            // bordered
+            dataSource={list}
+            renderItem={(item, i) => <ItemStyled onClick={() => this.goTo(i)}>{item.title}</ItemStyled>}
+          />
+        </ListContainer>}
+        {/* </div> */}
         {/* </Row> */}
         {/* <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>
           <PoweredByLogo></PoweredByLogo>

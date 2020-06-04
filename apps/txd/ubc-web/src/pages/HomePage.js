@@ -29,13 +29,27 @@ const HomePage = () => (
     {/* <BarStyled></BarStyled> */}
     <ContentStyled>
       <section id="home"><HomeCarouselArea></HomeCarouselArea></section>
-      <section id="business"><HomeBusinessArea title="Top Business" bgColor="#ffffff" group="top" row={1}></HomeBusinessArea></section>
-      <section id="business"><HomeBusinessArea title="New Business" bgColor="#f5f5f5" group="new" row={1}></HomeBusinessArea></section>
-      <section id="business"><HomeBusinessArea title="Restaurant" bgColor="#ffffff" group="restaurant" row={1}></HomeBusinessArea></section>
-      <section id="business"><HomeBusinessArea title="Life" bgColor="#f5f5f5" group="life" row={1}></HomeBusinessArea></section>
-      <section id="business"><HomeBusinessArea title="Auto" bgColor="#ffffff" group="auto" row={1}></HomeBusinessArea></section>
-      <section id="events"><HomeEventArea title="Upcoming Events" bgColor="#f5f5f5" row={1}></HomeEventArea></section>
-      <section id="gallery"><HomeGalleryArea title="Gallery" bgColor="#ffffff" row={2}></HomeGalleryArea></section>
+      <section id="business">
+        <HomeBusinessArea title="Top Business" bgColor="#ffffff" group="top" colNum={4}></HomeBusinessArea>
+      </section>
+      <section id="business">
+        <HomeBusinessArea title="New Business" bgColor="#f5f5f5" group="new" colNum={4}></HomeBusinessArea>
+      </section>
+      <section id="business">
+        <HomeBusinessArea title="Restaurant" bgColor="#ffffff" group="restaurant" colNum={4}></HomeBusinessArea>
+      </section>
+      <section id="business">
+        <HomeBusinessArea title="Life" bgColor="#f5f5f5" group="life" colNum={4}></HomeBusinessArea>
+      </section>
+      <section id="business">
+        <HomeBusinessArea title="Auto" bgColor="#ffffff" group="auto" colNum={4}></HomeBusinessArea>
+      </section>
+      <section id="events">
+        <HomeEventArea title="Upcoming Events" bgColor="#f5f5f5" colNum={4}></HomeEventArea>
+      </section>
+      <section id="gallery">
+        <HomeGalleryArea title="Gallery" bgColor="#ffffff" colNum={4}></HomeGalleryArea>
+      </section>
       {/* <section id="about"><HomeAboutArea bgColor="#ffffff" row={2}></HomeAboutArea></section> */}
       {/* <section id="aboutus"><HomeFeatureArea  bgColor="#f5f5f5"></HomeFeatureArea></section> */}
       {/* <HomeMessageArea></HomeMessageArea> */}

@@ -5,11 +5,7 @@ import styled from 'styled-components';
 import { Row, Col } from 'antd';
 import HomeRowArea from "components/homeAreas/HomeRowArea";
 import { getImageUrl } from 'util/getImageUrl';
-
-const RowStyled = styled(Row)`
-  max-width: 1024px;
-  margin: 0 auto 0 auto;
-`;
+import GalleryCard from 'components/forms/GalleryCard';
 
 const ImageStyled = styled.img`
   width: 100%;
@@ -19,40 +15,30 @@ const ImageStyled = styled.img`
 export class HomeGalleryArea extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
-  }
-  
-  componentDidMount(){
-    this.loadList();
+    this.state = {
+      list: undefined
+    }
   }
 
-  async loadList(){
+  async componentDidMount() {
     const list = await listGallery();
     this.setState({
       list
-    })
+    });
   }
 
   render() {
-    const {list} = this.state;
+    const { list } = this.state;
+    if (!list || !list.length) return null;
     return (
-      <HomeRowArea {...this.props} title="Gallery">
-        <RowStyled>
-          {list && list.map((item, i) => (
-            <Col key={i} span={6}>
-              <ImageStyled src={getImageUrl(item.imageId)} alt={item.title}>
-              </ImageStyled>
-            </Col>
-          ))}
-        </RowStyled>
+      <HomeRowArea {...this.props}>
+        {list && list.map((f, i) => <GalleryCard key={i} data={f} />)}
       </HomeRowArea>
     );
   }
 }
 
-HomeGalleryArea.propTypes = {
-  bgColor: PropTypes.string
-};
+HomeGalleryArea.propTypes = {};
 
 HomeGalleryArea.defaultProps = {};
 

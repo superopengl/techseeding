@@ -1,20 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Card, Typography } from 'antd';
+import { Card } from 'antd';
 import styled from 'styled-components';
 import { getImageUrl } from 'util/getImageUrl';
-import { LinkOutlined, DownOutlined } from '@ant-design/icons';
 const { Meta } = Card;
-const { Paragraph } = Typography;
+
 
 const CardStyled = styled(Card)`
   width: 240px;
-  height: 450px;
+  height: 320px;
   margin-bottom: 1rem;
   text-align: center;
 
   &:hover {
-    transform: scale(1.01);
+    transform: scale(1.02);
   }
 `;
 
@@ -32,7 +31,7 @@ const CoverImageStyled = styled.div`
 border-bottom: 1px solid #f0f0f0;
 `;
 
-export class BusinessCard extends React.Component {
+export class EventCard extends React.Component {
 
 
   render() {
@@ -43,14 +42,13 @@ export class BusinessCard extends React.Component {
         hoverable
         cover={<CoverImageStyled style={{ backgroundImage: `url("${getImageUrl(imageId)}")` }} />}
       >
-        <MetaStyled title={title} description={<Paragraph ellipsis={{ rows: 5, expandable: false}}>{description}</Paragraph>} />
-        {website && <small><a target="_blank" rel="noopener noreferrer" href={website}><LinkOutlined /> Link</a></small>}
+        <MetaStyled title={title} description={description} />
       </CardStyled>
     );
   }
 }
 
-BusinessCard.propTypes = {
+EventCard.propTypes = {
   data: PropTypes.shape({
     title: PropTypes.string,
     description: PropTypes.string,
@@ -59,6 +57,6 @@ BusinessCard.propTypes = {
   })
 };
 
-BusinessCard.defaultProps = {};
+EventCard.defaultProps = {};
 
-export default BusinessCard;
+export default EventCard;
