@@ -11,6 +11,7 @@
     "axios": "^0.19.2",
     "craco-less": "^1.16.0",
     "lodash": "^4.17.15",
+    "md5": "^2.2.1",
     "mime-format": "^2.0.0",
     "moment": "^2.25.3",
     "moment-random": "^1.0.5",

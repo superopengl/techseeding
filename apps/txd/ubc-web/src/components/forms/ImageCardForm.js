@@ -94,7 +94,7 @@ export class ImageCardForm extends React.Component {
               <FormButtonStyled htmlType="submit" type="primary" block>
                 Save
             </FormButtonStyled>
-              <FormButtonStyled htmlType="button" type="text" block onClick={onCancel}>
+              <FormButtonStyled type="link" block onClick={onCancel}>
                 Cancel
             </FormButtonStyled>
             </Form.Item>
