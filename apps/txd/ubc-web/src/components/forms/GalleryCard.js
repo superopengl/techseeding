@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Card } from 'antd';
+import { Card, Modal } from 'antd';
 import styled from 'styled-components';
+import Lightbox from 'react-image-lightbox';
 import { getImageUrl } from 'util/getImageUrl';
 const { Meta } = Card;
 
@@ -38,12 +39,33 @@ const ImageStyled = styled.img`
 
 export class GalleryCard extends React.Component {
 
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      previewing: false
+    };
+  }
+
+  togglePreview = value => {
+    this.setState({
+      previewing: !this.state.previewing
+    });
+  }
 
   render() {
     const { title, description, imageId, website } = this.props.data;
 
+    const imageUrl = getImageUrl(imageId);
     return (
-      <CoverImageStyled style={{ backgroundImage: `url("${getImageUrl(imageId)}")` }} />
+      <div>
+        <CoverImageStyled style={{ backgroundImage: `url("${imageUrl}")` }} onClick={() => this.setState({ previewing: true })} />
+        {this.state.previewing && <Lightbox
+          mainSrc={imageUrl}
+          enableZoom={false}
+          onCloseRequest={() => this.setState({ previewing: false })}
+        />}
+      </div>
     );
   }
 }

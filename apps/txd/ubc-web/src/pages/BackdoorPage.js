@@ -46,7 +46,7 @@ export class BackdoorPage extends React.Component {
     return (
       <div>
         {!confirmVisible && <ContainerStyled>
-          <Title>Admin Management Page</Title>
+          <Title>UBC Content Management</Title>
           <Tabs defaultActiveKey="1" onChange={callback}>
             <TabPane tab="Poster" key="poster">
               <PosterAdminGrid />
@@ -63,7 +63,7 @@ export class BackdoorPage extends React.Component {
           </Tabs>
         </ContainerStyled>}
         <Modal
-          title="Input admin secret to proceed"
+          title="Administrator password"
           visible={confirmVisible}
           onOk={this.handleOk}
           onCancel={this.handleCancel}
