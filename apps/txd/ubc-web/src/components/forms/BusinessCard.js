@@ -8,14 +8,10 @@ const { Meta } = Card;
 const { Paragraph } = Typography;
 
 const CardStyled = styled(Card)`
-  width: 240px;
+  width: 100%;
   height: 450px;
   margin-bottom: 1rem;
   text-align: center;
-
-  &:hover {
-    transform: scale(1.01);
-  }
 `;
 
 const MetaStyled = styled(Meta)`
@@ -23,7 +19,7 @@ const MetaStyled = styled(Meta)`
 `;
 
 const CoverImageStyled = styled.div`
-  width: 240px;
+  width: 100%;
   height: 200px;
   overflow: hidden;
   background-repeat: no-repeat;

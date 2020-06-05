@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ImageUploader from 'components/inputs/ImageUploader';
 import { Form, Input, InputNumber, Button } from 'antd';
+import { FormInstance } from 'antd/lib/form';
 import styled from 'styled-components';
 import { LoadingOutlined } from '@ant-design/icons';
 import { message } from 'antd';
@@ -28,9 +29,11 @@ width: 100%;
 `
 
 export class ImageCardForm extends React.Component {
+  
   constructor(props) {
     super(props);
-
+    
+    this.formRef = React.createRef();
     this.state = {
       id: this.props.id,
       loading: false
@@ -64,13 +67,23 @@ export class ImageCardForm extends React.Component {
     this.setState({ loading: true });
     // Assign id if exists
     Object.assign(entity, { id: this.state.id });
+    console.log('form', entity);
     await this.props.onSave(entity);
     this.setState({ loading: false });
     message.success({ content: 'Successfully saved the picture', duration: 5 });
   }
 
+  onCancel = () => {
+    this.props.onCancel();
+    this.reset();
+  }
+
+  reset = () => {
+    this.formRef.current.resetFields();
+  }
+
   render() {
-    const { fieldDefs, onCancel } = this.props;
+    const { fieldDefs } = this.props;
     const { loading, data } = this.state;
 
     return (
@@ -78,7 +91,7 @@ export class ImageCardForm extends React.Component {
         {/* <em>this.state.id = {this.state.id}</em> */}
         {loading ?
           <LoadingOutlined style={{ fontSize: '5rem' }} /> :
-          <Form style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
+          <Form ref={this.formRef} style={{ width: '100%' }} layout="vertical" onFinish={this.onChange} initialValues={data}>
             {fieldDefs.map((fieldDef, i) => {
               const { inputProps, type, ...field } = fieldDef;
               return <Form.Item key={i} {...field}>
@@ -94,7 +107,7 @@ export class ImageCardForm extends React.Component {
               <FormButtonStyled htmlType="submit" type="primary" block>
                 Save
             </FormButtonStyled>
-              <FormButtonStyled type="link" block onClick={onCancel}>
+              <FormButtonStyled type="link" block onClick={this.onCancel}>
                 Cancel
             </FormButtonStyled>
             </Form.Item>
@@ -106,8 +119,8 @@ export class ImageCardForm extends React.Component {
 }
 
 ImageCardForm.propTypes = {
-  id: PropTypes.string.isRequired,
-  onFetch: PropTypes.func.isRequired,
+  id: PropTypes.string,
+  onFetch: PropTypes.func,
   onSave: PropTypes.func.isRequired,
 };
 

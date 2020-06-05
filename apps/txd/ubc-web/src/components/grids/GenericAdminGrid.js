@@ -26,6 +26,13 @@ const CardStyled = styled(Card)`
 margin-bottom: 20px;
 `;
 
+const spanProps = {
+  sm: 24,
+  md: 12,
+  lg: 8,
+  xl: 6,
+}
+
 export class GenericAdminGrid extends React.Component {
 
   constructor(props) {
@@ -94,8 +101,7 @@ export class GenericAdminGrid extends React.Component {
 
   render() {
     const { list, editModalVisible, targetId } = this.state;
-    const { cardsPerRow } = this.props;
-    const span = 24 / cardsPerRow;
+    const { name } = this.props;
 
     const CardEditorComponent = this.props.cardEditorComponent;
 
@@ -104,12 +110,12 @@ export class GenericAdminGrid extends React.Component {
         {/* <em>targetId = {targetId}</em> */}
         <Row gutter={20} style={{ paddingBottom: 20 }}>
           {list && list.map((item, i) => (
-            <Col key={i} span={span}>
+            <Col key={i} {...spanProps}>
               <CardStyled hoverable
                 cover={<img alt="example" src={getImageUrl(item.imageId)} style={{ padding: '1px' }} />}
                 actions={[
                   <Popconfirm
-                    title={`Are you sure delete this ${this.props.name}?`}
+                    title={`Are you sure delete this ${name}?`}
                     onConfirm={() => this.delete(item.id)}
                     okButtonProps={{ danger: true }}
                     okText="Yes, delete!"
@@ -123,30 +129,32 @@ export class GenericAdminGrid extends React.Component {
 
                 <Meta title={
                   <div>
-                    {item.ordinal !== undefined && <BadgeStyled count={item.ordinal} showZero={true} />}
-                    {item.title}
+                    <div>{item.group && <Tag>{item.group}</Tag>} {item.ordinal && <Tag>{item.ordinal}</Tag>}</div>
+                    <div>
+                      {item.title}
+                    </div>
                   </div>}
                   description={item.description} />
               </CardStyled>
             </Col>
           ))}
-          <Col span={span}>
+          <Col {...spanProps}>
             <Card hoverable onClick={() => this.add()}>
               <PlusOutlined style={{ fontSize: '5rem', margin: 'auto', width: '100%' }} />
             </Card>
           </Col>
         </Row>
         <Modal
-          title={`${targetId ? "Edit" : "New"} ${this.props.name}`}
+          title={`${targetId ? "Edit" : "New"} ${name}`}
           visible={editModalVisible}
           onOk={this.handleEditModalOk}
           onCancel={this.handleModalCancel}
           footer={null}
         >
-          <CardEditorComponent id={this.state.targetId}
+          {editModalVisible && <CardEditorComponent ref={this.modalRef} id={targetId}
             onFinish={this.handleEditModalOk}
             onCancel={this.handleModalCancel}
-          ></CardEditorComponent>
+          ></CardEditorComponent>}
         </Modal>
       </div>
     );
@@ -161,11 +169,9 @@ GenericAdminGrid.propTypes = {
   ]).isRequired,
   onLoadList: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  cardsPerRow: PropTypes.number.isRequired,
 };
 
 GenericAdminGrid.defaultProps = {
-  cardsPerRow: 4
 };
 
 export default GenericAdminGrid;

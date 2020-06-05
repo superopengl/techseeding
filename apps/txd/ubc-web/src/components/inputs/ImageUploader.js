@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Upload } from 'antd';
+import { Upload, message } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import * as mineFormat from 'mime-format';
@@ -28,14 +28,30 @@ export class ImageUploader extends React.Component {
     this.state = {
       loading: false,
       imageId,
-      postImageId: imageId || uuidv4(),
-      imageUrl: getImageUrl(imageId)
+      imageUrl: getImageUrl(imageId),
+      uploadImageId: uuidv4(),
     }
   }
 
   beforeUpload = (file) => {
+    console.log('file info', file.originFileObj);
     const isImage = mineFormat.lookup(file.type).type === 'image';
-    return isImage
+
+    if (!isImage) {
+      message.error('You can only upload image file!');
+    }
+    const isSizeOk = file.size < 20 * 1024 * 1024;
+    if (!isSizeOk) {
+      message.error('Image must be smaller than 20 MB!');
+    }
+
+    const isOk = isImage && isSizeOk;
+
+    if (isOk) {
+      // Start uploading
+      this.setState({ loading: true });
+    }
+    return isOk;
   }
 
   getBase64 = async (img) => {
@@ -47,25 +63,25 @@ export class ImageUploader extends React.Component {
   }
 
   handleChange = async info => {
-    switch (info.file.status) {
+    const { file } = info
+    switch (file.status) {
       case 'uploading':
-        this.setState({ loading: true });
         return;
       case 'done':
-        const {postImageId} = this.state;
+        const { uploadImageId } = this.state;
         // Get this url from response in real world.
-        const imageUrl = await this.getBase64(info.file.originFileObj)
+        const imageUrl = await this.getBase64(file.originFileObj)
         this.setState({
           imageUrl,
-          imageId: postImageId,
-          loading: false,
+          imageId: uploadImageId,
+          uploadImageId: uuidv4(), // Issue a new uuid for next upload
+          loading: false
         });
 
-        if (this.props.onChange) {
-          this.props.onChange(postImageId);
-        }
-        return;
+        console.log('uploadImageId', uploadImageId);
+        this.props.onChange(uploadImageId);
       default:
+        this.setState({ loading: false });
     }
   };
 
@@ -76,7 +92,7 @@ export class ImageUploader extends React.Component {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
-    const { imageUrl, postImageId } = this.state;
+    const { imageUrl, uploadImageId, loading } = this.state;
 
     return (
       <div>
@@ -86,12 +102,18 @@ export class ImageUploader extends React.Component {
           accept="image/*"
           // className="avatar-uploader"
           showUploadList={false}
-          action={`${process.env.REACT_APP_UBC_API_ENDPOINT}/image/${postImageId}`}
+          action={`${process.env.REACT_APP_UBC_API_ENDPOINT}/image/${uploadImageId}`}
           beforeUpload={this.beforeUpload}
           onChange={this.handleChange}
         // customRequest={this.onRequest}
         >
-          {imageUrl ? <img src={imageUrl} alt="" style={{ width: '100%' }} /> : uploadButton}
+          {loading ? <LoadingOutlined style={{fontSize: '3rem'}} /> :
+            imageUrl ? <img src={imageUrl} alt="" style={{ width: '100%', height: 'auto' }} /> : <div>
+              <PlusOutlined style={{fontSize: '3rem'}}/>
+              <div className="ant-upload-text">Upload</div>
+            </div>
+          }
+          {/* {imageUrl ? <img src={imageUrl} alt="" style={{ width: '100%' }} /> : uploadButton} */}
         </UploadStyled>
       </div >
     );
@@ -100,7 +122,7 @@ export class ImageUploader extends React.Component {
 
 ImageUploader.propTypes = {
   value: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 ImageUploader.defaultProps = {};

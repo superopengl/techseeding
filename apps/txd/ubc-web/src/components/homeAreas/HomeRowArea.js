@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row, Col, Button } from 'antd';
-import { DownOutlined, UpOutlined } from '@ant-design/icons';
+import { DownOutlined, UpOutlined, CenterRowStyled } from '@ant-design/icons';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
@@ -13,41 +13,27 @@ const Title = styled.h1`
   color: #383838;
 `;
 
-const CenterRowStyled = styled(Row)`
-  justify-content: center;
-  margin-bottom: 0rem;
-  width: 100%;
-  text-align: center;
-  padding: 2rem 0;
-`;
-
-const ExpandButton = styled(Button)`
-width: 100%;
-color: #e2e2e2;
-  & svg {
-    transform: scaleX(3);
-  }
-`;
-
-const CardRowStyled = styled(Row)`
-  margin-bottom: 0rem;
-  width: 100%;
-  text-align: center;
-`;
-
 const Container = styled.div`
 justify-content: center;
 margin-bottom: 0rem;
 width: 100%;
 text-align: center;
 padding: 2rem 0;
+
+& .react-multi-carousel-list {
+  padding: 12px;
+}
 `;
 
 const InnerContainer = styled.div`
 margin-left: auto;
 margin-right: auto;
 width: 100%;
-max-width: 1024px;
+max-width: 1600px;
+`;
+
+const StyledRow = styled(Row)`
+padding: 0 1rem;
 `;
 
 const responsive = {
@@ -70,7 +56,17 @@ const responsive = {
   }
 };
 
+const spanProps = {
+  xs: 24,
+  sm: 12,
+  md: 12,
+  lg: 8,
+  xl: 6,
+  xxl: 4
+}
+
 export class HomeRowArea extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -85,31 +81,43 @@ export class HomeRowArea extends React.Component {
     })
   }
 
+  renderChildComponent = (comp) => {
+    return <Col {...spanProps}>
+      {comp}
+    </Col>
+  }
+
   render() {
     const { title, bgColor, children, deviceType } = this.props;
 
     return (
       <Container style={{ backgroundColor: bgColor || '#fff' }}>
         <InnerContainer>
-          <Col span={24}>
-            {title && <Title>{title}</Title>}
-          </Col>
-          {/* {title && <CenterRowStyled><Title>{title}</Title></CenterRowStyled>}
-          <CardRowStyled>
+          <Row>
+            <Col span={24}>
+              {title && <Title>{title}</Title>}
+            </Col>
+
+          </Row>
+
+          <StyledRow gutter={16}>
+
             {React.Children.map(children, this.renderChildComponent)}
-          </CardRowStyled>
-          {totalRows > 1 && <CenterRowStyled style={{ padding: 0 }}>
-            {this.state.collapsed && <ExpandButton icon={<DownOutlined />} type="link" onClick={() => this.toggle(false)}/>}
-            {!this.state.collapsed && <ExpandButton icon={<UpOutlined />} type="link" onClick={() => this.toggle(true)}/>}
+          </StyledRow>
+
+          {/* {totalRows > 1 && <CenterRowStyled style={{ padding: 0 }}>
+            {this.state.collapsed && <ExpandButton icon={<DownOutlined />} type="link" onClick={() => this.toggle(false)} />}
+            {!this.state.collapsed && <ExpandButton icon={<UpOutlined />} type="link" onClick={() => this.toggle(true)} />}
           </CenterRowStyled>} */}
 
-          <Carousel responsive={responsive}
+          {false && <Carousel
+            responsive={responsive}
             swipeable={true}
             removeArrowOnDeviceType={["tablet", "mobile"]}
             deviceType={deviceType}
           >
             {children}
-          </Carousel>
+          </Carousel>}
         </InnerContainer>
       </Container>
 
