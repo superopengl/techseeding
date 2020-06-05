@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { List } from 'antd';
 import { listPoster } from 'services/posterService';
 import { getImageUrl } from 'util/getImageUrl';
+import { useMediaQuery } from 'react-responsive'
+import MediaQuery from 'react-responsive'
 import {
   BrowserView,
   isTablet,
@@ -98,12 +100,13 @@ class HomeCarouselArea extends React.Component {
   }
 
   get posterHeight() {
-    switch(true) {
+
+    switch (true) {
       case isMobileOnly:
         return 200;
       case isTablet:
         return 400
-      case isBrowser: 
+      case isBrowser:
         return 600
       default:
         return 600;
@@ -112,14 +115,19 @@ class HomeCarouselArea extends React.Component {
 
   render() {
     const { list } = this.state;
+
+    // const isNarrowScreen = useMediaQuery({ query: '(max-width: 800px)' })
+
+    // const posterHeight = isNarrowScreen ? 200 : 600;
+
     return (
       <ContainerStyled gutter={0} style={{ position: 'relative' }}>
-        <CarouselRow style={{height: this.posterHeight}}>
+        <CarouselRow style={{ height: this.posterHeight }}>
           <Col span={24}>
             <Carousel autoplay dotPosition="bottom" ref={node => (this.carousel = node)}>
               {list && list.map((f, i) => (
                 <div key={i}>
-                  <ImgStyled style={{height: this.posterHeight, backgroundImage: `url("${getImageUrl(f.imageId)}")` }}>
+                  <ImgStyled style={{ height: this.posterHeight, backgroundImage: `url("${getImageUrl(f.imageId)}")` }}>
                   </ImgStyled>
                 </div>
               ))}
@@ -143,18 +151,20 @@ class HomeCarouselArea extends React.Component {
         </SearchRowContainer> */}
         {/* <Row style={{ position: 'absolute', right: 0, width: '100%', margin: '0 auto 0 auto' }}> */}
         {/* <div style={{ position: 'absolute', top: -500, right: 0 }}> */}
-        <BrowserView>
-          {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
-            <List
-              size="large"
-              // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
-              // footer={<div>Footer</div>}
-              // bordered
-              dataSource={list}
-              renderItem={(item, i) => <ItemStyled onClick={() => this.goTo(i)}>{item.title}</ItemStyled>}
-            />
-          </ListContainer>}
-        </BrowserView>
+        <MediaQuery minDeviceWidth={600}>
+          <>
+            {list && <ListContainer style={{ position: 'absolute', right: '2rem', top: '2rem', margin: '0 auto 0 auto' }}>
+              <List
+                size="large"
+                // header={<div style={{ color: '#fff', paddingLeft: '1.5rem' }}><b>Ranking</b></div>}
+                // footer={<div>Footer</div>}
+                // bordered
+                dataSource={list}
+                renderItem={(item, i) => <ItemStyled onClick={() => this.goTo(i)}>{item.title}</ItemStyled>}
+              />
+            </ListContainer>}
+          </>
+        </MediaQuery>
         {/* </div> */}
         {/* </Row> */}
         {/* <div style={{ maxWidth: 1024, position: 'absolute', bottom: '2rem', right: '2rem' }}>
