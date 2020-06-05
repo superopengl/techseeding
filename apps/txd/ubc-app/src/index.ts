@@ -27,8 +27,8 @@ async function launchApp() {
   console.log('Connecting database');
   await connectDatabase();
 
-  const httpPort = 80;
-  const httpsPort = +process.env.NODE_PORT || +process.env.UBC_PORT || 443;
+  const httpPort = +process.env.UBC_HTTP_PORT || 80;
+  const httpsPort = +process.env.UBC_HTTPS_PORT || 443;
 
   const app = createAppInstance(httpsPort);
   // start https server

@@ -9,6 +9,7 @@
     "start": "npm run build && npm run link-web && cd build && cross-env node index.js",
     "dev": "nodemon -w src --ext ts --exec npm start",
     "build": "npm run lint && npm run clean && npm run compile && npm run copy",
+    "build:prod": "npm run lint && npm run clean && npm run compile && npm run copy",
     "clean": "rm -rf build",
     "compile": "tsc",
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
