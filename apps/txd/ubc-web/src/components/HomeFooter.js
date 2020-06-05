@@ -11,7 +11,7 @@ width: 100%;
 text-align: center;
 font-size: 0.8rem;
 color: #f0f0f0;
-background-color: #173875;
+background-color: #0d1e33;
 `;
 
 const H3 = styled.h3`
@@ -21,7 +21,7 @@ color: #f0f0f0;
 const HomeFooter = () => (
   <FooterStyled>
     <section id="about">
-      <Row>
+      {/* <Row>
         <Col span={8}>
           <H3>About Us</H3>
           <p>
@@ -52,7 +52,7 @@ const HomeFooter = () => (
         </p>
         </Col>
       </Row>
-      <Divider></Divider>
+      <Divider></Divider> */}
       <Row>
         <Col span={24}> Copyright ©2020 UBC. Tech by TECHSEEDING PTY LTD. <TechseedingLogo /></Col>
       </Row>

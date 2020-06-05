@@ -10,6 +10,7 @@ import HomeCarouselArea from 'components/homeAreas/HomeCarouselArea';
 import HomeEventArea from 'components/homeAreas/HomeEventArea';
 import HomeGalleryArea from 'components/homeAreas/HomeGalleryArea';
 import HomeBusinessArea from 'components/homeAreas/HomeBusinessArea';
+import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
 const { Content } = Layout;
 
 const LayoutStyled = styled(Layout)`
@@ -51,7 +52,7 @@ const HomePage = () => (
         <HomeGalleryArea title="Gallery" bgColor="#ffffff"></HomeGalleryArea>
       </section>
       {/* <section id="about"><HomeAboutArea bgColor="#ffffff" row={2}></HomeAboutArea></section> */}
-      {/* <section id="aboutus"><HomeFeatureArea  bgColor="#f5f5f5"></HomeFeatureArea></section> */}
+      <section id="aboutus"><HomeFeatureArea  bgColor="#142952"></HomeFeatureArea></section>
       {/* <HomeMessageArea></HomeMessageArea> */}
     </ContentStyled>
     <HomeFooter></HomeFooter>

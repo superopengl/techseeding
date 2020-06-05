@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row, Col, Button } from 'antd';
+import { Row, Col, Button, Typography } from 'antd';
 import { DownOutlined, UpOutlined, CenterRowStyled } from '@ant-design/icons';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
@@ -10,7 +10,7 @@ const Title = styled.h1`
   font-size: 2rem;
   font-weight: 600;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  color: #383838;
+  color: '#383838';
 `;
 
 const Container = styled.div`
@@ -56,15 +56,6 @@ const responsive = {
   }
 };
 
-const spanProps = {
-  xs: 24,
-  sm: 12,
-  md: 12,
-  lg: 8,
-  xl: 6,
-  xxl: 4
-}
-
 export class HomeRowArea extends React.Component {
 
   constructor(props) {
@@ -82,16 +73,17 @@ export class HomeRowArea extends React.Component {
   }
 
   renderChildComponent = (comp) => {
-    return <Col {...spanProps}>
+    const { span } = this.props;
+    return <Col {...span}>
       {comp}
     </Col>
   }
 
   render() {
-    const { title, bgColor, children, deviceType } = this.props;
+    const { title, style, bgColor, children, deviceType } = this.props;
 
     return (
-      <Container style={{ backgroundColor: bgColor || '#fff' }}>
+      <Container style={{ backgroundColor: bgColor || '#fff',  ...style }} >
         <InnerContainer>
           <Row>
             <Col span={24}>
@@ -128,9 +120,25 @@ export class HomeRowArea extends React.Component {
 HomeRowArea.propTypes = {
   title: PropTypes.string,
   bgColor: PropTypes.string,
+  span: PropTypes.shape({
+    xs: PropTypes.number,
+    sm: PropTypes.number,
+    md: PropTypes.number,
+    lg: PropTypes.number,
+    xl: PropTypes.number,
+    xxl: PropTypes.number
+  })
 };
 
 HomeRowArea.defaultProps = {
+  span: {
+    xs: 24,
+    sm: 12,
+    md: 12,
+    lg: 8,
+    xl: 6,
+    xxl: 4
+  }
 };
 
 export default HomeRowArea;
