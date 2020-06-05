@@ -20,8 +20,8 @@ function connectSwaggerRoutes(app, ymlFile) {
 export function createAppInstance(httpsPort) {
   const app = express();
   app.use(cors());
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json({limit: '2mb'}));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
   app.use((err, req, res, next) => {
     if (res.headersSent) {
       return next(err);

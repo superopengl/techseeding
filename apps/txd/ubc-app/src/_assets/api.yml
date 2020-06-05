@@ -13,7 +13,7 @@ definitions:
 paths:
   /image/{id}:
     get:
-      operationId: 'getImage'
+      operationId: getImage
       parameters:
         - name: id
           in: path
@@ -24,7 +24,7 @@ paths:
         200:
           description: OK
     post:
-      operationId: 'uploadImage'
+      operationId: uploadImage
       parameters:
         - name: id
           in: path

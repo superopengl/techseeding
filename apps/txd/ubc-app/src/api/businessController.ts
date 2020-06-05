@@ -11,7 +11,9 @@ export const listBusiness = async (req, res) => {
   if (group) {
     query = query.where('x.group = :group', { group });
   }
-  const list = await query.orderBy('x.ordinal', 'ASC', 'NULLS LAST')
+  const list = await query
+    .orderBy('x.group', 'ASC')
+    .addOrderBy('x.ordinal', 'ASC', 'NULLS LAST')
     .addOrderBy('x.createdAt', 'ASC')
     .getMany();
 
