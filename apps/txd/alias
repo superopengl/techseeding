@@ -3,12 +3,12 @@ ORANGE='\033[0;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-echo -e "${ORANGE}UBC${NC}"
+echo -e "${ORANGE}TXD${NC}"
 
-alias uhome='cd /Users/jshao/github/ubc'
-alias uweb='cd /Users/jshao/github/ubc/ubc-web'
-alias uapp='cd /Users/jshao/github/ubc/ubc-app'
+alias uhome='cd /Users/jshao/github/txd'
+alias uweb='cd /Users/jshao/github/txd/txd-web'
+alias uapp='cd /Users/jshao/github/txd/txd-app'
 
-export AWS_PROFILE=ubc
+export AWS_PROFILE=txd
 
 uhome

@@ -1,0 +1,80 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@craco/craco": "^5.6.4",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "antd": "^4.2.4",
+    "axios": "^0.19.2",
+    "craco-less": "^1.16.0",
+    "emailjs-com": "^2.4.1",
+    "lodash": "^4.17.15",
+    "md5": "^2.2.1",
+    "mime-format": "^2.0.0",
+    "moment": "^2.25.3",
+    "moment-random": "^1.0.5",
+    "react": "^16.13.1",
+    "react-anchor-link-smooth-scroll": "^1.0.12",
+    "react-device-detect": "^1.12.1",
+    "react-dom": "^16.13.1",
+    "react-icons": "^3.10.0",
+    "react-image-lightbox": "^5.1.1",
+    "react-multi-carousel": "^2.5.5",
+    "react-responsive": "^8.1.0",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "3.4.1",
+    "react-window-size": "^1.2.2",
+    "styled-components": "^5.1.0",
+    "swagger-routes-express": "^3.1.2",
+    "yamljs": "^0.3.0"
+  },
+  "scripts": {
+    "start": "cross-env PORT=5001 craco start",
+    "build": "npm run clean && cross-env GENERATE_SOURCEMAP=true craco build",
+    "build:prod": "npm run clean && cross-env GENERATE_SOURCEMAP=false craco build",
+    "clean": "rm -rf build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "dev": "yarn && yarn build && yarn start",
+    "watched": "nodemon -w src --ext js --exec npm run build",
+    "watch": "npm-watch",
+    "g": "npx generate-react-cli component --",
+    "p": "npx generate-react-cli component -- --type=page",
+    "upload": "aws s3 sync build s3://txd-web/"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "babel-plugin-import": "^1.13.0",
+    "cross-env": "^7.0.2",
+    "generate-react-cli": "^5.0.0",
+    "less-loader": "^6.1.0",
+    "nodemon": "^2.0.4",
+    "npm-watch": "^0.6.0",
+    "prop-types": "^15.7.2"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js,jsx"
+    }
+  }
+}
