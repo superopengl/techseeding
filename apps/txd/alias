@@ -5,10 +5,11 @@ NC='\033[0m'
 
 echo -e "${ORANGE}TXD${NC}"
 
-alias uhome='cd /Users/jshao/github/txd'
-alias uweb='cd /Users/jshao/github/txd/txd-web'
-alias uapp='cd /Users/jshao/github/txd/txd-app'
+alias thome='cd /Users/jshao/github/txd'
+alias tweb='cd /Users/jshao/github/txd/txd-web'
 
 export AWS_PROFILE=txd
 
-uhome
+ssh-add -K ~/.ssh/superopengl_id_rsa
+
+thome
