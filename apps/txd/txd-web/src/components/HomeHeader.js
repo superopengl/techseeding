@@ -86,8 +86,9 @@ export class HomeHeader extends React.Component {
   };
 
   onClickContact = () => {
-    this.onClose();
-    this.props.onClickContact();
+    this.setState({
+      visible: false,
+    }, () => this.props.onClickContact());
   }
 
   render() {

@@ -161,8 +161,8 @@ class LandingPageRaw extends React.Component {
       windowWidth < 992 ? 400 :
         500;
 
-    const catchPhraseSize = windowWidth < 576 ? 24 :
-      windowWidth < 992 ? 30 :
+    const catchPhraseSize = windowWidth < 576 ? 28 :
+      windowWidth < 992 ? 36 :
         44;
 
     return (
@@ -173,6 +173,7 @@ class LandingPageRaw extends React.Component {
           onOk={this.handleContactOk}
           onCancel={this.handleContactCancel}
           footer={null}
+          centered={true}
         >
           <ContactForm onDone={this.handleContactCancel}></ContactForm>
         </Modal>

@@ -43,7 +43,7 @@
     "watch": "npm-watch",
     "g": "npx generate-react-cli component --",
     "p": "npx generate-react-cli component -- --type=page",
-    "upload": "aws s3 sync build s3://txd-web/"
+    "upload": "aws s3 sync build s3://txd-portal/"
   },
   "eslintConfig": {
     "extends": "react-app"
