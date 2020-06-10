@@ -25,6 +25,7 @@ const LayoutStyled = styled(Layout)`
   margin: 0 auto 0 auto;
   background-color: #ffffff;
   text-align: 'center'; 
+  overflow-x: hidden;
 `;
 
 const ContentStyled = styled(Content)`
