@@ -5,6 +5,18 @@ import emailjs from 'emailjs-com';
 
 export class ContactForm extends React.Component {
 
+  initialValues = {
+    name2: '',
+    reply: '',
+    message: ''
+  };
+
+  formRef = React.createRef();
+  
+  constructor(props) {
+    super(props);
+  }
+
   handleSubmit = async values => {
     console.log(values);
     const {
@@ -32,6 +44,10 @@ export class ContactForm extends React.Component {
     }
   }
 
+  reset = () => {
+    // console.log('reset triggered');
+    this.formRef.current.resetFields();
+  }
 
   handleCancel = () => {
     this.props.onDone();
@@ -39,7 +55,7 @@ export class ContactForm extends React.Component {
 
   render() {
     return (
-      <Form onFinish={this.handleSubmit}>
+      <Form onFinish={this.handleSubmit} ref={this.formRef}>
         <Form.Item name="name" rules={[{ required: true, message: 'How shall we announce you?' }]}>
           <Input placeholder="Name" allowClear={true} maxLength={100} />
         </Form.Item>

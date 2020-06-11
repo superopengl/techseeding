@@ -4,8 +4,12 @@ import { Layout, Menu, Drawer, Button } from 'antd';
 import AnchorLink from 'react-anchor-link-smooth-scroll'
 import MediaQuery from 'react-responsive'
 import { MenuOutlined, HomeOutlined, PhoneOutlined, SmileOutlined, BellOutlined } from '@ant-design/icons';
+import { AiOutlineHome, AiFillMessage } from "react-icons/ai";
 import TechseedingLogo from './TechseedingLogo';
-
+import { GrServices } from "react-icons/gr";
+import { BsPeopleFill } from "react-icons/bs";
+import { FaHome } from "react-icons/fa";
+import { MdRoomService } from "react-icons/md";
 const { Header } = Layout;
 const HeaderStyled = styled(Header)`
 position: fixed;
@@ -39,7 +43,6 @@ color: white;
         color: #ffffff;
       }
     }
-
   }
 
   & .ant-menu-item:hover {
@@ -66,6 +69,26 @@ const HeaderLogo = styled(AnchorLink)`
 diaplay: fex;
 height: ${headerHeight}px;
 `
+
+const StyledDrawer = styled(Drawer)`
+color: #22075e;
+
+a {
+  color: #22075e !important;
+}
+
+.ant-menu-item, .ant-menu-item:active, .ant-menu-item-selected {
+  background-color: white !important;
+  color: #22075e !important;
+}
+
+svg {
+  position: relative;
+  top: 2px;
+  margin-right: 1rem;
+  color: #22075e;
+}
+`;
 
 
 export class HomeHeader extends React.Component {
@@ -111,9 +134,9 @@ export class HomeHeader extends React.Component {
         </MediaQuery>
         <MediaQuery maxDeviceWidth={800}>
           <Button type="link" style={{ backgroundColor: 'transparent', color: 'white' }} onClick={this.showDrawer}>
-            <MenuOutlined />
+            <MenuOutlined/>
           </Button>
-          <Drawer
+          <StyledDrawer
             // title={<div><MenuOutlined /> Menu</div>}
             placement="right"
             closable={false}
@@ -122,12 +145,12 @@ export class HomeHeader extends React.Component {
             width={200}
           >
             <Menu mode="vertical" style={{ border: 0 }} >
-              <Menu.Item key="home"><HomeOutlined /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>Home</AnchorLink></Menu.Item>
-              <Menu.Item key="events"><BellOutlined /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>Services</AnchorLink></Menu.Item>
-              <Menu.Item key="about_us"><SmileOutlined /> <AnchorLink offset={headerHeight} href="#about" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
-              <Menu.Item key="contact" onClick={this.onClickContact}><PhoneOutlined /> Contact</Menu.Item>
+              <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>Home</AnchorLink></Menu.Item>
+              <Menu.Item key="events"><MdRoomService /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>Services</AnchorLink></Menu.Item>
+              <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
+              <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> Contact</Menu.Item>
             </Menu>
-          </Drawer>
+          </StyledDrawer>
         </MediaQuery>
 
       </HeaderStyled>

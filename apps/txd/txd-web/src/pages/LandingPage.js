@@ -3,17 +3,18 @@ import React from 'react';
 import styled from 'styled-components';
 
 // import 'App.css';
-import { Layout, Row, Col, Typography, Button, Modal } from 'antd';
+import { Layout, Row, Col, Typography, Button, Modal, Affix } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
 import { RiComputerLine } from "react-icons/ri";
 import { GoDeviceMobile } from "react-icons/go";
-import { AiOutlineWechat } from "react-icons/ai";
+import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
 import { FiDatabase } from "react-icons/fi";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import windowSize from 'react-window-size';
 import ContactForm from 'components/ContactForm';
+
 const { Content } = Layout;
 // const { Title } = Typography;
 
@@ -68,6 +69,25 @@ height: 60px !important;
 
 &:active {
   border: 3px solid rgba(255,255,255,0.8);
+}
+`;
+
+const AffixContactButton = styled(Button)`
+width: 60px;
+height: 60px;
+display: flex;
+align-items: center;
+justify-content: center;
+border: none;
+// background-color: rgba(34, 7, 94, 0.8);
+background-color: rgba(255,255,255, 0.8);
+color: rgba(34, 7, 94, 0.8);
+box-shadow: 1px 1px 5px #22075e;
+
+&:focus,&:hover,&:active {
+  border: none;
+  background-color: rgba(255,255,255, 0.8);
+  color: rgb(34, 7, 94);
 }
 `;
 
@@ -136,18 +156,24 @@ class LandingPageRaw extends React.Component {
     this.state = {
       modalVisible: false
     }
+
+    this.contactFormRef = React.createRef();
   }
 
   handleContactCancel = () => {
     this.setState({
       modalVisible: false
-    });
+    }, () => this.resetContactForm());
   }
 
   handleContactOk = () => {
     this.setState({
       modalVisible: false
-    });
+    }, () => this.resetContactForm());
+  }
+
+  resetContactForm = () => {
+    this.contactFormRef.current.reset();
   }
 
   openContactForm = () => {
@@ -169,14 +195,14 @@ class LandingPageRaw extends React.Component {
     return (
       <LayoutStyled>
         <Modal
-          title={<div style={{fontSize: '1rem', fontWeight: 300}}>Let us tailor a service package that meets your needs. Tell us a little about your business, and we will get back to you with some ideas shortly.</div>}
+          title={<div style={{ fontSize: '1rem', fontWeight: 300 }}>Let us tailor a service package that meets your needs. Tell us a little about your business, and we will get back to you with some ideas shortly.</div>}
           visible={this.state.modalVisible}
           onOk={this.handleContactOk}
           onCancel={this.handleContactCancel}
           footer={null}
           centered={true}
         >
-          <ContactForm onDone={this.handleContactCancel}></ContactForm>
+          <ContactForm ref={this.contactFormRef} onDone={this.handleContactCancel}></ContactForm>
         </Modal>
         <HomeHeader onClickContact={() => this.openContactForm()}></HomeHeader>
         {/* <BarStyled></BarStyled> */}
@@ -204,10 +230,15 @@ class LandingPageRaw extends React.Component {
             </Row>
           </section>
           <section id="contact_us">
-            <HomeFeatureArea style={{paddingBottom: 0}}></HomeFeatureArea>
+            <HomeFeatureArea style={{ paddingBottom: 0 }}></HomeFeatureArea>
           </section>
         </ContentStyled>
         <HomeFooter></HomeFooter>
+        <Affix style={{ position: 'fixed', bottom: 30, right: 30 }}>
+          <AffixContactButton type="primary" shape="circle" size="large" onClick={() => this.openContactForm()}>
+            <AiOutlineMessage size={36} />
+          </AffixContactButton>
+        </Affix>
       </LayoutStyled>
     );
   }
@@ -217,6 +248,6 @@ LandingPageRaw.propTypes = {};
 
 LandingPageRaw.defaultProps = {};
 
-export const LandingPage =  windowSize(LandingPageRaw)
+export const LandingPage = windowSize(LandingPageRaw)
 
 export default LandingPage;

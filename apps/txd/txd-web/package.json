@@ -43,7 +43,9 @@
     "watch": "npm-watch",
     "g": "npx generate-react-cli component --",
     "p": "npx generate-react-cli component -- --type=page",
-    "upload": "aws s3 sync build s3://txd-portal/"
+    "upload": "aws s3 sync build s3://txd-portal/",
+    "flush": "aws cloudfront create-invalidation --distribution-id E1JLIDSYCZB9UH --paths \"/*\"",
+    "release": "npm run build:prod && npm run upload && npm run flush"
   },
   "eslintConfig": {
     "extends": "react-app"
