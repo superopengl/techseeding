@@ -135,7 +135,7 @@ const tileData = [
   },
   {
     title: 'Digital Transformation',
-    content: `It's the era to accelerate the digital transformation, which will give you a truely reliable bridge between you and your customers. Our professional business analyst will help you to figure out a best way to move your workflow to the digital world.`,
+    content: `It's the era to accelerate the digital transformation, which will give you a truely reliable bridge between you and your customers. Our professional business analyst will help you figure out a best way to move your workflow to the digital world.`,
     icon: <GiMeshNetwork size={iconSize}></GiMeshNetwork>,
     backgroundColor: '#feffe6',
     color: '#fadb14'
@@ -179,6 +179,8 @@ class LandingPageRaw extends React.Component {
   openContactForm = () => {
     this.setState({
       modalVisible: true
+    }, () => {
+      setTimeout(() => this.contactFormRef.current.focus(), 300);
     });
   }
 

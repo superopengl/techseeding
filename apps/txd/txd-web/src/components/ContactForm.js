@@ -15,6 +15,12 @@ export class ContactForm extends React.Component {
   
   constructor(props) {
     super(props);
+
+    this.firstInputRef = React.createRef();
+  }
+  
+  focus() {
+    this.firstInputRef.focus();
   }
 
   handleSubmit = async values => {
@@ -57,7 +63,7 @@ export class ContactForm extends React.Component {
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>
         <Form.Item name="name" rules={[{ required: true, message: 'How shall we announce you?' }]}>
-          <Input placeholder="Name" allowClear={true} maxLength={100} />
+          <Input ref={input => this.firstInputRef = input} placeholder="Name" allowClear={true} maxLength={100} />
         </Form.Item>
         <Form.Item name="reply" rules={[{ required: true, message: 'How can we reach out to you?' }]}>
           <Input placeholder="Phone or email" allowClear={true} maxLength={100} />
