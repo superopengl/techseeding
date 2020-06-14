@@ -68,7 +68,7 @@ class HomeFeatureArea extends React.Component {
         <InfoCard>
           <SubTitle level={3}>About Us</SubTitle>
           <section>
-            We are a team of tech savveis with 15+ year experience in software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our tech stacks cover majority of the popular ones including Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, Postgres SQL, SQL Server, MySQL, Docker, AWS and Azure.
+            We are a team of tech savvies with 15+ years experience in the software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our tech stacks cover majority of the popular ones including Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.
           </section>
         </InfoCard>
         <InfoCard>
@@ -92,7 +92,7 @@ class HomeFeatureArea extends React.Component {
         <InfoCard>
           <SubTitle level={3}>Why Us?</SubTitle>
           <section>
-            It will be always easy to create a managed website on the internet nowadays. However, shortly many successful small business and startups will find out that they will need a customised digital solution that a static website cannot fulfill anymore. 
+            It will be always easy to create a managed website on the internet nowadays. However, shortly many successful small businesses and startups will find out that they will need a customised digital solution that a static website cannot fulfill anymore. With Techseeding, you can have a highly tailored morden cloud-based application to speed up your success.
           </section>
         </InfoCard>
       </HomeRowArea>

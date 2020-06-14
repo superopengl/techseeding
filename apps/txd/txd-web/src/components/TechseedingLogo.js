@@ -9,7 +9,7 @@ const Container = styled.div`
   // border: 1px solid #ffffff;
   position: relative;
   top: 10px;
-  left: -50px;
+  left: -20px;
 `;
 
 export const TechseedingLogo = () => (

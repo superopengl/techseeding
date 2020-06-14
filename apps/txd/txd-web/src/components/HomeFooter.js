@@ -36,7 +36,7 @@ const HomeFooter = () => (
         <Col span={8}>
           <H3>About Us</H3>
           <p>
-            We are a team of tech savveis with 15+ year experience in software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our tech stacks cover majority of the popular ones including Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, Postgres SQL, SQL Server, MySQL, Docker, AWS and Azure.
+            We are a team of tech savveis with 15+ year experience in software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our tech stacks cover majority of the popular ones including Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.
         </p>
         </Col>
         <Col span={8}>

@@ -127,7 +127,7 @@ export class HomeHeader extends React.Component {
             <Menu mode="horizontal" style={{ border: 0 }}>
               <Menu.Item key="home"><AnchorLink offset={headerHeight} href="#home">Home</AnchorLink></Menu.Item>
               <Menu.Item key="events"><AnchorLink offset={headerHeight} href="#services">Services</AnchorLink></Menu.Item>
-              <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#about">About Us</AnchorLink></Menu.Item>
+              <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#about_us">About Us</AnchorLink></Menu.Item>
               <Menu.Item key="contact"><Button type="link" onClick={this.onClickContact}>Contact</Button></Menu.Item>
             </Menu>
           </MenuContianer>
@@ -147,7 +147,7 @@ export class HomeHeader extends React.Component {
             <Menu mode="vertical" style={{ border: 0 }} >
               <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>Home</AnchorLink></Menu.Item>
               <Menu.Item key="events"><MdRoomService /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>Services</AnchorLink></Menu.Item>
-              <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
+              <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about_us" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
               <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> Contact</Menu.Item>
             </Menu>
           </StyledDrawer>

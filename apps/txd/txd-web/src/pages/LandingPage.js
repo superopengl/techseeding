@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 // import 'App.css';
-import { Layout, Row, Col, Typography, Button, Modal, Affix } from 'antd';
+import { Layout, Row, Col, Typography, Button, Modal, Affix, Tag } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
@@ -91,6 +91,13 @@ box-shadow: 1px 1px 5px #22075e;
 }
 `;
 
+const StyledTag = styled(Tag)`
+color: #d99245;
+border: 1px solid #d99245;
+background-color: rgba(217, 146, 69,0.1);
+border-radius: 999px;
+`;
+
 const tileSpanProps = {
   xs: 24,
   sm: 24,
@@ -105,13 +112,23 @@ const iconSize = 100;
 const tileData = [
   {
     title: 'Website',
-    content: 'We provide all types of website development from static web portal to complext web application which is highly tailored for your unique business.',
+    tags: [
+      'customised development',
+      'hosting',
+      'from $199'
+    ],
+    content: 'We provide all types of website development from static web portal with search engine optimisation to complex web application which is highly tailored for your unique business.',
     icon: <RiComputerLine size={iconSize}></RiComputerLine>,
     backgroundColor: '#e6f7ff',
     color: '#0050b3'
   },
   {
     title: 'Mobile Apps',
+    tags: [
+      'development',
+      'hosting',
+      'from $899'
+    ],
     content: `A mobile app can perform actions much quicker than a mobile website, and can be used to increase customer loyalty and to build the communication directly with your customers.`,
     icon: <GoDeviceMobile size={iconSize}></GoDeviceMobile>,
     backgroundColor: '#fff0f6',
@@ -119,7 +136,12 @@ const tileData = [
   },
   {
     title: 'Wechat',
-    content: 'Integration with Wechat and Wechat App (微信小程序，微信公众号) can be a sharp weapon for your business to expand to another world.',
+    tags: [
+      'development',
+      'hosting',
+      'from $399'
+    ],
+    content: 'Integration with WeChat Public Account and WeChat Mini Program (微信公众号/微信小程序) can be a sharp weapon for your business to expand to another world.',
     icon: <AiOutlineWechat size={iconSize}></AiOutlineWechat>,
 
     backgroundColor: '#f6ffed',
@@ -128,21 +150,33 @@ const tileData = [
   },
   {
     title: 'Database Design',
-    content: `A well designed database schema can be very benefit to your business with high scalability and low cost. No hesitate to review your database when you feel it's slow down. Postgres SQL, MySQL, SQL Server, MongoDB, NoSQL, ... we will find a best home for you data.`,
+    tags: [
+      'free quote',
+      'schema review',
+      'big data streaming',
+    ],
+    content: `A well designed database schema can be very beneficial to your business with high scalability and low cost. No hesitate to review your database when you feel it's slow down. PostgreSQL, MySQL, SQL Server, MongoDB, NoSQL, ... we will find a right home for your data.`,
     icon: <FiDatabase size={iconSize}></FiDatabase>,
     backgroundColor: '#f9f0ff',
     color: '#9254de'
   },
   {
     title: 'Digital Transformation',
-    content: `It's the era to accelerate the digital transformation, which will give you a truely reliable bridge between you and your customers. Our professional business analyst will help you figure out a best way to move your workflow to the digital world.`,
+    tags: [
+      'free quote',
+      'customised solution'
+    ],
+    content: `It's the era to accelerate the digital transformation, which will give you a truly reliable bridge between you and your customers. Our professional business analyst will help you figure out the best way to move your workflow to the digital world.`,
     icon: <GiMeshNetwork size={iconSize}></GiMeshNetwork>,
     backgroundColor: '#feffe6',
     color: '#fadb14'
   },
   {
     title: 'Tech Consulting',
-    content: 'We provide technical consulting service in range of Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, Postgres SQL, SQL Server, MySQL, Docker, AWS and Azure.',
+    tags: [
+      'from $120 per hour'
+    ],
+    content: 'We provide technical consulting service in a wide range of Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.',
     icon: <GiTeamIdea size={iconSize}></GiTeamIdea>,
     backgroundColor: '#e6fffb',
     color: '#13c2c2'
@@ -211,8 +245,8 @@ class LandingPageRaw extends React.Component {
         <ContentStyled >
           <section id="home">
             <PosterContainer style={{ height: posterHeight, position: 'relative' }}>
-              <Title style={{ fontSize: catchPhraseSize }}>E-solution to expand your business</Title>
-              <Title level={2} style={{ marginTop: 0, fontWeight: 300, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>Want an e-solution to expand your business?</Title>
+              <Title style={{ fontSize: catchPhraseSize, marginTop: '2rem' }}>A reliable tach friend for your business</Title>
+              <Title level={2} style={{ marginTop: 0, fontWeight: 300, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>E-solution services to expand your business</Title>
               <ContactButton type="primary" shape="round" size="large" onClick={() => this.openContactForm()}>Contact Us</ContactButton>
             </PosterContainer>
           </section>
@@ -223,6 +257,9 @@ class LandingPageRaw extends React.Component {
                   <Col key={i} {...tileSpanProps} style={{ textAlign: 'center', padding: '1rem' }}>
                     <div style={{ color: 'rgba(34, 7, 94, 0.2)', margin: '1rem' }}>{t.icon}</div>
                     <Title level={3}>{t.title}</Title>
+                    {(t.tags && t.tags.length > 0) ? <p>
+                    {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
+                    </p> : null}
                     <p>
                       {t.content}
                     </p>
@@ -231,7 +268,7 @@ class LandingPageRaw extends React.Component {
               })}
             </Row>
           </section>
-          <section id="contact_us">
+          <section id="about_us">
             <HomeFeatureArea style={{ paddingBottom: 0 }}></HomeFeatureArea>
           </section>
         </ContentStyled>
