@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Techseeding"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
-    <!--
+
+<head>
+  <base href="/" />
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#22075e" />
+  <meta name="color-scheme" content="dark">
+  <meta name="description"
+    content="A professional information technology services for small businesses, home businesses, and startups. Services include design and develop websites, web applications, mobile apps, WeChat Mini Programs, database optimisation, e-commerce, digital transformation and tech consulting. Our skills cover Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure." />
+  <meta name="robots" content="index,follow">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Home, Techseeding">
+  <meta property="og:description"
+    content="A professional information technology services for small businesses, home businesses, and startups. Services include design and develop websites, web applications, mobile apps, WeChat Mini Programs, database optimisation, e-commerce, digital transformation and tech consulting. Our skills cover Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.">
+  <meta property="og:url" content="https://www.techseeding.com.au/">
+  <meta property="og:image" content="https://www.techseeding.com.au/logo.png">
+  <meta property="og:site_name" content="Techseeding">
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
+  <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
@@ -24,20 +34,89 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Techseeding | Tech service for small businesses and startups</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <title>Techseeding | Technical service for small businesses and startups</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "image": [
+        "https://example.com/photos/1x1/photo.jpg",
+        "https://example.com/photos/4x3/photo.jpg",
+        "https://example.com/photos/16x9/photo.jpg"
+       ],
+      "@id": "http://davessteakhouse.example.com",
+      "name": "Dave's Steak House",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "148 W 51st St",
+        "addressLocality": "New York",
+        "addressRegion": "NY",
+        "postalCode": "10019",
+        "addressCountry": "US"
+      },
+      "review": {
+        "@type": "Review",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "4",
+          "bestRating": "5"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Lillian Ruiz"
+        }
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 40.761293,
+        "longitude": -73.982294
+      },
+      "url": "http://www.example.com/restaurant-locations/manhattan",
+      "telephone": "+12122459600",
+      "servesCuisine": "American",
+      "priceRange": "$$$",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday"
+          ],
+          "opens": "11:30",
+          "closes": "22:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Wednesday",
+            "Thursday",
+            "Friday"
+          ],
+          "opens": "11:30",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Saturday",
+          "opens": "16:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Sunday",
+          "opens": "16:00",
+          "closes": "22:00"
+        }
+      ],
+      "menu": "http://www.example.com/menu",
+      "acceptsReservations": "True"
+    }
+  </script>
+</head>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+</body>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
 </html>

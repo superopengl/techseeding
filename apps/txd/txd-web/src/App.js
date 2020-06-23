@@ -3,7 +3,7 @@ import React from 'react';
 import 'antd/dist/antd.less';
 import 'react-image-lightbox/style.css';
 import { Route, BrowserRouter } from 'react-router-dom';
-import LandingPage from 'pages/LandingPage';
+import HomePage from 'pages/HomePage';
 
 
 
@@ -12,7 +12,7 @@ function App() {
   return (
     <BrowserRouter basename="/">
       <div>
-        <Route path="/" component={LandingPage} />
+        <Route path="/" component={HomePage} />
       </div>
     </BrowserRouter>
   );
