@@ -69,7 +69,8 @@
     "less-loader": "^6.1.0",
     "nodemon": "^2.0.4",
     "npm-watch": "^0.6.0",
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "react-git-info": "^2.0.0"
   },
   "watch": {
     "build": {

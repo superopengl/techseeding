@@ -1,10 +1,12 @@
 import React from 'react';
-import { Layout, Row, Col, Divider, Typography } from 'antd';
+import { Layout, Row, Col, Divider, Typography, Tag } from 'antd';
 import styled from 'styled-components';
 import { MailOutlined, PhoneOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icons';
 import { TechseedingLogo } from "components/TechseedingLogo";
+import GitInfo from 'react-git-info/macro';
 const { Footer } = Layout;
-
+const gitInfo = GitInfo();
+const gitCommitHash = gitInfo.commit.shortHash;
 
 const FooterStyled = styled(Footer)`
 width: 100%;
@@ -63,9 +65,9 @@ const HomeFooter = () => (
         </p>
         </Col>
       </Row>*/}
-      <Divider></Divider> 
+      <Divider></Divider>
       <Row>
-        <Col span={24}> ©2020 Techseeding PTY LTD. All rights reserved.</Col>
+        <Col span={24}> ©2020 Techseeding PTY LTD. All rights reserved. Version {gitCommitHash}</Col>
       </Row>
     </section>
   </FooterStyled>
