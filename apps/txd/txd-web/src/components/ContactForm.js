@@ -12,11 +12,15 @@ export class ContactForm extends React.Component {
   };
 
   formRef = React.createRef();
-  
+
   constructor(props) {
     super(props);
 
     this.firstInputRef = React.createRef();
+
+    this.state = {
+      sending: false
+    }
   }
   
   focus() {
@@ -24,6 +28,10 @@ export class ContactForm extends React.Component {
   }
 
   handleSubmit = async values => {
+    if(this.state.sending) {
+      return;
+    }
+
     console.log(values);
     const {
       REACT_APP_EMAILJS_TEMPLATEID,
@@ -32,6 +40,7 @@ export class ContactForm extends React.Component {
 
     console.log(process.env);
     try {
+      this.setState({sending: true});
       await emailjs.send(
         'gmail_service',
         REACT_APP_EMAILJS_TEMPLATEID,
@@ -46,7 +55,7 @@ export class ContactForm extends React.Component {
       message.error(`Oops, failed to send contact message!`);
       console.error(e);
     } finally {
-      this.props.onDone();
+      this.setState({sending: false}, () => this.props.onDone());
     }
   }
 
@@ -60,22 +69,23 @@ export class ContactForm extends React.Component {
   }
 
   render() {
+    const {sending} = this.state;
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>
         <Form.Item name="name" rules={[{ required: true, message: 'How shall we announce you?' }]}>
-          <Input ref={input => this.firstInputRef = input} placeholder="Name" allowClear={true} maxLength={100} />
+          <Input ref={input => this.firstInputRef = input} placeholder="Name" allowClear={true} maxLength={100} disabled={sending}/>
         </Form.Item>
         <Form.Item name="reply" rules={[{ required: true, message: 'How can we reach out to you?' }]}>
-          <Input placeholder="Phone or email" allowClear={true} maxLength={100} />
+          <Input placeholder="Phone or email" allowClear={true} maxLength={100}  disabled={sending}/>
         </Form.Item>
         <Form.Item name="message" rules={[{ required: true, message: 'Why not let us know more about your needs?' }]}>
-          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000} placeholder="Tell us a little about your business or how can we help you." />
+          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000}  disabled={sending} placeholder="Tell us a little about your business or how can we help you." />
         </Form.Item>
         <Form.Item>
-          <Button block type="primary" htmlType="submit">Submit</Button>
+          <Button block type="primary" htmlType="submit" disabled={sending}>Submit</Button>
         </Form.Item>
         <Form.Item>
-          <Button block type="link" onClick={this.handleCancel}>Cancel</Button>
+          <Button block type="link" onClick={this.handleCancel} disabled={sending}>Cancel</Button>
         </Form.Item>
       </Form>
     );
