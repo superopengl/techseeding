@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Row, Col, Button, Typography } from 'antd';
-import { DownOutlined, UpOutlined, CenterRowStyled } from '@ant-design/icons';
+import { Row, Col } from 'antd';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 

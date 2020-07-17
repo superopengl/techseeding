@@ -10,7 +10,6 @@ import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
 import { RiComputerLine } from "react-icons/ri";
 import { GoDeviceMobile, GoDatabase } from "react-icons/go";
 import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
-import { FiDatabase } from "react-icons/fi";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import windowSize from 'react-window-size';
 import ContactForm from 'components/ContactForm';

@@ -1,8 +1,6 @@
 import React from 'react';
-import { Layout, Row, Col, Divider, Typography, Tag } from 'antd';
+import { Layout, Row, Col, Divider } from 'antd';
 import styled from 'styled-components';
-import { MailOutlined, PhoneOutlined, GlobalOutlined, WechatOutlined } from '@ant-design/icons';
-import { TechseedingLogo } from "components/TechseedingLogo";
 import GitInfo from 'react-git-info/macro';
 const { Footer } = Layout;
 const gitInfo = GitInfo();
@@ -27,9 +25,6 @@ a {
 }
 `;
 
-const H3 = styled.h3`
-color: #f0f0f0;
-`
 
 const HomeFooter = () => (
   <FooterStyled>

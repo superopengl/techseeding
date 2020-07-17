@@ -3,10 +3,8 @@ import styled from 'styled-components';
 import { Layout, Menu, Drawer, Button } from 'antd';
 import AnchorLink from 'react-anchor-link-smooth-scroll'
 import MediaQuery from 'react-responsive'
-import { MenuOutlined, HomeOutlined, PhoneOutlined, SmileOutlined, BellOutlined } from '@ant-design/icons';
-import { AiOutlineHome, AiFillMessage } from "react-icons/ai";
-import TechseedingLogo from './TechseedingLogo';
-import { GrServices } from "react-icons/gr";
+import { MenuOutlined } from '@ant-design/icons';
+import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
 import { MdRoomService } from "react-icons/md";
@@ -24,7 +22,7 @@ justify-content: space-between;
 // border-bottom: 1px solid #f0f0f0;
 align-items: center;
 // box-shadow: 0px 2px 8px #888888;
-padding-left: 20px;
+padding-left: 0px;
 padding-right: 20px;
 color: white;
 
@@ -90,6 +88,11 @@ svg {
 }
 `;
 
+const LogoImg = styled.img`
+  height: ${headerHeight - 16}px;
+  width: auto;
+  margin-left: 8px;
+`;
 
 export class HomeHeader extends React.Component {
   state = {
@@ -120,7 +123,8 @@ export class HomeHeader extends React.Component {
     return (
       <HeaderStyled>
         <HeaderLogo offset={headerHeight} href="#home">
-          <TechseedingLogo></TechseedingLogo>
+          {/* <TechseedingLogo></TechseedingLogo> */}
+          <LogoImg src="logo.png" alt="TECHSEEDING LOGO"></LogoImg>
         </HeaderLogo>
         <MediaQuery minDeviceWidth={801}>
           <MenuContianer>

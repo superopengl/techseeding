@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Form, Input, Button, message } from "antd";
 import emailjs from 'emailjs-com';
 
@@ -32,13 +31,12 @@ export class ContactForm extends React.Component {
       return;
     }
 
-    console.log(values);
     const {
       REACT_APP_EMAILJS_TEMPLATEID,
       REACT_APP_EMAILJS_USERID
     } = process.env;
 
-    console.log(process.env);
+    // console.log(process.env);
     try {
       this.setState({sending: true});
       await emailjs.send(
@@ -53,7 +51,7 @@ export class ContactForm extends React.Component {
       );
     } catch (e) {
       message.error(`Oops, failed to send contact message!`);
-      console.error(e);
+      // console.error(e);
     } finally {
       this.setState({sending: false}, () => this.props.onDone());
     }
