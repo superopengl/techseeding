@@ -1,0 +1,47 @@
+{
+  "pages":[
+    "pages/website/website",
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/contact/contact"
+  ],
+  "window":{
+    "backgroundTextStyle":"light",
+    "backgroundColor": "#22075e",
+    "backgroundColorTop": "#22075e",
+    "backgroundColorBottom": "#22075e",
+    "navigationBarBackgroundColor": "#22075e",
+    "navigationBarTitleText": "Techseeding",
+    "navigationBarTextStyle":"white"
+  },
+  "tabBar-2": {
+    "color": "#aaaaaa",
+    "selectedColor": "#ffffff",
+    "backgroundColor": "#22075e",
+    "position": "bottom",
+    "list": [
+      {
+        "text": "Home",
+        "pagePath": "pages/index/index"
+      },
+      {
+        "text": "About",
+        "pagePath": "pages/logs/logs"
+      },
+      {
+        "text": "Web",
+        "pagePath": "pages/website/website"
+      },
+      {
+        "text": "Contact",
+        "pagePath": "pages/contact/contact"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "darkmode": false,
+  "useExtendedLib": {
+    "weui": true
+  }
+}
