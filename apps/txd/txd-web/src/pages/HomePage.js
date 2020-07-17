@@ -46,6 +46,7 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 padding: 1rem;
+padding-top: 40px;
 
 .ant-typography {
   color: rgba(255,255,255,0.9) !important;
