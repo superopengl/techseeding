@@ -15,6 +15,9 @@ Page({
       url: '../logs/logs'
     })
   },
+  onShareAppMessage: function(res) {
+
+  },
   onLoad: function () {
     if (app.globalData.userInfo) {
       this.setData({
