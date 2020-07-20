@@ -68,7 +68,7 @@ class HomeFeatureArea extends React.Component {
         <InfoCard>
           <SubTitle level={3}>About Us</SubTitle>
           <section>
-            We are a team of tech savvies with 15+ years experience in the software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our tech stacks cover majority of the popular ones including Python, Nodejs, C#, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.
+            We are a team of tech savvies with 15+ years experience in the software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our stacks cover majority of the popular technologies including Nodejs, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.
           </section>
         </InfoCard>
         <InfoCard>
