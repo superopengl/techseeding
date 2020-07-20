@@ -77,20 +77,19 @@ class HomeFeatureArea extends React.Component {
             <table style={{ textAlign: 'left', margin: 'auto' }}>
               <tbody>
                 <tr>
-                  <td><MailOutlined /> Email</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><MailOutlined /> Email</td>
                   <td><a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a></td>
                 </tr>
                 <tr>
-                  <td><PhoneOutlined /> Phone</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><PhoneOutlined /> Phone</td>
                   <td>0405581228</td>
                 </tr>
                 <tr>
-                  <td style={{ width: '5rem' }}><WechatOutlined /> WeChat</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><WechatOutlined /> WeChat</td>
                   <td>superopengl</td>
                 </tr>
                 <tr>
-                  <td></td>
-                  <td><img src="images/wechat_qr.jpg" alt="wechat account: superopengl" width={100} height={100} /></td>
+                  <td colSpan="2" style={{textAlign: 'center', padding: '4px'}}><img src="images/wechat_qr.jpg" alt="wechat account: superopengl" width={120} height={120} /></td>
                 </tr>
               </tbody>
             </table>

@@ -124,7 +124,7 @@ export class HomeHeader extends React.Component {
       <HeaderStyled>
         <HeaderLogo offset={headerHeight} href="#home">
           {/* <TechseedingLogo></TechseedingLogo> */}
-          <LogoImg src="logo.png" alt="TECHSEEDING LOGO"></LogoImg>
+          <LogoImg src="logo-bw.png" alt="TECHSEEDING LOGO"></LogoImg>
         </HeaderLogo>
         <MediaQuery minDeviceWidth={801}>
           <MenuContianer>
