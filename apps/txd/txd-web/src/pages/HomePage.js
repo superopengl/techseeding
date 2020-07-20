@@ -96,6 +96,7 @@ color: #d99245;
 border: 1px solid #d99245;
 background-color: rgba(217, 146, 69,0.1);
 border-radius: 999px;
+margin: 2px;
 `;
 
 const tileSpanProps = {
