@@ -1,4 +1,4 @@
-Component({
+Page({
   data: {
       showTopTips: false,
 
@@ -7,34 +7,12 @@ Component({
           {name: 'cell standard', value: '1'}
       ],
       checkboxItems: [
-          {name: 'standard is dealt for u.', value: '0', checked: true},
-          {name: 'standard is dealicient for u.', value: '1'}
-      ],
-      items: [
-          {name: 'USA', value: '美国'},
-          {name: 'CHN', value: '中国', checked: 'true'},
-          {name: 'BRA', value: '巴西'},
-          {name: 'JPN', value: '日本'},
-          {name: 'ENG', value: '英国'},
-          {name: 'TUR', value: '法国'},
+          {name: '网站', value: 'web', checked: false},
+          {name: '手机App', value: 'mobile'},
+          {name: '微信公众号/小程序', value: 'wechat'},
+          {name: '其它 (数据库/大数据/技术咨询/...)', value: 'other'}
       ],
 
-      date: "2016-09-01",
-      time: "12:01",
-
-      countryCodes: ["+86", "+80", "+84", "+87"],
-      countryCodeIndex: 0,
-
-      countries: ["中国", "美国", "英国"],
-      countryIndex: 0,
-
-      accounts: ["微信号", "QQ", "Email"],
-      accountIndex: 0,
-
-      isAgree: false,
-      formData: {
-
-      },
       rules: [{
           name: 'radio',
           rules: {required: true, message: '单选列表是必选项'},

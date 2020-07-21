@@ -1,1 +1,2 @@
-<web-view src="https://www.techseeding.com.au"></web-view>
+<web-view src="https://www.techseeding.com.au?origin=wechat-app&lang={language}"></web-view>
+<!-- <view>https://www.techseeding.com.au?origin=wechat-app&lang={{language}}</view> -->

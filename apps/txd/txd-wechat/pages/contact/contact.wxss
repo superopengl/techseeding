@@ -1,1 +1,15 @@
 /* pages/contact/contact.wxss */
+.green-btn{
+  width: 100% !important;
+  background-color: #22075e;
+  color:#ffffff;
+  /* position: fixed;
+  bottom: 200rpx; */
+  margin-bottom: 2rem;
+}
+
+page {
+  /* color: #22075e; */
+}
+
+

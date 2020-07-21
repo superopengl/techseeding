@@ -1,40 +1,45 @@
 {
-  "pages":[
+  "pages": [
     "pages/website/website",
+    "pages/gallery/gallery",
     "pages/index/index",
     "pages/logs/logs",
-    "pages/contact/contact"
+    "pages/contact/contact",
+    "pages/gallery"
   ],
-  "window":{
-    "backgroundTextStyle":"light",
+  "window": {
+    "backgroundTextStyle": "light",
     "backgroundColor": "#22075e",
     "backgroundColorTop": "#22075e",
     "backgroundColorBottom": "#22075e",
     "navigationBarBackgroundColor": "#22075e",
     "navigationBarTitleText": "Techseeding",
-    "navigationBarTextStyle":"white"
+    "navigationBarTextStyle": "white"
   },
-  "tabBar-2": {
-    "color": "#aaaaaa",
+  "tabBar": {
+    "color": "#cccccc",
     "selectedColor": "#ffffff",
     "backgroundColor": "#22075e",
+    "borderStyle": "white",
     "position": "bottom",
     "list": [
       {
-        "text": "Home",
-        "pagePath": "pages/index/index"
+        "text": "关于",
+        "pagePath": "pages/website/website",
+        "iconPath": "images/tabbar-aboutus.png",
+        "selectedIconPath": "images/tabbar-aboutus-selected.png"
       },
       {
-        "text": "About",
-        "pagePath": "pages/logs/logs"
+        "text": "案例",
+        "pagePath": "pages/gallery/gallery",
+        "iconPath": "images/tabbar-gallery.png",
+        "selectedIconPath": "images/tabbar-gallery-selected.png"
       },
       {
-        "text": "Web",
-        "pagePath": "pages/website/website"
-      },
-      {
-        "text": "Contact",
-        "pagePath": "pages/contact/contact"
+        "text": "联系",
+        "pagePath": "pages/contact/contact",
+        "iconPath": "images/tabbar-contact.png",
+        "selectedIconPath": "images/tabbar-contact-selected.png"
       }
     ]
   },
