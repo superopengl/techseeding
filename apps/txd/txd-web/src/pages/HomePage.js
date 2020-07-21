@@ -13,12 +13,13 @@ import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import windowSize from 'react-window-size';
 import ContactForm from 'components/ContactForm';
+import * as queryString from 'query-string';
 
 const { Content } = Layout;
 // const { Title } = Typography;
 
 const Title = styled(Typography.Title)`
-color: rgba(255,255,255,0.8);
+color: rgba(255,255,255,0.8) !important;
 `;
 
 const LayoutStyled = styled(Layout)`
@@ -38,7 +39,7 @@ const PosterContainer = styled.div`
 background-repeat: no-repeat;
 background-size: cover;
 background-position: center;
-background-image: url("images/poster.jpg");
+background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0, 0, 0, 0.4)),url("images/poster.jpg");
 width: 100%;
 min-height: 200px;
 display: flex;
@@ -49,7 +50,7 @@ padding: 1rem;
 padding-top: 40px;
 
 .ant-typography {
-  color: rgba(255,255,255,0.9) !important;
+  color: rgba(255,255,255,1) !important;
   text-align: center;
 }
 
@@ -236,6 +237,9 @@ class HomePageRaw extends React.Component {
       windowWidth < 992 ? 36 :
         44;
 
+    const {origin} = queryString.parse(this.props.location.search);
+    const shouldShowContact = origin !== 'wechat-app';
+
     return (
       <LayoutStyled>
         <Modal
@@ -254,8 +258,8 @@ class HomePageRaw extends React.Component {
           <section id="home">
             <PosterContainer style={{ height: posterHeight, position: 'relative' }}>
               <Title style={{ fontSize: catchPhraseSize, marginTop: '2rem' }}>Professional tech friend of your business</Title>
-              <Title level={2} style={{ marginTop: 0, fontWeight: 300, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>Information technology services for small businesses, home businesses, and startups</Title>
-              <ContactButton type="primary" shape="round" size="large" onClick={() => this.openContactForm()}>Contact Us</ContactButton>
+              <Title level={2} style={{ marginTop: 0, fontWeight: 400, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>Information technology services for small businesses, home businesses, and startups</Title>
+              {shouldShowContact && <ContactButton type="primary" shape="round" size="large" onClick={() => this.openContactForm()}>Contact Us</ContactButton>}
             </PosterContainer>
           </section>
           <section id="services">
@@ -264,7 +268,7 @@ class HomePageRaw extends React.Component {
                 return (
                   <Col key={i} {...tileSpanProps} style={{ textAlign: 'center', padding: '1rem' }}>
                     <div style={{ color: 'rgba(34, 7, 94, 0.2)', margin: '1rem' }}>{t.icon}</div>
-                    <Title level={3}>{t.title}</Title>
+                    <Typography.Title level={3}>{t.title}</Typography.Title>
                     {(t.tags && t.tags.length > 0) ? <p>
                     {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
                     </p> : null}
@@ -281,11 +285,11 @@ class HomePageRaw extends React.Component {
           </section>
         </ContentStyled>
         <HomeFooter></HomeFooter>
-        <Affix style={{ position: 'fixed', bottom: 30, right: 30 }}>
+        {shouldShowContact && <Affix style={{ position: 'fixed', bottom: 30, right: 30 }}>
           <AffixContactButton type="primary" shape="circle" size="large" onClick={() => this.openContactForm()}>
             <AiOutlineMessage size={36} />
           </AffixContactButton>
-        </Affix>
+        </Affix>}
       </LayoutStyled>
     );
   }

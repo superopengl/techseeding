@@ -8,6 +8,9 @@ import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
 import { MdRoomService } from "react-icons/md";
+import * as queryString from 'query-string';
+import { withRouter } from 'react-router-dom'
+
 const { Header } = Layout;
 const HeaderStyled = styled(Header)`
 position: fixed;
@@ -94,7 +97,7 @@ const LogoImg = styled.img`
   margin-left: 8px;
 `;
 
-export class HomeHeader extends React.Component {
+class HomeHeaderRaw extends React.Component {
   state = {
     visible: false
   }
@@ -120,6 +123,9 @@ export class HomeHeader extends React.Component {
   render() {
     // const isSmallScreen = useMediaQuery({ query: '(max-device-width: 800px)' });
 
+    const {origin} = queryString.parse(this.props.location.search);
+    const shouldShowContact = origin !== 'wechat-app';
+
     return (
       <HeaderStyled>
         <HeaderLogo offset={headerHeight} href="#home">
@@ -132,7 +138,7 @@ export class HomeHeader extends React.Component {
               <Menu.Item key="home"><AnchorLink offset={headerHeight} href="#home">Home</AnchorLink></Menu.Item>
               <Menu.Item key="events"><AnchorLink offset={headerHeight} href="#services">Services</AnchorLink></Menu.Item>
               <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#about_us">About Us</AnchorLink></Menu.Item>
-              <Menu.Item key="contact"><Button type="link" onClick={this.onClickContact}>Contact</Button></Menu.Item>
+              {shouldShowContact && <Menu.Item key="contact"><Button type="link" onClick={this.onClickContact}>Contact</Button></Menu.Item>}
             </Menu>
           </MenuContianer>
         </MediaQuery>
@@ -152,7 +158,7 @@ export class HomeHeader extends React.Component {
               <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>Home</AnchorLink></Menu.Item>
               <Menu.Item key="events"><MdRoomService /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>Services</AnchorLink></Menu.Item>
               <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about_us" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
-              <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> Contact</Menu.Item>
+              {shouldShowContact && <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> Contact</Menu.Item>}
             </Menu>
           </StyledDrawer>
         </MediaQuery>
@@ -161,6 +167,8 @@ export class HomeHeader extends React.Component {
     )
   }
 }
+
+export const HomeHeader = withRouter(HomeHeaderRaw);
 
 HomeHeader.propTypes = {};
 
