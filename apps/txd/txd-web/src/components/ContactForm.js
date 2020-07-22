@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Input, Button, message } from "antd";
 import emailjs from 'emailjs-com';
-import { Trans } from 'react-i18next'
+import { Trans } from 'react-i18next';
 export class ContactForm extends React.Component {
 
   initialValues = {

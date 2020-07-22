@@ -4,6 +4,7 @@ import HomeRowArea from "./HomeRowArea";
 import styled from 'styled-components';
 import { BulbOutlined, DollarCircleOutlined } from '@ant-design/icons';
 import { MailOutlined, PhoneOutlined, WechatOutlined } from '@ant-design/icons';
+import { Trans } from 'react-i18next';
 
 
 const SubTitle = styled(Typography.Title)`
@@ -26,25 +27,6 @@ a {
 `;
 
 class HomeFeatureArea extends React.Component {
-  constructor(props) {
-    super(props);
-    this.data = [
-      {
-        icon: <BulbOutlined />,
-        content: 'Create a list of the features of your services and then list how they transfer to benefits. A benefit might be something that you help customers achieve, or something negative that you can help them avoid. In other words, how is your service going to make the customer feel, or what are they going to gain? Think about how your service makes their life better, easier, more cost-efficient or more enjoyable and use these ideas to make your text more enticing.'
-      },
-      {
-        icon: <DollarCircleOutlined />,
-        content: 'Create a list of the features of your services and then list how they transfer to benefits. A benefit might be something that you help customers achieve, or something negative that you can help them avoid. In other words, how is your service going to make the customer feel, or what are they going to gain? Think about how your service makes their life better, easier, more cost-efficient or more enjoyable and use these ideas to make your text more enticing.'
-      },
-      // {
-      //   icon: <RocketOutlined />,
-      //   content: 'Create a list of the features of your services and then list how they transfer to benefits. A benefit might be something that you help customers achieve, or something negative that you can help them avoid. In other words, how is your service going to make the customer feel, or what are they going to gain? Think about how your service makes their life better, easier, more cost-efficient or more enjoyable and use these ideas to make your text more enticing.'
-      // }
-    ];
-  }
-
-
   render() {
     const props = {
       bgColor: '',
@@ -66,30 +48,34 @@ class HomeFeatureArea extends React.Component {
     return (
       <HomeRowArea {...props}>
         <InfoCard>
-          <SubTitle level={3}>About Us</SubTitle>
+          <SubTitle level={3}>
+            <Trans i18nKey="home.about_us" />
+          </SubTitle>
           <section>
-            We are a team of tech savvies with 15+ years experience in the software industry. We have plenty of successful experiences in website, web application, mobile apps, wechat apps, database design and architecture design. Our stacks cover majority of the popular technologies including Nodejs, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.
+            <Trans i18nKey="home.about_us.content" />
           </section>
         </InfoCard>
         <InfoCard>
-          <SubTitle level={3}>Contact</SubTitle>
+          <SubTitle level={3}>
+          <Trans i18nKey="home.contact" />
+          </SubTitle>
           <section>
             <table style={{ textAlign: 'left', margin: 'auto' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><MailOutlined /> Email</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><MailOutlined /> <Trans i18nKey="home.contact.email" /></td>
                   <td><a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a></td>
                 </tr>
                 <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><PhoneOutlined /> Phone</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><PhoneOutlined /> <Trans i18nKey="home.contact.phone" /></td>
                   <td>0405581228</td>
                 </tr>
                 <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><WechatOutlined /> WeChat</td>
+                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><WechatOutlined /> <Trans i18nKey="home.contact.wechat" /></td>
                   <td>superopengl</td>
                 </tr>
                 <tr>
-                  <td colSpan="2" style={{textAlign: 'center', padding: '4px'}}><img src="images/wechat_qr.jpg" alt="wechat account: superopengl" width={120} height={120} /></td>
+                  <td colSpan="2" style={{ textAlign: 'center', padding: '4px' }}><img src="images/wechat_qr.jpg" alt="wechat account: superopengl" width={120} height={120} /></td>
                 </tr>
               </tbody>
             </table>
@@ -97,9 +83,11 @@ class HomeFeatureArea extends React.Component {
 
         </InfoCard>
         <InfoCard>
-          <SubTitle level={3}>Why Us?</SubTitle>
+          <SubTitle level={3}>
+            <Trans i18nKey="home.why_us" />
+          </SubTitle>
           <section>
-            It will be always easy to create a managed website on the internet nowadays. However, shortly many successful small businesses and startups will find out that they will need a customised digital solution that a static website cannot fulfill anymore. With Techseeding, you can have a highly tailored morden cloud-based application to speed up your success.
+            <Trans i18nKey="home.why_us.content" />
           </section>
         </InfoCard>
       </HomeRowArea>

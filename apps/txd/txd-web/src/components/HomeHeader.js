@@ -6,10 +6,12 @@ import MediaQuery from 'react-responsive'
 import { MenuOutlined } from '@ant-design/icons';
 import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaLanguage } from "react-icons/fa";
 import { MdRoomService } from "react-icons/md";
 import * as queryString from 'query-string';
 import { withRouter } from 'react-router-dom'
+import { Trans } from 'react-i18next';
+import LangToggleButton from './LangToggleButton';
 
 const { Header } = Layout;
 const HeaderStyled = styled(Header)`
@@ -123,7 +125,7 @@ class HomeHeaderRaw extends React.Component {
   render() {
     // const isSmallScreen = useMediaQuery({ query: '(max-device-width: 800px)' });
 
-    const {origin} = queryString.parse(this.props.location.search);
+    const { origin } = queryString.parse(this.props.location.search);
     const shouldShowContact = origin !== 'wechat-app';
 
     return (
@@ -135,16 +137,34 @@ class HomeHeaderRaw extends React.Component {
         <MediaQuery minDeviceWidth={801}>
           <MenuContianer>
             <Menu mode="horizontal" style={{ border: 0 }}>
-              <Menu.Item key="home"><AnchorLink offset={headerHeight} href="#home">Home</AnchorLink></Menu.Item>
-              <Menu.Item key="events"><AnchorLink offset={headerHeight} href="#services">Services</AnchorLink></Menu.Item>
-              <Menu.Item key="about_us"><AnchorLink offset={headerHeight} href="#about_us">About Us</AnchorLink></Menu.Item>
-              {shouldShowContact && <Menu.Item key="contact"><Button type="link" onClick={this.onClickContact}>Contact</Button></Menu.Item>}
+              <Menu.Item key="lng">
+                <LangToggleButton></LangToggleButton>
+              </Menu.Item>
+              <Menu.Item key="home">
+                <AnchorLink offset={headerHeight} href="#home">
+                  <Trans i18nKey="header.home" />
+                </AnchorLink>
+              </Menu.Item>
+              <Menu.Item key="events">
+                <AnchorLink offset={headerHeight} href="#services">
+                  <Trans i18nKey="header.services" />
+                </AnchorLink>
+              </Menu.Item>
+              <Menu.Item key="about_us">
+                <AnchorLink offset={headerHeight} href="#about_us">
+                  <Trans i18nKey="header.about_us" />
+                </AnchorLink>
+              </Menu.Item>
+              {shouldShowContact && <Menu.Item key="contact">
+                <Button type="link" onClick={this.onClickContact}>
+                  <Trans i18nKey="header.contact" />
+                </Button></Menu.Item>}
             </Menu>
           </MenuContianer>
         </MediaQuery>
         <MediaQuery maxDeviceWidth={800}>
           <Button type="link" style={{ backgroundColor: 'transparent', color: 'white' }} onClick={this.showDrawer}>
-            <MenuOutlined/>
+            <MenuOutlined />
           </Button>
           <StyledDrawer
             // title={<div><MenuOutlined /> Menu</div>}
@@ -152,13 +172,20 @@ class HomeHeaderRaw extends React.Component {
             closable={false}
             onClose={this.onClose}
             visible={this.state.visible}
-            width={200}
+            width={240}
           >
             <Menu mode="vertical" style={{ border: 0 }} >
-              <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>Home</AnchorLink></Menu.Item>
-              <Menu.Item key="events"><MdRoomService /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>Services</AnchorLink></Menu.Item>
-              <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about_us" onClick={this.onClose}>About Us</AnchorLink></Menu.Item>
-              {shouldShowContact && <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> Contact</Menu.Item>}
+              <Menu.Item key="home"><FaLanguage /> English/简体中文</Menu.Item>
+              <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>
+                <Trans i18nKey="header.home" />
+              </AnchorLink></Menu.Item>
+              <Menu.Item key="events"><MdRoomService /> <AnchorLink offset={headerHeight} href="#services" onClick={this.onClose}>
+                <Trans i18nKey="header.services" />
+              </AnchorLink></Menu.Item>
+              <Menu.Item key="about_us"><BsPeopleFill /> <AnchorLink offset={headerHeight} href="#about_us" onClick={this.onClose}>
+                <Trans i18nKey="header.about_us" />
+              </AnchorLink></Menu.Item>
+              {shouldShowContact && <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> <Trans i18nKey="header.contact" /></Menu.Item>}
             </Menu>
           </StyledDrawer>
         </MediaQuery>

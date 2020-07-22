@@ -114,41 +114,40 @@ const iconSize = 100;
 
 const tileData = [
   {
-    title: <Trans i18nKey="feature.title.website"/>,
+    title: <Trans i18nKey="feature.title.website" />,
     tags: [
-      'portal website',
-      'web application',
-      'customised design',
+      <Trans i18nKey="tag.portal" />,
+      <Trans i18nKey="tag.webapp" />,
+      <Trans i18nKey="tag.custom_design" />,
       // 'hosting',
       // 'from $199'
     ],
-    content: 'We provide all types of website development from static web portal with search engine optimisation to complex web application which is highly tailored for your unique business.',
+    content: <Trans i18nKey="feature.description.website" />,
     icon: <RiComputerLine size={iconSize}></RiComputerLine>,
     backgroundColor: '#e6f7ff',
     color: '#0050b3'
   },
   {
-    title: 'Mobile Apps',
+    title: <Trans i18nKey="feature.title.mobile" />,
     tags: [
-      'app development',
-      'mobile APIs',
-      'hosting',
-      // 'from $899'
+      <Trans i18nKey="tag.app_dev" />,
+      <Trans i18nKey="tag.mobile_api" />,
+      <Trans i18nKey="tag.hosting" />,
     ],
-    content: `Apple/Android mobile apps can perform actions much quicker than a mobile website, and can be used to increase customer loyalty and to build the communication directly with your customers.`,
+    content: <Trans i18nKey="feature.description.mobile" />,
     icon: <GoDeviceMobile size={iconSize}></GoDeviceMobile>,
     backgroundColor: '#fff0f6',
     color: '#c41d7f'
   },
   {
-    title: 'Wechat',
+    title: <Trans i18nKey="feature.title.wechat" />,
     tags: [
-      'Mini Program/小程序',
-      'Public Account/公众号',
-      'API hosting',
+      <Trans i18nKey="tag.wechat_mini" />,
+      <Trans i18nKey="tag.wechat_public" />,
+      <Trans i18nKey="tag.wechat_api" />,
       // 'from $399'
     ],
-    content: 'Integration with WeChat Public Account and WeChat Mini Program (微信公众号/微信小程序) can be a sharp weapon for your business to expand to another world.',
+    content: <Trans i18nKey="feature.description.wechat" />,
     icon: <AiOutlineWechat size={iconSize}></AiOutlineWechat>,
 
     backgroundColor: '#f6ffed',
@@ -156,37 +155,37 @@ const tileData = [
 
   },
   {
-    title: 'Database Design',
+    title: <Trans i18nKey="feature.title.database" />,
     tags: [
-      'free quote',
-      'schema review',
-      'big data streaming',
+      <Trans i18nKey="tag.free_quote" />,
+      <Trans i18nKey="tag.schema" />,
+      <Trans i18nKey="tag.big_data" />,
     ],
-    content: `A well designed database schema can be very beneficial to your business with high scalability and low cost. No hesitate to review your database when you feel it's slow down. PostgreSQL, MySQL, SQL Server, MongoDB, NoSQL, ... we will find a right home for your data.`,
+    content: <Trans i18nKey="feature.description.database" />,
     icon: <GoDatabase size={iconSize}></GoDatabase>,
     backgroundColor: '#f9f0ff',
     color: '#9254de'
   },
   {
-    title: 'Digital Transformation',
+    title: <Trans i18nKey="feature.title.digitizing" />,
     tags: [
-      'free quote',
-      'customised solution',
-      'e-commerce',
+      <Trans i18nKey="tag.free_quote" />,
+      <Trans i18nKey="tag.custom_solution" />,
+      <Trans i18nKey="tag.e_commerce" />,
     ],
-    content: `It's the era to accelerate the digital transformation, which will give you a truly reliable bridge between you and your customers. Our professional business analyst will help you figure out the best way to move your workflow to the digital world.`,
+    content: <Trans i18nKey="feature.description.digitizing" />,
     icon: <GiMeshNetwork size={iconSize}></GiMeshNetwork>,
     backgroundColor: '#feffe6',
     color: '#fadb14'
   },
   {
-    title: 'Tech Consulting',
+    title: <Trans i18nKey="feature.title.consulting" />,
     tags: [
-      'frontend/backend',
-      'architecture',
-      'business analysis'
+      <Trans i18nKey="tag.full_stack" />,
+      <Trans i18nKey="tag.architecture" />,
+      <Trans i18nKey="tag.ba" />,
     ],
-    content: 'We provide technical consulting service in a wide range of Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.',
+    content: <Trans i18nKey="feature.description.consulting" />,
     icon: <GiTeamIdea size={iconSize}></GiTeamIdea>,
     backgroundColor: '#e6fffb',
     color: '#13c2c2'
@@ -248,7 +247,9 @@ class HomePageRaw extends React.Component {
     return (
       <LayoutStyled>
         <Modal
-          title={<div style={{ fontSize: '1rem', fontWeight: 300 }}>Let us tailor a service package that meets your needs. Tell us a little about your business, and we will get back to you with some ideas shortly.</div>}
+          title={<div style={{ fontSize: '1rem', fontWeight: 300 }}>
+            <Trans i18nKey="contact.title" />
+          </div>}
           visible={this.state.modalVisible}
           onOk={this.handleContactOk}
           onCancel={this.handleContactCancel}
@@ -262,9 +263,13 @@ class HomePageRaw extends React.Component {
         <ContentStyled >
           <section id="home">
             <PosterContainer style={{ height: posterHeight, position: 'relative' }}>
-              <Title style={{ fontSize: catchPhraseSize, marginTop: '2rem' }}>Professional tech friend of your business</Title>
-              <Title level={2} style={{ marginTop: 0, fontWeight: 400, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>Information technology services for small businesses, home businesses, and startups</Title>
-              {shouldShowContact && <ContactButton type="primary" shape="round" size="large" onClick={() => this.openContactForm()}>Contact Us</ContactButton>}
+              <Title style={{ fontSize: catchPhraseSize, marginTop: '2rem' }}><Trans i18nKey="home.slogan" /></Title>
+              <Title level={2} style={{ marginTop: 0, fontWeight: 400, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>
+                <Trans i18nKey="home.catch_phrase" />
+              </Title>
+              {shouldShowContact && <ContactButton type="primary" shape="round" size="large" onClick={() => this.openContactForm()}>
+                <Trans i18nKey="button.contact_us" />
+              </ContactButton>}
             </PosterContainer>
           </section>
           <section id="services">
