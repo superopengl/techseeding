@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, Input, Button, message } from "antd";
 import emailjs from 'emailjs-com';
-
+import { Trans } from 'react-i18next'
 export class ContactForm extends React.Component {
 
   initialValues = {
@@ -80,10 +80,10 @@ export class ContactForm extends React.Component {
           <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000}  disabled={sending} placeholder="Tell us a little about your business or how can we help you." />
         </Form.Item>
         <Form.Item>
-          <Button block type="primary" htmlType="submit" disabled={sending}>Submit</Button>
+          <Button block type="primary" htmlType="submit" disabled={sending}><Trans i18nKey="button.submit"/></Button>
         </Form.Item>
         <Form.Item>
-          <Button block type="link" onClick={this.handleCancel} disabled={sending}>Cancel</Button>
+          <Button block type="link" onClick={this.handleCancel} disabled={sending}><Trans i18nKey="button.cancel"/></Button>
         </Form.Item>
       </Form>
     );

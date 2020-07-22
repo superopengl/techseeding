@@ -13,6 +13,7 @@ import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import windowSize from 'react-window-size';
 import ContactForm from 'components/ContactForm';
+import { Trans } from 'react-i18next';
 import * as queryString from 'query-string';
 
 const { Content } = Layout;
@@ -113,7 +114,7 @@ const iconSize = 100;
 
 const tileData = [
   {
-    title: 'Website',
+    title: <Trans i18nKey="feature.title.website"/>,
     tags: [
       'portal website',
       'web application',
@@ -223,7 +224,11 @@ class HomePageRaw extends React.Component {
     this.setState({
       modalVisible: true
     }, () => {
-      setTimeout(() => this.contactFormRef.current.focus(), 300);
+      setTimeout(() => {
+        if (this.contactFormRef.current) {
+          this.contactFormRef.current.focus()
+        }
+      }, 300);
     });
   }
 
@@ -237,7 +242,7 @@ class HomePageRaw extends React.Component {
       windowWidth < 992 ? 36 :
         44;
 
-    const {origin} = queryString.parse(this.props.location.search);
+    const { origin } = queryString.parse(this.props.location.search);
     const shouldShowContact = origin !== 'wechat-app';
 
     return (
@@ -270,7 +275,7 @@ class HomePageRaw extends React.Component {
                     <div style={{ color: 'rgba(34, 7, 94, 0.2)', margin: '1rem' }}>{t.icon}</div>
                     <Typography.Title level={3}>{t.title}</Typography.Title>
                     {(t.tags && t.tags.length > 0) ? <p>
-                    {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
+                      {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
                     </p> : null}
                     <p>
                       {t.content}
