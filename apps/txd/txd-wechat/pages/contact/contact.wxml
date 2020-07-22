@@ -5,7 +5,7 @@
 
             <mp-cells title="" footer="">
                 <mp-cell prop="name" title="称    谓" ext-class="">
-                    <input bindinput="formInputChange" data-field="qq" class="weui-input" placeholder="我们如何称呼您"/>
+                    <input auto-focus bindinput="formInputChange" data-field="qq" class="weui-input" placeholder="我们如何称呼您"/>
                 </mp-cell>
                 <mp-cell prop="contact" title="联系方式" ext-class="">
                     <input bindinput="formInputChange" data-field="qq" class="weui-input" placeholder="电话/Email/微信/..."/>
@@ -28,8 +28,8 @@
             <!-- </view> -->
             <view class="weui-cell">
                 <view class="weui-cell__bd">
-                    <textarea class="weui-textarea" placeholder="您的需求" style="height: 4.5em" maxlength="500"/>
-                    <view class="weui-textarea-counter">0/500</view>
+                    <textarea class="weui-textarea" bindinput="bindMessageInput" placeholder="您的需求" maxlength="500" auto-height="true"/>
+                    <view class="weui-textarea-counter">{{messageLength}}/500</view>
                 </view>
             </view>
         </view>

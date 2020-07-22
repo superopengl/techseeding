@@ -1,6 +1,7 @@
 Page({
   data: {
       showTopTips: false,
+      messageLength: 0,
 
       radioItems: [
           {name: 'cell standard', value: '0', checked: true},
@@ -32,6 +33,10 @@ Page({
           name: 'idcard',
           rules: {required: true, message: 'idcard必填'},
       }]
+  },
+  bindMessageInput: function(e) {
+    const len = e.detail.value.length || 0;
+    this.setData({messageLength: len});
   },
   methods: {
       radioChange: function (e) {
