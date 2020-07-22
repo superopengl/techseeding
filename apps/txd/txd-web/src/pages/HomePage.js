@@ -242,7 +242,7 @@ class HomePageRaw extends React.Component {
         44;
 
     const { origin } = queryString.parse(this.props.location.search);
-    const shouldShowContact = origin !== 'wechat-app';
+    const shouldShowContact = true || origin !== 'wechat-app';
 
     return (
       <LayoutStyled>

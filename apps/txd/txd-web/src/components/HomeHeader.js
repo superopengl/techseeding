@@ -139,7 +139,7 @@ class HomeHeaderRaw extends React.Component {
     // const isSmallScreen = useMediaQuery({ query: '(max-device-width: 800px)' });
 
     const { origin } = queryString.parse(this.props.location.search);
-    const shouldShowContact = origin !== 'wechat-app';
+    const shouldShowContact = true || origin !== 'wechat-app';
 
     return (
       <HeaderStyled>
