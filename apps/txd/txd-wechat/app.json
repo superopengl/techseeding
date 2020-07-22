@@ -16,7 +16,7 @@
     "navigationBarTitleText": "Techseeding",
     "navigationBarTextStyle": "white"
   },
-  "tabBar": {
+  "tabBar-hide": {
     "color": "#cccccc",
     "selectedColor": "#ffffff",
     "backgroundColor": "#22075e",
