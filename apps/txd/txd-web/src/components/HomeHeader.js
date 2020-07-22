@@ -6,8 +6,9 @@ import MediaQuery from 'react-responsive'
 import { MenuOutlined } from '@ant-design/icons';
 import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
+import { GrLanguage } from "react-icons/gr";
 import { FaHome, FaLanguage } from "react-icons/fa";
-import { MdRoomService } from "react-icons/md";
+import { MdRoomService, MdLanguage } from "react-icons/md";
 import * as queryString from 'query-string';
 import { withRouter } from 'react-router-dom'
 import { Trans } from 'react-i18next';
@@ -122,6 +123,18 @@ class HomeHeaderRaw extends React.Component {
     }, () => this.props.onClickContact());
   }
 
+  toggleLanguage = () => {
+    const { lng } = queryString.parse(this.props.location.search);
+    console.log(lng);
+    const lang = lng === 'zh' ? 'en' : 'zh';
+
+    // i18n.changeLanguage(lang);
+    this.props.history.push({
+      search: `?lng=${lang}`
+    });
+    window.location.reload();
+  }
+
   render() {
     // const isSmallScreen = useMediaQuery({ query: '(max-device-width: 800px)' });
 
@@ -137,9 +150,7 @@ class HomeHeaderRaw extends React.Component {
         <MediaQuery minDeviceWidth={801}>
           <MenuContianer>
             <Menu mode="horizontal" style={{ border: 0 }}>
-              <Menu.Item key="lng">
-                <LangToggleButton></LangToggleButton>
-              </Menu.Item>
+
               <Menu.Item key="home">
                 <AnchorLink offset={headerHeight} href="#home">
                   <Trans i18nKey="header.home" />
@@ -159,6 +170,9 @@ class HomeHeaderRaw extends React.Component {
                 <Button type="link" onClick={this.onClickContact}>
                   <Trans i18nKey="header.contact" />
                 </Button></Menu.Item>}
+              <Menu.Item key="lng">
+                <LangToggleButton onClick={this.toggleLanguage} />
+              </Menu.Item>
             </Menu>
           </MenuContianer>
         </MediaQuery>
@@ -175,7 +189,6 @@ class HomeHeaderRaw extends React.Component {
             width={240}
           >
             <Menu mode="vertical" style={{ border: 0 }} >
-              <Menu.Item key="home"><FaLanguage /> English/简体中文</Menu.Item>
               <Menu.Item key="home"><FaHome /> <AnchorLink offset={headerHeight} href="#home" onClick={this.onClose}>
                 <Trans i18nKey="header.home" />
               </AnchorLink></Menu.Item>
@@ -186,6 +199,7 @@ class HomeHeaderRaw extends React.Component {
                 <Trans i18nKey="header.about_us" />
               </AnchorLink></Menu.Item>
               {shouldShowContact && <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> <Trans i18nKey="header.contact" /></Menu.Item>}
+              <Menu.Item key="lang" onClick={this.toggleLanguage}><MdLanguage /> English/简体中文</Menu.Item>
             </Menu>
           </StyledDrawer>
         </MediaQuery>
