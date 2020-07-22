@@ -9,7 +9,7 @@ const gitCommitHash = gitInfo.commit.shortHash;
 const FooterStyled = styled(Footer)`
 width: 100%;
 text-align: center;
-font-size: 0.9rem;
+font-size: 0.8rem;
 color: #f0f0f0;
 background-color: #22075e;
 padding-left: 0;
@@ -31,7 +31,8 @@ const HomeFooter = () => (
     <section id="about">
       <Divider></Divider>
       <Row>
-        <Col span={24}> ©2020 Techseeding PTY LTD. All rights reserved. Version {gitCommitHash}</Col>
+        <Col span={24}>©{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
+        <Col span={24}>Version {gitCommitHash}</Col>
       </Row>
     </section>
   </FooterStyled>
