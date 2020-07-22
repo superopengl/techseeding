@@ -2,7 +2,8 @@ import React from 'react';
 import { Form, Input, Button, message } from "antd";
 import emailjs from 'emailjs-com';
 import { Trans } from 'react-i18next';
-export class ContactForm extends React.Component {
+import { withTranslation } from 'react-i18next';
+class ContactForm extends React.Component {
 
   initialValues = {
     name2: '',
@@ -68,16 +69,18 @@ export class ContactForm extends React.Component {
 
   render() {
     const {sending} = this.state;
+    const { t, i18n } = this.props;
+
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>
         <Form.Item name="name" rules={[{ required: true, message: 'How shall we announce you?' }]}>
-          <Input ref={input => this.firstInputRef = input} placeholder="Name" allowClear={true} maxLength={100} disabled={sending}/>
+          <Input ref={input => this.firstInputRef = input} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending}/>
         </Form.Item>
         <Form.Item name="reply" rules={[{ required: true, message: 'How can we reach out to you?' }]}>
-          <Input placeholder="Phone or email" allowClear={true} maxLength={100}  disabled={sending}/>
+          <Input placeholder={t('contact.placeholder.reply')} allowClear={true} maxLength={100}  disabled={sending}/>
         </Form.Item>
         <Form.Item name="message" rules={[{ required: true, message: 'Why not let us know more about your needs?' }]}>
-          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000}  disabled={sending} placeholder="Tell us a little about your business or how can we help you." />
+          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={500}  disabled={sending} placeholder={t('contact.placeholder.message')} />
         </Form.Item>
         <Form.Item>
           <Button block type="primary" htmlType="submit" disabled={sending}><Trans i18nKey="button.submit"/></Button>
@@ -94,4 +97,4 @@ ContactForm.propTypes = {};
 
 ContactForm.defaultProps = {};
 
-export default ContactForm;
+export default withTranslation(undefined, {withRef: true})(ContactForm);

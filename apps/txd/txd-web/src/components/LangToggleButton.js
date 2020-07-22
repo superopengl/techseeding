@@ -6,8 +6,8 @@ import i18n from "i18next";
 
 
 const LangIconImg = styled.img`
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
 `;
 

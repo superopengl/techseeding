@@ -75,7 +75,7 @@ class HomeFeatureArea extends React.Component {
                   <td>superopengl</td>
                 </tr>
                 <tr>
-                  <td colSpan="2" style={{ textAlign: 'center', padding: '4px' }}><img src="images/wechat_qr.jpg" alt="wechat account: superopengl" width={120} height={120} /></td>
+                  <td colSpan="2" style={{ textAlign: 'center', padding: '4px' }}><img src="images/wechat_logo_qr.jpg" alt="wechat account: superopengl" width={160} height="auto" /></td>
                 </tr>
               </tbody>
             </table>
