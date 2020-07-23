@@ -13,7 +13,12 @@ Page({
   onShareAppMessage: function(res) {
     return {
       title: 'Techseeding科技',
-      imageUrl: '/images/logo-avatar.png'
+      // imageUrl: '/images/logo-avatar.png'
     };
   },
+  onShareTimeline: function() {
+    return {
+      title: 'Techseeding科技',
+    };
+  }
 })
