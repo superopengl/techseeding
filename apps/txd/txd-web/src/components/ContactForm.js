@@ -73,14 +73,14 @@ class ContactForm extends React.Component {
 
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>
-        <Form.Item name="name" rules={[{ required: true, message: 'How shall we announce you?' }]}>
+        <Form.Item name="name" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
           <Input ref={input => this.firstInputRef = input} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending}/>
         </Form.Item>
-        <Form.Item name="reply" rules={[{ required: true, message: 'How can we reach out to you?' }]}>
+        <Form.Item name="reply" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
           <Input placeholder={t('contact.placeholder.reply')} allowClear={true} maxLength={100}  disabled={sending}/>
         </Form.Item>
-        <Form.Item name="message" rules={[{ required: true, message: 'Why not let us know more about your needs?' }]}>
-          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={500}  disabled={sending} placeholder={t('contact.placeholder.message')} />
+        <Form.Item name="message" rules={[{ required: true, message: ' ', whitespace: true, max: 1000 }]}>
+          <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000}  disabled={sending} placeholder={t('contact.placeholder.message')} />
         </Form.Item>
         <Form.Item>
           <Button block type="primary" htmlType="submit" disabled={sending}><Trans i18nKey="button.submit"/></Button>
