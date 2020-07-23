@@ -199,7 +199,7 @@ class HomeHeaderRaw extends React.Component {
                 <Trans i18nKey="header.about_us" />
               </AnchorLink></Menu.Item>
               {shouldShowContact && <Menu.Item key="contact" onClick={this.onClickContact}><AiFillMessage /> <Trans i18nKey="header.contact" /></Menu.Item>}
-              <Menu.Item key="lang" onClick={this.toggleLanguage}><MdLanguage /> EN / 中文</Menu.Item>
+              <Menu.Item key="lang" onClick={this.toggleLanguage}><MdLanguage /> EN / 简中</Menu.Item>
             </Menu>
           </StyledDrawer>
         </MediaQuery>
