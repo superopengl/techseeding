@@ -4,7 +4,10 @@ Page({
     language: 'zh'
   },
   onLoad: function() {
-    const {language} = wx.getSystemInfoSync();
+    let {wechatLanguage} = wx.getSystemInfoSync();
+    wechatLanguage = 'zh-CH';
+    const language = /zh/i.test(wechatLanguage) ? 'zh' : 'en';
+    console.log('language is', wechatLanguage, language);
     this.setData({language});
   },
   onShareAppMessage: function(res) {
