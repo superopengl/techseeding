@@ -1,14 +1,15 @@
 // pages/website/website.js
+// const app = getApp();
+
 Page({
   data: {
-    language: 'zh'
+    lng: 'zh'
   },
-  onLoad: function() {
-    let {wechatLanguage} = wx.getSystemInfoSync();
-    wechatLanguage = 'zh-CH';
-    const language = /zh/i.test(wechatLanguage) ? 'zh' : 'en';
-    console.log('language is', wechatLanguage, language);
-    this.setData({language});
+  onShow: function() {
+    const {language} = wx.getSystemInfoSync();
+    const lng = 'zh' || /zh/i.test(language) ? 'zh' : 'en';
+    console.log('language is', language, lng);
+    this.setData({lng});
   },
   onShareAppMessage: function(res) {
     return {
