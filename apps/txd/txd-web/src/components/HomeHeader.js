@@ -6,8 +6,7 @@ import MediaQuery from 'react-responsive'
 import { MenuOutlined } from '@ant-design/icons';
 import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
-import { GrLanguage } from "react-icons/gr";
-import { FaHome, FaLanguage } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { MdRoomService, MdLanguage } from "react-icons/md";
 import * as queryString from 'query-string';
 import { withRouter } from 'react-router-dom'

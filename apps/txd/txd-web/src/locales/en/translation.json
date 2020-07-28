@@ -13,6 +13,7 @@
   "home.why_us": "Why Us?",
   "home.why_us.content": "It will be always easy to create a managed website on the internet nowadays. However, shortly many successful small businesses and startups will find out that they will need a customised digital solution that a static website cannot fulfill anymore. With Techseeding, you can have a highly tailored morden cloud-based application to speed up your success.",
   "home.contact": "Contact",
+  "home.contact.website": "Website",
   "home.contact.email": "Email",
   "home.contact.phone": "Phone",
   "home.contact.wechat": "WeChat",
@@ -48,5 +49,8 @@
   "contact.title": "Let us tailor a service package that meets your needs. Tell us a little about your business, and we will get back to you with some ideas shortly.",
   "contact.placeholder.name": "Name",
   "contact.placeholder.reply": "Phone or email or ...",
-  "contact.placeholder.message": "Tell us a little about your business or how can we help you."
+  "contact.placeholder.message": "Tell us a little about your business or how can we help you.",
+  "copy.done": "Copied {{value}}",
+  "contact.message.done": "Successfully sent out the message! We will reply as soon. Thank you very much.",
+  "contact.message.error": "Oops! Failed to send out the message."
 }

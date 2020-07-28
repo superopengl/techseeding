@@ -1,6 +1,5 @@
 import i18n from "i18next";
 // import Backend from 'i18next-http-backend';
-import { initReactI18next, reactI18nextModule } from "react-i18next";
 import LanguageDetector from 'i18next-browser-languagedetector';
 import translationEn from './locales/en/translation.json';
 import translationZh from './locales/zh/translation.json';
@@ -23,7 +22,7 @@ i18n
     resources,
     // lng: "en",
     fallbackLng: "en",
-    debug: true,
+    debug: false,
     ns: ["translation"],
     defaultNS: "translation",
     keySeparator: false, // we use content as keys

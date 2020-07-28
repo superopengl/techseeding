@@ -13,6 +13,7 @@
   "home.why_us": "我们的优势",
   "home.why_us.content": "现在通过网站DIY工具可以很容易地实现一个演示型的网站。然而，很多小企业或初创公司很快就会发现，这些快餐型的网站只能实现静态页面和功能非常有限的交互页面，无法实现针对专有商业模型的自定义开发。在Techseeding，我们致力于针对您独特的需求，量身定制最适合您的系统和云平台",
   "home.contact": "联系方式",
+  "home.contact.website": "网站",
   "home.contact.email": "邮箱",
   "home.contact.phone": "电话",
   "home.contact.wechat": "微信",
@@ -48,5 +49,8 @@
   "contact.title": "如果您有什么问题或需求，我们会尽快回复您！",
   "contact.placeholder.name": "称谓",
   "contact.placeholder.reply": "电话、邮箱等联系方式",
-  "contact.placeholder.message": "我们如何能帮到您？"
+  "contact.placeholder.message": "我们如何能帮到您？",
+  "copy.done": "已拷贝 {{value}}",
+  "contact.message.done": "成功发送消息！我们会尽快回复，谢谢。",
+  "contact.message.error": "发送消息错误！"
 }

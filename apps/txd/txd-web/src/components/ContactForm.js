@@ -3,6 +3,7 @@ import { Form, Input, Button, message } from "antd";
 import emailjs from 'emailjs-com';
 import { Trans } from 'react-i18next';
 import { withTranslation } from 'react-i18next';
+import i18n from 'i18next';
 class ContactForm extends React.Component {
 
   initialValues = {
@@ -50,8 +51,15 @@ class ContactForm extends React.Component {
         },
         REACT_APP_EMAILJS_USERID
       );
+      message.success({
+        content: i18n.t('contact.message.done'),
+        key: 'contact.message.done'
+      });
     } catch (e) {
-      message.error(`Oops, failed to send contact message!`);
+      message.error({
+        content: i18n.t('contact.message.error'),
+        key: 'contact.message.error'
+      });
       // console.error(e);
     } finally {
       this.setState({sending: false}, () => this.props.onDone());
@@ -69,7 +77,7 @@ class ContactForm extends React.Component {
 
   render() {
     const {sending} = this.state;
-    const { t, i18n } = this.props;
+    const { t } = this.props;
 
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>

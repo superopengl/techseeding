@@ -2,13 +2,13 @@ import React from 'react';
 import { Typography } from 'antd';
 import HomeRowArea from "./HomeRowArea";
 import styled from 'styled-components';
-import { BulbOutlined, DollarCircleOutlined } from '@ant-design/icons';
 import { MailOutlined, PhoneOutlined, WechatOutlined } from '@ant-design/icons';
 import { Trans } from 'react-i18next';
-
+import { MdOpenInNew } from "react-icons/md";
+import { CopyToClipboardButton } from '../CopyToClipboardButton';
 
 const SubTitle = styled(Typography.Title)`
-color: #f0f0f0 !important;
+color: #dddddd !important;
 `
 
 const InfoCard = styled.div`
@@ -17,7 +17,7 @@ width: 100%;
 margin-bottom: 2rem;
 
 a {
-  color: #f0f0f0;
+  color: #dddddd;
 
   &:hover {
     color: white;
@@ -26,6 +26,12 @@ a {
 }
 `;
 
+const ContactSection = styled.section`
+  & p {
+    margin:0;
+    height
+  }
+`;
 class HomeFeatureArea extends React.Component {
   render() {
     const props = {
@@ -57,29 +63,29 @@ class HomeFeatureArea extends React.Component {
         </InfoCard>
         <InfoCard>
           <SubTitle level={3}>
-          <Trans i18nKey="home.contact" />
+            <Trans i18nKey="home.contact" />
           </SubTitle>
-          <section>
-            <table style={{ textAlign: 'left', margin: 'auto' }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><MailOutlined /> <Trans i18nKey="home.contact.email" /></td>
-                  <td><a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a></td>
-                </tr>
-                <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><PhoneOutlined /> <Trans i18nKey="home.contact.phone" /></td>
-                  <td>0405581228</td>
-                </tr>
-                <tr>
-                  <td style={{ width: '5rem', textAlign: 'right', paddingRight: '8px' }}><WechatOutlined /> <Trans i18nKey="home.contact.wechat" /></td>
-                  <td>superopengl</td>
-                </tr>
-                <tr>
-                  <td colSpan="2" style={{ textAlign: 'center', padding: '4px' }}><img src="images/wechat_logo_qr.jpg" alt="wechat account: superopengl" width={160} height="auto" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
+          <ContactSection>
+            <p>
+              <MdOpenInNew style={{ position: 'relative', top: 2 }} /> <Trans i18nKey="home.contact.website" /> : <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">https://www.techseeding.com.au</a>
+              <CopyToClipboardButton value="https://www.techseeding.com.au/" />
+            </p>
+            <p>
+              <MailOutlined /> <Trans i18nKey="home.contact.email" /> : <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
+              <CopyToClipboardButton value="mr.shaojun@gmail.com" />
+            </p>
+            <p>
+              <PhoneOutlined /> <Trans i18nKey="home.contact.phone" /> : <a href="tel:+61405581228">04 0558 1228</a>
+              <CopyToClipboardButton value="+61405581228" />
+            </p>
+            <p>
+              <WechatOutlined /> <Trans i18nKey="home.contact.wechat" /> : <a href="weixin://dl/chat?superopengl">superopengl</a>
+              <CopyToClipboardButton value="superopengl" />
+            </p>
+            <p style={{marginTop: '1rem'}}>
+              <img src="images/wechat_logo_qr.jpg" alt="wechat account: superopengl" width={160} height="auto" />
+            </p>
+          </ContactSection>
 
         </InfoCard>
         <InfoCard>
