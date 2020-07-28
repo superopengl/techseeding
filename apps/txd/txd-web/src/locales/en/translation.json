@@ -23,7 +23,7 @@
   "feature.title.wechat": "Wechat",
   "feature.description.wechat": "Integration with WeChat Public Account and WeChat Mini Program (微信公众号/微信小程序) can be a sharp weapon for your business to expand to another world.",
   "feature.title.database": "Database Design",
-  "feature.description.database": "A well designed database schema can be very beneficial to your business with high scalability and low cost. No hesitate to review your database when you feel it's slow down. PostgreSQL, MySQL, SQL Server, MongoDB, NoSQL, ... we will find a right home for your data.",
+  "feature.description.database": "A well designed database schema can be very beneficial to your business with high scalability and low cost. No hesitate to review your database when you feel it's slow down. PostgreSQL, MySQL, SQL Server, MongoDB, Columnar Database, NoSQL, ... we will find a right home for your data.",
   "feature.title.digitizing": "Digitizing",
   "feature.description.digitizing": "It's the era to accelerate the digital transformation, which will give you a truly reliable bridge between you and your customers. Our professional business analyst will help you figure out the best way to move your workflow to the digital world.",
   "feature.title.consulting": "Tech Consulting",
