@@ -4,6 +4,7 @@ import { message } from "antd";
 import styled from 'styled-components';
 import { MdContentCopy } from "react-icons/md";
 import i18n from 'i18next';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 const CopyIcon = styled(MdContentCopy)`
   color: #cccccc;
@@ -28,7 +29,6 @@ function setTextToClipboard(value) {
     content,
     key: 'copy.done'
   });
-  console.log('copied', content);
 }
 
 
@@ -36,7 +36,9 @@ export const CopyToClipboardButton = (props) => {
   // const { t, i18n } = useTranslation();
   // const message = t('copy.done', {value});
 
-  return <StyledButton type="link" shape="circle" icon={<CopyIcon />} onClick={() => setTextToClipboard(props.value)}/>
+  return <CopyToClipboard text={props.value} onCopy={() => setTextToClipboard(props.value)}>
+    <StyledButton type="link" shape="circle" icon={<CopyIcon />}/>
+  </CopyToClipboard>
 };
 
 
