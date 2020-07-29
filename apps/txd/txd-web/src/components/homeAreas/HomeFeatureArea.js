@@ -75,7 +75,7 @@ class HomeFeatureArea extends React.Component {
               <CopyToClipboardButton value="mr.shaojun@gmail.com" />
             </p>
             <p>
-              <PhoneOutlined /> <Trans i18nKey="home.contact.phone" /> : <a href="tel:+61405581228">04 0558 1228</a>
+              <PhoneOutlined /> <Trans i18nKey="home.contact.phone" /> : <a href="tel:+61405581228">+61 4 0558 1228</a>
               <CopyToClipboardButton value="+61405581228" />
             </p>
             <p>

@@ -2,6 +2,8 @@ import React from 'react';
 import { Layout, Row, Col, Divider } from 'antd';
 import styled from 'styled-components';
 import GitInfo from 'react-git-info/macro';
+import * as queryString from 'query-string';
+import { withRouter } from 'react-router-dom';
 const { Footer } = Layout;
 const gitInfo = GitInfo();
 const gitCommitHash = gitInfo.commit.shortHash;
@@ -26,20 +28,26 @@ a {
 `;
 
 
-const HomeFooter = () => (
-  <FooterStyled>
-    <section id="about">
-      <Divider></Divider>
-      <Row>
-        <Col span={24}>©{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
-        <Col span={24}>Version {gitCommitHash}</Col>
-      </Row>
-    </section>
-  </FooterStyled>
-);
+class HomeFooter extends React.Component {
+  render() {
+    const { wechat_app_ver } = queryString.parse(this.props.location.search);
+    const versionInfo = `Website version: ${gitCommitHash}${wechat_app_ver ? ` / WeChat Mini Program version: ${wechat_app_ver}` : ''}`;
+
+    return <FooterStyled>
+      <section id="about">
+        <Divider></Divider>
+        <Row>
+          <Col span={24}>©{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
+          <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
+          <Col span={24}>{versionInfo}</Col>
+        </Row>
+      </section>
+    </FooterStyled>
+  };
+}
 
 HomeFooter.propTypes = {};
 
 HomeFooter.defaultProps = {};
 
-export default HomeFooter;
+export default withRouter(HomeFooter);
