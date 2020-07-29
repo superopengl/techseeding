@@ -3,13 +3,15 @@
 
 Page({
   data: {
-    lng: 'zh'
+    lng: 'zh',
+    version: ''
   },
   onShow: function() {
     const {language} = wx.getSystemInfoSync();
+    const {miniProgram: {version}} = wx.getAccountInfoSync();
     const lng = 'zh' || /zh/i.test(language) ? 'zh' : 'en';
     console.log('language is', language, lng);
-    this.setData({lng});
+    this.setData({lng, version});
   },
   onShareAppMessage: function(res) {
     return {
