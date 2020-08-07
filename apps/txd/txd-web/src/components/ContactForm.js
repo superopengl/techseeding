@@ -82,7 +82,7 @@ class ContactForm extends React.Component {
     return (
       <Form onFinish={this.handleSubmit} ref={this.formRef}>
         <Form.Item name="name" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
-          <Input ref={input => this.firstInputRef = input} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending}/>
+          <Input autoFocus={true} ref={input => this.firstInputRef = input} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending}/>
         </Form.Item>
         <Form.Item name="reply" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
           <Input placeholder={t('contact.placeholder.reply')} allowClear={true} maxLength={100}  disabled={sending}/>
