@@ -31,11 +31,11 @@ a {
 class HomeFooter extends React.Component {
   render() {
     const { wechat_app_ver } = queryString.parse(this.props.location.search);
-    const versionInfo = `Website version: ${gitCommitHash}${wechat_app_ver ? ` / WeChat Mini Program version: ${wechat_app_ver}` : ''}`;
+    const versionInfo = `Version: ${gitCommitHash}${wechat_app_ver ? ` / WeChat Mini Program Version: ${wechat_app_ver}` : ''}`;
 
     return <FooterStyled>
       <section id="about">
-        <Divider></Divider>
+        <Divider style={{borderTopColor: 'rgba(255,255,255,0.6)'}}></Divider>
         <Row>
           <Col span={24}>©{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
