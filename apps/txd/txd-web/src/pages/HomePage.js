@@ -251,6 +251,8 @@ class HomePageRaw extends React.Component {
             <Trans i18nKey="contact.title" />
           </div>}
           visible={this.state.modalVisible}
+          destroyOnClose={true}
+          maskClosable={true}
           onOk={this.handleContactOk}
           onCancel={this.handleContactCancel}
           footer={null}
