@@ -9,17 +9,17 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "backgroundColor": "#22075e",
-    "backgroundColorTop": "#22075e",
-    "backgroundColorBottom": "#22075e",
-    "navigationBarBackgroundColor": "#22075e",
+    "backgroundColor": "#013a8c",
+    "backgroundColorTop": "#013a8c",
+    "backgroundColorBottom": "#013a8c",
+    "navigationBarBackgroundColor": "#013a8c",
     "navigationBarTitleText": "Techseeding",
     "navigationBarTextStyle": "white"
   },
   "tabBar-hide": {
     "color": "#cccccc",
     "selectedColor": "#ffffff",
-    "backgroundColor": "#22075e",
+    "backgroundColor": "#013a8c",
     "borderStyle": "white",
     "position": "bottom",
     "list": [

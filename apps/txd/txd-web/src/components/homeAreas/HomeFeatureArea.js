@@ -45,7 +45,7 @@ class HomeFeatureArea extends React.Component {
         xxl: 8
       },
       style: {
-        backgroundColor: '#22075e',
+        backgroundColor: '#013a8c',
         color: '#f0f0f0',
         paddingBottom: 0
       }
@@ -82,11 +82,10 @@ class HomeFeatureArea extends React.Component {
               <WechatOutlined /> <Trans i18nKey="home.contact.wechat" /> : <a href="weixin://dl/chat?superopengl">superopengl</a>
               <CopyToClipboardButton value="superopengl" />
             </p>
-            <p style={{marginTop: '1rem'}}>
+            {/* <p style={{marginTop: '1rem'}}>
               <img src="images/wechat_logo_qr.jpg" alt="wechat account: superopengl" width={160} height="auto" />
-            </p>
+            </p> */}
           </ContactSection>
-
         </InfoCard>
         <InfoCard>
           <SubTitle level={3}>

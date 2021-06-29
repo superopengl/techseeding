@@ -66,7 +66,7 @@ float: right;
 margin-bottom: 2px;
 `;
 
-const headerHeight = 64;
+const headerHeight = 48;
 
 const HeaderLogo = styled(AnchorLink)`
 diaplay: fex;
@@ -74,22 +74,22 @@ height: ${headerHeight}px;
 `
 
 const StyledDrawer = styled(Drawer)`
-color: #22075e;
+color: #013a8c;
 
 a {
-  color: #22075e !important;
+  color: #013a8c !important;
 }
 
 .ant-menu-item, .ant-menu-item:active, .ant-menu-item-selected {
   background-color: white !important;
-  color: #22075e !important;
+  color: #013a8c !important;
 }
 
 svg {
   position: relative;
   top: 2px;
   margin-right: 1rem;
-  color: #22075e;
+  color: #013a8c;
 }
 `;
 
@@ -97,6 +97,8 @@ const LogoImg = styled.img`
   height: ${headerHeight - 16}px;
   width: auto;
   margin-left: 8px;
+  position: relative;
+  top: -8px;
 `;
 
 class HomeHeaderRaw extends React.Component {
@@ -144,7 +146,7 @@ class HomeHeaderRaw extends React.Component {
       <HeaderStyled>
         <HeaderLogo offset={headerHeight} href="#home">
           {/* <TechseedingLogo></TechseedingLogo> */}
-          <LogoImg src="logo-bw.png" alt="TECHSEEDING LOGO"></LogoImg>
+          <LogoImg src="/logo-light.png" alt="TECHSEEDING LOGO"></LogoImg>
         </HeaderLogo>
         <MediaQuery minDeviceWidth={801}>
           <MenuContianer>

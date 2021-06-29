@@ -1,7 +1,7 @@
 /* pages/contact/contact.wxss */
 .green-btn{
   width: 100% !important;
-  background-color: #22075e;
+  background-color: #013a8c;
   color:#ffffff;
   /* position: fixed;
   bottom: 200rpx; */
@@ -9,7 +9,7 @@
 }
 
 page {
-  /* color: #22075e; */
+  /* color: #013a8c; */
 }
 
 

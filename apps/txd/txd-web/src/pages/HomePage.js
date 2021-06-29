@@ -40,7 +40,8 @@ const PosterContainer = styled.div`
 background-repeat: no-repeat;
 background-size: cover;
 background-position: center;
-background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0, 0, 0, 0.4)),url("images/poster.jpg");
+// background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0, 0, 0, 0.4)),url("images/poster.jpg");
+background-color: #013a8c;
 width: 100%;
 min-height: 200px;
 display: flex;
@@ -54,6 +55,18 @@ padding-top: 40px;
   color: rgba(255,255,255,1) !important;
   text-align: center;
 }
+
+.poster-patterns {
+  background-image: url("images/logo-poster-pattern.svg");
+  background-repeat: repeat;
+  background-size: 100px;
+  opacity: 0.1;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  }
 
 `;
 
@@ -84,7 +97,7 @@ border: none;
 // background-color: rgba(34, 7, 94, 0.8);
 background-color: rgba(255,255,255, 0.8);
 color: rgba(34, 7, 94, 0.8);
-box-shadow: 1px 1px 5px #22075e;
+box-shadow: 1px 1px 5px #013a8c;
 
 &:focus,&:hover,&:active {
   border: none;
@@ -94,9 +107,9 @@ box-shadow: 1px 1px 5px #22075e;
 `;
 
 const StyledTag = styled(Tag)`
-color: #d99245;
-border: 1px solid #d99245;
-background-color: rgba(217, 146, 69,0.1);
+// color: #013a8c;
+// border: 1px solid #013a8c;
+// background-color: #013a8c22;
 border-radius: 999px;
 margin: 2px;
 `;
@@ -265,6 +278,8 @@ class HomePageRaw extends React.Component {
         <ContentStyled >
           <section id="home">
             <PosterContainer style={{ height: posterHeight, position: 'relative' }}>
+              <div className="poster-patterns" />
+
               <Title style={{ fontSize: catchPhraseSize, marginTop: '2rem' }}><Trans i18nKey="home.slogan" /></Title>
               <Title level={2} style={{ marginTop: 0, fontWeight: 400, fontSize: Math.max(catchPhraseSize * 0.6, 14) }}>
                 <Trans i18nKey="home.catch_phrase" />
@@ -275,12 +290,12 @@ class HomePageRaw extends React.Component {
             </PosterContainer>
           </section>
           <section id="services">
-            <Row>
+            <Row gutter={[30, 30]} style={{ padding: '60px 1rem 60px 1rem' }}>
               {tileData.map((t, i) => {
                 return (
                   <Col key={i} {...tileSpanProps} style={{ textAlign: 'center', padding: '1rem' }}>
-                    <div style={{ color: 'rgba(34, 7, 94, 0.2)', margin: '1rem' }}>{t.icon}</div>
-                    <Typography.Title level={3}>{t.title}</Typography.Title>
+                    {/* <div style={{ color: '#333333', margin: '1rem' }}>{t.icon}</div> */}
+                    <Typography.Title level={2} style={{ color: '#303030', marginBottom: 20 }}>{t.title}</Typography.Title>
                     {(t.tags && t.tags.length > 0) ? <p>
                       {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
                     </p> : null}

@@ -4,6 +4,9 @@ import styled from 'styled-components';
 import GitInfo from 'react-git-info/macro';
 import * as queryString from 'query-string';
 import { withRouter } from 'react-router-dom';
+import { HomeOutlined } from '@ant-design/icons';
+
+
 const { Footer } = Layout;
 const gitInfo = GitInfo();
 const gitCommitHash = gitInfo.commit.shortHash;
@@ -11,14 +14,14 @@ const gitCommitHash = gitInfo.commit.shortHash;
 const FooterStyled = styled(Footer)`
 width: 100%;
 text-align: center;
-font-size: 0.8rem;
-color: #f0f0f0;
-background-color: #22075e;
+font-size: 0.7rem;
+color: rgba(255,255,255,0.5);
+background-color: #013a8c;
 padding-left: 0;
 padding-right: 0;
 padding-top: 0;
 a {
-  color: #f0f0f0;
+  color: rgba(255,255,255,0.5);
 
   &:hover {
     color: white;
@@ -35,9 +38,14 @@ class HomeFooter extends React.Component {
 
     return <FooterStyled>
       <section id="about">
-        <Divider style={{borderTopColor: 'rgba(255,255,255,0.6)'}}></Divider>
-        <Row>
+        {/* <Divider style={{borderTopColor: 'rgba(255,255,255,0.6)'}}></Divider> */}
+        <Row gutter={[10, 2]}>
           <Col span={24}>©{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
+          <Col span={24}>
+              <HomeOutlined style={{ marginRight: 8 }} /><a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
+                Unit 101, 11 Spring St., Chatswood, NSW 2067
+                </a>
+            </Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
           <Col span={24}>{versionInfo}</Col>
         </Row>
