@@ -10,18 +10,18 @@ const FooterStyled = styled(Footer)`
   width: 100%;
   text-align: center;
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
-  background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #86868b;
+  background: rgba(255, 255, 255, 0.4);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   padding: 2rem 1rem;
   letter-spacing: -0.01em;
 
   a {
-    color: rgba(255, 255, 255, 0.4);
+    color: #86868b;
     transition: color 0.2s ease;
 
     &:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: #1d1d1f;
       text-decoration: none;
     }
   }

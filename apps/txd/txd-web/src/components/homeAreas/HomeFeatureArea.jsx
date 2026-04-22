@@ -13,14 +13,15 @@ const Container = styled.section`
 `;
 
 const GlassInfoCard = styled.div`
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 20px;
   padding: 2rem;
   height: 100%;
   position: relative;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 
   &::before {
     content: '';
@@ -29,7 +30,7 @@ const GlassInfoCard = styled.div`
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
   }
 `;
 
@@ -37,13 +38,13 @@ const SubTitle = styled.h3`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 600;
   font-size: 1.15rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #1d1d1f;
   margin: 0 0 1rem 0;
   letter-spacing: -0.02em;
 `;
 
 const BodyText = styled.div`
-  color: rgba(255, 255, 255, 0.45);
+  color: #86868b;
   font-size: 0.875rem;
   line-height: 1.7;
 `;
@@ -52,7 +53,7 @@ const ContactSection = styled.div`
   p {
     margin: 0;
     padding: 6px 0;
-    color: rgba(255, 255, 255, 0.45);
+    color: #86868b;
     font-size: 0.875rem;
     display: flex;
     align-items: center;
@@ -61,17 +62,17 @@ const ContactSection = styled.div`
   }
 
   a {
-    color: rgba(255, 255, 255, 0.6);
+    color: #515154;
     transition: color 0.2s ease;
 
     &:hover {
-      color: white;
+      color: #0071e3;
       text-decoration: none;
     }
   }
 
   .anticon, svg {
-    opacity: 0.5;
+    opacity: 0.4;
     font-size: 14px;
   }
 `;
@@ -82,7 +83,7 @@ const SectionLabel = styled.p`
   letter-spacing: 0.15em;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #5b9cf5;
+  color: #0071e3;
   margin: 0 0 0.5rem 0;
 `;
 
@@ -91,7 +92,7 @@ const SectionTitle = styled.h2`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
   font-size: 2rem;
-  color: rgba(255, 255, 255, 0.92);
+  color: #1d1d1f;
   margin: 0 0 3rem 0;
   letter-spacing: -0.03em;
 `;

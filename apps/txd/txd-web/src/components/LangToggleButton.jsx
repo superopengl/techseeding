@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(0, 0, 0, 0.45);
   display: flex;
   font-size: 13px;
   letter-spacing: 0;
@@ -10,7 +10,7 @@ const Container = styled.div`
   transition: color 0.2s ease;
 
   &:hover {
-    color: rgba(255, 255, 255, 0.9);
+    color: #1d1d1f;
   }
 `;
 
