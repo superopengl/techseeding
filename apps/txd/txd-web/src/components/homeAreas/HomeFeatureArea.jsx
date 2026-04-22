@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { MailOutlined, PhoneOutlined, WechatOutlined } from '@ant-design/icons';
 import { Trans } from 'react-i18next';
-import { MdOpenInNew } from "react-icons/md";
 import { CopyToClipboardButton } from '../CopyToClipboardButton';
 import { Row, Col } from 'antd';
 
@@ -137,19 +135,19 @@ function HomeFeatureArea() {
             <SubTitle><Trans i18nKey="home.contact" /></SubTitle>
             <ContactSection>
               <p>
-                <MdOpenInNew /> <Trans i18nKey="home.contact.website" />: <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">techseeding.com.au</a>
+                <Trans i18nKey="home.contact.website" />: <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">techseeding.com.au</a>
                 <CopyToClipboardButton value="https://www.techseeding.com.au/" />
               </p>
               <p>
-                <MailOutlined /> <Trans i18nKey="home.contact.email" />: <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
+                <Trans i18nKey="home.contact.email" />: <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
                 <CopyToClipboardButton value="mr.shaojun@gmail.com" />
               </p>
               <p>
-                <PhoneOutlined /> <Trans i18nKey="home.contact.phone" />: <a href="tel:+61405581228">+61 4 0558 1228</a>
+                <Trans i18nKey="home.contact.phone" />: <a href="tel:+61405581228">+61 4 0558 1228</a>
                 <CopyToClipboardButton value="+61405581228" />
               </p>
               <p>
-                <WechatOutlined /> <Trans i18nKey="home.contact.wechat" />: <a href="weixin://dl/chat?superopengl">superopengl</a>
+                <Trans i18nKey="home.contact.wechat" />: <a href="weixin://dl/chat?superopengl">superopengl</a>
                 <CopyToClipboardButton value="superopengl" />
               </p>
             </ContactSection>
