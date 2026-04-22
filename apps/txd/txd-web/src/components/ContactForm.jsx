@@ -17,7 +17,6 @@ const StyledForm = styled(Form)`
     border-radius: 10px !important;
     color: rgba(255, 255, 255, 0.9) !important;
     font-size: 0.9rem;
-    padding: 10px 14px;
     transition: all 0.2s ease;
 
     &::placeholder {
@@ -35,17 +34,23 @@ const StyledForm = styled(Form)`
     }
   }
 
+  .ant-input {
+    padding: 10px 14px;
+  }
+
   .ant-input-affix-wrapper {
     padding: 0 14px;
 
     .ant-input {
       padding: 10px 0 !important;
       border: none !important;
+      background: transparent !important;
       box-shadow: none !important;
     }
   }
 
   textarea.ant-input {
+    padding: 10px 14px;
     resize: none;
   }
 
