@@ -508,7 +508,7 @@ function HomePage() {
   return (
     <LayoutStyled>
       <Modal
-        title={<div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
+        title={<div style={{ fontSize: '0.85rem', fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
           <Trans i18nKey="contact.title" />
         </div>}
         open={modalVisible}
@@ -518,9 +518,26 @@ function HomePage() {
         onCancel={handleContactCancel}
         footer={null}
         centered={true}
+        closeIcon={<span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>&#x2715;</span>}
         styles={{
-          mask: { backdropFilter: 'blur(12px)', background: 'rgba(0, 0, 0, 0.5)' },
-          content: { backdropFilter: 'blur(40px)', background: 'rgba(15, 15, 30, 0.85)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16 },
+          mask: { backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', background: 'rgba(0, 0, 0, 0.6)' },
+          content: {
+            backdropFilter: 'blur(40px)',
+            WebkitBackdropFilter: 'blur(40px)',
+            background: 'linear-gradient(170deg, rgba(20, 20, 45, 0.92) 0%, rgba(10, 10, 25, 0.95) 100%)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 16,
+            boxShadow: '0 32px 80px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255,255,255,0.1) inset',
+            padding: '24px 28px',
+          },
+          header: {
+            background: 'transparent',
+            borderBottom: 'none',
+            paddingBottom: 4,
+          },
+          body: {
+            paddingTop: 8,
+          },
         }}
       >
         <ContactForm ref={contactFormRef} onDone={handleContactCancel} />

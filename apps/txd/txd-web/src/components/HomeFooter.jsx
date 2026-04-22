@@ -37,7 +37,7 @@ function HomeFooter() {
     <FooterStyled>
       <section id="about">
         <Row gutter={[10, 4]}>
-          <Col span={24}>&copy;{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
+          <Col span={24}>&copy;2019-{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
           <Col span={24}>
             <HomeOutlined style={{ marginRight: 6, opacity: 0.5 }} />
             <a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
