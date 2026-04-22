@@ -9,7 +9,7 @@ const { Footer } = Layout;
 const FooterStyled = styled(Footer)`
   width: 100%;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: rgba(255, 255, 255, 0.25);
   background: transparent;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
