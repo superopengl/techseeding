@@ -9,19 +9,19 @@ const { Footer } = Layout;
 const FooterStyled = styled(Footer)`
   width: 100%;
   text-align: center;
-  font-size: 0.75rem;
-  color: #86868b;
-  background: rgba(255, 255, 255, 0.4);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.25);
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
   padding: 2rem 1rem;
   letter-spacing: -0.01em;
 
   a {
-    color: #86868b;
+    color: rgba(255, 255, 255, 0.3);
     transition: color 0.2s ease;
 
     &:hover {
-      color: #1d1d1f;
+      color: rgba(255, 255, 255, 0.7);
       text-decoration: none;
     }
   }
@@ -36,16 +36,16 @@ function HomeFooter() {
   return (
     <FooterStyled>
       <section id="about">
-        <Row gutter={[10, 6]}>
+        <Row gutter={[10, 4]}>
           <Col span={24}>&copy;{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
           <Col span={24}>
-            <HomeOutlined style={{ marginRight: 8, opacity: 0.6 }} />
+            <HomeOutlined style={{ marginRight: 6, opacity: 0.5 }} />
             <a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
               Unit 101, 11 Spring St., Chatswood, NSW 2067
             </a>
           </Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
-          <Col span={24} style={{ opacity: 0.6 }}>{versionInfo}</Col>
+          <Col span={24} style={{ opacity: 0.5 }}>{versionInfo}</Col>
         </Row>
       </section>
     </FooterStyled>

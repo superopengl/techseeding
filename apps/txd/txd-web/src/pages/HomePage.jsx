@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import styled, { keyframes } from 'styled-components';
-import { Layout, Row, Col, Typography, Button, Modal, Tag } from 'antd';
+import styled, { keyframes, css } from 'styled-components';
+import { Layout, Row, Col, Button, Modal, Tag } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
@@ -15,9 +15,21 @@ import { useSearchParams } from 'react-router-dom';
 
 const { Content } = Layout;
 
+const auroraShift = keyframes`
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(30px, -20px) rotate(120deg) scale(1.1); }
+  66% { transform: translate(-20px, 20px) rotate(240deg) scale(0.95); }
+  100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+`;
+
 const subtleFloat = keyframes`
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
+`;
+
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 `;
 
 const LayoutStyled = styled(Layout)`
@@ -32,79 +44,172 @@ const ContentStyled = styled(Content)`
   width: 100%;
 `;
 
-const PosterContainer = styled.div`
-  width: 100%;
-  min-height: 200px;
+/* ─── Hero ─── */
+
+const HeroSection = styled.section`
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 1rem;
-  padding-top: 60px;
-  position: relative;
-  overflow: hidden;
+  padding: 1.5rem;
+  padding-top: 80px;
+`;
 
-  .poster-patterns {
-    background-image: url("images/logo-poster-pattern.svg");
-    background-repeat: repeat;
-    background-size: 100px;
-    opacity: 0.04;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+const AuroraBackground = styled.div`
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+
+  &::before, &::after {
+    content: '';
     position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.35;
+    animation: ${auroraShift} 20s ease-in-out infinite;
+  }
+
+  &::before {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+    top: -20%;
+    left: -10%;
+  }
+
+  &::after {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+    bottom: -10%;
+    right: -10%;
+    animation-delay: -7s;
+    animation-direction: reverse;
+  }
+`;
+
+const AuroraOrb = styled.div`
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.2;
+  background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: ${auroraShift} 25s ease-in-out infinite;
+  animation-delay: -12s;
+`;
+
+const GridOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+  z-index: 0;
+`;
+
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: ${fadeInUp} 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+`;
+
+const HeroBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+  margin-bottom: 1.5rem;
+
+  span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5dd894;
+    box-shadow: 0 0 8px #5dd894;
   }
 `;
 
 const HeroTitle = styled.h1`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
-  color: white;
   text-align: center;
   margin: 0;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
 
-  background: linear-gradient(135deg, #ffffff 0%, #a8c8ff 50%, #ffffff 100%);
+  background: linear-gradient(160deg, #ffffff 0%, #94bfff 40%, #c4b5fd 60%, #ffffff 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 `;
 
 const HeroSubtitle = styled.p`
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.45);
   text-align: center;
-  margin: 0.75rem 0 0 0;
+  margin: 1rem 0 0 0;
   letter-spacing: -0.01em;
-  line-height: 1.4;
+  line-height: 1.5;
 `;
 
 const ContactButton = styled(Button)`
   && {
     width: 100%;
-    max-width: 280px;
-    height: 50px !important;
-    margin-top: 2rem;
-    border-radius: 25px;
-    font-size: 16px;
+    max-width: 220px;
+    height: 48px !important;
+    margin-top: 2.5rem;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.01em;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
     color: white;
+    position: relative;
+    overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.1));
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask-composite: xor;
+      pointer-events: none;
+    }
+
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.35);
+      background: linear-gradient(135deg, #4f8ff7, #9d6ff8);
       color: white;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 32px rgba(91, 156, 245, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
     }
 
     &:active {
@@ -113,13 +218,13 @@ const ContactButton = styled(Button)`
   }
 `;
 
+/* ─── Service Cards ─── */
+
 const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 2rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
   height: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
@@ -132,111 +237,147 @@ const GlassCard = styled.div`
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, ${props => props.$glowColor || '#5b9cf5'}10 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: ${props => props.$glowColor || '#5b9cf5'}40;
     transform: translateY(-4px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 40px ${props => props.$glowColor || '#5b9cf5'}12;
+
+    &::after {
+      opacity: 1;
+    }
   }
 `;
 
 const CardIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.25rem;
+  background: ${props => props.$color || '#5b9cf5'}15;
   color: ${props => props.$color || '#5b9cf5'};
-  opacity: 0.85;
   transition: all 0.4s ease;
+  font-size: 24px;
 
   ${GlassCard}:hover & {
-    opacity: 1;
-    animation: ${subtleFloat} 3s ease-in-out infinite;
+    background: ${props => props.$color || '#5b9cf5'}22;
+    box-shadow: 0 0 24px ${props => props.$color || '#5b9cf5'}30;
   }
 `;
 
 const CardTitle = styled.h3`
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 600;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.6rem 0;
   letter-spacing: -0.02em;
 `;
 
 const CardDescription = styled.p`
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.875rem;
-  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  line-height: 1.65;
   margin: 0;
 `;
 
 const StyledTag = styled(Tag)`
   && {
-    border-radius: 999px;
-    margin: 3px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 0.75rem;
-    padding: 2px 10px;
+    border-radius: 6px;
+    margin: 2px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.7rem;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    letter-spacing: 0.01em;
+    padding: 1px 8px;
   }
 `;
 
 const AffixContactButton = styled(Button)`
   && {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border-radius: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
     transition: all 0.3s ease;
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 24px;
+    right: 24px;
     z-index: 10;
 
     &:hover, &:focus, &:active {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.4);
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(91, 156, 245, 0.2);
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.25);
     }
   }
 `;
+
+/* ─── Sections ─── */
 
 const ServicesSection = styled.section`
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 1.5rem;
+  position: relative;
+`;
+
+const SectionDivider = styled.div`
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  margin: 0 auto;
+  max-width: 800px;
 `;
 
 const SectionLabel = styled.p`
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #5b9cf5;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  color: #818cf8;
   margin: 0 0 0.5rem 0;
 `;
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
-  font-size: 2rem;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 3rem 0;
-  letter-spacing: -0.03em;
+  font-size: 2.2rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 3.5rem 0;
+  letter-spacing: -0.04em;
 `;
 
 const tileSpanProps = {
@@ -248,7 +389,7 @@ const tileSpanProps = {
   xxl: 8,
 };
 
-const iconSize = 48;
+const iconSize = 24;
 
 const tileData = [
   {
@@ -260,7 +401,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.ai" />,
     icon: <BsStars size={iconSize} />,
-    color: '#b68df0',
+    color: '#a78bfa',
   },
   {
     title: <Trans i18nKey="feature.title.website" />,
@@ -271,7 +412,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.website" />,
     icon: <RiComputerLine size={iconSize} />,
-    color: '#5b9cf5',
+    color: '#60a5fa',
   },
   {
     title: <Trans i18nKey="feature.title.mobile" />,
@@ -282,7 +423,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.mobile" />,
     icon: <GoDeviceMobile size={iconSize} />,
-    color: '#e87eac',
+    color: '#f472b6',
   },
   {
     title: <Trans i18nKey="feature.title.wechat" />,
@@ -293,7 +434,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.wechat" />,
     icon: <AiOutlineWechat size={iconSize} />,
-    color: '#5dd894',
+    color: '#34d399',
   },
   {
     title: <Trans i18nKey="feature.title.digitizing" />,
@@ -304,7 +445,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.digitizing" />,
     icon: <GiMeshNetwork size={iconSize} />,
-    color: '#f0c75e',
+    color: '#fbbf24',
   },
   {
     title: <Trans i18nKey="feature.title.consulting" />,
@@ -315,7 +456,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.consulting" />,
     icon: <GiTeamIdea size={iconSize} />,
-    color: '#5ed8d0',
+    color: '#2dd4bf',
   },
 ];
 
@@ -355,11 +496,11 @@ function HomePage() {
     }, 300);
   }, []);
 
-  const posterHeight = windowWidth < 576 ? 380 :
-    windowWidth < 992 ? 440 : 520;
+  const posterHeight = windowWidth < 576 ? 420 :
+    windowWidth < 992 ? 480 : 560;
 
-  const catchPhraseSize = windowWidth < 576 ? 30 :
-    windowWidth < 992 ? 40 : 52;
+  const catchPhraseSize = windowWidth < 576 ? 32 :
+    windowWidth < 992 ? 44 : 56;
 
   const origin = searchParams.get('origin');
   const shouldShowContact = true || origin !== 'wechat-app';
@@ -367,7 +508,7 @@ function HomePage() {
   return (
     <LayoutStyled>
       <Modal
-        title={<div style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
+        title={<div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
           <Trans i18nKey="contact.title" />
         </div>}
         open={modalVisible}
@@ -378,42 +519,48 @@ function HomePage() {
         footer={null}
         centered={true}
         styles={{
-          mask: { backdropFilter: 'blur(8px)', background: 'rgba(0, 0, 0, 0.4)' },
-          content: { backdropFilter: 'blur(40px)', background: 'rgba(20, 30, 60, 0.75)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20 },
+          mask: { backdropFilter: 'blur(12px)', background: 'rgba(0, 0, 0, 0.5)' },
+          content: { backdropFilter: 'blur(40px)', background: 'rgba(15, 15, 30, 0.85)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16 },
         }}
       >
         <ContactForm ref={contactFormRef} onDone={handleContactCancel} />
       </Modal>
       <HomeHeader onClickContact={openContactForm} />
       <ContentStyled>
-        <section id="home">
-          <PosterContainer style={{ height: posterHeight }}>
-            <div className="poster-patterns" />
-            <HeroTitle style={{ fontSize: catchPhraseSize }}>
+        <HeroSection id="home" style={{ minHeight: posterHeight }}>
+          <AuroraBackground />
+          <AuroraOrb />
+          <GridOverlay />
+          <HeroContent>
+            <HeroBadge><span /> Available for new projects</HeroBadge>
+            <HeroTitle style={{ fontSize: catchPhraseSize, maxWidth: 800 }}>
               <Trans i18nKey="home.slogan" />
             </HeroTitle>
-            <HeroSubtitle style={{ fontSize: Math.max(catchPhraseSize * 0.38, 14), maxWidth: 600 }}>
+            <HeroSubtitle style={{ fontSize: Math.max(catchPhraseSize * 0.32, 14), maxWidth: 520 }}>
               <Trans i18nKey="home.catch_phrase" />
             </HeroSubtitle>
             {shouldShowContact && (
-              <ContactButton type="default" shape="round" size="large" onClick={openContactForm}>
+              <ContactButton type="default" size="large" onClick={openContactForm}>
                 <Trans i18nKey="button.contact_us" />
               </ContactButton>
             )}
-          </PosterContainer>
-        </section>
+          </HeroContent>
+        </HeroSection>
+
+        <SectionDivider />
+
         <section id="services">
           <ServicesSection>
             <SectionLabel><Trans i18nKey="section.services.subtitle" /></SectionLabel>
             <SectionTitle><Trans i18nKey="section.services" /></SectionTitle>
-            <Row gutter={[20, 20]}>
+            <Row gutter={[16, 16]}>
               {tileData.map((t, i) => (
                 <Col key={i} {...tileSpanProps}>
-                  <GlassCard>
+                  <GlassCard $glowColor={t.color}>
                     <CardIcon $color={t.color}>{t.icon}</CardIcon>
                     <CardTitle>{t.title}</CardTitle>
                     {t.tags && t.tags.length > 0 && (
-                      <div style={{ marginBottom: '0.75rem' }}>
+                      <div style={{ marginBottom: '0.6rem' }}>
                         {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
                       </div>
                     )}
@@ -424,6 +571,9 @@ function HomePage() {
             </Row>
           </ServicesSection>
         </section>
+
+        <SectionDivider />
+
         <section id="about_us">
           <HomeFeatureArea />
         </section>
@@ -431,7 +581,7 @@ function HomePage() {
       <HomeFooter />
       {shouldShowContact && (
         <AffixContactButton shape="default" size="large" onClick={openContactForm}>
-          <AiOutlineMessage size={24} />
+          <AiOutlineMessage size={22} />
         </AffixContactButton>
       )}
     </LayoutStyled>

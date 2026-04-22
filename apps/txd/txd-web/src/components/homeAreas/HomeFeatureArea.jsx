@@ -13,14 +13,13 @@ const Container = styled.section`
 `;
 
 const GlassInfoCard = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.75rem;
   height: 100%;
   position: relative;
+  transition: border-color 0.3s ease;
 
   &::before {
     content: '';
@@ -29,31 +28,34 @@ const GlassInfoCard = styled.div`
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.1);
   }
 `;
 
 const SubTitle = styled.h3`
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 600;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   letter-spacing: -0.02em;
 `;
 
 const BodyText = styled.div`
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.825rem;
   line-height: 1.7;
 `;
 
 const ContactSection = styled.div`
   p {
     margin: 0;
-    padding: 6px 0;
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 0.875rem;
+    padding: 5px 0;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 0.825rem;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -61,7 +63,7 @@ const ContactSection = styled.div`
   }
 
   a {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.55);
     transition: color 0.2s ease;
 
     &:hover {
@@ -71,29 +73,29 @@ const ContactSection = styled.div`
   }
 
   .anticon, svg {
-    opacity: 0.5;
-    font-size: 14px;
+    opacity: 0.4;
+    font-size: 13px;
   }
 `;
 
 const SectionLabel = styled.p`
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: #5b9cf5;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  color: #818cf8;
   margin: 0 0 0.5rem 0;
 `;
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
-  font-size: 2rem;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 2.2rem;
+  color: rgba(255, 255, 255, 0.95);
   margin: 0 0 3rem 0;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
 `;
 
 const spanProps = {
@@ -110,7 +112,7 @@ function HomeFeatureArea() {
     <Container>
       <SectionLabel><Trans i18nKey="section.about" /></SectionLabel>
       <SectionTitle><Trans i18nKey="home.about_us" /></SectionTitle>
-      <Row gutter={[20, 20]}>
+      <Row gutter={[16, 16]}>
         <Col {...spanProps}>
           <GlassInfoCard>
             <SubTitle><Trans i18nKey="home.about_us" /></SubTitle>
