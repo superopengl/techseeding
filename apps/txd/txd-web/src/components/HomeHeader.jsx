@@ -26,57 +26,43 @@ const HeaderStyled = styled(Header)`
   align-items: center;
   padding-left: 16px;
   padding-right: 20px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(10, 15, 30, 0.6);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+`;
 
-  & .ant-menu {
-    background-color: transparent;
-    border: none;
-    line-height: 56px;
+const DesktopNav = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 28px;
+`;
 
-    & .ant-menu-item {
-      top: 0;
-      color: rgba(0, 0, 0, 0.55);
-      border-bottom: none !important;
+const NavLink = styled.a`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
 
-      &::after {
-        border-bottom: none !important;
-      }
-
-      & a, button {
-        color: rgba(0, 0, 0, 0.55);
-        padding-left: 0;
-        padding-right: 0;
-        font-weight: 400;
-        font-size: 14px;
-        letter-spacing: -0.01em;
-        transition: color 0.2s ease;
-
-        &:hover {
-          color: #1d1d1f;
-        }
-      }
-    }
-
-    & .ant-menu-item:hover {
-      color: #1d1d1f;
-      border-color: transparent !important;
-    }
-
-    & .ant-menu-item-selected {
-      border-color: transparent !important;
-    }
-
-    & .ant-menu-item-active::after {
-      border-bottom: none !important;
-    }
+  &:hover {
+    color: #ffffff;
   }
 `;
 
-const MenuContainer = styled.div`
-  float: right;
+const NavButton = styled.span`
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
 `;
 
 const headerHeight = 56;
@@ -89,7 +75,7 @@ const HeaderLogo = styled.a`
 
 const StyledDrawer = styled(Drawer)`
   .ant-drawer-content {
-    background: rgba(255, 255, 255, 0.92) !important;
+    background: rgba(15, 20, 40, 0.9) !important;
     backdrop-filter: blur(40px) !important;
     -webkit-backdrop-filter: blur(40px) !important;
   }
@@ -99,11 +85,11 @@ const StyledDrawer = styled(Drawer)`
   }
 
   a {
-    color: rgba(0, 0, 0, 0.55) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
     transition: color 0.2s ease;
 
     &:hover {
-      color: #1d1d1f !important;
+      color: white !important;
     }
   }
 
@@ -113,13 +99,13 @@ const StyledDrawer = styled(Drawer)`
   }
 
   .ant-menu-item {
-    color: rgba(0, 0, 0, 0.55) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
     border-radius: 8px;
     margin: 2px 8px;
 
     &:hover, &:active, &.ant-menu-item-selected {
-      background: rgba(0, 0, 0, 0.04) !important;
-      color: #1d1d1f !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: white !important;
     }
   }
 
@@ -127,7 +113,7 @@ const StyledDrawer = styled(Drawer)`
     position: relative;
     top: 2px;
     margin-right: 0.75rem;
-    color: rgba(0, 0, 0, 0.35);
+    color: rgba(255, 255, 255, 0.5);
   }
 `;
 
@@ -135,7 +121,6 @@ const LogoImg = styled.img`
   height: 28px;
   width: auto;
   opacity: 0.9;
-  filter: brightness(0.2);
   transition: opacity 0.2s ease;
 
   &:hover {
@@ -183,29 +168,6 @@ function HomeHeader({ onClickContact }) {
     window.location.reload();
   }, [searchParams, navigate]);
 
-  const desktopMenuItems = [
-    {
-      key: 'home',
-      label: <a href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></a>,
-    },
-    {
-      key: 'events',
-      label: <a href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></a>,
-    },
-    {
-      key: 'about_us',
-      label: <a href="#about_us" onClick={scrollTo('about_us')}><Trans i18nKey="header.about_us" /></a>,
-    },
-    ...(shouldShowContact ? [{
-      key: 'contact',
-      label: <Button type="link" onClick={handleClickContact} style={{ color: 'rgba(0,0,0,0.55)', padding: 0, fontSize: 14, fontWeight: 400 }}><Trans i18nKey="header.contact" /></Button>,
-    }] : []),
-    {
-      key: 'lng',
-      label: <LangToggleButton onClick={toggleLanguage} />,
-    },
-  ];
-
   const mobileMenuItems = [
     {
       key: 'home',
@@ -242,14 +204,18 @@ function HomeHeader({ onClickContact }) {
         <LogoImg src="/logo-light.png" alt="TECHSEEDING LOGO" />
       </HeaderLogo>
       {isDesktop ? (
-        <MenuContainer>
-          <Menu mode="horizontal" style={{ border: 0 }} items={desktopMenuItems} />
-        </MenuContainer>
+        <DesktopNav>
+          <NavLink href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></NavLink>
+          <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
+          <NavLink href="#about_us" onClick={scrollTo('about_us')}><Trans i18nKey="header.about_us" /></NavLink>
+          {shouldShowContact && <NavButton onClick={handleClickContact}><Trans i18nKey="header.contact" /></NavButton>}
+          <LangToggleButton onClick={toggleLanguage} />
+        </DesktopNav>
       ) : (
         <>
           <Button
             type="text"
-            style={{ color: 'rgba(0,0,0,0.55)', fontSize: 18 }}
+            style={{ color: 'rgba(255,255,255,0.8)', fontSize: 18 }}
             onClick={() => setDrawerVisible(true)}
           >
             <MenuOutlined />
@@ -260,7 +226,7 @@ function HomeHeader({ onClickContact }) {
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}
             width={260}
-            styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.15)' } }}
+            styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
           >
             <Menu mode="vertical" style={{ border: 0 }} items={mobileMenuItems} />
           </StyledDrawer>
