@@ -5,7 +5,8 @@ import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
 import { RiComputerLine } from "react-icons/ri";
-import { GoDeviceMobile, GoDatabase } from "react-icons/go";
+import { GoDeviceMobile } from "react-icons/go";
+import { BsStars } from "react-icons/bs";
 import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import ContactForm from 'components/ContactForm';
@@ -284,14 +285,14 @@ const tileData = [
     color: '#5dd894',
   },
   {
-    title: <Trans i18nKey="feature.title.database" />,
+    title: <Trans i18nKey="feature.title.ai" />,
     tags: [
-      <Trans i18nKey="tag.free_quote" />,
-      <Trans i18nKey="tag.schema" />,
-      <Trans i18nKey="tag.big_data" />,
+      <Trans i18nKey="tag.ai_chatbot" />,
+      <Trans i18nKey="tag.ai_automation" />,
+      <Trans i18nKey="tag.ai_integration" />,
     ],
-    content: <Trans i18nKey="feature.description.database" />,
-    icon: <GoDatabase size={iconSize} />,
+    content: <Trans i18nKey="feature.description.ai" />,
+    icon: <BsStars size={iconSize} />,
     color: '#b68df0',
   },
   {
