@@ -1,12 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { ReactComponent as TechseedingLogoSvg } from 'images/techseeding.svg';
+import TechseedingLogoSvg from 'images/techseeding.svg?react';
 
 const Container = styled.div`
-  // display: inline-block;
-  // width: 100px;
-  // height; 1rem;
-  // border: 1px solid #ffffff;
   position: relative;
   top: 10px;
   left: -20px;
@@ -14,7 +10,7 @@ const Container = styled.div`
 
 export const TechseedingLogo = () => (
   <Container>
-    <TechseedingLogoSvg/>
+    <TechseedingLogoSvg />
   </Container>
 );
 

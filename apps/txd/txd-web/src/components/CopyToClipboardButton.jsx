@@ -1,10 +1,9 @@
 import React from 'react';
-import { Button } from 'antd';
-import { message } from "antd";
+import { Button, message } from 'antd';
 import styled from 'styled-components';
 import { MdContentCopy } from "react-icons/md";
 import i18n from 'i18next';
-import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 const CopyIcon = styled(MdContentCopy)`
   color: #cccccc;
@@ -14,7 +13,6 @@ const CopyIcon = styled(MdContentCopy)`
   &:hover {
     color: white;
   }
-}
 `;
 
 const StyledButton = styled(Button)`
@@ -24,21 +22,17 @@ const StyledButton = styled(Button)`
 `;
 
 function setTextToClipboard(value) {
-  const content = i18n.t('copy.done', {value});
+  const content = i18n.t('copy.done', { value });
   message.info({
     content,
     key: 'copy.done'
   });
 }
 
-
 export const CopyToClipboardButton = (props) => {
-  // const { t, i18n } = useTranslation();
-  // const message = t('copy.done', {value});
-
-  return <CopyToClipboard text={props.value} onCopy={() => setTextToClipboard(props.value)}>
-    <StyledButton type="link" shape="circle" icon={<CopyIcon />}/>
-  </CopyToClipboard>
+  return (
+    <CopyToClipboard text={props.value} onCopy={() => setTextToClipboard(props.value)}>
+      <StyledButton type="link" shape="circle" icon={<CopyIcon />} />
+    </CopyToClipboard>
+  );
 };
-
-
