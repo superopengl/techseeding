@@ -12,87 +12,134 @@ import { Trans } from 'react-i18next';
 import LangToggleButton from './LangToggleButton';
 
 const { Header } = Layout;
+
 const HeaderStyled = styled(Header)`
-position: fixed;
-z-index: 1;
-width: 100%;
-background-color: rgba(0,0,0,0.6);
-display: flex;
-white-space: nowrap;
-border: 0;
-justify-content: space-between;
-align-items: center;
-padding-left: 0px;
-padding-right: 20px;
-color: white;
+  position: fixed;
+  z-index: 100;
+  width: 100%;
+  height: 56px;
+  line-height: 56px;
+  display: flex;
+  white-space: nowrap;
+  border: 0;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 16px;
+  padding-right: 20px;
+  background: rgba(10, 15, 30, 0.6);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
-& .ant-menu {
-  background-color: transparent;
+  & .ant-menu {
+    background-color: transparent;
+    border: none;
+    line-height: 56px;
 
-  & .ant-menu-item {
-    top: 0;
+    & .ant-menu-item {
+      top: 0;
+      color: rgba(255, 255, 255, 0.7);
+      border-bottom: none !important;
 
-    & a,button {
-      color: rgba(255,255,255,0.7);
-      padding-left: 0;
-      padding-right: 0;
+      &::after {
+        border-bottom: none !important;
+      }
 
-      &:hover {
-        color: #ffffff;
+      & a, button {
+        color: rgba(255, 255, 255, 0.7);
+        padding-left: 0;
+        padding-right: 0;
+        font-weight: 400;
+        font-size: 14px;
+        letter-spacing: -0.01em;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: #ffffff;
+        }
       }
     }
-  }
 
-  & .ant-menu-item:hover {
-    color: #ffffff;
-    border-color: #ffffff;
-  }
+    & .ant-menu-item:hover {
+      color: #ffffff;
+      border-color: transparent !important;
+    }
 
-  .ant-menu-item-selected,.ant-menu-item-selected {
-    border-color: transparent;
-  }
-}
+    & .ant-menu-item-selected {
+      border-color: transparent !important;
+    }
 
+    & .ant-menu-item-active::after {
+      border-bottom: none !important;
+    }
+  }
 `;
 
 const MenuContainer = styled.div`
-float: right;
-margin-bottom: 2px;
+  float: right;
 `;
 
-const headerHeight = 48;
+const headerHeight = 56;
 
 const HeaderLogo = styled.a`
-display: flex;
-height: ${headerHeight}px;
+  display: flex;
+  align-items: center;
+  height: ${headerHeight}px;
 `;
 
 const StyledDrawer = styled(Drawer)`
-color: #013a8c;
+  .ant-drawer-content {
+    background: rgba(15, 20, 40, 0.9) !important;
+    backdrop-filter: blur(40px) !important;
+    -webkit-backdrop-filter: blur(40px) !important;
+  }
 
-a {
-  color: #013a8c !important;
-}
+  .ant-drawer-body {
+    padding: 1rem 0;
+  }
 
-.ant-menu-item, .ant-menu-item:active, .ant-menu-item-selected {
-  background-color: white !important;
-  color: #013a8c !important;
-}
+  a {
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: color 0.2s ease;
 
-svg {
-  position: relative;
-  top: 2px;
-  margin-right: 1rem;
-  color: #013a8c;
-}
+    &:hover {
+      color: white !important;
+    }
+  }
+
+  .ant-menu {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .ant-menu-item {
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-radius: 8px;
+    margin: 2px 8px;
+
+    &:hover, &:active, &.ant-menu-item-selected {
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: white !important;
+    }
+  }
+
+  svg {
+    position: relative;
+    top: 2px;
+    margin-right: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
 `;
 
 const LogoImg = styled.img`
-  height: ${headerHeight - 16}px;
+  height: 28px;
   width: auto;
-  margin-left: 8px;
-  position: relative;
-  top: -8px;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
 `;
 
 function smoothScrollTo(id, offset = 0) {
@@ -150,7 +197,7 @@ function HomeHeader({ onClickContact }) {
     },
     ...(shouldShowContact ? [{
       key: 'contact',
-      label: <Button type="link" onClick={handleClickContact}><Trans i18nKey="header.contact" /></Button>,
+      label: <Button type="link" onClick={handleClickContact} style={{ color: 'rgba(255,255,255,0.7)', padding: 0, fontSize: 14, fontWeight: 400 }}><Trans i18nKey="header.contact" /></Button>,
     }] : []),
     {
       key: 'lng',
@@ -199,7 +246,11 @@ function HomeHeader({ onClickContact }) {
         </MenuContainer>
       ) : (
         <>
-          <Button type="link" style={{ backgroundColor: 'transparent', color: 'white' }} onClick={() => setDrawerVisible(true)}>
+          <Button
+            type="text"
+            style={{ color: 'rgba(255,255,255,0.8)', fontSize: 18 }}
+            onClick={() => setDrawerVisible(true)}
+          >
             <MenuOutlined />
           </Button>
           <StyledDrawer
@@ -207,7 +258,8 @@ function HomeHeader({ onClickContact }) {
             closable={false}
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}
-            width={240}
+            width={260}
+            styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
           >
             <Menu mode="vertical" style={{ border: 0 }} items={mobileMenuItems} />
           </StyledDrawer>

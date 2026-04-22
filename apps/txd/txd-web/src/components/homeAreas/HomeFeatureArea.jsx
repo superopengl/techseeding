@@ -1,98 +1,153 @@
 import React from 'react';
-import { Typography } from 'antd';
-import HomeRowArea from "./HomeRowArea";
 import styled from 'styled-components';
 import { MailOutlined, PhoneOutlined, WechatOutlined } from '@ant-design/icons';
 import { Trans } from 'react-i18next';
 import { MdOpenInNew } from "react-icons/md";
 import { CopyToClipboardButton } from '../CopyToClipboardButton';
+import { Row, Col } from 'antd';
 
-const SubTitle = styled(Typography.Title)`
-color: #dddddd !important;
+const Container = styled.section`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 1.5rem 40px;
 `;
 
-const InfoCard = styled.div`
-box-sizing: border-box;
-width: 100%;
-margin-bottom: 2rem;
+const GlassInfoCard = styled.div`
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 2rem;
+  height: 100%;
+  position: relative;
 
-a {
-  color: #dddddd;
-
-  &:hover {
-    color: white;
-    text-decoration: underline;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
   }
-}
 `;
 
-const ContactSection = styled.section`
-  & p {
+const SubTitle = styled.h3`
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+`;
+
+const BodyText = styled.div`
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.875rem;
+  line-height: 1.7;
+`;
+
+const ContactSection = styled.div`
+  p {
     margin: 0;
+    padding: 6px 0;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: white;
+      text-decoration: none;
+    }
+  }
+
+  .anticon, svg {
+    opacity: 0.5;
+    font-size: 14px;
   }
 `;
 
-function HomeFeatureArea(props) {
-  const rowProps = {
-    bgColor: '',
-    span: {
-      xs: 24,
-      sm: 24,
-      md: 24,
-      lg: 8,
-      xl: 8,
-      xxl: 8
-    },
-    style: {
-      backgroundColor: '#013a8c',
-      color: '#f0f0f0',
-      paddingBottom: 0,
-      ...props.style,
-    }
-  };
+const SectionLabel = styled.p`
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5b9cf5;
+  margin: 0 0 0.5rem 0;
+`;
 
+const SectionTitle = styled.h2`
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 3rem 0;
+  letter-spacing: -0.03em;
+`;
+
+const spanProps = {
+  xs: 24,
+  sm: 24,
+  md: 24,
+  lg: 8,
+  xl: 8,
+  xxl: 8,
+};
+
+function HomeFeatureArea() {
   return (
-    <HomeRowArea {...rowProps}>
-      <InfoCard>
-        <SubTitle level={3}>
-          <Trans i18nKey="home.about_us" />
-        </SubTitle>
-        <section>
-          <Trans i18nKey="home.about_us.content" />
-        </section>
-      </InfoCard>
-      <InfoCard>
-        <SubTitle level={3}>
-          <Trans i18nKey="home.contact" />
-        </SubTitle>
-        <ContactSection>
-          <p>
-            <MdOpenInNew style={{ position: 'relative', top: 2 }} /> <Trans i18nKey="home.contact.website" /> : <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">https://www.techseeding.com.au</a>
-            <CopyToClipboardButton value="https://www.techseeding.com.au/" />
-          </p>
-          <p>
-            <MailOutlined /> <Trans i18nKey="home.contact.email" /> : <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
-            <CopyToClipboardButton value="mr.shaojun@gmail.com" />
-          </p>
-          <p>
-            <PhoneOutlined /> <Trans i18nKey="home.contact.phone" /> : <a href="tel:+61405581228">+61 4 0558 1228</a>
-            <CopyToClipboardButton value="+61405581228" />
-          </p>
-          <p>
-            <WechatOutlined /> <Trans i18nKey="home.contact.wechat" /> : <a href="weixin://dl/chat?superopengl">superopengl</a>
-            <CopyToClipboardButton value="superopengl" />
-          </p>
-        </ContactSection>
-      </InfoCard>
-      <InfoCard>
-        <SubTitle level={3}>
-          <Trans i18nKey="home.why_us" />
-        </SubTitle>
-        <section>
-          <Trans i18nKey="home.why_us.content" />
-        </section>
-      </InfoCard>
-    </HomeRowArea>
+    <Container>
+      <SectionLabel><Trans i18nKey="header.about_us" /></SectionLabel>
+      <SectionTitle><Trans i18nKey="home.about_us" /></SectionTitle>
+      <Row gutter={[20, 20]}>
+        <Col {...spanProps}>
+          <GlassInfoCard>
+            <SubTitle><Trans i18nKey="home.about_us" /></SubTitle>
+            <BodyText><Trans i18nKey="home.about_us.content" /></BodyText>
+          </GlassInfoCard>
+        </Col>
+        <Col {...spanProps}>
+          <GlassInfoCard>
+            <SubTitle><Trans i18nKey="home.contact" /></SubTitle>
+            <ContactSection>
+              <p>
+                <MdOpenInNew /> <Trans i18nKey="home.contact.website" />: <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">techseeding.com.au</a>
+                <CopyToClipboardButton value="https://www.techseeding.com.au/" />
+              </p>
+              <p>
+                <MailOutlined /> <Trans i18nKey="home.contact.email" />: <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
+                <CopyToClipboardButton value="mr.shaojun@gmail.com" />
+              </p>
+              <p>
+                <PhoneOutlined /> <Trans i18nKey="home.contact.phone" />: <a href="tel:+61405581228">+61 4 0558 1228</a>
+                <CopyToClipboardButton value="+61405581228" />
+              </p>
+              <p>
+                <WechatOutlined /> <Trans i18nKey="home.contact.wechat" />: <a href="weixin://dl/chat?superopengl">superopengl</a>
+                <CopyToClipboardButton value="superopengl" />
+              </p>
+            </ContactSection>
+          </GlassInfoCard>
+        </Col>
+        <Col {...spanProps}>
+          <GlassInfoCard>
+            <SubTitle><Trans i18nKey="home.why_us" /></SubTitle>
+            <BodyText><Trans i18nKey="home.why_us.content" /></BodyText>
+          </GlassInfoCard>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

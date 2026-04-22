@@ -7,22 +7,24 @@ import { HomeOutlined } from '@ant-design/icons';
 const { Footer } = Layout;
 
 const FooterStyled = styled(Footer)`
-width: 100%;
-text-align: center;
-font-size: 0.7rem;
-color: rgba(255,255,255,0.5);
-background-color: #013a8c;
-padding-left: 0;
-padding-right: 0;
-padding-top: 0;
-a {
-  color: rgba(255,255,255,0.5);
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem 1rem;
+  letter-spacing: -0.01em;
 
-  &:hover {
-    color: white;
-    text-decoration: underline;
+  a {
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+    }
   }
-}
 `;
 
 function HomeFooter() {
@@ -34,15 +36,16 @@ function HomeFooter() {
   return (
     <FooterStyled>
       <section id="about">
-        <Row gutter={[10, 2]}>
+        <Row gutter={[10, 6]}>
           <Col span={24}>&copy;{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
           <Col span={24}>
-            <HomeOutlined style={{ marginRight: 8 }} /><a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
+            <HomeOutlined style={{ marginRight: 8, opacity: 0.6 }} />
+            <a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
               Unit 101, 11 Spring St., Chatswood, NSW 2067
             </a>
           </Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
-          <Col span={24}>{versionInfo}</Col>
+          <Col span={24} style={{ opacity: 0.6 }}>{versionInfo}</Col>
         </Row>
       </section>
     </FooterStyled>
