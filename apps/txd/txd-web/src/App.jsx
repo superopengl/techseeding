@@ -1,16 +1,17 @@
 import React from 'react';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, theme } from 'antd';
 import HomePage from 'pages/HomePage';
 
 const appTheme = {
+  algorithm: theme.darkAlgorithm,
   token: {
-    colorPrimary: '#0071e3',
-    colorBgContainer: 'rgba(255, 255, 255, 0.6)',
-    colorBgElevated: 'rgba(255, 255, 255, 0.85)',
-    colorBorder: 'rgba(0, 0, 0, 0.08)',
-    colorText: '#1d1d1f',
-    colorTextSecondary: '#86868b',
+    colorPrimary: '#5b9cf5',
+    colorBgContainer: 'rgba(255, 255, 255, 0.06)',
+    colorBgElevated: 'rgba(30, 40, 70, 0.85)',
+    colorBorder: 'rgba(255, 255, 255, 0.1)',
+    colorText: 'rgba(255, 255, 255, 0.88)',
+    colorTextSecondary: 'rgba(255, 255, 255, 0.55)',
     fontSize: 15,
     controlHeight: 42,
     controlHeightLG: 50,
@@ -21,26 +22,26 @@ const appTheme = {
   },
   components: {
     Modal: {
-      contentBg: 'rgba(255, 255, 255, 0.82)',
+      contentBg: 'rgba(20, 30, 60, 0.8)',
       headerBg: 'transparent',
-      titleColor: '#1d1d1f',
+      titleColor: 'rgba(255, 255, 255, 0.9)',
     },
     Input: {
-      colorBgContainer: 'rgba(255, 255, 255, 0.7)',
-      colorBorder: 'rgba(0, 0, 0, 0.1)',
-      activeBorderColor: '#0071e3',
+      colorBgContainer: 'rgba(255, 255, 255, 0.07)',
+      colorBorder: 'rgba(255, 255, 255, 0.12)',
+      activeBorderColor: '#5b9cf5',
     },
     Button: {
       borderRadius: 12,
     },
     Menu: {
-      itemBg: 'transparent',
-      itemSelectedBg: 'rgba(0, 0, 0, 0.04)',
+      darkItemBg: 'transparent',
+      darkItemSelectedBg: 'rgba(255, 255, 255, 0.08)',
     },
     Tag: {
-      colorBgContainer: 'rgba(0, 0, 0, 0.04)',
-      colorBorder: 'rgba(0, 0, 0, 0.06)',
-      colorText: '#86868b',
+      colorBgContainer: 'rgba(255, 255, 255, 0.06)',
+      colorBorder: 'rgba(255, 255, 255, 0.1)',
+      colorText: 'rgba(255, 255, 255, 0.7)',
     },
   },
 };

@@ -6,14 +6,14 @@ import i18n from 'i18next';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 const CopyIcon = styled(MdContentCopy)`
-  color: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.25);
   position: relative;
   top: 2px;
   font-size: 13px;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #0071e3;
+    color: rgba(255, 255, 255, 0.6);
   }
 `;
 
@@ -23,7 +23,7 @@ const StyledButton = styled(Button)`
     transition: background 0.2s ease;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.04);
+      background: rgba(255, 255, 255, 0.08);
     }
   }
 `;
