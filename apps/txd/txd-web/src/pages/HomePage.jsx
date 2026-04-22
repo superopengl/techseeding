@@ -43,13 +43,12 @@ const PosterContainer = styled.div`
   padding-top: 60px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #1a3a6e 0%, #0d2240 100%);
 
   .poster-patterns {
     background-image: url("images/logo-poster-pattern.svg");
     background-repeat: repeat;
     background-size: 100px;
-    opacity: 0.06;
+    opacity: 0.04;
     top: 0;
     left: 0;
     bottom: 0;
@@ -61,17 +60,22 @@ const PosterContainer = styled.div`
 const HeroTitle = styled.h1`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
+  color: white;
   text-align: center;
   margin: 0;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  color: white;
+
+  background: linear-gradient(135deg, #ffffff 0%, #a8c8ff 50%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const HeroSubtitle = styled.p`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   margin: 0.75rem 0 0 0;
   letter-spacing: -0.01em;
@@ -88,19 +92,19 @@ const ContactButton = styled(Button)`
     font-size: 16px;
     font-weight: 500;
     letter-spacing: -0.01em;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.25);
-      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.35);
       color: white;
       transform: translateY(-1px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 32px rgba(91, 156, 245, 0.15);
     }
 
     &:active {
@@ -110,17 +114,16 @@ const ContactButton = styled(Button)`
 `;
 
 const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 2rem 1.5rem;
   height: 100%;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 
   &::before {
     content: '';
@@ -129,20 +132,20 @@ const GlassCard = styled.div`
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.75);
-    border-color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-4px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
 `;
 
 const CardIcon = styled.div`
   margin-bottom: 1.25rem;
-  color: ${props => props.$color || '#0071e3'};
+  color: ${props => props.$color || '#5b9cf5'};
   opacity: 0.85;
   transition: all 0.4s ease;
 
@@ -156,13 +159,13 @@ const CardTitle = styled.h3`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 600;
   font-size: 1.25rem;
-  color: #1d1d1f;
+  color: rgba(255, 255, 255, 0.92);
   margin: 0 0 0.75rem 0;
   letter-spacing: -0.02em;
 `;
 
 const CardDescription = styled.p`
-  color: #86868b;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 0;
@@ -172,9 +175,9 @@ const StyledTag = styled(Tag)`
   && {
     border-radius: 999px;
     margin: 3px;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    color: #86868b;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.55);
     font-size: 0.75rem;
     padding: 2px 10px;
   }
@@ -187,12 +190,12 @@ const AffixContactButton = styled(Button)`
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: #1d1d1f;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border-radius: 16px;
     transition: all 0.3s ease;
     position: fixed;
@@ -201,11 +204,11 @@ const AffixContactButton = styled(Button)`
     z-index: 10;
 
     &:hover, &:focus, &:active {
-      background: rgba(255, 255, 255, 0.85);
-      border-color: rgba(0, 0, 0, 0.12);
-      color: #0071e3;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: white;
       transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 12px 40px rgba(91, 156, 245, 0.2);
     }
   }
 `;
@@ -222,7 +225,7 @@ const SectionLabel = styled.p`
   letter-spacing: 0.15em;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #0071e3;
+  color: #5b9cf5;
   margin: 0 0 0.5rem 0;
 `;
 
@@ -231,7 +234,7 @@ const SectionTitle = styled.h2`
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   font-weight: 700;
   font-size: 2rem;
-  color: #1d1d1f;
+  color: rgba(255, 255, 255, 0.92);
   margin: 0 0 3rem 0;
   letter-spacing: -0.03em;
 `;
@@ -257,7 +260,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.ai" />,
     icon: <BsStars size={iconSize} />,
-    color: '#8b5cf6',
+    color: '#b68df0',
   },
   {
     title: <Trans i18nKey="feature.title.website" />,
@@ -268,7 +271,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.website" />,
     icon: <RiComputerLine size={iconSize} />,
-    color: '#0071e3',
+    color: '#5b9cf5',
   },
   {
     title: <Trans i18nKey="feature.title.mobile" />,
@@ -279,7 +282,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.mobile" />,
     icon: <GoDeviceMobile size={iconSize} />,
-    color: '#d64d7a',
+    color: '#e87eac',
   },
   {
     title: <Trans i18nKey="feature.title.wechat" />,
@@ -290,7 +293,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.wechat" />,
     icon: <AiOutlineWechat size={iconSize} />,
-    color: '#34a853',
+    color: '#5dd894',
   },
   {
     title: <Trans i18nKey="feature.title.digitizing" />,
@@ -301,7 +304,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.digitizing" />,
     icon: <GiMeshNetwork size={iconSize} />,
-    color: '#e08a2b',
+    color: '#f0c75e',
   },
   {
     title: <Trans i18nKey="feature.title.consulting" />,
@@ -312,7 +315,7 @@ const tileData = [
     ],
     content: <Trans i18nKey="feature.description.consulting" />,
     icon: <GiTeamIdea size={iconSize} />,
-    color: '#0891b2',
+    color: '#5ed8d0',
   },
 ];
 
@@ -364,7 +367,7 @@ function HomePage() {
   return (
     <LayoutStyled>
       <Modal
-        title={<div style={{ fontSize: '1rem', fontWeight: 500, color: '#1d1d1f' }}>
+        title={<div style={{ fontSize: '1rem', fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>
           <Trans i18nKey="contact.title" />
         </div>}
         open={modalVisible}
@@ -375,8 +378,8 @@ function HomePage() {
         footer={null}
         centered={true}
         styles={{
-          mask: { backdropFilter: 'blur(8px)', background: 'rgba(0, 0, 0, 0.2)' },
-          content: { backdropFilter: 'blur(40px)', background: 'rgba(255, 255, 255, 0.82)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, boxShadow: '0 24px 80px rgba(0,0,0,0.12)' },
+          mask: { backdropFilter: 'blur(8px)', background: 'rgba(0, 0, 0, 0.4)' },
+          content: { backdropFilter: 'blur(40px)', background: 'rgba(20, 30, 60, 0.75)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20 },
         }}
       >
         <ContactForm ref={contactFormRef} onDone={handleContactCancel} />
@@ -401,8 +404,8 @@ function HomePage() {
         </section>
         <section id="services">
           <ServicesSection>
-            <SectionLabel><Trans i18nKey="header.services" /></SectionLabel>
-            <SectionTitle><Trans i18nKey="feature.title.website" /> &amp; more</SectionTitle>
+            <SectionLabel><Trans i18nKey="section.services.subtitle" /></SectionLabel>
+            <SectionTitle><Trans i18nKey="section.services" /></SectionTitle>
             <Row gutter={[20, 20]}>
               {tileData.map((t, i) => (
                 <Col key={i} {...tileSpanProps}>
