@@ -62,10 +62,10 @@ const BodyText = styled.div`
 `;
 
 const ContactSection = styled.div`
-  p {
+  div {
     margin: 0;
     padding: 5px 0;
-    color: rgba(255, 255, 255, 0.48);
+    color: rgba(255, 255, 255, 0.55);
     font-size: 0.825rem;
     display: flex;
     align-items: center;
@@ -74,18 +74,13 @@ const ContactSection = styled.div`
   }
 
   a {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(160, 180, 255, 0.8);
     transition: color 0.2s ease;
 
     &:hover {
       color: white;
       text-decoration: none;
     }
-  }
-
-  .anticon, svg {
-    opacity: 0.4;
-    font-size: 13px;
   }
 `;
 
@@ -134,22 +129,18 @@ function HomeFeatureArea() {
           <GlassInfoCard>
             <SubTitle><Trans i18nKey="home.contact" /></SubTitle>
             <ContactSection>
-              <p>
+              <div>
                 <Trans i18nKey="home.contact.website" />: <a target="blank" referrerPolicy="no-referrer" href="https://www.techseeding.com.au/">techseeding.com.au</a>
-                <CopyToClipboardButton value="https://www.techseeding.com.au/" />
-              </p>
-              <p>
+              </div>
+              <div>
                 <Trans i18nKey="home.contact.email" />: <a href="mailto:mr.shaojun@gmail.com">mr.shaojun@gmail.com</a>
-                <CopyToClipboardButton value="mr.shaojun@gmail.com" />
-              </p>
-              <p>
+              </div>
+              <div>
                 <Trans i18nKey="home.contact.phone" />: <a href="tel:+61405581228">+61 4 0558 1228</a>
-                <CopyToClipboardButton value="+61405581228" />
-              </p>
-              <p>
+              </div>
+              <div>
                 <Trans i18nKey="home.contact.wechat" />: <a href="weixin://dl/chat?superopengl">superopengl</a>
-                <CopyToClipboardButton value="superopengl" />
-              </p>
+              </div>
             </ContactSection>
           </GlassInfoCard>
         </Col>
