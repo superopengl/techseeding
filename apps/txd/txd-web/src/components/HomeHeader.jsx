@@ -120,13 +120,13 @@ const StyledDrawer = styled(Drawer)`
 const LogoImg = styled.img`
   height: 28px;
   width: auto;
-  opacity: 0.75;
-  filter: brightness(0.85) sepia(1) hue-rotate(200deg) saturate(2);
+  opacity: 0.9;
+  filter: brightness(1.1) sepia(1) hue-rotate(200deg) saturate(1.5);
   transition: all 0.3s ease;
 
   &:hover {
-    opacity: 0.95;
-    filter: brightness(1) sepia(1) hue-rotate(200deg) saturate(1.5);
+    opacity: 1;
+    filter: brightness(1.3) sepia(1) hue-rotate(200deg) saturate(1.2);
   }
 `;
 
