@@ -58,7 +58,7 @@ const SubTitle = styled.h3`
 `;
 
 const BodyText = styled.div`
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.825rem;
   line-height: 1.7;
 `;
@@ -67,7 +67,7 @@ const ContactSection = styled.div`
   p {
     margin: 0;
     padding: 5px 0;
-    color: rgba(255, 255, 255, 0.38);
+    color: rgba(255, 255, 255, 0.48);
     font-size: 0.825rem;
     display: flex;
     align-items: center;
@@ -76,7 +76,7 @@ const ContactSection = styled.div`
   }
 
   a {
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.6);
     transition: color 0.2s ease;
 
     &:hover {

@@ -168,7 +168,7 @@ const HeroTitle = styled.h1`
 
 const HeroSubtitle = styled.p`
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55);
   text-align: center;
   margin: 1rem 0 0 0;
   letter-spacing: -0.01em;
@@ -293,7 +293,7 @@ const CardTitle = styled.h3`
 `;
 
 const CardDescription = styled.p`
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.52);
   font-size: 0.8rem;
   line-height: 1.65;
   margin: 0;
@@ -305,7 +305,7 @@ const StyledTag = styled(Tag)`
     margin: 2px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.48);
     font-size: 0.7rem;
     font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
     letter-spacing: 0.01em;
