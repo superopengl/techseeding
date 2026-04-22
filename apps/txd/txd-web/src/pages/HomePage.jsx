@@ -350,6 +350,19 @@ const ServicesSection = styled.section`
   margin: 0 auto;
   padding: 80px 1.5rem;
   position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
 `;
 
 const SectionDivider = styled.div`

@@ -10,6 +10,19 @@ const Container = styled.section`
   max-width: 1200px;
   margin: 0 auto;
   padding: 60px 1.5rem 40px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: 10%;
+    width: 500px;
+    height: 350px;
+    background: radial-gradient(ellipse, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
 `;
 
 const GlassInfoCard = styled.div`
