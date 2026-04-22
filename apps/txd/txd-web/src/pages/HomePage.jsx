@@ -286,7 +286,7 @@ const CardIcon = styled.div`
 
 const CardTitle = styled.h3`
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: rgba(255, 255, 255, 0.92);
   margin: 0 0 0.6rem 0;
   letter-spacing: -0.02em;
@@ -294,7 +294,7 @@ const CardTitle = styled.h3`
 
 const CardDescription = styled.p`
   color: rgba(255, 255, 255, 0.52);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   line-height: 1.65;
   margin: 0;
 `;

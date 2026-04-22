@@ -49,7 +49,7 @@ const GlassInfoCard = styled.div`
 
 const SubTitle = styled.h3`
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.9);
   margin: 0 0 0.75rem 0;
   letter-spacing: -0.02em;
@@ -57,7 +57,7 @@ const SubTitle = styled.h3`
 
 const BodyText = styled.div`
   color: rgba(255, 255, 255, 0.5);
-  font-size: 0.825rem;
+  font-size: 0.875rem;
   line-height: 1.7;
 `;
 
@@ -66,7 +66,7 @@ const ContactSection = styled.div`
     margin: 0;
     padding: 5px 0;
     color: rgba(255, 255, 255, 0.55);
-    font-size: 0.825rem;
+    font-size: 0.875rem;
     display: flex;
     align-items: center;
     gap: 6px;
