@@ -45,7 +45,7 @@ function HomeFooter() {
             </a>
           </Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
-          <Col span={24} style={{ opacity: 0.5 }}>{versionInfo}</Col>
+          <Col span={24} style={{ opacity: 0 }}>{versionInfo}</Col>
         </Row>
       </section>
     </FooterStyled>
