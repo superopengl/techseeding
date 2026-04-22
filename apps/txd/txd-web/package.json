@@ -20,18 +20,18 @@
   },
   "scripts": {
     "start": "vite --port 5001",
-    "build": "npm run clean && vite build",
+    "build": "pnpm run clean && vite build",
     "build:prod": "vite build",
     "clean": "rm -rf build",
     "preview": "vite preview --port 5001",
-    "dev": "npm install && npm run start",
-    "watched": "nodemon -w src --ext js --exec npm run build",
+    "dev": "pnpm install && pnpm run start",
+    "watched": "nodemon -w src --ext js --exec pnpm run build",
     "watch": "npm-watch",
     "g": "npx generate-react-cli component --",
     "p": "npx generate-react-cli component -- --type=page",
     "upload": "aws s3 sync build s3://txd-portal/",
     "flush": "aws cloudfront create-invalidation --distribution-id E1JLIDSYCZB9UH --paths \"/*\"",
-    "release": "npm run build:prod && npm run upload && npm run flush"
+    "release": "pnpm run build:prod && pnpm run upload && pnpm run flush"
   },
   "browserslist": {
     "production": [
@@ -61,5 +61,8 @@
       ],
       "extensions": "js,jsx"
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }

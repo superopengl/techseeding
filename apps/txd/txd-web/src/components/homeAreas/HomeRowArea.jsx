@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row, Col } from 'antd';
 
@@ -60,18 +59,5 @@ function HomeRowArea({ title, style, bgColor, children, span = defaultSpan }) {
     </Container>
   );
 }
-
-HomeRowArea.propTypes = {
-  title: PropTypes.string,
-  bgColor: PropTypes.string,
-  span: PropTypes.shape({
-    xs: PropTypes.number,
-    sm: PropTypes.number,
-    md: PropTypes.number,
-    lg: PropTypes.number,
-    xl: PropTypes.number,
-    xxl: PropTypes.number
-  })
-};
 
 export default HomeRowArea;
