@@ -1,12 +1,13 @@
 import { db } from "../db/index.js";
 import { otpCode, studentProfile } from "../db/schema.js";
 import { eq, and, gt } from "drizzle-orm";
+import { success, error } from "../lib/response.js";
 
 export function verify(fastify) {
   fastify.post("/api/verify", async (request, reply) => {
     const { code } = request.body || {};
     if (!code || typeof code !== "string" || code.length !== 6) {
-      return reply.status(400).send({ error: "A 6-digit code is required" });
+      return error(reply, 400, "VALIDATION_ERROR", "A 6-digit code is required");
     }
 
     const [otp] = await db
@@ -20,7 +21,7 @@ export function verify(fastify) {
       );
 
     if (!otp) {
-      return reply.status(401).send({ error: "Invalid or expired code" });
+      return error(reply, 401, "INVALID_CODE", "Invalid or expired code");
     }
 
     // Delete used OTP
@@ -33,9 +34,9 @@ export function verify(fastify) {
       .where(eq(studentProfile.firstName, otp.displayName));
 
     if (!profile) {
-      return reply.status(404).send({ error: "Student not found" });
+      return error(reply, 404, "NOT_FOUND", "Student not found");
     }
 
-    return { studentId: profile.studentId };
+    return success({ studentId: profile.studentId });
   });
 }

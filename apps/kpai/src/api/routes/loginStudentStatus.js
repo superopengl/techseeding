@@ -1,9 +1,8 @@
-import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
 import { loginRequest, user } from "../db/schema.js";
 import { eq } from "drizzle-orm";
-
-const JWT_SECRET = process.env.LAB67_JWT_SECRET;
+import { createToken } from "../lib/createToken.js";
+import { success, error } from "../lib/response.js";
 
 export function loginStudentStatus(fastify) {
   fastify.get("/api/login/student/:loginRequestId/status", async (request, reply) => {
@@ -16,20 +15,16 @@ export function loginStudentStatus(fastify) {
       .where(eq(loginRequest.id, loginRequestId));
 
     if (!record) {
-      return reply.status(404).send({ error: "Login request not found" });
+      return error(reply, 404, "NOT_FOUND", "Login request not found");
     }
 
     const { login_request: req, user: studentUser } = record;
 
     if (req.status === "approved") {
-      const token = jwt.sign(
-        { userId: studentUser.id, role: studentUser.role },
-        JWT_SECRET,
-        { expiresIn: "1d" },
-      );
-      return { loginRequestId: req.id, status: req.status, token };
+      const token = createToken({ userId: studentUser.id, role: studentUser.role });
+      return success({ loginRequestId: req.id, status: req.status, token });
     }
 
-    return { loginRequestId: req.id, status: req.status };
+    return success({ loginRequestId: req.id, status: req.status });
   });
 }

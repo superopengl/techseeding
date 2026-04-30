@@ -3,6 +3,7 @@ import { Button, Input, Typography, Card, Space, Spin, Result, message } from "a
 import { IdcardOutlined, LoadingOutlined, RocketOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
+import { apiCall } from "../api";
 
 const { Title, Paragraph } = Typography;
 
@@ -44,15 +45,15 @@ export function LoginPage() {
 
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/login/student/${loginRequestId}/status`);
-        const { status: reqStatus } = await res.json();
-        if (reqStatus === "approved") {
+        const data = await apiCall(`/api/login/student/${loginRequestId}/status`);
+        if (data.status === "approved") {
           clearInterval(pollingRef.current);
           clearTimeout(timeoutRef.current);
           clearInterval(countdownRef.current);
+          sessionStorage.setItem("lab67_token", data.token);
           setStatus("approved");
           navigate(`/sandbox/${studentId}`);
-        } else if (reqStatus === "rejected") {
+        } else if (data.status === "rejected") {
           clearInterval(pollingRef.current);
           clearTimeout(timeoutRef.current);
           clearInterval(countdownRef.current);
@@ -75,22 +76,17 @@ export function LoginPage() {
     setLoading(true);
     setLoginError(null);
     try {
-      const res = await fetch("/api/login/student", {
+      const data = await apiCall("/api/login/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentId: name.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setLoginError(data.error || "Login failed");
-        return;
-      }
       setStudentId(name.trim());
       setLoginRequestId(data.loginRequestId);
       setRemaining(600);
       setStatus("pending");
-    } catch {
-      setLoginError("Network error. Please try again.");
+    } catch (e) {
+      setLoginError(e.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -140,21 +136,14 @@ export function LoginPage() {
   const verifyOtp = async (code) => {
     setOtpLoading(true);
     try {
-      const res = await fetch("/api/verify", {
+      const data = await apiCall("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        message.error(data.error || "Invalid code");
-        setOtpDigits(["", "", "", "", "", ""]);
-        otpRefs.current[0]?.focus();
-        return;
-      }
       navigate(`/sandbox/${data.studentId}`);
-    } catch {
-      message.error("Verification failed");
+    } catch (e) {
+      message.error(e.message || "Verification failed");
       setOtpDigits(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
     } finally {

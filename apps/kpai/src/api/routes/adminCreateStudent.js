@@ -1,16 +1,17 @@
 import { db } from "../db/index.js";
 import { user, studentProfile } from "../db/schema.js";
 import { generateStudentId } from "../lib/generateStudentId.js";
+import { success, error } from "../lib/response.js";
 
 export function adminCreateStudent(fastify) {
   fastify.post("/api/admin/student", async (request, reply) => {
     const { firstName, lastName, nickname, dob, gender, school, homeAddress, contactNumber, custodianName, notes } = request.body || {};
 
     if (!firstName || !lastName) {
-      return reply.status(400).send({ error: "firstName and lastName are required" });
+      return error(reply, 400, "VALIDATION_ERROR", "firstName and lastName are required");
     }
 
-    const { newUser, profile } = await db.transaction(async (tx) => {
+    const { newUser, profile: newProfile } = await db.transaction(async (tx) => {
       const [newUser] = await tx
         .insert(user)
         .values({ displayName: nickname, role: "student" })
@@ -39,18 +40,18 @@ export function adminCreateStudent(fastify) {
       return { newUser, profile };
     });
 
-    return reply.status(201).send({
+    return reply.status(201).send(success({
       id: newUser.id,
       displayName: newUser.displayName,
       role: newUser.role,
       profile: {
-        id: profile.id,
-        studentId: profile.studentId,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        nickname: profile.nickname,
-        joinedAt: profile.joinedAt,
+        id: newProfile.id,
+        studentId: newProfile.studentId,
+        firstName: newProfile.firstName,
+        lastName: newProfile.lastName,
+        nickname: newProfile.nickname,
+        joinedAt: newProfile.joinedAt,
       },
-    });
+    }));
   });
 }

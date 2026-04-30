@@ -1,12 +1,13 @@
 import { db } from "../db/index.js";
 import { loginRequest } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+import { success, error } from "../lib/response.js";
 
 export function adminLoginApprove(fastify) {
   fastify.post("/api/admin/login/student/approve", async (request, reply) => {
     const { loginRequestId } = request.body || {};
     if (!loginRequestId) {
-      return reply.status(400).send({ error: "loginRequestId is required" });
+      return error(reply, 400, "VALIDATION_ERROR", "loginRequestId is required");
     }
 
     const [record] = await db
@@ -16,9 +17,9 @@ export function adminLoginApprove(fastify) {
       .returning();
 
     if (!record) {
-      return reply.status(404).send({ error: "Login request not found" });
+      return error(reply, 404, "NOT_FOUND", "Login request not found");
     }
 
-    return { loginRequestId: record.id, status: record.status };
+    return success({ loginRequestId: record.id, status: record.status });
   });
 }

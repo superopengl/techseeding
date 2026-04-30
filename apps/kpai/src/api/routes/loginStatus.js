@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { studentSession } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+import { success, error } from "../lib/response.js";
 
 export function loginStatus(fastify) {
   fastify.get("/api/login/status/:sessionId", async (request, reply) => {
@@ -11,9 +12,9 @@ export function loginStatus(fastify) {
       .where(eq(studentSession.id, sessionId));
 
     if (!session) {
-      return reply.status(404).send({ error: "Session not found" });
+      return error(reply, 404, "NOT_FOUND", "Session not found");
     }
 
-    return { status: session.status, sessionId: session.id };
+    return success({ status: session.status, sessionId: session.id });
   });
 }

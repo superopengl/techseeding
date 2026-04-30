@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { colors, shadows, fonts } from "../theme";
+import { apiCall } from "../api";
 
 const { Header, Content } = Layout;
 
@@ -22,10 +23,7 @@ export function AdminPage() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/students");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (!Array.isArray(data)) throw new Error("Invalid response");
+      const data = await apiCall("/api/admin/students");
       setStudents(data);
     } catch {
       message.error("Failed to load students");
@@ -51,7 +49,7 @@ export function AdminPage() {
     const displayName = `${values.firstName.trim()} ${values.lastName.trim()}`;
     const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.lab67`;
     try {
-      const res = await fetch("/api/admin/student", {
+      await apiCall("/api/admin/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,10 +59,6 @@ export function AdminPage() {
           dob: values.dob ? values.dob.format("YYYY-MM-DD") : null,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to create student");
-      }
       message.success("Student added");
       setAddModalOpen(false);
       fetchStudents();
@@ -77,15 +71,11 @@ export function AdminPage() {
 
   const handleApproveLogin = async (loginRequestId) => {
     try {
-      const res = await fetch("/api/admin/login/student/approve", {
+      await apiCall("/api/admin/login/student/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ loginRequestId }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to approve");
-      }
       message.success("Login approved");
       fetchStudents();
     } catch (e) {

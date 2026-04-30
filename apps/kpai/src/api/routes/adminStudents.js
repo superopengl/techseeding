@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { user, studentProfile, loginRequest } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+import { success } from "../lib/response.js";
 
 export function adminStudents(fastify) {
   fastify.get("/api/admin/students", async () => {
@@ -11,7 +12,7 @@ export function adminStudents(fastify) {
       .leftJoin(loginRequest, eq(loginRequest.studentId, user.id))
       .orderBy(studentProfile.createdAt);
 
-    return profiles.map((row) => ({
+    return success(profiles.map((row) => ({
       id: row.user.id,
       displayName: row.user.displayName,
       email: row.user.email,
@@ -24,6 +25,6 @@ export function adminStudents(fastify) {
       createdAt: row.student_profile.createdAt,
       loginRequestId: row.login_request?.id ?? null,
       loginRequestStatus: row.login_request?.status ?? null,
-    }));
+    })));
   });
 }

@@ -53,14 +53,14 @@ wsTerminal(fastify);
 
 fastify.setNotFoundHandler(async (request, reply) => {
   if (request.url.startsWith("/api/") || request.url.startsWith("/ws")) {
-    return reply.status(404).send({ error: "Not found" });
+    return reply.status(404).send({ success: false, error: { code: "NOT_FOUND", message: "Not found" } });
   }
   return reply.sendFile("index.html");
 });
 
 // --- Start ---
 
-const PORT = process.env.LAB67_PORT || 9511;
+const PORT = process.env.LAB67_API_SERVICE_PORT || 9511;
 fastify.listen({ port: PORT, host: "0.0.0.0" }, (err) => {
   if (err) {
     fastify.log.error(err);

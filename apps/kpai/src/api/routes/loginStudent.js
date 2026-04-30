@@ -1,12 +1,13 @@
 import { db } from "../db/index.js";
 import { user, studentProfile, loginRequest } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+import { success, error } from "../lib/response.js";
 
 export function loginStudent(fastify) {
   fastify.post("/api/login/student", async (request, reply) => {
     const { studentId } = request.body || {};
     if (!studentId || typeof studentId !== "string" || studentId.trim().length === 0) {
-      return reply.status(400).send({ error: "Student ID is required" });
+      return error(reply, 400, "VALIDATION_ERROR", "Student ID is required");
     }
 
     const [result] = await db
@@ -19,7 +20,7 @@ export function loginStudent(fastify) {
       .where(eq(studentProfile.studentId, studentId.trim()));
 
     if (!result) {
-      return reply.status(404).send({ error: "Student not found" });
+      return error(reply, 404, "NOT_FOUND", "Student not found");
     }
 
     const { user: studentUser } = result;
@@ -33,6 +34,6 @@ export function loginStudent(fastify) {
       })
       .returning();
 
-    return { loginRequestId: loginReq.id };
+    return success({ loginRequestId: loginReq.id });
   });
 }

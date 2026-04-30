@@ -2,6 +2,29 @@
 
 All endpoints are prefixed with `/api` except the health check. Authenticated endpoints require a JWT token in the `Authorization: Bearer <token>` header.
 
+## Standard Response Format
+
+All API responses (except health check and WebSocket) follow this envelope:
+
+**Success:**
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": { "limit": 50, "cursor": "...", "refreshed_auth_token": "" }
+}
+```
+
+**Error:**
+```json
+{
+  "success": false,
+  "error": { "code": "ERROR_CODE", "message": "Human-readable message" }
+}
+```
+
+The `meta` field is optional and only included when relevant (e.g., pagination, token refresh).
+
 ---
 
 ## Public
