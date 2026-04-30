@@ -2,8 +2,8 @@ import React from "react";
 import { Empty } from "antd";
 import { colors } from "../theme";
 
-export function GamePreview({ studentId }) {
-  if (!studentId) {
+export function GamePreview({ sandboxId }) {
+  if (!sandboxId) {
     return (
       <div
         style={{
@@ -21,7 +21,7 @@ export function GamePreview({ studentId }) {
 
   return (
     <iframe
-      src={`/sandbox/${studentId}/game/index.html`}
+      src={`/sandbox/${sandboxId}/game/index.html`}
       title="Game Preview"
       style={{
         width: "100%",

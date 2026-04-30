@@ -7,20 +7,20 @@ import { createStudentSandbox } from "../lib/sandboxManager.js";
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
     fastify.get("/ws", { websocket: true }, (socket, req) => {
-      const studentId = req.query.studentId;
+      const sandboxId = req.query.sandboxId;
 
-      if (!studentId) {
+      if (!sandboxId) {
         socket.send(
           JSON.stringify({
             type: "output",
-            data: "\x1b[31mError: No student ID provided.\x1b[0m\r\n",
+            data: "\x1b[31mError: No sandbox ID provided.\x1b[0m\r\n",
           })
         );
         socket.close();
         return;
       }
 
-      const { gamePath } = createStudentSandbox(studentId);
+      const { gamePath } = createStudentSandbox(sandboxId);
 
       const ptyProcess = pty.spawn(
         "claude",

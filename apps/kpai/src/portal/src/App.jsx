@@ -16,7 +16,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/sandbox/:studentId" element={<SandboxPage />} />
+          <Route path="/sandbox/:sandboxId" element={<SandboxPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms_of_use" element={<TermsOfUsePage />} />

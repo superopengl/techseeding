@@ -12,7 +12,7 @@ const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
 
 export function SandboxPage() {
-  const { studentId } = useParams();
+  const { sandboxId } = useParams();
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
@@ -69,7 +69,7 @@ export function SandboxPage() {
       </Header>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto" }}>
-          <GamePreview studentId={studentId} />
+          <GamePreview sandboxId={sandboxId} />
         </div>
         <div
           onMouseDown={onMouseDown}
@@ -84,7 +84,7 @@ export function SandboxPage() {
           onMouseLeave={(e) => (e.currentTarget.style.background = colors.border)}
         />
         <div style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
-          <Terminal studentId={studentId} />
+          <Terminal sandboxId={sandboxId} />
         </div>
       </div>
     </Layout>

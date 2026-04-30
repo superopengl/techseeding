@@ -3,12 +3,12 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
-export function Terminal({ studentId }) {
+export function Terminal({ sandboxId }) {
   const containerRef = useRef(null);
   const termRef = useRef(null);
 
   useEffect(() => {
-    if (!studentId || !containerRef.current) return;
+    if (!sandboxId || !containerRef.current) return;
 
     const term = new XTerm({ cursorBlink: true, fontSize: 14 });
     const fitAddon = new FitAddon();
@@ -19,7 +19,7 @@ export function Terminal({ studentId }) {
 
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(
-      `${proto}//${location.host}/ws?studentId=${studentId}`
+      `${proto}//${location.host}/ws?sandboxId=${sandboxId}`
     );
 
     ws.onopen = () => {
@@ -60,9 +60,9 @@ export function Terminal({ studentId }) {
       ws.close();
       term.dispose();
     };
-  }, [studentId]);
+  }, [sandboxId]);
 
-  if (!studentId) {
+  if (!sandboxId) {
     return (
       <div
         style={{
