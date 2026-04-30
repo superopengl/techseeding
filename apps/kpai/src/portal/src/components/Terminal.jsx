@@ -18,8 +18,9 @@ export function Terminal({ sandboxId }) {
     termRef.current = term;
 
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
+    const token = sessionStorage.getItem("lab67_token");
     const ws = new WebSocket(
-      `${proto}//${location.host}/ws?sandboxId=${sandboxId}`
+      `${proto}//${location.host}/ws?sandboxId=${sandboxId}&token=${token}`
     );
 
     ws.onopen = () => {

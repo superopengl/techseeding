@@ -1,13 +1,38 @@
 import pty from "node-pty";
-import { db } from "../db/index.js";
-import { studentSession } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import jwt from "jsonwebtoken";
 import { createSandbox } from "../lib/sandboxManager.js";
+
+const JWT_SECRET = process.env.LAB67_JWT_SECRET;
 
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
     fastify.get("/ws", { websocket: true }, (socket, req) => {
-      const sandboxId = req.query.sandboxId;
+      const { sandboxId, token } = req.query;
+
+      if (!token) {
+        socket.send(
+          JSON.stringify({
+            type: "output",
+            data: "\x1b[31mError: Authentication required.\x1b[0m\r\n",
+          })
+        );
+        socket.close();
+        return;
+      }
+
+      let payload;
+      try {
+        payload = jwt.verify(token, JWT_SECRET);
+      } catch {
+        socket.send(
+          JSON.stringify({
+            type: "output",
+            data: "\x1b[31mError: Invalid or expired token.\x1b[0m\r\n",
+          })
+        );
+        socket.close();
+        return;
+      }
 
       if (!sandboxId) {
         socket.send(
@@ -26,7 +51,7 @@ export function wsTerminal(fastify) {
         "claude",
         [
           "--allowedTools",
-          "Edit,Write,Read,Bash(cat),Bash(ls),Bash(mkdir),Bash(cp)",
+          "Edit,Write,Read,Bash(cat)",
         ],
         {
           name: "xterm-256color",
