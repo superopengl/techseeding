@@ -177,9 +177,8 @@ All env vars are prefixed with `LAB67_`.
 | Variable | Description | Default |
 |---|---|---|
 | `LAB67_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/lab67` |
-| `LAB67_API_SERVICE_PORT` | API server port | `9511` |
+| `LAB67_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
 | `LAB67_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
-
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)

@@ -17,6 +17,7 @@ import { adminCreateStudent } from "./routes/adminCreateStudent.js";
 import { adminLoginApprove } from "./routes/adminLoginApprove.js";
 import { sandboxList } from "./routes/sandboxList.js";
 import { sandboxCreate } from "./routes/sandboxCreate.js";
+import { sandboxPreview } from "./routes/sandboxPreview.js";
 import { wsTerminal } from "./routes/wsTerminal.js";
 
 const fastify = Fastify({ logger: true });
@@ -51,6 +52,7 @@ adminCreateStudent(fastify);
 adminLoginApprove(fastify);
 sandboxList(fastify);
 sandboxCreate(fastify);
+sandboxPreview(fastify);
 wsTerminal(fastify);
 
 // --- SPA fallback ---
@@ -62,10 +64,18 @@ fastify.setNotFoundHandler(async (request, reply) => {
   return reply.sendFile("index.html");
 });
 
+// --- Graceful shutdown (needed for --watch restarts) ---
+
+for (const signal of ["SIGTERM", "SIGINT"]) {
+  process.on(signal, () => {
+    fastify.close().then(() => process.exit(0));
+  });
+}
+
 // --- Start ---
 
-const PORT = process.env.LAB67_API_SERVICE_PORT || 9511;
-fastify.listen({ port: PORT, host: "0.0.0.0" }, (err) => {
+const { port, hostname } = new URL(process.env.LAB67_API_SERVICE_URL);
+fastify.listen({ port: Number(port), host: hostname }, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);

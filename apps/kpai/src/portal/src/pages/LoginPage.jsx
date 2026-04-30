@@ -51,7 +51,7 @@ export function LoginPage() {
           clearInterval(countdownRef.current);
           sessionStorage.setItem("lab67_token", data.token);
           setStatus("approved");
-          navigate("/sandboxes");
+          navigate("/sandbox");
         } else if (data.status === "rejected") {
           clearInterval(pollingRef.current);
           clearTimeout(timeoutRef.current);
@@ -140,7 +140,7 @@ export function LoginPage() {
         body: JSON.stringify({ code }),
       });
       sessionStorage.setItem("lab67_token", data.token);
-      navigate("/sandboxes");
+      navigate("/sandbox");
     } catch (e) {
       message.error(e.message || "Verification failed");
       setOtpDigits(["", "", "", "", "", ""]);

@@ -14,7 +14,7 @@ export function sandboxCreate(fastify) {
 
     const { title } = request.body || {};
     const id = crypto.randomUUID();
-    const releaseUrl = `/sandbox/${id}/game/`;
+    const releaseUrl = `${process.env.LAB67_API_SERVICE_URL}/sandbox/${id}/preview`;
     const workDir = createSandbox(id);
 
     const [newSandbox] = await db
