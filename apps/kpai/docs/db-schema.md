@@ -104,7 +104,6 @@ A game workspace owned by a student. Each sandbox represents one game creation a
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this sandbox |
-| release_url | text | NOT NULL | URL path to the published game (e.g. `/sandbox/<id>/game/`) |
 | work_dir | text | nullable | Filesystem path to the sandbox working directory |
 | title | text | nullable | Game title |
 | description | text | nullable | Game description |

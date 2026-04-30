@@ -22,7 +22,7 @@ export function GamePreview({ sandboxId }) {
   return (
     <iframe
       src={`/sandbox/${sandboxId}/preview`}
-      title="Game Preview"
+      title="Lab67 - Sandbox Preview"
       style={{
         width: "100%",
         height: "100%",
