@@ -40,7 +40,8 @@ export const studentProfile = pgTable("student_profile", {
 export const sandbox = pgTable("sandbox", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => user.id),
-  sandboxRootUrl: text("sandbox_root_url").notNull(),
+  releaseUrl: text("release_url").notNull(),
+  workDir: text("work_dir"),
   title: text("title"),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -14,16 +14,16 @@ export function sandboxCreate(fastify) {
 
     const { title } = request.body || {};
     const id = crypto.randomUUID();
-    const sandboxRootUrl = `/sandbox/${id}/game/`;
-
-    createSandbox(id);
+    const releaseUrl = `/sandbox/${id}/game/`;
+    const workDir = createSandbox(id);
 
     const [newSandbox] = await db
       .insert(sandbox)
       .values({
         id,
         userId: payload.userId,
-        sandboxRootUrl,
+        releaseUrl,
+        workDir,
         title: title || "Untitled Game",
       })
       .returning();

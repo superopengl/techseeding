@@ -1,31 +1,22 @@
 import path from "path";
+import os from "os";
 import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, "..", "..", "..");
-const SANDBOXES_DIR = path.join(ROOT_DIR, "sandboxes");
-const TEMPLATES_DIR = path.join(ROOT_DIR, "templates");
-
-fs.mkdirSync(SANDBOXES_DIR, { recursive: true });
+const SANDBOX_SAMPLE_DIR = path.join(__dirname, "..", "resources", "sandbox_sample");
 
 export function createSandbox(sandboxId) {
-  const sandboxPath = path.join(SANDBOXES_DIR, sandboxId);
-  const gamePath = path.join(sandboxPath, "game");
+  const workDir = path.join(os.tmpdir(), "lab67", "sandbox", sandboxId);
 
-  if (!fs.existsSync(gamePath)) {
-    fs.mkdirSync(gamePath, { recursive: true });
-
-    const templateFiles = fs.readdirSync(TEMPLATES_DIR);
-    for (const file of templateFiles) {
-      fs.copyFileSync(
-        path.join(TEMPLATES_DIR, file),
-        path.join(gamePath, file)
-      );
-    }
+  if (!fs.existsSync(workDir)) {
+    fs.cpSync(SANDBOX_SAMPLE_DIR, workDir, { recursive: true });
   }
 
-  return { sandboxPath, gamePath };
+  return workDir;
 }
 
-export { SANDBOXES_DIR, ROOT_DIR };
+const SANDBOXES_DIR = path.join(ROOT_DIR, "sandboxes");
+
+export { ROOT_DIR, SANDBOXES_DIR };

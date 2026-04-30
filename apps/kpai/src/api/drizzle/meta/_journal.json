@@ -85,6 +85,20 @@
       "when": 1777520900000,
       "tag": "0011_seed_builtin_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1777521000000,
+      "tag": "0012_add_sandbox_work_dir",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1777521100000,
+      "tag": "0013_rename_sandbox_root_url",
+      "breakpoints": true
     }
   ]
 }
