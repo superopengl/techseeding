@@ -1,12 +1,14 @@
 import pty from "node-pty";
 import jwt from "jsonwebtoken";
-import { createSandbox } from "../lib/sandboxManager.js";
+import { db } from "../db/index.js";
+import { sandbox } from "../db/schema.js";
+import { eq } from "drizzle-orm";
 
 const JWT_SECRET = process.env.LAB67_JWT_SECRET;
 
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
-    fastify.get("/ws", { websocket: true }, (socket, req) => {
+    fastify.get("/ws", { websocket: true }, async (socket, req) => {
       const { sandboxId, token } = req.query;
 
       if (!token) {
@@ -45,7 +47,23 @@ export function wsTerminal(fastify) {
         return;
       }
 
-      const { gamePath } = createSandbox(sandboxId);
+      const [record] = await db
+        .select({ workDir: sandbox.workDir })
+        .from(sandbox)
+        .where(eq(sandbox.id, sandboxId));
+
+      if (!record || !record.workDir) {
+        socket.send(
+          JSON.stringify({
+            type: "output",
+            data: "\x1b[31mError: Sandbox not found.\x1b[0m\r\n",
+          })
+        );
+        socket.close();
+        return;
+      }
+
+      const gamePath = record.workDir;
 
       const ptyProcess = pty.spawn(
         "claude",
