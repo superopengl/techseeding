@@ -69,7 +69,7 @@ export function wsTerminal(fastify) {
         "claude",
         [
           "--allowedTools",
-          "Edit,Write,Read,Bash(cat)",
+          "Read(index.html),Edit(index.html)",
         ],
         {
           name: "xterm-256color",
