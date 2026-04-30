@@ -6,9 +6,9 @@
   "main": "src/api/server.js",
   "scripts": {
     "postinstall": "chmod +x node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true",
-    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:portal\"",
-    "dev:api": "node --env-file=.env --watch-path=src/api src/api/server.js",
-    "dev:portal": "pnpm --filter lab67-portal dev",
+    "dev": "concurrently \"pnpm start:api\" \"pnpm start:portal\"",
+    "start:api": "node --env-file=.env --watch-path=src/api --inspect src/api/server.js",
+    "start:portal": "pnpm --filter lab67-portal dev",
     "build": "pnpm --filter lab67-portal build",
     "start:prod": "node --env-file=.env.production src/api/server.js",
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
