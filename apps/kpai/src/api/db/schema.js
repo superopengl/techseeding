@@ -39,7 +39,7 @@ export const studentProfile = pgTable("student_profile", {
 
 export const sandbox = pgTable("sandbox", {
   id: uuid("id").primaryKey().defaultRandom(),
-  studentId: uuid("student_id").notNull().references(() => user.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
   sandboxRootUrl: text("sandbox_root_url").notNull(),
   title: text("title"),
   description: text("description"),
@@ -49,7 +49,7 @@ export const sandbox = pgTable("sandbox", {
 
 export const loginRequest = pgTable("login_request", {
   id: uuid("id").primaryKey().defaultRandom(),
-  studentId: uuid("student_id").notNull().unique().references(() => user.id),
+  userId: uuid("user_id").notNull().unique().references(() => user.id),
   status: text("status").notNull(), // requesting | approved | loggedin
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -57,11 +57,20 @@ export const loginRequest = pgTable("login_request", {
 
 export const studentSession = pgTable("student_session", {
   id: uuid("id").primaryKey().defaultRandom(),
-  studentId: uuid("student_id").notNull().references(() => user.id),
+  userId: uuid("user_id").notNull().references(() => user.id),
   sandboxId: uuid("sandbox_id").references(() => sandbox.id),
   requestedAt: timestamp("requested_at").notNull().defaultNow(),
   loggedInAt: timestamp("logged_in_at"),
   status: text("status").notNull(), // requesting | active
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const sandboxRelease = pgTable("sandbox_release", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sandboxId: uuid("sandbox_id").notNull().references(() => sandbox.id),
+  tag: text("tag"),
+  releasedAt: timestamp("released_at").notNull().defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

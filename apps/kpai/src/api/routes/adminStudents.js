@@ -9,7 +9,7 @@ export function adminStudents(fastify) {
       .select()
       .from(studentProfile)
       .innerJoin(user, eq(studentProfile.userId, user.id))
-      .leftJoin(loginRequest, eq(loginRequest.studentId, user.id))
+      .leftJoin(loginRequest, eq(loginRequest.userId, user.id))
       .orderBy(studentProfile.createdAt);
 
     return success(profiles.map((row) => ({

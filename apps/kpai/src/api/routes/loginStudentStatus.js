@@ -11,7 +11,7 @@ export function loginStudentStatus(fastify) {
     const [record] = await db
       .select()
       .from(loginRequest)
-      .innerJoin(user, eq(user.id, loginRequest.studentId))
+      .innerJoin(user, eq(user.id, loginRequest.userId))
       .where(eq(loginRequest.id, loginRequestId));
 
     if (!record) {

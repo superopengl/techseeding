@@ -12,7 +12,6 @@ export function LoginPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
-  const [studentId, setStudentId] = useState(null);
   const [loginRequestId, setLoginRequestId] = useState(null);
   const [status, setStatus] = useState(null);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -52,7 +51,7 @@ export function LoginPage() {
           clearInterval(countdownRef.current);
           sessionStorage.setItem("lab67_token", data.token);
           setStatus("approved");
-          navigate(`/sandbox/${studentId}`);
+          navigate("/sandboxes");
         } else if (data.status === "rejected") {
           clearInterval(pollingRef.current);
           clearTimeout(timeoutRef.current);
@@ -69,7 +68,7 @@ export function LoginPage() {
       clearTimeout(timeoutRef.current);
       clearInterval(countdownRef.current);
     };
-  }, [loginRequestId, status, studentId, navigate]);
+  }, [loginRequestId, status, navigate]);
 
   const handleSubmit = async () => {
     if (!name.trim()) return;
@@ -81,7 +80,6 @@ export function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentId: name.trim() }),
       });
-      setStudentId(name.trim());
       setLoginRequestId(data.loginRequestId);
       setRemaining(600);
       setStatus("pending");
@@ -141,7 +139,8 @@ export function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      navigate(`/sandbox/${data.studentId}`);
+      sessionStorage.setItem("lab67_token", data.token);
+      navigate("/sandboxes");
     } catch (e) {
       message.error(e.message || "Verification failed");
       setOtpDigits(["", "", "", "", "", ""]);
@@ -268,7 +267,6 @@ export function LoginPage() {
               clearTimeout(timeoutRef.current);
               clearInterval(countdownRef.current);
               setStatus(null);
-              setStudentId(null);
               setName("");
             }}
             style={{ color: colors.body, fontSize: 14 }}
@@ -307,7 +305,6 @@ export function LoginPage() {
             type="primary"
             onClick={() => {
               setStatus(null);
-              setStudentId(null);
               setName("");
             }}
             style={{

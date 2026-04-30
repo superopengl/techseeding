@@ -14,6 +14,7 @@ import { apiCall } from "../api";
 const { Header, Content } = Layout;
 
 export function AdminPage() {
+  useEffect(() => { document.title = "Admin Dashboard"; }, []);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);

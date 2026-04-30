@@ -74,12 +74,12 @@ Tracks a student's login request lifecycle. Created when a student requests to l
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| student_id | uuid | NOT NULL, UNIQUE, FK → `user.id` | The student requesting login |
+| user_id | uuid | NOT NULL, UNIQUE, FK → `user.id` | The student requesting login |
 | status | text | NOT NULL, one of `requesting`, `approved`, `loggedin` | Current request state |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `student_id` (unique)
+**Indexes:** `user_id` (unique)
 
 ### `student_session`
 
@@ -88,7 +88,7 @@ Represents a student's login session. A student can have multiple sessions over 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| student_id | uuid | NOT NULL, FK → `user.id` | The student who owns this session |
+| user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this session |
 | sandbox_id | uuid | nullable, FK → `sandbox.id` | The sandbox assigned to this session |
 | requested_at | timestamp | NOT NULL, default `now()` | When the login was requested |
 | logged_in_at | timestamp | nullable | When the session was approved/activated |
@@ -96,7 +96,7 @@ Represents a student's login session. A student can have multiple sessions over 
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `student_id`
+**Indexes:** `user_id`
 
 ### `sandbox`
 
@@ -105,14 +105,14 @@ A game workspace owned by a student. Each sandbox represents one game creation a
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| student_id | uuid | NOT NULL, FK → `user.id` | The student who owns this sandbox |
+| user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this sandbox |
 | sandbox_root_url | text | NOT NULL | URL path to the sandbox game files (e.g. `/sandbox/<id>/game/`) |
 | title | text | nullable | Game title |
 | description | text | nullable | Game description |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `student_id`
+**Indexes:** `user_id`
 
 ### `sandbox_message`
 

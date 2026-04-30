@@ -5,6 +5,7 @@ import { antTheme } from "./theme";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { SandboxPage } from "./pages/SandboxPage";
+import { SandboxListPage } from "./pages/SandboxListPage";
 import { AdminPage } from "./pages/AdminPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { TermsOfUsePage } from "./pages/TermsOfUsePage";
@@ -16,6 +17,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/sandbox" element={<SandboxListPage />} />
           <Route path="/sandbox/:sandboxId" element={<SandboxPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />

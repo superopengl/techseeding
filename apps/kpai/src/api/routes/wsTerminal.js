@@ -2,7 +2,7 @@ import pty from "node-pty";
 import { db } from "../db/index.js";
 import { studentSession } from "../db/schema.js";
 import { eq } from "drizzle-orm";
-import { createStudentSandbox } from "../lib/sandboxManager.js";
+import { createSandbox } from "../lib/sandboxManager.js";
 
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
@@ -20,7 +20,7 @@ export function wsTerminal(fastify) {
         return;
       }
 
-      const { gamePath } = createStudentSandbox(sandboxId);
+      const { gamePath } = createSandbox(sandboxId);
 
       const ptyProcess = pty.spawn(
         "claude",

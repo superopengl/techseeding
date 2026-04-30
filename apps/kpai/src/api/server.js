@@ -15,6 +15,8 @@ import { adminReject } from "./routes/adminReject.js";
 import { adminOtp } from "./routes/adminOtp.js";
 import { adminCreateStudent } from "./routes/adminCreateStudent.js";
 import { adminLoginApprove } from "./routes/adminLoginApprove.js";
+import { sandboxList } from "./routes/sandboxList.js";
+import { sandboxCreate } from "./routes/sandboxCreate.js";
 import { wsTerminal } from "./routes/wsTerminal.js";
 
 const fastify = Fastify({ logger: true });
@@ -47,6 +49,8 @@ adminReject(fastify);
 adminOtp(fastify);
 adminCreateStudent(fastify);
 adminLoginApprove(fastify);
+sandboxList(fastify);
+sandboxCreate(fastify);
 wsTerminal(fastify);
 
 // --- SPA fallback ---

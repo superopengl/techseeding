@@ -43,6 +43,20 @@
       "when": 1777520300000,
       "tag": "0005_sync_doc_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777520400000,
+      "tag": "0006_rename_student_id_to_user_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777520500000,
+      "tag": "0007_add_sandbox_release",
+      "breakpoints": true
     }
   ]
 }

@@ -27,9 +27,9 @@ export function loginStudent(fastify) {
 
     const [loginReq] = await db
       .insert(loginRequest)
-      .values({ studentId: studentUser.id, status: "requesting" })
+      .values({ userId: studentUser.id, status: "requesting" })
       .onConflictDoUpdate({
-        target: loginRequest.studentId,
+        target: loginRequest.userId,
         set: { status: "requesting", updatedAt: new Date() },
       })
       .returning();

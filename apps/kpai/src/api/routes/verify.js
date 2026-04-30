@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { otpCode, studentProfile } from "../db/schema.js";
 import { eq, and, gt } from "drizzle-orm";
+import { createToken } from "../lib/createToken.js";
 import { success, error } from "../lib/response.js";
 
 export function verify(fastify) {
@@ -37,6 +38,7 @@ export function verify(fastify) {
       return error(reply, 404, "NOT_FOUND", "Student not found");
     }
 
-    return success({ studentId: profile.studentId });
+    const token = createToken({ userId: profile.userId, role: "student" });
+    return success({ token });
   });
 }

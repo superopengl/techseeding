@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs";
-import crypto from "crypto";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -10,8 +9,8 @@ const TEMPLATES_DIR = path.join(ROOT_DIR, "templates");
 
 fs.mkdirSync(SANDBOXES_DIR, { recursive: true });
 
-export function createStudentSandbox(studentId) {
-  const sandboxPath = path.join(SANDBOXES_DIR, studentId);
+export function createSandbox(sandboxId) {
+  const sandboxPath = path.join(SANDBOXES_DIR, sandboxId);
   const gamePath = path.join(sandboxPath, "game");
 
   if (!fs.existsSync(gamePath)) {
@@ -27,10 +26,6 @@ export function createStudentSandbox(studentId) {
   }
 
   return { sandboxPath, gamePath };
-}
-
-export function generateStudentId() {
-  return crypto.randomBytes(4).toString("hex");
 }
 
 export { SANDBOXES_DIR, ROOT_DIR };
