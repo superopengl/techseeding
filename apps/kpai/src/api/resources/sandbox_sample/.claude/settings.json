@@ -9,5 +9,6 @@
     ]
   },
   "mcpServers": {},
-  "enableAllProjectMcpServers": false
+  "enableAllProjectMcpServers": false,
+  "enablePlugins": false
 }
