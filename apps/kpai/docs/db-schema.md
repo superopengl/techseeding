@@ -8,7 +8,8 @@ All tables use **singular** naming. Every entity includes `created_at` and `upda
 user 1──1 student_profile
 user 1──* login_request
 user 1──* student_session *──1 sandbox
-user 1──* sandbox 1──* sandbox_message
+user 1──* sandbox 1──* session_message
+                sandbox 1──* sandbox_release
 user 1──* otp_code
 ```
 
@@ -90,9 +91,6 @@ Represents a student's login session. A student can have multiple sessions over 
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this session |
 | sandbox_id | uuid | nullable, FK → `sandbox.id` | The sandbox assigned to this session |
-| requested_at | timestamp | NOT NULL, default `now()` | When the login was requested |
-| logged_in_at | timestamp | nullable | When the session was approved/activated |
-| status | text | NOT NULL, one of `requesting`, `active` | Current session state |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
@@ -114,20 +112,35 @@ A game workspace owned by a student. Each sandbox represents one game creation a
 
 **Indexes:** `user_id`
 
-### `sandbox_message`
+### `sandbox_release`
+
+A published snapshot of a sandbox game. Each release captures a point-in-time version that can be shared publicly.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| sandbox_id | uuid | NOT NULL, FK → `sandbox.id` | The sandbox this release belongs to |
+| tag | text | nullable | Optional version tag (e.g. `v1`, `beta`) |
+| released_at | timestamp | NOT NULL, default `now()` | When this version was released |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+| updated_at | timestamp | NOT NULL, default `now()` | Last update time |
+
+**Indexes:** `sandbox_id`
+
+### `session_message`
 
 Chat messages exchanged between a student and the AI agent within a sandbox.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| sandbox_id | uuid | NOT NULL, FK → `sandbox.id` | Owning sandbox |
+| sandbox_session_id | uuid | NOT NULL, FK → `student_session.id` | Owning session |
 | content | jsonb | NOT NULL | Message payload |
 | type | text | NOT NULL, one of `request`, `response` | Direction of message |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `sandbox_id`
+**Indexes:** `sandbox_session_id`
 
 ---
 

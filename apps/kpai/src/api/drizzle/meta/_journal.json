@@ -57,6 +57,34 @@
       "when": 1777520500000,
       "tag": "0007_add_sandbox_release",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1777520600000,
+      "tag": "0008_rename_sandbox_message",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1777520700000,
+      "tag": "0009_rename_session_message_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1777520800000,
+      "tag": "0010_drop_session_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1777520900000,
+      "tag": "0011_seed_builtin_admin",
+      "breakpoints": true
     }
   ]
 }

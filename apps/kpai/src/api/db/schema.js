@@ -59,9 +59,6 @@ export const studentSession = pgTable("student_session", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => user.id),
   sandboxId: uuid("sandbox_id").references(() => sandbox.id),
-  requestedAt: timestamp("requested_at").notNull().defaultNow(),
-  loggedInAt: timestamp("logged_in_at"),
-  status: text("status").notNull(), // requesting | active
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -75,9 +72,9 @@ export const sandboxRelease = pgTable("sandbox_release", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const sandboxMessage = pgTable("sandbox_message", {
+export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sandboxId: uuid("sandbox_id").notNull().references(() => sandbox.id),
+  sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => studentSession.id),
   content: jsonb("content").notNull(),
   type: text("type").notNull(), // request | response
   createdAt: timestamp("created_at").notNull().defaultNow(),
