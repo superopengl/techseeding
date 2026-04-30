@@ -1,0 +1,29 @@
+import { db } from "../db/index.js";
+import { user, studentProfile, loginRequest } from "../db/schema.js";
+import { eq } from "drizzle-orm";
+
+export function adminStudents(fastify) {
+  fastify.get("/api/admin/students", async () => {
+    const profiles = await db
+      .select()
+      .from(studentProfile)
+      .innerJoin(user, eq(studentProfile.userId, user.id))
+      .leftJoin(loginRequest, eq(loginRequest.studentId, user.id))
+      .orderBy(studentProfile.createdAt);
+
+    return profiles.map((row) => ({
+      id: row.user.id,
+      displayName: row.user.displayName,
+      email: row.user.email,
+      studentId: row.student_profile.studentId,
+      firstName: row.student_profile.firstName,
+      lastName: row.student_profile.lastName,
+      nickname: row.student_profile.nickname,
+      school: row.student_profile.school,
+      joinedAt: row.student_profile.joinedAt,
+      createdAt: row.student_profile.createdAt,
+      loginRequestId: row.login_request?.id ?? null,
+      loginRequestStatus: row.login_request?.status ?? null,
+    }));
+  });
+}

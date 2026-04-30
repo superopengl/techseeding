@@ -1,0 +1,2 @@
+ALTER TABLE "user" ALTER COLUMN "email" DROP NOT NULL;
+ALTER TABLE "student_profile" ALTER COLUMN "nickname" SET NOT NULL;
