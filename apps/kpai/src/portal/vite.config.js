@@ -11,12 +11,12 @@ export default defineConfig({
         target: "ws://localhost:9511",
         ws: true,
       },
-      // Only proxy sandbox game file requests, not the /sandbox/:studentId SPA route
+      // Only proxy sandbox game/preview requests, not the /sandbox/:studentId SPA route
       "/sandbox": {
         target: "http://localhost:9511",
         bypass(req) {
-          // Let React Router handle /sandbox/:studentId (no /game/ in path)
-          if (!req.url.includes("/game/")) {
+          // Let React Router handle /sandbox and /sandbox/:sandboxId
+          if (!req.url.includes("/preview")) {
             return req.url;
           }
         },

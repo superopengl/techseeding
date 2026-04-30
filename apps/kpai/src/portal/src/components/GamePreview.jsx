@@ -21,7 +21,7 @@ export function GamePreview({ sandboxId }) {
 
   return (
     <iframe
-      src={`${import.meta.env.VITE_LAB67_API_SERVICE_URL || ""}/sandbox/${sandboxId}/preview`}
+      src={`/sandbox/${sandboxId}/preview`}
       title="Game Preview"
       style={{
         width: "100%",
