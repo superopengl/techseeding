@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal } from "antd";
-import { AppstoreOutlined, CloudUploadOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Layout, Input, Button, Space, Modal, message } from "antd";
+import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined } from "@ant-design/icons";
+import { QRCodeSVG } from "qrcode.react";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
@@ -25,6 +26,7 @@ export function SandboxPage() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [showMyGames, setShowMyGames] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
   const titleInputRef = useRef(null);
 
@@ -166,8 +168,8 @@ export function SandboxPage() {
           <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyGames(true)}>
             My Games
           </Button>
-          <Button type="primary" icon={<CloudUploadOutlined />}>
-            Release
+          <Button type="primary" icon={<QrcodeOutlined />} onClick={() => setShowShare(true)}>
+            Share
           </Button>
           <Button
             type="text"
@@ -227,6 +229,42 @@ export function SandboxPage() {
           onSelect={() => { setShowMyGames(false); setSandboxNotFound(false); }}
           onDeleteCurrent={() => setSandboxNotFound(true)}
         />
+      </Modal>
+      <Modal
+        title="Share Your Game"
+        open={showShare}
+        onCancel={() => setShowShare(false)}
+        footer={null}
+        width={400}
+        destroyOnClose
+      >
+        {(() => {
+          const shareUrl = `${window.location.origin}/sandbox/${sandboxId}/preview`;
+          return (
+            <div style={{ textAlign: "center", padding: "24px 0" }}>
+              <QRCodeSVG
+                value={shareUrl}
+                size={200}
+                imageSettings={{
+                  src: "/logo.png",
+                  width: 40,
+                  height: 40,
+                  excavate: true,
+                }}
+              />
+              <Input.Search
+                value={shareUrl}
+                readOnly
+                enterButton="Copy"
+                onSearch={() => {
+                  navigator.clipboard.writeText(shareUrl);
+                  message.success("Link copied!");
+                }}
+                style={{ marginTop: 16 }}
+              />
+            </div>
+          );
+        })()}
       </Modal>
     </Layout>
   );
