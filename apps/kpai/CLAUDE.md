@@ -82,6 +82,8 @@ src/
       adminOtp.js         # POST /api/admin/otp/:studentId
       adminCreateStudent.js # POST /api/admin/student
       wsTerminal.js       # WS /ws
+    resources/
+      sandbox_sample/     # Sandbox template — each new sandbox is a copy of this folder with API key injection
     lib/                  # Shared utilities
       sandboxManager.js   # Sandbox creation, ID generation, path constants
     db/
@@ -98,7 +100,6 @@ src/
     vite.config.js        # Vite config with dev proxy and build output to public/
     package.json          # Frontend dependencies
 public/                   # Built frontend assets (output of pnpm build, served by Fastify)
-templates/index.html      # Starter game template copied into each new sandbox
 ```
 
 ## Deployment
@@ -122,6 +123,7 @@ Finished games can be pushed to a public location (e.g., S3) so kids can share a
 - **One route controller per file** — each API route lives in its own file under `src/api/routes/`. The controller is a function that takes `fastify` and registers its route(s).
 - **Shared logic in `lib/`** — reusable utilities go in `src/api/lib/`, one function per file.
 - **Design tokens in `theme.js`** — all frontend colors, gradients, shadows, and fonts are imported from `src/portal/src/theme.js`. No hardcoded color values in components.
+- **Logical commits** — when committing, separate changes into logical commits grouped by concern (e.g., backend routes, frontend components, docs, build output) rather than one monolithic commit.
 
 ## Tech Stack
 
