@@ -139,7 +139,7 @@ export function HomePage() {
       <div
         style={{
           background: gradients.hero,
-          padding: "80px 24px 100px",
+          padding: "80px 24px 180px",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -217,12 +217,50 @@ export function HomePage() {
         </div>
       </div>
 
+      {/* Floating screenshot showcase — overlaps hero and features */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          marginTop: -140,
+          padding: "0 24px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 16,
+            overflow: "hidden",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.35)",
+            border: "2px solid rgba(255,255,255,0.12)",
+            maxWidth: 900,
+            marginInline: "auto",
+          }}
+        >
+          <img
+            src="/car-racer.png"
+            alt="A kid building a Road Racer game with AI in Lab67"
+            style={{ width: "100%", display: "block" }}
+          />
+        </div>
+        <Paragraph
+          style={{
+            color: colors.muted,
+            fontSize: 14,
+            marginTop: 16,
+            fontStyle: "italic",
+          }}
+        >
+          A real game built by a kid — describe your idea, watch AI code it live!
+        </Paragraph>
+      </div>
+
       {/* Features Section */}
       <div
         style={{
           maxWidth: 1000,
           margin: "0 auto",
-          padding: "80px 24px",
+          padding: "48px 24px 80px",
           textAlign: "center",
         }}
       >
