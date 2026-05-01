@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, List, Spin } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
   CopyOutlined,
   CheckOutlined,
+  CodeOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { colors, shadows, fonts } from "../theme";
@@ -20,6 +21,10 @@ export function AdminPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addForm] = Form.useForm();
   const [addLoading, setAddLoading] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerStudent, setDrawerStudent] = useState(null);
+  const [sandboxes, setSandboxes] = useState([]);
+  const [sandboxesLoading, setSandboxesLoading] = useState(false);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -84,6 +89,21 @@ export function AdminPage() {
     }
   };
 
+  const handleRowClick = async (record) => {
+    setDrawerStudent(record);
+    setDrawerOpen(true);
+    setSandboxesLoading(true);
+    try {
+      const data = await apiCall(`/api/admin/students/${record.id}/sandboxes`);
+      setSandboxes(data);
+    } catch {
+      message.error("Failed to load sandboxes");
+      setSandboxes([]);
+    } finally {
+      setSandboxesLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: "Student ID",
@@ -94,7 +114,8 @@ export function AdminPage() {
           <span>{id}</span>
           <CopyOutlined
             style={{ color: colors.muted, cursor: "pointer", fontSize: 13 }}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               navigator.clipboard.writeText(id);
               message.success("Student ID copied");
             }}
@@ -129,12 +150,6 @@ export function AdminPage() {
       render: (v) => v || "-",
     },
     {
-      title: "School",
-      dataIndex: "school",
-      key: "school",
-      render: (v) => v || "-",
-    },
-    {
       title: "Joined At",
       dataIndex: "joinedAt",
       key: "joinedAt",
@@ -162,7 +177,7 @@ export function AdminPage() {
               type="primary"
               size="small"
               icon={<CheckOutlined />}
-              onClick={() => handleApproveLogin(record.loginRequestId)}
+              onClick={(e) => { e.stopPropagation(); handleApproveLogin(record.loginRequestId); }}
               style={{ borderRadius: 6 }}
             >
               Approve
@@ -217,6 +232,10 @@ export function AdminPage() {
           rowKey="id"
           loading={loading}
           pagination={false}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+            style: { cursor: "pointer" },
+          })}
           style={{
             background: colors.surface,
             borderRadius: 16,
@@ -224,6 +243,47 @@ export function AdminPage() {
           }}
         />
       </Content>
+      <Drawer
+        title={drawerStudent ? `${drawerStudent.displayName}'s Sandboxes` : "Sandboxes"}
+        placement="right"
+        width={480}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        destroyOnClose
+      >
+        {sandboxesLoading ? (
+          <div style={{ textAlign: "center", padding: 48 }}>
+            <Spin />
+          </div>
+        ) : sandboxes.length === 0 ? (
+          <Typography.Text type="secondary">No sandboxes yet.</Typography.Text>
+        ) : (
+          <List
+            dataSource={sandboxes}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  <Button
+                    key="open"
+                    type="link"
+                    size="small"
+                    icon={<CodeOutlined />}
+                    href={`/sandbox/${item.id}`}
+                    target="_blank"
+                  >
+                    Open
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  title={item.title || "Untitled Sandbox"}
+                  description={`Created ${new Date(item.createdAt).toLocaleString()} · Updated ${new Date(item.updatedAt).toLocaleString()}`}
+                />
+              </List.Item>
+            )}
+          />
+        )}
+      </Drawer>
       <Modal
         title="Add Student"
         open={addModalOpen}
@@ -257,9 +317,6 @@ export function AdminPage() {
               <Radio value="boy">Boy</Radio>
               <Radio value="girl">Girl</Radio>
             </Radio.Group>
-          </Form.Item>
-          <Form.Item name="school" label="School">
-            <Input />
           </Form.Item>
           <Form.Item name="homeAddress" label="Home Address">
             <Input />
