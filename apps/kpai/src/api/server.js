@@ -3,7 +3,7 @@ import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket";
 import path from "path";
 import { fileURLToPath } from "url";
-import { ROOT_DIR, SANDBOXES_DIR } from "./lib/sandboxManager.js";
+import { ROOT_DIR } from "./lib/sandboxManager.js";
 import { healthcheck } from "./routes/healthcheck.js";
 import { loginStudent } from "./routes/loginStudent.js";
 import { loginStatus } from "./routes/loginStatus.js";
@@ -38,11 +38,6 @@ await fastify.register(fastifyStatic, {
   prefix: "/",
 });
 
-await fastify.register(fastifyStatic, {
-  root: SANDBOXES_DIR,
-  prefix: "/sandbox/",
-  decorateReply: false,
-});
 
 // --- Routes ---
 
