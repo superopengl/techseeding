@@ -127,6 +127,13 @@
       "when": 1777521500000,
       "tag": "0017_add_sandbox_session_closed_at",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1777521600000,
+      "tag": "0018_drop_session_message_updated_at",
+      "breakpoints": true
     }
   ]
 }

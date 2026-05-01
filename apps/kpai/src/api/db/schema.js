@@ -80,5 +80,4 @@ export const sessionMessage = pgTable("session_message", {
   content: jsonb("content").notNull(),
   type: text("type").notNull(), // request | response
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
