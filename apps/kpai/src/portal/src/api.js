@@ -12,6 +12,7 @@ export async function apiCall(url, options = {}) {
 
   if (res.status === 401 || res.status === 403) {
     sessionStorage.removeItem("c4k_token");
+    sessionStorage.removeItem("c4k_role");
     window.location.href = "/login";
     throw new Error("Unauthorized");
   }

@@ -215,6 +215,7 @@ export function SandboxPage() {
                   },
                   onOk: () => {
                     sessionStorage.removeItem("c4k_token");
+                    sessionStorage.removeItem("c4k_role");
                     navigate("/login");
                   },
                 });
