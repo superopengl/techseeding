@@ -7,7 +7,7 @@ All tables use **singular** naming. Every entity includes `created_at` and `upda
 ```
 user 1──1 student_profile
 user 1──* login_request
-user 1──* student_session *──1 sandbox
+user 1──* sandbox_session *──1 sandbox
 user 1──* sandbox 1──* session_message
                 sandbox 1──* sandbox_release
 user 1──* otp_code
@@ -82,15 +82,16 @@ Tracks a student's login request lifecycle. Created when a student requests to l
 
 **Indexes:** `user_id` (unique)
 
-### `student_session`
+### `sandbox_session`
 
-Represents a student's login session. A student can have multiple sessions over time. Each session can be linked to a sandbox (game workspace) where the student builds a game.
+Represents a student's sandbox session. A student can have multiple sessions over time. Each session is linked to a sandbox (game workspace) where the student builds a game.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this session |
 | sandbox_id | uuid | nullable, FK → `sandbox.id` | The sandbox assigned to this session |
+| closed_at | timestamp | nullable | When this session was closed |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
@@ -134,7 +135,7 @@ Chat messages exchanged between a student and the AI agent within a sandbox.
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| sandbox_session_id | uuid | NOT NULL, FK → `student_session.id` | Owning session |
+| sandbox_session_id | uuid | NOT NULL, FK → `sandbox_session.id` | Owning session |
 | content | jsonb | NOT NULL | Message payload |
 | type | text | NOT NULL, one of `request`, `response` | Direction of message |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |

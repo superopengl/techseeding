@@ -33,7 +33,7 @@ Multi-page app with four views:
 
 ### Database (PostgreSQL + Drizzle ORM)
 
-Six tables: `user`, `otp_code`, `student_profile`, `student_session`, `sandbox`, `sandbox_message`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
+Six tables: `user`, `otp_code`, `student_profile`, `sandbox_session`, `sandbox`, `sandbox_message`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
 
 Full schema documentation: [docs/db-schema.md](docs/db-schema.md)
 

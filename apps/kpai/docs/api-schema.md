@@ -172,7 +172,7 @@ Get sandbox information.
   ```json
   {
     "id": "uuid",
-    "studentSessionId": "uuid",
+    "sandboxSessionId": "uuid",
     "sandboxRootUrl": "string",
     "title": "string | null",
     "description": "string | null",
