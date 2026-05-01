@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Input, Typography, Card, Space, Spin, Result, message } from "antd";
-import { IdcardOutlined, LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { IdcardOutlined, LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
@@ -16,6 +16,8 @@ export function LoginPage() {
   const [loginError, setLoginError] = useState(null);
   const [loginRequestId, setLoginRequestId] = useState(null);
   const [status, setStatus] = useState(null);
+  const [email, setEmail] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [remaining, setRemaining] = useState(600);
@@ -52,6 +54,7 @@ export function LoginPage() {
           clearTimeout(timeoutRef.current);
           clearInterval(countdownRef.current);
           sessionStorage.setItem("c4k_token", data.token);
+          sessionStorage.setItem("c4k_role", "student");
           setStatus("approved");
           navigate("/sandbox");
         } else if (data.status === "rejected") {
@@ -89,6 +92,24 @@ export function LoginPage() {
       setLoginError(e.message || "Login failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!email.trim()) return;
+    setEmailLoading(true);
+    try {
+      await apiCall("/api/login/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      message.success("Verification code sent!");
+      setStatus("otp");
+    } catch (e) {
+      message.error(e.message || "Failed to send verification code");
+    } finally {
+      setEmailLoading(false);
     }
   };
 
@@ -142,7 +163,8 @@ export function LoginPage() {
         body: JSON.stringify({ code }),
       });
       sessionStorage.setItem("c4k_token", data.token);
-      navigate("/sandbox");
+      sessionStorage.setItem("c4k_role", data.role);
+      navigate(data.role === "admin" ? "/admin" : "/sandbox");
     } catch (e) {
       message.error(e.message || "Verification failed");
       setOtpDigits(["", "", "", "", "", ""]);
@@ -327,6 +349,66 @@ export function LoginPage() {
     );
   }
 
+  if (status === "email-otp") {
+    return (
+      <div style={containerStyle}>
+        <Decorations />
+        <Card style={{ ...cardStyle, textAlign: "center" }} styles={{ body: { padding: "48px 32px" } }}>
+          <MailOutlined style={{ fontSize: 40, color: colors.accentPurple, marginBottom: 12 }} />
+          <Title
+            level={3}
+            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
+          >
+            Login with Verification Code
+          </Title>
+          <Paragraph style={{ color: colors.body, marginBottom: 24 }}>
+            Enter your email and we'll send you a verification code
+          </Paragraph>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <Input
+              size="large"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onPressEnter={handleSendOtp}
+              style={{ borderRadius: 12, height: 48 }}
+              styles={{ input: { textAlign: "center" } }}
+            />
+            <Button
+              type="primary"
+              size="large"
+              block
+              loading={emailLoading}
+              onClick={handleSendOtp}
+              disabled={!email.trim()}
+              icon={<SendOutlined />}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 600,
+                background: colors.ctaYellow,
+                color: colors.heading,
+                border: "none",
+                boxShadow: shadows.ctaButtonSmall,
+              }}
+            >
+              Send Verification Code
+            </Button>
+          </Space>
+          <Button
+            type="link"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => setStatus(null)}
+            style={{ color: colors.body, fontSize: 14, marginTop: 16 }}
+          >
+            Back to Login
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   if (status === "otp") {
     return (
       <div style={containerStyle}>
@@ -383,17 +465,31 @@ export function LoginPage() {
           {otpLoading && (
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: colors.primary }} />} />
           )}
-          <Button
-            type="link"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => {
-              setStatus("pending");
-              setOtpDigits(["", "", "", "", "", ""]);
-            }}
-            style={{ color: colors.body, fontSize: 14, marginTop: 8 }}
-          >
-            Back to Waiting
-          </Button>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 8, gap: 4 }}>
+            {email && (
+              <Button
+                type="link"
+                onClick={() => {
+                  setOtpDigits(["", "", "", "", "", ""]);
+                  handleSendOtp();
+                }}
+                style={{ color: colors.primary, fontSize: 14 }}
+              >
+                Resend Verification Code
+              </Button>
+            )}
+            <Button
+              type="link"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => {
+                setStatus(loginRequestId ? "pending" : null);
+                setOtpDigits(["", "", "", "", "", ""]);
+              }}
+              style={{ color: colors.body, fontSize: 14 }}
+            >
+              {loginRequestId ? "Back to Waiting" : "Back to Login"}
+            </Button>
+          </div>
         </Card>
       </div>
     );
@@ -432,7 +528,7 @@ export function LoginPage() {
       <Decorations />
       <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Logo size={56} style={{ marginBottom: 12 }} />
+          <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
           <Title
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
@@ -490,7 +586,7 @@ export function LoginPage() {
         <div style={{ textAlign: "center", marginTop: 12 }}>
           <Button
             type="link"
-            onClick={() => setStatus("otp")}
+            onClick={() => setStatus("email-otp")}
             style={{ color: colors.primary, fontSize: 14, padding: 0 }}
           >
             Login with Verification Code
