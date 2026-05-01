@@ -299,6 +299,7 @@ export function AdminPage() {
         open={reviewOpen}
         sandboxId={reviewSandbox?.id}
         sandboxTitle={reviewSandbox?.title || "Untitled Sandbox"}
+        studentName={drawerStudent?.displayName}
         onClose={() => setReviewOpen(false)}
       />
       <Modal

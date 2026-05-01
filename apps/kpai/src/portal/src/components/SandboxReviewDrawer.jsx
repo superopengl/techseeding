@@ -150,7 +150,7 @@ function MessageTimeline({ sessions, showAi }) {
   );
 }
 
-export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, onClose }) {
+export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName, onClose }) {
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -196,7 +196,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, onClose }) 
 
   return (
     <Drawer
-      title={sandboxTitle || "Sandbox Review"}
+      title={[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}
       placement="bottom"
       height="85vh"
       open={open}
