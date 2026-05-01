@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ConfigProvider } from "antd";
-import { antTheme } from "./theme";
+import { antTheme, antModalConfig } from "./theme";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { SandboxPage } from "./pages/SandboxPage";
@@ -12,7 +12,7 @@ import { TermsOfUsePage } from "./pages/TermsOfUsePage";
 
 export function App() {
   return (
-    <ConfigProvider theme={antTheme}>
+    <ConfigProvider theme={antTheme} modal={antModalConfig}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />

@@ -10,27 +10,31 @@ export function sandboxPreview(fastify) {
     const { sandboxId } = request.params;
 
     const [record] = await db
-      .select({ workDir: sandbox.workDir })
+      .select({ workDir: sandbox.workDir, indexHtmlContent: sandbox.indexHtmlContent })
       .from(sandbox)
       .where(eq(sandbox.id, sandboxId));
 
-    if (!record || !record.workDir) {
+    if (!record) {
       return error(reply, 404, "NOT_FOUND", "Sandbox not found");
     }
 
-    const filePath = path.join(record.workDir, "index.html");
+    const filePath = record.workDir ? path.join(record.workDir, "index.html") : null;
+    const fileExists = filePath && fs.existsSync(filePath);
 
-    if (!fs.existsSync(filePath)) {
+    if (!fileExists && !record.indexHtmlContent) {
       return error(reply, 404, "NOT_FOUND", "index.html not found");
     }
 
-    const stream = fs.createReadStream(filePath);
-
-    return reply
+    reply
       .header("Cache-Control", "no-store, no-cache, must-revalidate")
       .header("Pragma", "no-cache")
       .header("Expires", "0")
-      .type("text/html")
-      .send(stream);
+      .type("text/html");
+
+    if (fileExists) {
+      return reply.send(fs.createReadStream(filePath));
+    }
+
+    return reply.send(record.indexHtmlContent);
   });
 }

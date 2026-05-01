@@ -59,8 +59,9 @@ export function SandboxPage() {
   }, [title]);
 
   const saveTitle = useCallback(() => {
+    const trimmed = titleDraft.trim();
+    if (!trimmed) return;
     setEditingTitle(false);
-    const trimmed = titleDraft.trim() || "Untitled Game";
     if (trimmed === title) return;
     setTitle(trimmed);
     fetchWithAuth(`/api/sandbox/${sandboxId}`, {
@@ -181,6 +182,7 @@ export function SandboxPage() {
                 content: "Are you sure you want to logout?",
                 okText: "Logout",
                 cancelText: "Stay",
+                autoFocusButton: "cancel",
                 okButtonProps: {
                   style: {
                     borderRadius: 12,
@@ -195,7 +197,7 @@ export function SandboxPage() {
                   style: { borderRadius: 12, fontWeight: 600 },
                 },
                 onOk: () => {
-                  sessionStorage.removeItem("l4k_token");
+                  sessionStorage.removeItem("c4k_token");
                   navigate("/login");
                 },
               });
@@ -256,7 +258,7 @@ export function SandboxPage() {
           return (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
               <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>
-                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun Lab4Kids is! 🚀
+                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun Code4Kids is! 🚀
               </p>
               <div style={{
                 display: "inline-block",

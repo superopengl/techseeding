@@ -41,7 +41,20 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
       title: "Delete Game",
       content: `Are you sure you want to delete "${sandboxItem.title || "Untitled Game"}"? This cannot be undone.`,
       okText: "Delete",
-      okButtonProps: { danger: true },
+      cancelText: "Keep",
+      okButtonProps: {
+        style: {
+          borderRadius: 12,
+          fontWeight: 600,
+          background: colors.ctaYellow,
+          color: colors.heading,
+          border: "none",
+          boxShadow: shadows.ctaButtonSmall,
+        },
+      },
+      cancelButtonProps: {
+        style: { borderRadius: 12, fontWeight: 600 },
+      },
       onOk: async () => {
         try {
           await apiCall(`/api/sandbox/${sandboxItem.id}`, { method: "DELETE" });
