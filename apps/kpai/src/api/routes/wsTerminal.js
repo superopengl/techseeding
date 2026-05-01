@@ -1,7 +1,7 @@
 import pty from "node-pty";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
-import { sandbox, sandboxSession } from "../db/schema.js";
+import { sandbox, sandboxSession, sessionMessage } from "../db/schema.js";
 import os from "os";
 import fs from "fs";
 import path from "path";
@@ -113,12 +113,35 @@ export function wsTerminal(fastify) {
       const ptyProcess = spawnTerminal(sandboxWorkDir);
       const { cleanup } = watchIndexHtml(sandboxWorkDir, sandboxId, socket, fastify);
 
+      // Message capture buffers
+      let inputBuffer = "";
+      let outputBuffer = "";
+      let outputDebounceTimer = null;
+
+      function saveMessage(type, text) {
+        db.insert(sessionMessage)
+          .values({ sandboxSessionId: session.id, content: { text }, type })
+          .catch((err) => {
+            fastify.log.error({ sessionId: session.id, type, err }, "Failed to save session message");
+          });
+      }
+
+      function flushOutput() {
+        if (outputBuffer.length > 0) {
+          saveMessage("response", outputBuffer);
+          outputBuffer = "";
+        }
+      }
+
       ptyProcess.onData((data) => {
         try {
           socket.send(JSON.stringify({ type: "output", data }));
         } catch {
           // client disconnected
         }
+        outputBuffer += data;
+        clearTimeout(outputDebounceTimer);
+        outputDebounceTimer = setTimeout(flushOutput, 1000);
       });
 
       ptyProcess.onExit(({ exitCode, signal }) => {
@@ -130,15 +153,34 @@ export function wsTerminal(fastify) {
 
       socket.on("message", (msg) => {
         const { type, data, cols, rows } = JSON.parse(msg);
-        if (type === "input") ptyProcess.write(data);
+        if (type === "input") {
+          ptyProcess.write(data);
+          if (data === "\r" || data === "\n") {
+            if (inputBuffer.length > 0) {
+              // Flush any pending output before saving the new input
+              clearTimeout(outputDebounceTimer);
+              flushOutput();
+              saveMessage("request", inputBuffer);
+              inputBuffer = "";
+            }
+          } else if (data === "\x7f" || data === "\b") {
+            // Backspace — remove last character
+            inputBuffer = inputBuffer.slice(0, -1);
+          } else if (data.length === 1 && data >= " ") {
+            // Printable character
+            inputBuffer += data;
+          }
+        }
         if (type === "resize") ptyProcess.resize(cols, rows);
       });
 
       socket.on("close", () => {
+        clearTimeout(outputDebounceTimer);
+        flushOutput();
         cleanup();
         ptyProcess.kill();
         db.update(sandboxSession)
-          .set({ closedAt: new Date(), updatedAt: new Date() })
+          .set({ closedAt: new Date() })
           .where(eq(sandboxSession.id, session.id))
           .catch((err) => {
             fastify.log.error({ sessionId: session.id, err }, "Failed to close sandbox session");
