@@ -113,6 +113,20 @@
       "when": 1777521300000,
       "tag": "0015_add_sandbox_index_html_content",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1777521400000,
+      "tag": "0016_rename_student_session",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1777521500000,
+      "tag": "0017_add_sandbox_session_closed_at",
+      "breakpoints": true
     }
   ]
 }

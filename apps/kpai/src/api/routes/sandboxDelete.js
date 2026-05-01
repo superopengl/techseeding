@@ -1,5 +1,5 @@
 import { db } from "../db/index.js";
-import { sandbox, studentSession, sessionMessage, sandboxRelease } from "../db/schema.js";
+import { sandbox, sandboxSession, sessionMessage, sandboxRelease } from "../db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 import { verifyToken } from "../lib/verifyToken.js";
 import { success, error } from "../lib/response.js";
@@ -21,17 +21,17 @@ export function sandboxDelete(fastify) {
       return error(reply, 404, "NOT_FOUND", "Sandbox not found");
     }
 
-    // Delete related records: sessionMessages -> studentSessions -> sandboxReleases -> sandbox
+    // Delete related records: sessionMessages -> sandboxSessions -> sandboxReleases -> sandbox
     await db.transaction(async (tx) => {
       const sessions = await tx
-        .select({ id: studentSession.id })
-        .from(studentSession)
-        .where(eq(studentSession.sandboxId, record.id));
+        .select({ id: sandboxSession.id })
+        .from(sandboxSession)
+        .where(eq(sandboxSession.sandboxId, record.id));
 
       if (sessions.length > 0) {
         const sessionIds = sessions.map((s) => s.id);
         await tx.delete(sessionMessage).where(inArray(sessionMessage.sandboxSessionId, sessionIds));
-        await tx.delete(studentSession).where(inArray(studentSession.id, sessionIds));
+        await tx.delete(sandboxSession).where(inArray(sandboxSession.id, sessionIds));
       }
 
       await tx.delete(sandboxRelease).where(eq(sandboxRelease.sandboxId, record.id));

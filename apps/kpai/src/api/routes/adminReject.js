@@ -1,5 +1,5 @@
 import { db } from "../db/index.js";
-import { studentSession } from "../db/schema.js";
+import { sandboxSession } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 
@@ -8,8 +8,8 @@ export function adminReject(fastify) {
     const { sessionId } = request.params;
 
     const [deleted] = await db
-      .delete(studentSession)
-      .where(eq(studentSession.id, sessionId))
+      .delete(sandboxSession)
+      .where(eq(sandboxSession.id, sessionId))
       .returning();
 
     if (!deleted) {

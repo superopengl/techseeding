@@ -56,10 +56,11 @@ export const loginRequest = pgTable("login_request", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const studentSession = pgTable("student_session", {
+export const sandboxSession = pgTable("sandbox_session", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => user.id),
   sandboxId: uuid("sandbox_id").references(() => sandbox.id),
+  closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -75,7 +76,7 @@ export const sandboxRelease = pgTable("sandbox_release", {
 
 export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => studentSession.id),
+  sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => sandboxSession.id),
   content: jsonb("content").notNull(),
   type: text("type").notNull(), // request | response
   createdAt: timestamp("created_at").notNull().defaultNow(),

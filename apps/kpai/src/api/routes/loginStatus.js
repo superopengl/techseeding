@@ -1,5 +1,5 @@
 import { db } from "../db/index.js";
-import { studentSession } from "../db/schema.js";
+import { sandboxSession } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 
@@ -8,8 +8,8 @@ export function loginStatus(fastify) {
     const { sessionId } = request.params;
     const [session] = await db
       .select()
-      .from(studentSession)
-      .where(eq(studentSession.id, sessionId));
+      .from(sandboxSession)
+      .where(eq(sandboxSession.id, sessionId));
 
     if (!session) {
       return error(reply, 404, "NOT_FOUND", "Session not found");

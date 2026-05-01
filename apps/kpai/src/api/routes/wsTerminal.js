@@ -1,7 +1,7 @@
 import pty from "node-pty";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
-import { sandbox } from "../db/schema.js";
+import { sandbox, sandboxSession } from "../db/schema.js";
 import os from "os";
 import fs from "fs";
 import path from "path";
@@ -82,7 +82,8 @@ export function wsTerminal(fastify) {
     fastify.get("/ws", { websocket: true }, async (socket, req) => {
       const { sandboxId, token } = req.query;
 
-      if (!authenticateToken(token)) {
+      const payload = authenticateToken(token);
+      if (!payload) {
         sendError(socket, token ? "Invalid or expired token." : "Authentication required.");
         return;
       }
@@ -102,6 +103,11 @@ export function wsTerminal(fastify) {
       if (isNew && record.indexHtmlContent) {
         fs.writeFileSync(path.join(sandboxWorkDir, "index.html"), record.indexHtmlContent);
       }
+
+      const [session] = await db
+        .insert(sandboxSession)
+        .values({ userId: payload.userId, sandboxId })
+        .returning({ id: sandboxSession.id });
 
       configureOpenCode(sandboxWorkDir);
       const ptyProcess = spawnTerminal(sandboxWorkDir);
@@ -131,6 +137,12 @@ export function wsTerminal(fastify) {
       socket.on("close", () => {
         cleanup();
         ptyProcess.kill();
+        db.update(sandboxSession)
+          .set({ closedAt: new Date(), updatedAt: new Date() })
+          .where(eq(sandboxSession.id, session.id))
+          .catch((err) => {
+            fastify.log.error({ sessionId: session.id, err }, "Failed to close sandbox session");
+          });
       });
     });
   });
