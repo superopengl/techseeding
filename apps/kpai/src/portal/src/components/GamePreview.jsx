@@ -2,7 +2,7 @@ import React from "react";
 import { Empty } from "antd";
 import { colors } from "../theme";
 
-export function GamePreview({ sandboxId }) {
+export function GamePreview({ sandboxId, refreshKey }) {
   if (!sandboxId) {
     return (
       <div
@@ -21,6 +21,7 @@ export function GamePreview({ sandboxId }) {
 
   return (
     <iframe
+      key={refreshKey}
       src={`/sandbox/${sandboxId}/preview`}
       title="Lab67 - Sandbox Preview"
       style={{

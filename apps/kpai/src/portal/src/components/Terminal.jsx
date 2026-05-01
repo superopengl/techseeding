@@ -3,7 +3,7 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
-export function Terminal({ sandboxId }) {
+export function Terminal({ sandboxId, onFileChanged }) {
   const containerRef = useRef(null);
   const termRef = useRef(null);
 
@@ -33,6 +33,8 @@ export function Terminal({ sandboxId }) {
       const msg = JSON.parse(e.data);
       if (msg.type === "output") {
         term.write(msg.data);
+      } else if (msg.type === "file-changed") {
+        onFileChanged?.();
       }
     };
 

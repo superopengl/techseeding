@@ -74,28 +74,6 @@ export function wsTerminal(fastify) {
       // Write opencode.json config to the game directory so OpenCode picks up DeepSeek
       const openCodeConfig = JSON.parse(fs.readFileSync(opencodeConfigFilePath, 'utf-8'));
       openCodeConfig.provider.deepseek.options.apiKey = deepseekApiKey;
-      const openCodeConfig2 = {
-        $schema: "https://opencode.ai/config.json",
-        model: "deepseek/deepseek-v4-flash",
-        provider: {
-          deepseek: {
-            options: {
-              apiKey: deepseekApiKey,
-            },
-          },
-        },
-        "permission": {
-          "bash": "deny",
-          "read": {
-            "*": "deny",
-            "index.html": "allow"
-          },
-          "edit": {
-            "*": "deny",
-            "index.html": "allow"
-          }
-        }
-      };
 
       fs.mkdirSync(gamePath, { recursive: true });
       fs.writeFileSync(
@@ -117,6 +95,21 @@ export function wsTerminal(fastify) {
       });
 
       // ptyProcess.write(`opencode\r`);
+
+      // Watch index.html for changes and notify the frontend to refresh the preview
+      const indexPath = path.join(gamePath, "index.html");
+      let fileChangeTimer = null;
+      const watcher = fs.watch(indexPath, () => {
+        // Debounce to avoid rapid-fire notifications during multi-write edits
+        clearTimeout(fileChangeTimer);
+        fileChangeTimer = setTimeout(() => {
+          try {
+            socket.send(JSON.stringify({ type: "file-changed", file: "index.html" }));
+          } catch {
+            // client disconnected
+          }
+        }, 300);
+      });
 
       ptyProcess.onData((data) => {
         try {
@@ -146,6 +139,8 @@ export function wsTerminal(fastify) {
       });
 
       socket.on("close", () => {
+        watcher.close();
+        clearTimeout(fileChangeTimer);
         ptyProcess.kill();
       });
     });

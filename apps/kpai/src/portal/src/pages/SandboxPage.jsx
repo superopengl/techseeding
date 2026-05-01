@@ -15,6 +15,11 @@ export function SandboxPage() {
   const { sandboxId } = useParams();
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
+
+  const handleFileChanged = useCallback(() => {
+    setPreviewKey((k) => k + 1);
+  }, []);
   const containerRef = useRef(null);
 
   const onMouseDown = useCallback((e) => {
@@ -69,7 +74,7 @@ export function SandboxPage() {
       </Header>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto" }}>
-          <GamePreview sandboxId={sandboxId} />
+          <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
         </div>
         <div
           onMouseDown={onMouseDown}
@@ -84,7 +89,7 @@ export function SandboxPage() {
           onMouseLeave={(e) => (e.currentTarget.style.background = colors.border)}
         />
         <div style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
-          <Terminal sandboxId={sandboxId} />
+          <Terminal sandboxId={sandboxId} onFileChanged={handleFileChanged} />
         </div>
       </div>
     </Layout>
