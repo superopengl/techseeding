@@ -10,6 +10,7 @@ import {
 import dayjs from "dayjs";
 import { colors, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
+import { SandboxReviewDrawer } from "../components/SandboxReviewDrawer";
 import { apiCall } from "../api";
 
 const { Header, Content } = Layout;
@@ -25,6 +26,8 @@ export function AdminPage() {
   const [drawerStudent, setDrawerStudent] = useState(null);
   const [sandboxes, setSandboxes] = useState([]);
   const [sandboxesLoading, setSandboxesLoading] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewSandbox, setReviewSandbox] = useState(null);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -268,8 +271,10 @@ export function AdminPage() {
                     type="link"
                     size="small"
                     icon={<CodeOutlined />}
-                    href={`/sandbox/${item.id}`}
-                    target="_blank"
+                    onClick={() => {
+                      setReviewSandbox(item);
+                      setReviewOpen(true);
+                    }}
                   >
                     Open
                   </Button>,
@@ -284,6 +289,12 @@ export function AdminPage() {
           />
         )}
       </Drawer>
+      <SandboxReviewDrawer
+        open={reviewOpen}
+        sandboxId={reviewSandbox?.id}
+        sandboxTitle={reviewSandbox?.title || "Untitled Sandbox"}
+        onClose={() => setReviewOpen(false)}
+      />
       <Modal
         title="Add Student"
         open={addModalOpen}
