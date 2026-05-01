@@ -362,7 +362,7 @@ export function LoginPage() {
             Login with Verification Code
           </Title>
           <Paragraph style={{ color: colors.body, marginBottom: 24 }}>
-            Enter your email and we'll send you a verification code
+            For registered users — enter your email and we'll send you a verification code
           </Paragraph>
           <Space direction="vertical" size="middle" style={{ width: "100%" }}>
             <Input
