@@ -226,8 +226,10 @@ export function SandboxPage() {
         </div>
       </div>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
-        <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas }}>
-          <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
+        <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
+          <div style={{ width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
+            <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
+          </div>
         </div>
         <div
           onMouseDown={onMouseDown}
