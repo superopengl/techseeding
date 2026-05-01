@@ -2,11 +2,11 @@
 
 ## Product Vision
 
-Lab67 is an AI-powered HTML game maker platform for kids aged 8-12. It's designed for kids who want to understand the "brain" of the AI and push the limits of what a game can do. Rather than hiding AI behind a polished UI, Lab67 surfaces the raw AI interaction — kids see exactly how the AI thinks, edits code, and builds their game, giving them a real understanding of how AI works under the hood.
+Lab67 is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, coding, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, write code, and build it step by step. Rather than hiding AI behind a polished UI, Lab67 surfaces the raw interaction so kids see exactly how AI reasons, edits files, and solves problems. The result: kids don't just make games — they develop a genuine understanding of how AI and software engineering work.
 
 ## Target Users
 
-Kids aged 8-12 who are curious about AI and coding. No prior experience required, but the platform rewards curiosity and experimentation.
+Kids aged 8-12 who love games, coding, science, engineering, and AI. No prior coding experience is required — the platform meets kids where they are and rewards curiosity, experimentation, and creative problem-solving. Lab67 is for the kid who takes apart toys to see how they work, who asks "but how does it actually do that?", and who wants to build something real.
 
 ## Core UI
 
