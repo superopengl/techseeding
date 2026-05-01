@@ -9,6 +9,13 @@ export function fetchWithAuth(url, options = {}) {
 
 export async function apiCall(url, options = {}) {
   const res = await fetchWithAuth(url, options);
+
+  if (res.status === 401 || res.status === 403) {
+    sessionStorage.removeItem("lab67_token");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+
   const body = await res.json();
 
   if (!body.success) {

@@ -8,6 +8,7 @@ import { apiCall } from "../api";
 const { Title, Paragraph } = Typography;
 
 export function LoginPage() {
+  useEffect(() => { document.title = "Login"; }, []);
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
