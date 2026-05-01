@@ -51,7 +51,7 @@ Summary:
 - `POST /api/admin/student` — create a new student user with profile
 - `GET /api/sandbox/:id` — get sandbox info (auth required)
 - `POST /api/sandbox/:id/message` — send message (auth required)
-- `WS /api/sandbox/:id/ws` — bidirectional WebSocket (auth required)
+- `WS /api/ws` — bidirectional WebSocket (auth required)
 
 ### Frontend (React + Ant Design)
 
@@ -81,7 +81,7 @@ src/
       adminReject.js      # POST /api/admin/reject/:studentId
       adminOtp.js         # POST /api/admin/otp/:studentId
       adminCreateStudent.js # POST /api/admin/student
-      wsTerminal.js       # WS /ws
+      wsTerminal.js       # WS /api/ws
     resources/
       sandbox_sample/     # Sandbox template — each new sandbox is a copy of this folder with API key injection
     lib/                  # Shared utilities
@@ -120,6 +120,7 @@ Finished games can be pushed to a public location (e.g., S3) so kids can share a
 ## Coding Conventions
 
 - **One export per file** — each JS/TS file should have a single default export function. The filename must match the exported function name (e.g. `adminApprove.js` exports `function adminApprove`).
+- **All API routes under `/api`** — every backend endpoint (including WebSocket) must use the `/api/` prefix. The frontend and backend share the same domain, and the SPA fallback serves `index.html` for all non-`/api/` paths.
 - **One route controller per file** — each API route lives in its own file under `src/api/routes/`. The controller is a function that takes `fastify` and registers its route(s).
 - **Shared logic in `lib/`** — reusable utilities go in `src/api/lib/`, one function per file.
 - **Design tokens in `theme.js`** — all frontend colors, gradients, shadows, and fonts are imported from `src/portal/src/theme.js`. No hardcoded color values in components.

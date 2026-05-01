@@ -212,7 +212,7 @@ Send a message from this sandbox to the AI agent.
   - `403` — Sandbox does not belong to the authenticated user
   - `404` — Sandbox not found
 
-### `WS /api/sandbox/:id/ws`
+### `WS /api/ws`
 
 Bidirectional WebSocket connection for real-time communication within a sandbox (terminal I/O, live updates).
 
