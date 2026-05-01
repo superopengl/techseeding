@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Spin, Empty, Modal, Button, message } from "antd";
-import { PlusOutlined, ThunderboltOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Card, Spin, Modal, Button, message } from "antd";
+import { PlusOutlined, ThunderboltOutlined, DeleteOutlined, PlayCircleFilled } from "@ant-design/icons";
 import { colors, fonts, shadows } from "../theme";
 import { apiCall } from "../api";
 
-export function SandboxList({ currentSandboxId }) {
+export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
   const navigate = useNavigate();
   const [sandboxes, setSandboxes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ export function SandboxList({ currentSandboxId }) {
         body: JSON.stringify({}),
       });
       navigate(`/sandbox/${data.id}`);
+      onSelect?.();
     } catch {
       message.error("Failed to create game");
     } finally {
@@ -46,6 +47,9 @@ export function SandboxList({ currentSandboxId }) {
           await apiCall(`/api/sandbox/${sandboxItem.id}`, { method: "DELETE" });
           setSandboxes((prev) => prev.filter((s) => s.id !== sandboxItem.id));
           message.success(`${sandboxItem.title || "Untitled Game"} deleted`);
+          if (sandboxItem.id === currentSandboxId) {
+            onDeleteCurrent?.();
+          }
         } catch {
           message.error("Failed to delete game");
         }
@@ -62,40 +66,35 @@ export function SandboxList({ currentSandboxId }) {
   }
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-        gap: 24,
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <Card
         hoverable
         onClick={handleCreate}
         loading={creating}
         style={{
-          borderRadius: 16,
+          borderRadius: 12,
           border: `2px dashed ${colors.primary}`,
           background: colors.mintBg,
           boxShadow: "none",
-          aspectRatio: "1 / 1",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
         }}
-        styles={{ body: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", padding: 24 } }}
+        styles={{ body: { display: "flex", alignItems: "center", gap: 12, padding: "12px 20px" } }}
       >
-        <PlusOutlined style={{ fontSize: 36, color: colors.primary, marginBottom: 12 }} />
-        <span
-          style={{
-            fontFamily: fonts.heading,
-            fontSize: 18,
-            fontWeight: 700,
-            color: colors.primary,
-          }}
-        >
-          New Game
-        </span>
+        <PlusOutlined style={{ fontSize: 20, color: colors.primary }} />
+        <div>
+          <div
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: 15,
+              fontWeight: 700,
+              color: colors.primary,
+            }}
+          >
+            New Game
+          </div>
+          <div style={{ color: colors.muted, fontSize: 12 }}>
+            Start a new project
+          </div>
+        </div>
       </Card>
 
       {sandboxes.map((s) => {
@@ -104,61 +103,48 @@ export function SandboxList({ currentSandboxId }) {
           <Card
             key={s.id}
             hoverable
-            onClick={() => navigate(`/sandbox/${s.id}`)}
+            onClick={() => { navigate(`/sandbox/${s.id}`); onSelect?.(); }}
             style={{
-              borderRadius: 16,
+              borderRadius: 12,
               border: isCurrent ? `2px solid ${colors.primary}` : `1px solid ${colors.border}`,
               boxShadow: shadows.cardSubtle,
-              aspectRatio: "1 / 1",
             }}
-            styles={{ body: { padding: 24, display: "flex", flexDirection: "column", height: "100%" } }}
+            styles={{ body: { display: "flex", alignItems: "center", gap: 12, padding: "12px 20px" } }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-              <ThunderboltOutlined style={{ fontSize: 28, color: colors.accentPurple }} />
-              <Button
-                type="text"
-                danger
-                size="small"
-                icon={<DeleteOutlined />}
-                onClick={(e) => handleDelete(e, s)}
+            {isCurrent
+              ? <PlayCircleFilled style={{ fontSize: 20, color: colors.primary }} />
+              : <ThunderboltOutlined style={{ fontSize: 20, color: colors.accentPurple }} />
+            }
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontFamily: fonts.heading,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: colors.heading,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
               >
-                Delete
-              </Button>
-            </div>
-            <div
-              style={{
-                fontFamily: fonts.heading,
-                fontSize: 17,
-                fontWeight: 700,
-                color: colors.heading,
-                marginBottom: 8,
-              }}
-            >
-              {s.title || "Untitled Game"}
-            </div>
-            {s.description && (
-              <div style={{ color: colors.body, fontSize: 14, flex: 1 }}>
-                {s.description}
+                {s.title || "Untitled Game"}
               </div>
-            )}
-            <div style={{ color: colors.muted, fontSize: 12, marginTop: 12 }}>
-              {new Date(s.createdAt).toLocaleDateString()}
+              <div style={{ color: colors.muted, fontSize: 12 }}>
+                {new Date(s.createdAt).toLocaleString()}
+              </div>
             </div>
+            <Button
+              type="text"
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              onClick={(e) => handleDelete(e, s)}
+            >
+              Delete
+            </Button>
           </Card>
         );
       })}
-
-      {sandboxes.length === 0 && (
-        <div style={{ gridColumn: "1 / -1", textAlign: "center", paddingTop: 40 }}>
-          <Empty
-            description={
-              <span style={{ color: colors.muted }}>
-                No games yet. Click "New Game" to get started!
-              </span>
-            }
-          />
-        </div>
-      )}
     </div>
   );
 }

@@ -24,6 +24,7 @@ export function SandboxPage() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [showMyGames, setShowMyGames] = useState(false);
+  const [sandboxNotFound, setSandboxNotFound] = useState(false);
   const titleInputRef = useRef(null);
 
   useEffect(() => {
@@ -36,7 +37,12 @@ export function SandboxPage() {
     if (!sandboxId) return;
     apiCall(`/api/sandbox/${sandboxId}`).then((data) => {
       setTitle(data.title || "Untitled Game");
-    }).catch(() => {});
+    }).catch((err) => {
+      if (err.status === 404) {
+        setSandboxNotFound(true);
+        setShowMyGames(true);
+      }
+    });
   }, [sandboxId]);
 
   useEffect(() => {
@@ -126,7 +132,6 @@ export function SandboxPage() {
               onBlur={saveTitle}
               onPressEnter={saveTitle}
               maxLength={50}
-              showCount
               style={{
                 width: 260,
                 textAlign: "center",
@@ -207,12 +212,20 @@ export function SandboxPage() {
       <Modal
         title="My Games"
         open={showMyGames}
-        onCancel={() => setShowMyGames(false)}
+        onCancel={sandboxNotFound ? undefined : () => setShowMyGames(false)}
+        closable={!sandboxNotFound}
+        maskClosable={!sandboxNotFound}
+        keyboard={!sandboxNotFound}
         footer={null}
         width={800}
         destroyOnClose
+        styles={sandboxNotFound ? { mask: { background: "rgba(0, 0, 0, 0.75)" } } : undefined}
       >
-        <SandboxList currentSandboxId={sandboxId} />
+        <SandboxList
+          currentSandboxId={sandboxId}
+          onSelect={() => { setShowMyGames(false); setSandboxNotFound(false); }}
+          onDeleteCurrent={() => setSandboxNotFound(true)}
+        />
       </Modal>
     </Layout>
   );
