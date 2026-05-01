@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, List, Spin } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
@@ -249,10 +249,10 @@ export function AdminPage() {
       <Drawer
         title={drawerStudent ? `${drawerStudent.displayName}'s Sandboxes` : "Sandboxes"}
         placement="right"
-        width={480}
+        size="large"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        destroyOnClose
+        destroyOnHidden
       >
         {sandboxesLoading ? (
           <div style={{ textAlign: "center", padding: 48 }}>
@@ -261,32 +261,38 @@ export function AdminPage() {
         ) : sandboxes.length === 0 ? (
           <Typography.Text type="secondary">No sandboxes yet.</Typography.Text>
         ) : (
-          <List
-            dataSource={sandboxes}
-            renderItem={(item) => (
-              <List.Item
-                actions={[
-                  <Button
-                    key="open"
-                    type="link"
-                    size="small"
-                    icon={<CodeOutlined />}
-                    onClick={() => {
-                      setReviewSandbox(item);
-                      setReviewOpen(true);
-                    }}
-                  >
-                    Open
-                  </Button>,
-                ]}
+          <div>
+            {sandboxes.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px 0",
+                  borderBottom: `1px solid ${colors.borderLight}`,
+                }}
               >
-                <List.Item.Meta
-                  title={item.title || "Untitled Sandbox"}
-                  description={`Created ${new Date(item.createdAt).toLocaleString()} · Updated ${new Date(item.updatedAt).toLocaleString()}`}
-                />
-              </List.Item>
-            )}
-          />
+                <div>
+                  <div style={{ fontWeight: 500, color: colors.heading }}>{item.title || "Untitled Sandbox"}</div>
+                  <div style={{ fontSize: 12, color: colors.muted }}>
+                    Created {new Date(item.createdAt).toLocaleString()} · Updated {new Date(item.updatedAt).toLocaleString()}
+                  </div>
+                </div>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<CodeOutlined />}
+                  onClick={() => {
+                    setReviewSandbox(item);
+                    setReviewOpen(true);
+                  }}
+                >
+                  Open
+                </Button>
+              </div>
+            ))}
+          </div>
         )}
       </Drawer>
       <SandboxReviewDrawer
@@ -300,7 +306,7 @@ export function AdminPage() {
         open={addModalOpen}
         onOk={handleAddStudent}
         onCancel={() => setAddModalOpen(false)}
-        destroyOnClose
+        destroyOnHidden
         confirmLoading={addLoading}
         okText="Submit"
       >

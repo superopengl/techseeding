@@ -292,7 +292,7 @@ export function SandboxPage() {
         keyboard={!sandboxNotFound}
         footer={null}
         width={800}
-        destroyOnClose
+        destroyOnHidden
         styles={sandboxNotFound ? { mask: { background: "rgba(0, 0, 0, 0.75)" } } : undefined}
       >
         <SandboxList
@@ -307,7 +307,7 @@ export function SandboxPage() {
         onCancel={() => setShowShare(false)}
         footer={null}
         width={400}
-        destroyOnClose
+        destroyOnHidden
         zIndex={1002}
       >
         {(() => {

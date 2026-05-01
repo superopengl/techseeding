@@ -81,7 +81,7 @@ function MessageTimeline({ sessions, showAi }) {
   sessions.forEach((session, si) => {
     items.push({
       color: "blue",
-      children: (
+      content: (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
           <span style={{ color: dark.textMuted, fontSize: 12 }}>
@@ -96,7 +96,7 @@ function MessageTimeline({ sessions, showAi }) {
       if (msg.type === "request") {
         items.push({
           color: "green",
-          children: (
+          content: (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                 <Tag color="green" style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>Student</Tag>
@@ -128,7 +128,7 @@ function MessageTimeline({ sessions, showAi }) {
         if (!stripped) return;
         items.push({
           color: "gray",
-          children: <OutputMessage msg={msg} />,
+          content: <OutputMessage msg={msg} />,
         });
       }
     });
@@ -136,7 +136,7 @@ function MessageTimeline({ sessions, showAi }) {
     if (session.messages.length === 0) {
       items.push({
         color: "gray",
-        children: <span style={{ color: dark.textMuted, fontSize: 13 }}>No messages in this session.</span>,
+        content: <span style={{ color: dark.textMuted, fontSize: 13 }}>No messages in this session.</span>,
       });
     }
   });
@@ -201,7 +201,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, onClose }) 
       height="85vh"
       open={open}
       onClose={onClose}
-      destroyOnClose
+      destroyOnHidden
       styles={{ body: { padding: 0 } }}
       extra={
         <span style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
@@ -288,7 +288,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, onClose }) 
         onCancel={() => setShowShare(false)}
         footer={null}
         width={400}
-        destroyOnClose
+        destroyOnHidden
       >
         {(() => {
           const shareUrl = `${window.location.origin}/sandbox/${sandboxId}/preview`;
