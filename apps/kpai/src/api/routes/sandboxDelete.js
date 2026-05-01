@@ -22,19 +22,21 @@ export function sandboxDelete(fastify) {
     }
 
     // Delete related records: sessionMessages -> studentSessions -> sandboxReleases -> sandbox
-    const sessions = await db
-      .select({ id: studentSession.id })
-      .from(studentSession)
-      .where(eq(studentSession.sandboxId, record.id));
+    await db.transaction(async (tx) => {
+      const sessions = await tx
+        .select({ id: studentSession.id })
+        .from(studentSession)
+        .where(eq(studentSession.sandboxId, record.id));
 
-    if (sessions.length > 0) {
-      const sessionIds = sessions.map((s) => s.id);
-      await db.delete(sessionMessage).where(inArray(sessionMessage.sandboxSessionId, sessionIds));
-      await db.delete(studentSession).where(inArray(studentSession.id, sessionIds));
-    }
+      if (sessions.length > 0) {
+        const sessionIds = sessions.map((s) => s.id);
+        await tx.delete(sessionMessage).where(inArray(sessionMessage.sandboxSessionId, sessionIds));
+        await tx.delete(studentSession).where(inArray(studentSession.id, sessionIds));
+      }
 
-    await db.delete(sandboxRelease).where(eq(sandboxRelease.sandboxId, record.id));
-    await db.delete(sandbox).where(eq(sandbox.id, record.id));
+      await tx.delete(sandboxRelease).where(eq(sandboxRelease.sandboxId, record.id));
+      await tx.delete(sandbox).where(eq(sandbox.id, record.id));
+    });
 
     // Clean up sandbox directory
     if (record.workDir && fs.existsSync(record.workDir)) {
