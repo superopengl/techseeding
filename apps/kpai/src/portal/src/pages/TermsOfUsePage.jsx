@@ -1,7 +1,6 @@
 import React from "react";
-import { Typography, Button } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Typography } from "antd";
+import { Logo } from "../components/Logo";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -16,8 +15,6 @@ const sectionTitle = {
 };
 
 export function TermsOfUsePage() {
-  const navigate = useNavigate();
-
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
       <div
@@ -27,14 +24,9 @@ export function TermsOfUsePage() {
           padding: "48px 24px 80px",
         }}
       >
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate("/")}
-          style={{ marginBottom: 24, color: "#43b88c", fontWeight: 600 }}
-        >
-          Back to Home
-        </Button>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <Logo size={48} style={{ marginInline: "auto" }} />
+        </div>
 
         <Title
           style={{
@@ -191,6 +183,8 @@ export function TermsOfUsePage() {
               Your use of Code4Kids is also governed by our{" "}
               <a
                 href="/privacy_policy"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{ color: "#43b88c", fontWeight: 600 }}
               >
                 Privacy Policy

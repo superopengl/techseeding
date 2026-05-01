@@ -458,8 +458,8 @@ export function HomePage() {
           ABN: 35631597450 / ACN: 631597450
         </Text>
         <div style={{ marginTop: 12, display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-          <a href="/privacy_policy" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Privacy Policy</a>
-          <a href="/terms_of_use" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Terms of Use</a>
+          <a href="/privacy_policy" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Privacy Policy</a>
+          <a href="/terms_of_use" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Terms of Use</a>
           <a href="/admin" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Admin Portal</a>
         </div>
       </div>
