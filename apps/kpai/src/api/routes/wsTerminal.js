@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import { eq } from "drizzle-orm";
 import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
+import { stripAnsi } from "../lib/stripAnsi.js";
 
 const JWT_SECRET = process.env.L4K_JWT_SECRET;
 
@@ -119,8 +120,10 @@ export function wsTerminal(fastify) {
       let outputDebounceTimer = null;
 
       function saveMessage(type, text) {
+        const cleaned = stripAnsi(text);
+        if (!cleaned) return;
         db.insert(sessionMessage)
-          .values({ sandboxSessionId: session.id, content: { text }, type })
+          .values({ sandboxSessionId: session.id, content: { text: cleaned }, type })
           .catch((err) => {
             fastify.log.error({ sessionId: session.id, type, err }, "Failed to save session message");
           });

@@ -1,16 +1,23 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Spin, Timeline, Tag } from "antd";
+import { Drawer, Spin, Timeline, Tag, ConfigProvider, theme as antTheme } from "antd";
 import { RightOutlined, DownOutlined } from "@ant-design/icons";
 import { colors, shadows } from "../theme";
 import { GamePreview } from "./GamePreview";
 import { apiCall } from "../api";
+import { stripAnsi } from "../utils/stripAnsi";
 
 const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
 
-function stripAnsi(text) {
-  return text.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
-}
+const dark = {
+  bg: "#1a1a2e",
+  surface: "#232340",
+  border: "#2d2d4a",
+  text: "#e2e8f0",
+  textMuted: "#8892a8",
+  inputBg: "rgba(67, 184, 140, 0.15)",
+  outputBg: "rgba(255, 255, 255, 0.05)",
+};
 
 function OutputMessage({ msg }) {
   const [expanded, setExpanded] = useState(false);
@@ -24,15 +31,15 @@ function OutputMessage({ msg }) {
         style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
       >
         {expanded
-          ? <DownOutlined style={{ fontSize: 10, color: colors.muted }} />
-          : <RightOutlined style={{ fontSize: 10, color: colors.muted }} />
+          ? <DownOutlined style={{ fontSize: 10, color: dark.textMuted }} />
+          : <RightOutlined style={{ fontSize: 10, color: dark.textMuted }} />
         }
         <Tag style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>AI</Tag>
-        <span style={{ color: colors.muted, fontSize: 11 }}>
+        <span style={{ color: dark.textMuted, fontSize: 11 }}>
           {new Date(msg.createdAt).toLocaleTimeString()}
         </span>
         {!expanded && (
-          <span style={{ color: colors.body, fontSize: 12, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+          <span style={{ color: dark.textMuted, fontSize: 12, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
             {preview}{text.length > 80 ? "…" : ""}
           </span>
         )}
@@ -44,14 +51,14 @@ function OutputMessage({ msg }) {
           lineHeight: 1.5,
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
-          color: colors.heading,
+          color: dark.text,
           fontFamily: "monospace",
           maxHeight: 300,
           overflow: "auto",
           padding: "8px 12px",
           borderRadius: 8,
-          background: colors.canvas,
-          border: `1px solid ${colors.borderLight}`,
+          background: dark.outputBg,
+          border: `1px solid ${dark.border}`,
         }}>
           {text}
         </pre>
@@ -63,7 +70,7 @@ function OutputMessage({ msg }) {
 function MessageTimeline({ sessions }) {
   if (sessions.length === 0) {
     return (
-      <div style={{ padding: 24, color: colors.muted, textAlign: "center" }}>
+      <div style={{ padding: 24, color: dark.textMuted, textAlign: "center" }}>
         No messages yet.
       </div>
     );
@@ -76,7 +83,7 @@ function MessageTimeline({ sessions }) {
       children: (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
-          <span style={{ color: colors.muted, fontSize: 12 }}>
+          <span style={{ color: dark.textMuted, fontSize: 12 }}>
             {new Date(session.createdAt).toLocaleString()}
             {session.closedAt && ` — ${new Date(session.closedAt).toLocaleString()}`}
           </span>
@@ -92,22 +99,23 @@ function MessageTimeline({ sessions }) {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                 <Tag color="green" style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>Student</Tag>
-                <span style={{ color: colors.muted, fontSize: 11 }}>
+                <span style={{ color: dark.textMuted, fontSize: 11 }}>
                   {new Date(msg.createdAt).toLocaleTimeString()}
                 </span>
               </div>
               <pre style={{
                 margin: 0,
-                fontSize: 12,
+                fontSize: 13,
                 lineHeight: 1.5,
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
-                color: colors.heading,
+                color: "#fff",
+                fontWeight: 600,
                 fontFamily: "monospace",
-                padding: "8px 12px",
+                padding: "10px 14px",
                 borderRadius: 8,
-                background: colors.mintBg,
-                border: `1px solid ${colors.borderLight}`,
+                background: "rgba(67, 184, 140, 0.35)",
+                border: "1px solid rgba(67, 184, 140, 0.4)",
               }}>
                 {stripAnsi(msg.content?.text || "")}
               </pre>
@@ -115,6 +123,8 @@ function MessageTimeline({ sessions }) {
           ),
         });
       } else {
+        const stripped = stripAnsi(msg.content?.text || "");
+        if (!stripped) return;
         items.push({
           color: "gray",
           children: <OutputMessage msg={msg} />,
@@ -125,15 +135,17 @@ function MessageTimeline({ sessions }) {
     if (session.messages.length === 0) {
       items.push({
         color: "gray",
-        children: <span style={{ color: colors.muted, fontSize: 13 }}>No messages in this session.</span>,
+        children: <span style={{ color: dark.textMuted, fontSize: 13 }}>No messages in this session.</span>,
       });
     }
   });
 
   return (
-    <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
-      <Timeline items={items} />
-    </div>
+    <ConfigProvider theme={{ algorithm: antTheme.darkAlgorithm }}>
+      <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
+        <Timeline items={items} />
+      </div>
+    </ConfigProvider>
   );
 }
 
@@ -229,7 +241,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, onClose }) 
         <div style={{
           flex: 1,
           overflow: "hidden",
-          background: colors.surface,
+          background: dark.bg,
           pointerEvents: isDragging ? "none" : "auto",
         }}>
           {loading ? (
