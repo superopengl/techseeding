@@ -15,8 +15,12 @@ import { adminReject } from "./routes/adminReject.js";
 import { adminOtp } from "./routes/adminOtp.js";
 import { adminCreateStudent } from "./routes/adminCreateStudent.js";
 import { adminLoginApprove } from "./routes/adminLoginApprove.js";
+import { me } from "./routes/me.js";
 import { sandboxList } from "./routes/sandboxList.js";
 import { sandboxCreate } from "./routes/sandboxCreate.js";
+import { sandboxGet } from "./routes/sandboxGet.js";
+import { sandboxUpdate } from "./routes/sandboxUpdate.js";
+import { sandboxDelete } from "./routes/sandboxDelete.js";
 import { sandboxPreview } from "./routes/sandboxPreview.js";
 import { wsTerminal } from "./routes/wsTerminal.js";
 
@@ -50,8 +54,12 @@ adminReject(fastify);
 adminOtp(fastify);
 adminCreateStudent(fastify);
 adminLoginApprove(fastify);
+me(fastify);
 sandboxList(fastify);
 sandboxCreate(fastify);
+sandboxGet(fastify);
+sandboxUpdate(fastify);
+sandboxDelete(fastify);
 sandboxPreview(fastify);
 wsTerminal(fastify);
 

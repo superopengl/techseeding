@@ -13,6 +13,9 @@ export function sandboxCreate(fastify) {
     }
 
     const { title } = request.body || {};
+    if (typeof title === "string" && title.length > 50) {
+      return error(reply, 400, "BAD_REQUEST", "Title must be 50 characters or less");
+    }
     const id = crypto.randomUUID();
     const workDir = provisionSandboxDirectory(id);
 
