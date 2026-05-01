@@ -62,7 +62,6 @@ export const sandboxSession = pgTable("sandbox_session", {
   sandboxId: uuid("sandbox_id").references(() => sandbox.id),
   closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const sandboxRelease = pgTable("sandbox_release", {
