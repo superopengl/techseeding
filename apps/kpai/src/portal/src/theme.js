@@ -13,6 +13,7 @@ export const colors = {
 
   // Text
   heading: "#2d3748",
+  bodyStrong: "#4a5568",
   body: "#718096",
   muted: "#a0aec0",
   onDark: "#fff",

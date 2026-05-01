@@ -7,6 +7,7 @@ import {
   CodeOutlined,
   ExperimentOutlined,
   TeamOutlined,
+  LoginOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -19,25 +20,25 @@ const features = [
     icon: <SmileOutlined />,
     color: colors.primary,
     bg: colors.mintBg,
-    title: "Made for Kids",
+    title: "Built for Ages 8\u201312",
     description:
-      "No coding experience needed. Just describe what you want and watch your game come to life!",
+      "No coding experience needed. If you can describe an idea, you can build a game. Lab67 meets you where you are.",
   },
   {
     icon: <ThunderboltOutlined />,
     color: colors.accentAmber,
     bg: colors.amberBg,
-    title: "AI-Powered",
+    title: "See How AI Thinks",
     description:
-      "Chat with an AI assistant that writes real code for you in seconds.",
+      "Watch a real AI agent reason, write code, and solve problems — not hidden behind a button, but right in front of you.",
   },
   {
     icon: <CodeOutlined />,
     color: colors.accentBlue,
     bg: colors.skyBg,
-    title: "Real Games",
+    title: "Real Code, Real Games",
     description:
-      "Create playable HTML games you can share with friends and family.",
+      "Every game is built with real HTML, CSS, and JavaScript. Play it, share it, and learn how it works.",
   },
 ];
 
@@ -46,22 +47,22 @@ const steps = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     num: "1",
-    title: "Describe Your Idea",
-    description: 'Tell the AI what game you want, like "a space shooter with aliens".',
+    title: "Imagine a Game",
+    description: 'Type what you want — "a racing game with power-ups" or "a puzzle where gravity flips."',
   },
   {
     icon: <RocketOutlined />,
     color: colors.primary,
     num: "2",
-    title: "AI Builds It",
-    description: "Watch the AI write real code and build your game in real time.",
+    title: "Watch AI Build It",
+    description: "See the AI think, plan, and write real code line by line — like a coding partner that works at lightning speed.",
   },
   {
     icon: <TeamOutlined />,
     color: colors.accentAmber,
     num: "3",
-    title: "Play & Share",
-    description: "Play your game instantly and share it with friends!",
+    title: "Play, Tweak, Share",
+    description: "Your game runs instantly. Keep improving it, experiment with new ideas, and share it with friends.",
   },
 ];
 
@@ -86,10 +87,11 @@ function NavBar({ onStart }) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "16px 48px",
-        background: colors.surface,
-        borderBottom: `1px solid ${colors.borderLight}`,
-        position: "sticky",
+        background: "transparent",
+        position: "absolute",
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 100,
       }}
     >
@@ -100,7 +102,7 @@ function NavBar({ onStart }) {
             fontFamily: fonts.heading,
             fontSize: 26,
             fontWeight: 700,
-            color: colors.heading,
+            color: colors.onDark,
           }}
         >
           Lab67
@@ -109,6 +111,7 @@ function NavBar({ onStart }) {
       <Button
         type="primary"
         size="large"
+        icon={<LoginOutlined />}
         onClick={onStart}
         style={{
           borderRadius: 24,
@@ -121,7 +124,7 @@ function NavBar({ onStart }) {
           boxShadow: shadows.ctaButtonSmall,
         }}
       >
-        Get Started
+        Student Login
       </Button>
     </div>
   );
@@ -139,7 +142,7 @@ export function HomePage() {
       <div
         style={{
           background: gradients.hero,
-          padding: "80px 24px 180px",
+          padding: "120px 24px 180px",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -191,7 +194,7 @@ export function HomePage() {
               textShadow: shadows.textOnGradient,
             }}
           >
-            Create Games with AI!
+            Where Kids Build Games<br />with <span style={{ color: colors.ctaYellow }}>AI</span>
           </Title>
           <Paragraph
             style={{
@@ -203,8 +206,8 @@ export function HomePage() {
               lineHeight: 1.6,
             }}
           >
-            Imagine a game, describe it in words, and watch AI build it for you —
-            no coding needed. It's like magic, but it's real code!
+            For kids aged 8–12 who love games, coding, science, and AI.
+            Describe your dream game — then watch a real AI agent write the code and bring it to life.
           </Paragraph>
           <Button
             size="large"
@@ -245,13 +248,13 @@ export function HomePage() {
         </div>
         <Paragraph
           style={{
-            color: colors.muted,
+            color: colors.body,
             fontSize: 14,
             marginTop: 16,
             fontStyle: "italic",
           }}
         >
-          A real game built by a kid — describe your idea, watch AI code it live!
+          Road Racer — a real game built by a kid using Lab67. Your turn next!
         </Paragraph>
       </div>
 
@@ -278,7 +281,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          Everything you need to go from idea to playable game
+          A playground for young minds who love games, engineering, and figuring out how things work
         </Paragraph>
         <Row gutter={[32, 32]}>
           {features.map((f, i) => (
@@ -320,7 +323,7 @@ export function HomePage() {
                 >
                   {f.title}
                 </Title>
-                <Text style={{ color: colors.body, fontSize: 15, lineHeight: 1.6 }}>
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
                   {f.description}
                 </Text>
               </Card>
@@ -351,7 +354,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          Three simple steps to your very own game
+          From idea to playable game in minutes
         </Paragraph>
         <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
           {steps.map((s, i) => (
@@ -386,7 +389,7 @@ export function HomePage() {
                 >
                   {s.title}
                 </Title>
-                <Text style={{ color: colors.body, fontSize: 15, lineHeight: 1.6 }}>
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
                   {s.description}
                 </Text>
               </div>
@@ -413,12 +416,12 @@ export function HomePage() {
             textShadow: shadows.textOnGradient,
           }}
         >
-          Ready to Build Something Amazing?
+          Ready to Build Your First Game?
         </Title>
         <Paragraph
           style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 36 }}
         >
-          Join Lab67 and start creating your own games today!
+          Join thousands of young makers who are learning AI, coding, and game design — all at once.
         </Paragraph>
         <Button
           size="large"
@@ -426,7 +429,7 @@ export function HomePage() {
           icon={<RocketOutlined />}
           style={ctaButtonStyle}
         >
-          Get Started Free
+          Start Making Games
         </Button>
       </div>
 
@@ -443,21 +446,21 @@ export function HomePage() {
         }}
       >
         <Text style={{ color: colors.onDarkTertiary, fontSize: 14 }}>
-          Lab67 — AI Game Maker for Kids
+          Lab67 — Where Kids Build Games with AI
         </Text>
-        <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+        <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
           Lab67 is a product owned by Techseeding
         </Text>
-        <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>
+        <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           &copy;2019&ndash;2026 Techseeding PTY LTD. All rights reserved.
         </Text>
-        <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>
+        <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           ABN: 35631597450 / ACN: 631597450
         </Text>
         <div style={{ marginTop: 12, display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-          <a href="/privacy_policy" style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Privacy Policy</a>
-          <a href="/terms_of_use" style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Terms of Use</a>
-          <a href="/admin" style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Admin Portal</a>
+          <a href="/privacy_policy" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Privacy Policy</a>
+          <a href="/terms_of_use" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Terms of Use</a>
+          <a href="/admin" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Admin Portal</a>
         </div>
       </div>
     </div>
