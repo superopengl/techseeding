@@ -1,0 +1,22 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "model": "deepseek/deepseek-v4-flash",
+    "permission": {
+        "bash": "deny",
+        "read": {
+            "*": "deny",
+            "index.html": "allow"
+        },
+        "edit": {
+            "*": "deny",
+            "index.html": "allow"
+        }
+    },
+    "provider": {
+        "deepseek": {
+            "options": {
+                "apiKey": "deepseek-api-key"
+            }
+        }
+    }
+}

@@ -2,6 +2,9 @@ import pty from "node-pty";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
 import { sandbox } from "../db/schema.js";
+import os from "os";
+import fs from "fs";
+import path from "path";
 import { eq } from "drizzle-orm";
 
 const JWT_SECRET = process.env.LAB67_JWT_SECRET;
@@ -65,31 +68,55 @@ export function wsTerminal(fastify) {
 
       const gamePath = record.workDir;
 
-      const ptyProcess = pty.spawn(
-        "claude",
-        [
-          "--allowedTools",
-          "Read(index.html),Edit(index.html)",
-        ],
-        {
-          name: "xterm-256color",
-          cols: 80,
-          rows: 24,
-          cwd: gamePath,
-          env: {
-            ...process.env,
-            HOME: gamePath,
-            ANTHROPIC_BASE_URL: process.env.LAB67_SANDBOX_ANTHROPIC_BASE_URL,
-            ANTHROPIC_AUTH_TOKEN: process.env.LAB67_SANDBOX_ANTHROPIC_AUTH_TOKEN,
-            ANTHROPIC_MODEL: process.env.LAB67_SANDBOX_ANTHROPIC_MODEL,
-            ANTHROPIC_DEFAULT_OPUS_MODEL: process.env.LAB67_SANDBOX_ANTHROPIC_DEFAULT_OPUS_MODEL,
-            ANTHROPIC_DEFAULT_SONNET_MODEL: process.env.LAB67_SANDBOX_ANTHROPIC_DEFAULT_SONNET_MODEL,
-            ANTHROPIC_DEFAULT_HAIKU_MODEL: process.env.LAB67_SANDBOX_ANTHROPIC_DEFAULT_HAIKU_MODEL,
-            CLAUDE_CODE_SUBAGENT_MODEL: process.env.LAB67_SANDBOX_CLAUDE_CODE_SUBAGENT_MODEL,
-            CLAUDE_CODE_EFFORT_LEVEL: process.env.LAB67_SANDBOX_CLAUDE_CODE_EFFORT_LEVEL,
+      const opencodeConfigFilePath = path.join(gamePath, "opencode.json");
+      const deepseekApiKey = process.env.LAB67_SANDBOX_DEEPSEEK_API_KEY;
+
+      // Write opencode.json config to the game directory so OpenCode picks up DeepSeek
+      const openCodeConfig = JSON.parse(fs.readFileSync(opencodeConfigFilePath, 'utf-8'));
+      openCodeConfig.provider.deepseek.options.apiKey = deepseekApiKey;
+      const openCodeConfig2 = {
+        $schema: "https://opencode.ai/config.json",
+        model: "deepseek/deepseek-v4-flash",
+        provider: {
+          deepseek: {
+            options: {
+              apiKey: deepseekApiKey,
+            },
           },
+        },
+        "permission": {
+          "bash": "deny",
+          "read": {
+            "*": "deny",
+            "index.html": "allow"
+          },
+          "edit": {
+            "*": "deny",
+            "index.html": "allow"
+          }
         }
+      };
+
+      fs.mkdirSync(gamePath, { recursive: true });
+      fs.writeFileSync(
+        opencodeConfigFilePath,
+        JSON.stringify(openCodeConfig, null, 2)
       );
+
+      const envVars = {
+        ...process.env,
+        HOME: os.homedir(),
+      };
+
+      const ptyProcess = pty.spawn("opencode", [], {
+        name: "xterm-256color",
+        cols: 80,
+        rows: 24,
+        cwd: gamePath,
+        env: envVars,
+      });
+
+      // ptyProcess.write(`opencode\r`);
 
       ptyProcess.onData((data) => {
         try {
@@ -99,7 +126,10 @@ export function wsTerminal(fastify) {
         }
       });
 
-      ptyProcess.onExit(() => {
+      ptyProcess.onExit(({ exitCode, signal }) => {
+        if (exitCode !== 0) {
+          fastify.log.error({ sandboxId, exitCode, signal }, "opencode process exited with error");
+        }
         socket.close();
       });
 

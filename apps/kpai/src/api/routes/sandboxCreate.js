@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { db } from "../db/index.js";
 import { sandbox } from "../db/schema.js";
 import { verifyToken } from "../lib/verifyToken.js";
-import { createSandbox } from "../lib/sandboxManager.js";
+import { provisionSandboxDirectory } from "../lib/sandboxManager.js";
 import { success, error } from "../lib/response.js";
 
 export function sandboxCreate(fastify) {
@@ -14,7 +14,7 @@ export function sandboxCreate(fastify) {
 
     const { title } = request.body || {};
     const id = crypto.randomUUID();
-    const workDir = createSandbox(id);
+    const workDir = provisionSandboxDirectory(id);
 
     const [newSandbox] = await db
       .insert(sandbox)
