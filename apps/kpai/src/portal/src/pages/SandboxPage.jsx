@@ -8,6 +8,7 @@ import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
+import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
 
 
@@ -73,6 +74,40 @@ export function SandboxPage() {
   const handleFileChanged = useCallback(() => {
     setPreviewKey((k) => k + 1);
   }, []);
+
+  useEffect(() => {
+    if (!showShare) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    Object.assign(canvas.style, {
+      position: "fixed",
+      inset: "0",
+      width: "100%",
+      height: "100%",
+      zIndex: "1001",
+      pointerEvents: "none",
+    });
+    document.body.appendChild(canvas);
+    const fire = confetti.create(canvas, { resize: true, useWorker: true });
+
+    const brandColors = ["#43b88c", "#fcd63c", "#7c5cfc", "#6ec1e4", "#f59e0b", "#61ce70"];
+    let animId;
+
+    function frame() {
+      fire({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors: brandColors });
+      fire({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors: brandColors });
+      animId = requestAnimationFrame(frame);
+    }
+    frame();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      fire.reset();
+      canvas.remove();
+    };
+  }, [showShare]);
+
   const containerRef = useRef(null);
 
   const onMouseDown = useCallback((e) => {
@@ -273,6 +308,7 @@ export function SandboxPage() {
         footer={null}
         width={400}
         destroyOnClose
+        zIndex={1002}
       >
         {(() => {
           const shareUrl = `${window.location.origin}/sandbox/${sandboxId}/preview`;
