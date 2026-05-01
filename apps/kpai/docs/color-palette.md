@@ -1,6 +1,6 @@
 # Color Palette
 
-Lab67 uses a bright, playful, kid-friendly light theme.
+Lab4Kids uses a bright, playful, kid-friendly light theme.
 
 ## Brand Colors
 

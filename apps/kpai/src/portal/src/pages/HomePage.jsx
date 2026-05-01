@@ -22,7 +22,7 @@ const features = [
     bg: colors.mintBg,
     title: "Built for Ages 8\u201312",
     description:
-      "No coding experience needed. If you can describe an idea, you can build a game. Lab67 meets you where you are.",
+      "No coding experience needed. If you can describe an idea, you can build a game. Lab4Kids meets you where you are.",
   },
   {
     icon: <ThunderboltOutlined />,
@@ -105,7 +105,7 @@ function NavBar({ onStart }) {
             color: colors.onDark,
           }}
         >
-          Lab67
+          Lab4Kids
         </span>
       </div>
       <Button
@@ -242,7 +242,7 @@ export function HomePage() {
         >
           <img
             src="/car-racer.png"
-            alt="A kid building a Road Racer game with AI in Lab67"
+            alt="A kid building a Road Racer game with AI in Lab4Kids"
             style={{ width: "100%", display: "block" }}
           />
         </div>
@@ -254,7 +254,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real game built by a kid using Lab67. Your turn next!
+          Road Racer — a real game built by a kid using Lab4Kids. Your turn next!
         </Paragraph>
       </div>
 
@@ -276,7 +276,7 @@ export function HomePage() {
             marginBottom: 12,
           }}
         >
-          Why Kids Love Lab67
+          Why Kids Love Lab4Kids
         </Title>
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
@@ -446,10 +446,10 @@ export function HomePage() {
         }}
       >
         <Text style={{ color: colors.onDarkTertiary, fontSize: 14 }}>
-          Lab67 — Where Kids Build Games with AI
+          Lab4Kids — Where Kids Build Games with AI
         </Text>
         <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-          Lab67 is a product owned by Techseeding
+          Lab4Kids is a product owned by Techseeding
         </Text>
         <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           &copy;2019&ndash;2026 Techseeding PTY LTD. All rights reserved.

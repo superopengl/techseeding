@@ -82,7 +82,7 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
 
 // --- Start ---
 
-const { port, hostname } = new URL(process.env.LAB67_API_SERVICE_URL);
+const { port, hostname } = new URL(process.env.L4K_API_SERVICE_URL);
 fastify.listen({ port: Number(port), host: hostname }, (err) => {
   if (err) {
     fastify.log.error(err);

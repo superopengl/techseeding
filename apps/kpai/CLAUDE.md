@@ -1,12 +1,12 @@
-# Lab67
+# Lab4Kids
 
 ## Product Vision
 
-Lab67 is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, coding, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, write code, and build it step by step. Rather than hiding AI behind a polished UI, Lab67 surfaces the raw interaction so kids see exactly how AI reasons, edits files, and solves problems. The result: kids don't just make games — they develop a genuine understanding of how AI and software engineering work.
+Lab4Kids is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, coding, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, write code, and build it step by step. Rather than hiding AI behind a polished UI, Lab4Kids surfaces the raw interaction so kids see exactly how AI reasons, edits files, and solves problems. The result: kids don't just make games — they develop a genuine understanding of how AI and software engineering work.
 
 ## Target Users
 
-Kids aged 8-12 who love games, coding, science, engineering, and AI. No prior coding experience is required — the platform meets kids where they are and rewards curiosity, experimentation, and creative problem-solving. Lab67 is for the kid who takes apart toys to see how they work, who asks "but how does it actually do that?", and who wants to build something real.
+Kids aged 8-12 who love games, coding, science, engineering, and AI. No prior coding experience is required — the platform meets kids where they are and rewards curiosity, experimentation, and creative problem-solving. Lab4Kids is for the kid who takes apart toys to see how they work, who asks "but how does it actually do that?", and who wants to build something real.
 
 ## Core UI
 
@@ -104,7 +104,7 @@ public/                   # Built frontend assets (output of pnpm build, served 
 
 ## Deployment
 
-- **Domain**: `lab67.techseeding.com.au` (subdomain under TechSeeding company domain)
+- **Domain**: `lab4kids.techseeding.com.au` (subdomain under TechSeeding company domain)
 
 ## Publishing (Planned)
 
@@ -157,13 +157,13 @@ Two environments: **local dev** and **production**.
 | `.env.production` | Production | No |
 | `.env.sample` | Template with defaults | Yes |
 
-All env vars are prefixed with `LAB67_`.
+All env vars are prefixed with `L4K_`.
 
 | Variable | Description | Default |
 |---|---|---|
-| `LAB67_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/lab67` |
-| `LAB67_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
-| `LAB67_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
+| `L4K_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/lab4kids` |
+| `L4K_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
+| `L4K_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)

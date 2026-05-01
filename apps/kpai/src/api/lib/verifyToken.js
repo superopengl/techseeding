@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.LAB67_JWT_SECRET;
+const JWT_SECRET = process.env.L4K_JWT_SECRET;
 
 export function verifyToken(request) {
   const auth = request.headers.authorization;

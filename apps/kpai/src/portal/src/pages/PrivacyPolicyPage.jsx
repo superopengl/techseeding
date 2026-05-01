@@ -56,12 +56,12 @@ export function PrivacyPolicyPage() {
               1. Introduction
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Lab67 ("we", "us", or "our") is an AI-powered game making platform
+              Lab4Kids ("we", "us", or "our") is an AI-powered game making platform
               for children aged 8–12, operated by Techseeding PTY LTD (ABN
               35631597450 / ACN 631597450). We are committed to protecting the
               privacy of all users, especially children. This Privacy Policy
               explains how we collect, use, and safeguard information when you
-              use our platform at lab67.techseeding.com.au.
+              use our platform at lab4kids.techseeding.com.au.
             </Paragraph>
           </div>
 
@@ -96,7 +96,7 @@ export function PrivacyPolicyPage() {
               We use collected information solely to:
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
-              <li>Provide and operate the Lab67 game-making platform</li>
+              <li>Provide and operate the Lab4Kids game-making platform</li>
               <li>
                 Manage student sessions and sandbox environments
               </li>
@@ -112,7 +112,7 @@ export function PrivacyPolicyPage() {
             </ul>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We do not use any collected data for advertising, marketing
-              profiling, or any purpose unrelated to delivering the Lab67
+              profiling, or any purpose unrelated to delivering the Lab4Kids
               service.
             </Paragraph>
           </div>
@@ -122,7 +122,7 @@ export function PrivacyPolicyPage() {
               4. AI Interaction and Content
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Lab67 uses AI (Claude by Anthropic) to help students create games.
+              Lab4Kids uses AI (Claude by Anthropic) to help students create games.
               Messages sent by students to the AI assistant are processed to
               generate game code. These interactions are stored as part of the
               sandbox session and may be reviewed by administrators for safety
@@ -161,7 +161,7 @@ export function PrivacyPolicyPage() {
               6. Children's Privacy
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Lab67 is designed for children aged 8–12. We take children's
+              Lab4Kids is designed for children aged 8–12. We take children's
               privacy seriously:
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
@@ -248,7 +248,7 @@ export function PrivacyPolicyPage() {
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We may update this Privacy Policy from time to time. Any changes
               will be posted on this page with an updated "Last updated" date.
-              Continued use of Lab67 after changes constitutes acceptance of the
+              Continued use of Lab4Kids after changes constitutes acceptance of the
               updated policy.
             </Paragraph>
           </div>
@@ -266,7 +266,7 @@ export function PrivacyPolicyPage() {
               <br />
               ABN: 35631597450 / ACN: 631597450
               <br />
-              Website: lab67.techseeding.com.au
+              Website: lab4kids.techseeding.com.au
             </Paragraph>
           </div>
         </div>

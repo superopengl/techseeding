@@ -8,7 +8,7 @@ const ROOT_DIR = path.join(__dirname, "..", "..", "..");
 const SANDBOX_SAMPLE_DIR = path.join(__dirname, "..", "resources", "sandbox_sample");
 
 export function ensureSandboxWorkDir(sandboxId) {
-  const workDir = path.join(os.tmpdir(), "lab67", "sandbox", sandboxId);
+  const workDir = path.join(os.tmpdir(), "lab4kids", "sandbox", sandboxId);
   const existed = fs.existsSync(workDir);
 
   if (!existed) {

@@ -31,7 +31,7 @@ export function SandboxListPage() {
             color: colors.heading,
           }}
         >
-          Lab67
+          Lab4Kids
         </span>
         <span
           style={{

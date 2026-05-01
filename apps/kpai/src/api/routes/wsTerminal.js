@@ -8,7 +8,7 @@ import path from "path";
 import { eq } from "drizzle-orm";
 import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 
-const JWT_SECRET = process.env.LAB67_JWT_SECRET;
+const JWT_SECRET = process.env.L4K_JWT_SECRET;
 
 function sendError(socket, message) {
   socket.send(JSON.stringify({ type: "output", data: `\x1b[31mError: ${message}\x1b[0m\r\n` }));
@@ -35,7 +35,7 @@ async function lookupSandbox(sandboxId) {
 function configureOpenCode(gamePath) {
   const configPath = path.join(gamePath, "opencode.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  config.provider.deepseek.options.apiKey = process.env.LAB67_SANDBOX_DEEPSEEK_API_KEY;
+  config.provider.deepseek.options.apiKey = process.env.L4K_SANDBOX_DEEPSEEK_API_KEY;
   fs.mkdirSync(gamePath, { recursive: true });
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 }

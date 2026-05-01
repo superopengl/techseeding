@@ -51,7 +51,7 @@ export function LoginPage() {
           clearInterval(pollingRef.current);
           clearTimeout(timeoutRef.current);
           clearInterval(countdownRef.current);
-          sessionStorage.setItem("lab67_token", data.token);
+          sessionStorage.setItem("l4k_token", data.token);
           setStatus("approved");
           navigate("/sandbox");
         } else if (data.status === "rejected") {
@@ -141,7 +141,7 @@ export function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      sessionStorage.setItem("lab67_token", data.token);
+      sessionStorage.setItem("l4k_token", data.token);
       navigate("/sandbox");
     } catch (e) {
       message.error(e.message || "Verification failed");
@@ -437,7 +437,7 @@ export function LoginPage() {
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
           >
-            Welcome to Lab67!
+            Welcome to Lab4Kids!
           </Title>
           <Paragraph style={{ color: colors.body }}>
             Enter your Student ID to get started
