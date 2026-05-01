@@ -482,6 +482,20 @@ export function LoginPage() {
         <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
           Don't have a Student ID? Contact us or ask your parents to contact us to register for you.
         </Paragraph>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 20 }}>
+          <div style={{ flex: 1, height: 1, background: colors.border }} />
+          <span style={{ color: colors.muted, fontSize: 13 }}>or</span>
+          <div style={{ flex: 1, height: 1, background: colors.border }} />
+        </div>
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <Button
+            type="link"
+            onClick={() => setStatus("otp")}
+            style={{ color: colors.primary, fontSize: 14, padding: 0 }}
+          >
+            Login with Verification Code
+          </Button>
+        </div>
       </Card>
     </div>
   );
