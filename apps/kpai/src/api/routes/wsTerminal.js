@@ -9,112 +9,102 @@ import { eq } from "drizzle-orm";
 
 const JWT_SECRET = process.env.LAB67_JWT_SECRET;
 
+function sendError(socket, message) {
+  socket.send(JSON.stringify({ type: "output", data: `\x1b[31mError: ${message}\x1b[0m\r\n` }));
+  socket.close();
+}
+
+function authenticateToken(token) {
+  if (!token) return null;
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch {
+    return null;
+  }
+}
+
+async function lookupSandbox(sandboxId) {
+  const [record] = await db
+    .select({ workDir: sandbox.workDir })
+    .from(sandbox)
+    .where(eq(sandbox.id, sandboxId));
+  return record?.workDir || null;
+}
+
+function configureOpenCode(gamePath) {
+  const configPath = path.join(gamePath, "opencode.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  config.provider.deepseek.options.apiKey = process.env.LAB67_SANDBOX_DEEPSEEK_API_KEY;
+  fs.mkdirSync(gamePath, { recursive: true });
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+}
+
+function spawnTerminal(gamePath) {
+  return pty.spawn("opencode", [], {
+    name: "xterm-256color",
+    cols: 80,
+    rows: 24,
+    cwd: gamePath,
+    env: { ...process.env, HOME: os.homedir() },
+  });
+}
+
+function watchIndexHtml(gamePath, sandboxId, socket, fastify) {
+  const indexPath = path.join(gamePath, "index.html");
+  let debounceTimer = null;
+
+  const watcher = fs.watch(indexPath, () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      try {
+        socket.send(JSON.stringify({ type: "file-changed", file: "index.html" }));
+      } catch {
+        // client disconnected
+      }
+      // Persist to database in the background
+      fs.promises.readFile(indexPath, "utf-8").then((content) =>
+        db
+          .update(sandbox)
+          .set({ indexHtmlContent: content, updatedAt: new Date() })
+          .where(eq(sandbox.id, sandboxId))
+      ).catch((err) => {
+        fastify.log.error({ sandboxId, err }, "Failed to persist index.html to database");
+      });
+    }, 300);
+  });
+
+  return { watcher, cleanup: () => { watcher.close(); clearTimeout(debounceTimer); } };
+}
+
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
     fastify.get("/ws", { websocket: true }, async (socket, req) => {
       const { sandboxId, token } = req.query;
 
-      if (!token) {
-        socket.send(
-          JSON.stringify({
-            type: "output",
-            data: "\x1b[31mError: Authentication required.\x1b[0m\r\n",
-          })
-        );
-        socket.close();
-        return;
-      }
-
-      let payload;
-      try {
-        payload = jwt.verify(token, JWT_SECRET);
-      } catch {
-        socket.send(
-          JSON.stringify({
-            type: "output",
-            data: "\x1b[31mError: Invalid or expired token.\x1b[0m\r\n",
-          })
-        );
-        socket.close();
+      if (!authenticateToken(token)) {
+        sendError(socket, token ? "Invalid or expired token." : "Authentication required.");
         return;
       }
 
       if (!sandboxId) {
-        socket.send(
-          JSON.stringify({
-            type: "output",
-            data: "\x1b[31mError: No sandbox ID provided.\x1b[0m\r\n",
-          })
-        );
-        socket.close();
+        sendError(socket, "No sandbox ID provided.");
         return;
       }
 
-      const [record] = await db
-        .select({ workDir: sandbox.workDir })
-        .from(sandbox)
-        .where(eq(sandbox.id, sandboxId));
-
-      if (!record || !record.workDir) {
-        socket.send(
-          JSON.stringify({
-            type: "output",
-            data: "\x1b[31mError: Sandbox not found.\x1b[0m\r\n",
-          })
-        );
-        socket.close();
+      const gamePath = await lookupSandbox(sandboxId);
+      if (!gamePath) {
+        sendError(socket, "Sandbox not found.");
         return;
       }
 
-      const gamePath = record.workDir;
-
-      const opencodeConfigFilePath = path.join(gamePath, "opencode.json");
-      const deepseekApiKey = process.env.LAB67_SANDBOX_DEEPSEEK_API_KEY;
-
-      // Write opencode.json config to the game directory so OpenCode picks up DeepSeek
-      const openCodeConfig = JSON.parse(fs.readFileSync(opencodeConfigFilePath, 'utf-8'));
-      openCodeConfig.provider.deepseek.options.apiKey = deepseekApiKey;
-
-      fs.mkdirSync(gamePath, { recursive: true });
-      fs.writeFileSync(
-        opencodeConfigFilePath,
-        JSON.stringify(openCodeConfig, null, 2)
-      );
-
-      const envVars = {
-        ...process.env,
-        HOME: os.homedir(),
-      };
-
-      const ptyProcess = pty.spawn("opencode", [], {
-        name: "xterm-256color",
-        cols: 80,
-        rows: 24,
-        cwd: gamePath,
-        env: envVars,
-      });
-
-      // ptyProcess.write(`opencode\r`);
-
-      // Watch index.html for changes and notify the frontend to refresh the preview
-      const indexPath = path.join(gamePath, "index.html");
-      let fileChangeTimer = null;
-      const watcher = fs.watch(indexPath, () => {
-        // Debounce to avoid rapid-fire notifications during multi-write edits
-        clearTimeout(fileChangeTimer);
-        fileChangeTimer = setTimeout(() => {
-          try {
-            socket.send(JSON.stringify({ type: "file-changed", file: "index.html" }));
-          } catch {
-            // client disconnected
-          }
-        }, 300);
-      });
+      configureOpenCode(gamePath);
+      const ptyProcess = spawnTerminal(gamePath);
+      const { cleanup } = watchIndexHtml(gamePath, sandboxId, socket, fastify);
 
       ptyProcess.onData((data) => {
         try {
           socket.send(JSON.stringify({ type: "output", data }));
-        } catch (e) {
+        } catch {
           // client disconnected
         }
       });
@@ -127,20 +117,13 @@ export function wsTerminal(fastify) {
       });
 
       socket.on("message", (msg) => {
-        const parsed = JSON.parse(msg);
-        switch (parsed.type) {
-          case "input":
-            ptyProcess.write(parsed.data);
-            break;
-          case "resize":
-            ptyProcess.resize(parsed.cols, parsed.rows);
-            break;
-        }
+        const { type, data, cols, rows } = JSON.parse(msg);
+        if (type === "input") ptyProcess.write(data);
+        if (type === "resize") ptyProcess.resize(cols, rows);
       });
 
       socket.on("close", () => {
-        watcher.close();
-        clearTimeout(fileChangeTimer);
+        cleanup();
         ptyProcess.kill();
       });
     });

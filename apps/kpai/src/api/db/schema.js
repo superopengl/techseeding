@@ -43,6 +43,7 @@ export const sandbox = pgTable("sandbox", {
   workDir: text("work_dir"),
   title: text("title"),
   description: text("description"),
+  indexHtmlContent: text("index_html_content"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
