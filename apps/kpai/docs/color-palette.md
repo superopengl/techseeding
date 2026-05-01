@@ -1,6 +1,6 @@
 # Color Palette
 
-Lab4Kids uses a bright, playful, kid-friendly light theme.
+Code4Kids uses a bright, playful, kid-friendly light theme.
 
 ## Brand Colors
 

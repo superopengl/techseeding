@@ -19,7 +19,7 @@ export function Logo({ size = 32, style }) {
     >
       <img
         src="/logo.png"
-        alt="Lab4Kids"
+        alt="Code4Kids"
         style={{ width: size, height: size }}
       />
     </div>

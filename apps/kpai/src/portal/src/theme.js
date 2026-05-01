@@ -1,4 +1,4 @@
-// Lab4Kids Design Tokens
+// Code4Kids Design Tokens
 // See docs/color-palette.md for full documentation.
 
 export const colors = {
@@ -68,4 +68,9 @@ export const antTheme = {
     borderRadius: 16,
     fontFamily: fonts.body,
   },
+};
+
+// Global Ant Design modal defaults — pass to <ConfigProvider modal={antModalConfig}>
+export const antModalConfig = {
+  autoFocusButton: "cancel",
 };

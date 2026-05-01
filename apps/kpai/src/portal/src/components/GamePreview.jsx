@@ -23,7 +23,7 @@ export function GamePreview({ sandboxId, refreshKey }) {
     <iframe
       key={refreshKey}
       src={`/sandbox/${sandboxId}/preview`}
-      title="Lab4Kids - Sandbox Preview"
+      title="Code4Kids - Sandbox Preview"
       style={{
         width: "100%",
         height: "100%",

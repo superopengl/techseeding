@@ -1,5 +1,5 @@
 export function fetchWithAuth(url, options = {}) {
-  const token = sessionStorage.getItem("l4k_token");
+  const token = sessionStorage.getItem("c4k_token");
   const headers = { ...options.headers };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -11,7 +11,7 @@ export async function apiCall(url, options = {}) {
   const res = await fetchWithAuth(url, options);
 
   if (res.status === 401 || res.status === 403) {
-    sessionStorage.removeItem("l4k_token");
+    sessionStorage.removeItem("c4k_token");
     window.location.href = "/login";
     throw new Error("Unauthorized");
   }

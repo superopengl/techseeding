@@ -48,7 +48,7 @@ export function AdminPage() {
     }
     setAddLoading(true);
     const displayName = `${values.firstName.trim()} ${values.lastName.trim()}`;
-    const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.lab4kids`;
+    const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.code4kids`;
     try {
       await apiCall("/api/admin/student", {
         method: "POST",
