@@ -8,9 +8,8 @@ import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
-import { colors, fonts, shadows } from "../theme";
+import { colors, fonts, shadows, gradients } from "../theme";
 
-const { Header, Content } = Layout;
 
 const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
@@ -103,112 +102,131 @@ export function SandboxPage() {
 
   return (
     <Layout style={{ height: "100vh" }}>
-      <Header
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "0 24px",
-          background: colors.surface,
-          borderBottom: `1px solid ${colors.border}`,
+          position: "relative",
+          overflow: "hidden",
+          background: gradients.hero,
+          borderBottom: `1px solid rgba(255,255,255,0.15)`,
           height: 56,
+          flexShrink: 0,
         }}
       >
-        <Logo />
-        {displayName && (
-          <span
-            style={{
-              fontFamily: fonts.body,
-              fontSize: 14,
-              fontWeight: 600,
-              color: colors.heading,
-            }}
-          >
-            {displayName}
-          </span>
-        )}
-        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-          {editingTitle ? (
-            <Input
-              ref={titleInputRef}
-              value={titleDraft}
-              onChange={(e) => setTitleDraft(e.target.value)}
-              onBlur={saveTitle}
-              onPressEnter={saveTitle}
-              maxLength={50}
-              style={{
-                width: 260,
-                textAlign: "center",
-                fontFamily: fonts.heading,
-                fontSize: 16,
-                fontWeight: 600,
-              }}
-            />
-          ) : (
+        {/* Decorative circles */}
+        <div style={{ position: "absolute", width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.08)", top: -40, left: -20 }} />
+        <div style={{ position: "absolute", width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.06)", bottom: -30, right: 60 }} />
+        <div style={{ position: "absolute", width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.1)", top: -10, right: "30%" }} />
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "0 24px",
+            height: "100%",
+          }}
+        >
+          <Logo />
+          {displayName && (
             <span
-              onClick={startEditing}
               style={{
-                fontFamily: fonts.heading,
-                fontSize: 16,
+                fontFamily: fonts.body,
+                fontSize: 14,
                 fontWeight: 600,
-                color: colors.heading,
-                cursor: "pointer",
-                padding: "4px 12px",
-                borderRadius: 8,
-                border: `1px dashed transparent`,
-                transition: "border-color 0.2s",
+                color: colors.onDark,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = colors.border)}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
             >
-              {title || "Untitled Game"}
+              {displayName}
             </span>
           )}
-        </div>
-        <Space size={8}>
-          <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyGames(true)}>
-            My Games
-          </Button>
-          <Button type="primary" icon={<QrcodeOutlined />} onClick={() => setShowShare(true)}>
-            Share
-          </Button>
-          <Button
-            type="text"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={() => {
-              Modal.confirm({
-                title: "Logout",
-                content: "Are you sure you want to logout?",
-                okText: "Logout",
-                cancelText: "Stay",
-                autoFocusButton: "cancel",
-                okButtonProps: {
-                  style: {
-                    borderRadius: 12,
-                    fontWeight: 600,
-                    background: colors.ctaYellow,
-                    color: colors.heading,
-                    border: "none",
-                    boxShadow: shadows.ctaButtonSmall,
+          <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            {editingTitle ? (
+              <Input
+                ref={titleInputRef}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={saveTitle}
+                onPressEnter={saveTitle}
+                maxLength={50}
+                style={{
+                  width: 260,
+                  textAlign: "center",
+                  fontFamily: fonts.heading,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  background: "rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: colors.onDark,
+                }}
+              />
+            ) : (
+              <span
+                onClick={startEditing}
+                style={{
+                  fontFamily: fonts.heading,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: colors.onDark,
+                  cursor: "pointer",
+                  padding: "4px 12px",
+                  borderRadius: 8,
+                  border: "1px dashed transparent",
+                  transition: "border-color 0.2s",
+                  textShadow: shadows.textOnGradient,
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
+              >
+                {title || "Untitled Game"}
+              </span>
+            )}
+          </div>
+          <Space size={8}>
+            <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyGames(true)} style={{ color: colors.onDark }}>
+              My Games
+            </Button>
+            <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
+              Share
+            </Button>
+            <Button
+              type="text"
+              icon={<LogoutOutlined />}
+              style={{ color: "rgba(255,255,255,0.7)" }}
+              onClick={() => {
+                Modal.confirm({
+                  title: "Logout",
+                  content: "Are you sure you want to logout?",
+                  okText: "Logout",
+                  cancelText: "Stay",
+                  autoFocusButton: "cancel",
+                  okButtonProps: {
+                    style: {
+                      borderRadius: 12,
+                      fontWeight: 600,
+                      background: colors.ctaYellow,
+                      color: colors.heading,
+                      border: "none",
+                      boxShadow: shadows.ctaButtonSmall,
+                    },
                   },
-                },
-                cancelButtonProps: {
-                  style: { borderRadius: 12, fontWeight: 600 },
-                },
-                onOk: () => {
-                  sessionStorage.removeItem("c4k_token");
-                  navigate("/login");
-                },
-              });
-            }}
-          >
-            Logout
-          </Button>
-        </Space>
-      </Header>
+                  cancelButtonProps: {
+                    style: { borderRadius: 12, fontWeight: 600 },
+                  },
+                  onOk: () => {
+                    sessionStorage.removeItem("c4k_token");
+                    navigate("/login");
+                  },
+                });
+              }}
+            >
+              Logout
+            </Button>
+          </Space>
+        </div>
+      </div>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
-        <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto" }}>
+        <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas }}>
           <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
         </div>
         <div
