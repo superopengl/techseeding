@@ -6,6 +6,7 @@ import os from "os";
 import fs from "fs";
 import path from "path";
 import { eq } from "drizzle-orm";
+import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 
 const JWT_SECRET = process.env.LAB67_JWT_SECRET;
 
@@ -25,10 +26,10 @@ function authenticateToken(token) {
 
 async function lookupSandbox(sandboxId) {
   const [record] = await db
-    .select({ workDir: sandbox.workDir })
+    .select({ workDir: sandbox.workDir, indexHtmlContent: sandbox.indexHtmlContent })
     .from(sandbox)
     .where(eq(sandbox.id, sandboxId));
-  return record?.workDir || null;
+  return record || null;
 }
 
 function configureOpenCode(gamePath) {
@@ -91,15 +92,20 @@ export function wsTerminal(fastify) {
         return;
       }
 
-      const gamePath = await lookupSandbox(sandboxId);
-      if (!gamePath) {
+      const record = await lookupSandbox(sandboxId);
+      if (!record?.workDir) {
         sendError(socket, "Sandbox not found.");
         return;
       }
 
-      configureOpenCode(gamePath);
-      const ptyProcess = spawnTerminal(gamePath);
-      const { cleanup } = watchIndexHtml(gamePath, sandboxId, socket, fastify);
+      const { workDir: sandboxWorkDir, isNew } = ensureSandboxWorkDir(sandboxId);
+      if (isNew && record.indexHtmlContent) {
+        fs.writeFileSync(path.join(sandboxWorkDir, "index.html"), record.indexHtmlContent);
+      }
+
+      configureOpenCode(sandboxWorkDir);
+      const ptyProcess = spawnTerminal(sandboxWorkDir);
+      const { cleanup } = watchIndexHtml(sandboxWorkDir, sandboxId, socket, fastify);
 
       ptyProcess.onData((data) => {
         try {

@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { db } from "../db/index.js";
 import { sandbox } from "../db/schema.js";
 import { verifyToken } from "../lib/verifyToken.js";
-import { provisionSandboxDirectory } from "../lib/sandboxManager.js";
+import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 import { success, error } from "../lib/response.js";
 
 export function sandboxCreate(fastify) {
@@ -17,7 +17,7 @@ export function sandboxCreate(fastify) {
       return error(reply, 400, "BAD_REQUEST", "Title must be 50 characters or less");
     }
     const id = crypto.randomUUID();
-    const workDir = provisionSandboxDirectory(id);
+    const { workDir } = ensureSandboxWorkDir(id);
 
     const [newSandbox] = await db
       .insert(sandbox)
