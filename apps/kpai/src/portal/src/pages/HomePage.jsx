@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
+import { Logo } from "../components/Logo";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -93,7 +94,7 @@ function NavBar({ onStart }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <RocketOutlined style={{ fontSize: 28, color: colors.primary }} />
+        <Logo size={36} />
         <span
           style={{
             fontFamily: fonts.heading,

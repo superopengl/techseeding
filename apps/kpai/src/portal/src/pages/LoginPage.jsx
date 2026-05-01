@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Input, Typography, Card, Space, Spin, Result, message } from "antd";
-import { IdcardOutlined, LoadingOutlined, RocketOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { IdcardOutlined, LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
+import { Logo } from "../components/Logo";
 import { apiCall } from "../api";
 
 const { Title, Paragraph } = Typography;
@@ -431,7 +432,7 @@ export function LoginPage() {
       <Decorations />
       <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <RocketOutlined style={{ fontSize: 40, color: colors.primary, marginBottom: 12 }} />
+          <Logo size={56} style={{ marginBottom: 12 }} />
           <Title
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}

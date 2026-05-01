@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag } from "antd";
 import {
   ReloadOutlined,
-  RocketOutlined,
   PlusOutlined,
   CopyOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { colors, shadows, fonts } from "../theme";
+import { Logo } from "../components/Logo";
 import { apiCall } from "../api";
 
 const { Header, Content } = Layout;
@@ -187,18 +187,8 @@ export function AdminPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <RocketOutlined style={{ fontSize: 24, color: colors.primary }} />
-          <span
-            style={{
-              fontFamily: fonts.heading,
-              fontSize: 22,
-              fontWeight: 700,
-              color: colors.heading,
-            }}
-          >
-            Lab67
-          </span>
-          <span style={{ color: colors.muted, fontSize: 14, marginLeft: 8 }}>
+          <Logo />
+          <span style={{ color: colors.muted, fontSize: 14 }}>
             Admin Dashboard
           </span>
         </div>

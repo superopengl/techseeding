@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { Layout } from "antd";
-import { RocketOutlined } from "@ant-design/icons";
 import { colors, fonts } from "../theme";
 import { SandboxList } from "../components/SandboxList";
+import { Logo } from "../components/Logo";
 
 const { Header, Content } = Layout;
 
@@ -22,7 +22,7 @@ export function SandboxListPage() {
           height: 56,
         }}
       >
-        <RocketOutlined style={{ fontSize: 24, color: colors.primary }} />
+        <Logo />
         <span
           style={{
             fontFamily: fonts.heading,

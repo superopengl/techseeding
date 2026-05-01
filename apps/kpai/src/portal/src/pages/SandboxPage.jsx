@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal } from "antd";
-import { RocketOutlined, AppstoreOutlined, CloudUploadOutlined, LogoutOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, CloudUploadOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Terminal } from "../components/Terminal";
+import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
@@ -110,7 +111,7 @@ export function SandboxPage() {
           height: 56,
         }}
       >
-        <RocketOutlined style={{ fontSize: 24, color: colors.primary }} />
+        <Logo />
         {displayName && (
           <span
             style={{
