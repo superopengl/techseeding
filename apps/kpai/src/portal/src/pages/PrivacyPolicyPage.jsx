@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Typography } from "antd";
+import { Link } from "react-router-dom";
 import { Logo } from "../components/Logo";
 
 const { Title, Paragraph, Text } = Typography;
@@ -15,6 +16,7 @@ const sectionTitle = {
 };
 
 export function PrivacyPolicyPage() {
+  useEffect(() => { document.title = "Privacy Policy"; }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
       <div
@@ -25,7 +27,7 @@ export function PrivacyPolicyPage() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Logo size={48} style={{ marginInline: "auto" }} />
+          <Link to="/"><Logo size={48} style={{ marginInline: "auto" }} /></Link>
         </div>
 
         <Title
