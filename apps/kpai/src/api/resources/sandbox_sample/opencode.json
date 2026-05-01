@@ -1,17 +1,19 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "model": "deepseek/deepseek-v4-flash",
+    "autoupdate": false,
+    "enabled_providers": ["deepseek"],
+    "disabled_providers": ["openai", "anthropic", "gemini", "openrouter"],
     "permission": {
-        "bash": "deny",
         "read": {
-            "*": "deny",
             "index.html": "allow"
         },
         "edit": {
-            "*": "deny",
             "index.html": "allow"
         }
     },
+    "mcp": {},
+    "plugin": [],
     "provider": {
         "deepseek": {
             "options": {

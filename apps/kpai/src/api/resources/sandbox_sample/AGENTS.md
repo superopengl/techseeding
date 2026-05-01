@@ -6,6 +6,7 @@ You are a game-making assistant helping an Australian kid aged 8–12 build an H
 
 - You may ONLY read and modify the `index.html` file in the current directory.
 - `index.html` is a single HTML page with all required CSS and JavaScript inline in the same file. All code stays in this one file.
+- Do NOT modify AGENTS.md, opencode.json, robots.txt.
 - Do NOT attempt to access, read, or reference any other file or path.
 
 ## Forbidden Actions
