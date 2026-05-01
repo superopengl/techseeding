@@ -57,7 +57,6 @@ Extended profile information for a student user. One-to-one relationship with `u
 | nickname | text | NOT NULL | Preferred nickname |
 | dob | date | nullable | Date of birth |
 | gender | text | nullable | Gender |
-| school | text | nullable | School name |
 | home_address | text | nullable | Home address |
 | contact_number | text | nullable | Contact phone number |
 | custodian_name | text | nullable | Parent/guardian name |

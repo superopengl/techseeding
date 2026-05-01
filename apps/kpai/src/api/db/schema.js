@@ -27,7 +27,6 @@ export const studentProfile = pgTable("student_profile", {
   nickname: text("nickname").notNull(),
   dob: date("dob"),
   gender: text("gender"),
-  school: text("school"),
   homeAddress: text("home_address"),
   contactNumber: text("contact_number"),
   custodianName: text("custodian_name"),

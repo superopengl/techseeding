@@ -128,7 +128,6 @@ Create a new student user with profile.
     "nickname": "string (optional)",
     "dob": "date string (optional)",
     "gender": "string (optional)",
-    "school": "string (optional)",
     "homeAddress": "string (optional)",
     "contactNumber": "string (optional)",
     "custodianName": "string (optional)",

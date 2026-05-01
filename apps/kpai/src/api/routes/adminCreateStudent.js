@@ -5,7 +5,7 @@ import { success, error } from "../lib/response.js";
 
 export function adminCreateStudent(fastify) {
   fastify.post("/api/admin/student", async (request, reply) => {
-    const { firstName, lastName, nickname, dob, gender, school, homeAddress, contactNumber, custodianName, notes } = request.body || {};
+    const { firstName, lastName, nickname, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
 
     if (!firstName || !lastName) {
       return error(reply, 400, "VALIDATION_ERROR", "firstName and lastName are required");
@@ -29,7 +29,6 @@ export function adminCreateStudent(fastify) {
           nickname: nickname || firstName,
           dob: dob || null,
           gender: gender || null,
-          school: school || null,
           homeAddress: homeAddress || null,
           contactNumber: contactNumber || null,
           custodianName: custodianName || null,

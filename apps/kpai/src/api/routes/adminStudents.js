@@ -20,7 +20,6 @@ export function adminStudents(fastify) {
       firstName: row.student_profile.firstName,
       lastName: row.student_profile.lastName,
       nickname: row.student_profile.nickname,
-      school: row.student_profile.school,
       joinedAt: row.student_profile.joinedAt,
       createdAt: row.student_profile.createdAt,
       loginRequestId: row.login_request?.id ?? null,
