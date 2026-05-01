@@ -1,5 +1,5 @@
 import { db } from "../db/index.js";
-import { otpCode, studentProfile } from "../db/schema.js";
+import { otpCode, user } from "../db/schema.js";
 import { eq, and, gt } from "drizzle-orm";
 import { createToken } from "../lib/createToken.js";
 import { success, error } from "../lib/response.js";
@@ -28,17 +28,16 @@ export function verify(fastify) {
     // Delete used OTP
     await db.delete(otpCode).where(eq(otpCode.id, otp.id));
 
-    // Find the student profile by display name
-    const [profile] = await db
+    const [found] = await db
       .select()
-      .from(studentProfile)
-      .where(eq(studentProfile.firstName, otp.displayName));
+      .from(user)
+      .where(eq(user.id, otp.userId));
 
-    if (!profile) {
-      return error(reply, 404, "NOT_FOUND", "Student not found");
+    if (!found) {
+      return error(reply, 404, "NOT_FOUND", "User not found");
     }
 
-    const token = createToken({ userId: profile.userId, role: "student" });
-    return success({ token });
+    const token = createToken({ userId: found.id, role: found.role });
+    return success({ token, role: found.role });
   });
 }

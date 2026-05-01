@@ -148,6 +148,20 @@
       "when": 1777521800000,
       "tag": "0020_drop_student_profile_school",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1777521900000,
+      "tag": "0021_update_otp_code_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1777522000000,
+      "tag": "0022_otp_code_user_id_unique",
+      "breakpoints": true
     }
   ]
 }

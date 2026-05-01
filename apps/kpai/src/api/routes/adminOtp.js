@@ -18,7 +18,7 @@ export function adminOtp(fastify) {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expiredAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    await db.insert(otpCode).values({ displayName: profile.firstName, code, expiredAt });
+    await db.insert(otpCode).values({ userId: profile.userId, code, expiredAt });
 
     return success({ code, expiredAt });
   });

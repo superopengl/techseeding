@@ -35,11 +35,10 @@ A one-time passcode issued to a user for authentication. Expires after a set dur
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| display_name | text | NOT NULL | Display name provided at time of request |
+| user_id | uuid | NOT NULL, FK → `user.id` | The user this OTP belongs to |
 | code | char(6) | NOT NULL | 6-digit OTP code |
 | expired_at | timestamp | NOT NULL | When this code expires |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
-| updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
 **Indexes:** `user_id`, `code`
 

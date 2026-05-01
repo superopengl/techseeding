@@ -11,11 +11,10 @@ export const user = pgTable("user", {
 
 export const otpCode = pgTable("otp_code", {
   id: uuid("id").primaryKey().defaultRandom(),
-  displayName: text("display_name").notNull(),
+  userId: uuid("user_id").notNull().unique().references(() => user.id),
   code: char("code", { length: 6 }).notNull(),
   expiredAt: timestamp("expired_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const studentProfile = pgTable("student_profile", {
