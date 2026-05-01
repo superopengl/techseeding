@@ -8,7 +8,7 @@ import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
-import { colors, fonts } from "../theme";
+import { colors, fonts, shadows } from "../theme";
 
 const { Header, Content } = Layout;
 
@@ -180,9 +180,22 @@ export function SandboxPage() {
                 title: "Logout",
                 content: "Are you sure you want to logout?",
                 okText: "Logout",
-                okButtonProps: { danger: true },
+                cancelText: "Stay",
+                okButtonProps: {
+                  style: {
+                    borderRadius: 12,
+                    fontWeight: 600,
+                    background: colors.ctaYellow,
+                    color: colors.heading,
+                    border: "none",
+                    boxShadow: shadows.ctaButtonSmall,
+                  },
+                },
+                cancelButtonProps: {
+                  style: { borderRadius: 12, fontWeight: 600 },
+                },
                 onOk: () => {
-                  sessionStorage.removeItem("lab67_token");
+                  sessionStorage.removeItem("l4k_token");
                   navigate("/login");
                 },
               });
@@ -242,16 +255,29 @@ export function SandboxPage() {
           const shareUrl = `${window.location.origin}/sandbox/${sandboxId}/preview`;
           return (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
-              <QRCodeSVG
-                value={shareUrl}
-                size={200}
-                imageSettings={{
-                  src: "/logo.png",
-                  width: 40,
-                  height: 40,
-                  excavate: true,
-                }}
-              />
+              <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>
+                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun Lab4Kids is! 🚀
+              </p>
+              <div style={{
+                display: "inline-block",
+                padding: 20,
+                borderRadius: 20,
+                background: colors.mintBg,
+                boxShadow: "0 2px 12px rgba(124,92,252,0.10)",
+              }}>
+                <QRCodeSVG
+                  value={shareUrl}
+                  size={180}
+                  fgColor={colors.primary}
+                  level="H"
+                  imageSettings={{
+                    src: "/logo.png",
+                    width: 40,
+                    height: 40,
+                    excavate: true,
+                  }}
+                />
+              </div>
               <Input.Search
                 value={shareUrl}
                 readOnly
@@ -261,6 +287,18 @@ export function SandboxPage() {
                   message.success("Link copied!");
                 }}
                 style={{ marginTop: 16 }}
+                styles={{ affixWrapper: { borderRadius: 12, height: 44 } }}
+                enterButtonProps={{
+                  style: {
+                    height: 44,
+                    borderRadius: "0 12px 12px 0",
+                    background: colors.ctaYellow,
+                    color: colors.heading,
+                    border: "none",
+                    fontWeight: 600,
+                    boxShadow: shadows.ctaButtonSmall,
+                  },
+                }}
               />
             </div>
           );
