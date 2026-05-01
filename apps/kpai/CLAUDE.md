@@ -39,22 +39,6 @@ Full schema documentation: [docs/db-schema.md](docs/db-schema.md)
 
 Schema defined in `src/api/db/schema.js`, migrations in `src/api/drizzle/`.
 
-### Sandbox Isolation
-
-Each student gets a strictly isolated folder:
-
-```
-sandboxes/
-  <studentId>/
-    game/              # HTML/CSS/JS game files (served at /sandbox/<id>/game/)
-      index.html       # Starter template copied on first session
-```
-
-Claude Code is spawned per student with:
-- `cwd` set to the student's `game/` folder
-- `HOME` env overridden to the game folder (prevents file access outside sandbox)
-- `--allowedTools` restricted to: `Edit, Write, Read, Bash(cat), Bash(ls), Bash(mkdir), Bash(cp)`
-
 ### API Routes (Fastify)
 
 Full API documentation: [docs/api-schema.md](docs/api-schema.md)
@@ -115,7 +99,6 @@ src/
     package.json          # Frontend dependencies
 public/                   # Built frontend assets (output of pnpm build, served by Fastify)
 templates/index.html      # Starter game template copied into each new sandbox
-sandboxes/                # Per-student isolated folders (gitignored)
 ```
 
 ## Deployment
