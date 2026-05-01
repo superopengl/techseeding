@@ -11,33 +11,39 @@ export function verify(fastify) {
       return error(reply, 400, "VALIDATION_ERROR", "A 6-digit code is required");
     }
 
-    const [otp] = await db
-      .select()
-      .from(otpCode)
-      .where(
-        and(
-          eq(otpCode.code, code),
-          gt(otpCode.expiredAt, new Date())
-        )
-      );
+    const result = await db.transaction(async (tx) => {
+      const [otp] = await tx
+        .select()
+        .from(otpCode)
+        .where(
+          and(
+            eq(otpCode.code, code),
+            gt(otpCode.expiredAt, new Date())
+          )
+        );
 
-    if (!otp) {
+      if (!otp) return { error: "INVALID_CODE" };
+
+      await tx.delete(otpCode).where(eq(otpCode.id, otp.id));
+
+      const [found] = await tx
+        .select()
+        .from(user)
+        .where(eq(user.id, otp.userId));
+
+      if (!found) return { error: "NOT_FOUND" };
+
+      return { user: found };
+    });
+
+    if (result.error === "INVALID_CODE") {
       return error(reply, 401, "INVALID_CODE", "Invalid or expired code");
     }
-
-    // Delete used OTP
-    await db.delete(otpCode).where(eq(otpCode.id, otp.id));
-
-    const [found] = await db
-      .select()
-      .from(user)
-      .where(eq(user.id, otp.userId));
-
-    if (!found) {
+    if (result.error === "NOT_FOUND") {
       return error(reply, 404, "NOT_FOUND", "User not found");
     }
 
-    const token = createJwtToken({ userId: found.id, role: found.role });
-    return success({ token, role: found.role });
+    const token = createJwtToken({ userId: result.user.id, role: result.user.role });
+    return success({ token, role: result.user.role });
   });
 }
