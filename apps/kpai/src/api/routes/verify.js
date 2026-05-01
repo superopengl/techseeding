@@ -1,7 +1,7 @@
 import { db } from "../db/index.js";
 import { otpCode, user } from "../db/schema.js";
 import { eq, and, gt } from "drizzle-orm";
-import { createToken } from "../lib/createToken.js";
+import { createJwtToken } from "../lib/createJwtToken.js";
 import { success, error } from "../lib/response.js";
 
 export function verify(fastify) {
@@ -37,7 +37,7 @@ export function verify(fastify) {
       return error(reply, 404, "NOT_FOUND", "User not found");
     }
 
-    const token = createToken({ userId: found.id, role: found.role });
+    const token = createJwtToken({ userId: found.id, role: found.role });
     return success({ token, role: found.role });
   });
 }

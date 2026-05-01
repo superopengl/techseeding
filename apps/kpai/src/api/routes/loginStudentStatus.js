@@ -1,7 +1,7 @@
 import { db } from "../db/index.js";
 import { loginRequest, user } from "../db/schema.js";
 import { eq } from "drizzle-orm";
-import { createToken } from "../lib/createToken.js";
+import { createJwtToken } from "../lib/createJwtToken.js";
 import { success, error } from "../lib/response.js";
 
 export function loginStudentStatus(fastify) {
@@ -21,7 +21,7 @@ export function loginStudentStatus(fastify) {
     const { login_request: req, user: studentUser } = record;
 
     if (req.status === "approved") {
-      const token = createToken({ userId: studentUser.id, role: studentUser.role });
+      const token = createJwtToken({ userId: studentUser.id, role: studentUser.role });
       return success({ loginRequestId: req.id, status: req.status, token });
     }
 
