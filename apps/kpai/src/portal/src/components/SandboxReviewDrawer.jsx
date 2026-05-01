@@ -291,7 +291,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
         destroyOnHidden
       >
         {(() => {
-          const shareUrl = `${window.location.origin}/sandbox/${sandboxId}/preview`;
+          const shareUrl = `${window.location.origin}/api/sandbox/${sandboxId}/preview`;
           return (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
               <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>

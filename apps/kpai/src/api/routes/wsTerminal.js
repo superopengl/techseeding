@@ -80,7 +80,7 @@ function watchIndexHtml(gamePath, sandboxId, socket, fastify) {
 
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
-    fastify.get("/ws", { websocket: true }, async (socket, req) => {
+    fastify.get("/api/ws", { websocket: true }, async (socket, req) => {
       const { sandboxId, token } = req.query;
 
       const payload = authenticateToken(token);

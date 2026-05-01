@@ -67,7 +67,7 @@ wsTerminal(fastify);
 // --- SPA fallback ---
 
 fastify.setNotFoundHandler(async (request, reply) => {
-  if (request.url.startsWith("/api/") || request.url.startsWith("/ws")) {
+  if (request.url.startsWith("/api/")) {
     return reply.status(404).send({ success: false, error: { code: "NOT_FOUND", message: "Not found" } });
   }
   return reply.sendFile("index.html");

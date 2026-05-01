@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { error } from "../lib/response.js";
 
 export function sandboxPreview(fastify) {
-  fastify.get("/sandbox/:sandboxId/preview", async (request, reply) => {
+  fastify.get("/api/sandbox/:sandboxId/preview", async (request, reply) => {
     const { sandboxId } = request.params;
 
     const [record] = await db

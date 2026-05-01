@@ -20,7 +20,7 @@ export function Terminal({ sandboxId, onFileChanged }) {
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
     const token = sessionStorage.getItem("c4k_token");
     const ws = new WebSocket(
-      `${proto}//${location.host}/ws?sandboxId=${sandboxId}&token=${token}`
+      `${proto}//${location.host}/api/ws?sandboxId=${sandboxId}&token=${token}`
     );
 
     ws.onopen = () => {
