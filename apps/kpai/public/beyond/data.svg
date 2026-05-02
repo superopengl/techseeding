@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160">
+  <rect width="280" height="160" rx="12" fill="#f7fafc"/>
+  <!-- Bar chart -->
+  <g transform="translate(30, 20)">
+    <rect x="10" y="70" width="22" height="50" rx="4" fill="#43b88c" opacity="0.8"/>
+    <rect x="38" y="40" width="22" height="80" rx="4" fill="#6ec1e4" opacity="0.8"/>
+    <rect x="66" y="55" width="22" height="65" rx="4" fill="#7c5cfc" opacity="0.8"/>
+    <rect x="94" y="25" width="22" height="95" rx="4" fill="#fcd63c" opacity="0.85"/>
+    <!-- Axis -->
+    <line x1="5" y1="120" x2="125" y2="120" stroke="#cbd5e0" stroke-width="1.5"/>
+    <line x1="5" y1="20" x2="5" y2="120" stroke="#cbd5e0" stroke-width="1.5"/>
+  </g>
+  <!-- Pie chart -->
+  <g transform="translate(195, 45)">
+    <circle cx="0" cy="0" r="35" fill="#43b88c" opacity="0.8"/>
+    <path d="M0 0 L0 -35 A35 35 0 0 1 30 17 Z" fill="#6ec1e4" opacity="0.8"/>
+    <path d="M0 0 L30 17 A35 35 0 0 1 -10 33 Z" fill="#fcd63c" opacity="0.85"/>
+    <path d="M0 0 L-10 33 A35 35 0 0 1 -33 -10 Z" fill="#7c5cfc" opacity="0.7"/>
+  </g>
+  <!-- Line chart -->
+  <g transform="translate(145, 95)">
+    <polyline points="10,40 30,25 50,35 70,10 90,20 110,5" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="10" cy="40" r="3" fill="#f59e0b"/>
+    <circle cx="50" cy="35" r="3" fill="#f59e0b"/>
+    <circle cx="90" cy="20" r="3" fill="#f59e0b"/>
+    <line x1="5" y1="45" x2="120" y2="45" stroke="#e2e8f0" stroke-width="1"/>
+  </g>
+</svg>
