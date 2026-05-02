@@ -1,12 +1,12 @@
-# Code4Kids
+# KidPlayAI
 
 ## Product Vision
 
-Code4Kids is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, coding, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, write code, and build it step by step. Rather than hiding AI behind a polished UI, Code4Kids surfaces the raw interaction so kids see exactly how AI reasons, edits files, and solves problems. The result: kids don't just make games — they develop a genuine understanding of how AI and software engineering work.
+KidPlayAI is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, design, and build it step by step. Rather than hiding AI behind a polished UI, KidPlayAI surfaces the raw interaction so kids see exactly how AI reasons, creates, and solves problems. The result: kids don't just make games — they learn to harness AI as a creative tool and develop a genuine understanding of how AI works.
 
 ## Target Users
 
-Kids aged 8-12 who love games, coding, science, engineering, and AI. No prior coding experience is required — the platform meets kids where they are and rewards curiosity, experimentation, and creative problem-solving. Code4Kids is for the kid who takes apart toys to see how they work, who asks "but how does it actually do that?", and who wants to build something real.
+Kids aged 8-12 who love games, science, engineering, and AI. No prior experience is required — the platform meets kids where they are and rewards curiosity, experimentation, and creative problem-solving. KidPlayAI is for the kid who takes apart toys to see how they work, who asks "but how does it actually do that?", and who wants to build something real.
 
 ## Core UI
 
@@ -104,7 +104,7 @@ public/                   # Built frontend assets (output of pnpm build, served 
 
 ## Deployment
 
-- **Domain**: `code4kids.techseeding.com.au` (subdomain under TechSeeding company domain)
+- **Domain**: `kidplayai.techseeding.com.au` (subdomain under TechSeeding company domain)
 
 ## Publishing (Planned)
 
@@ -162,7 +162,7 @@ All env vars are prefixed with `L4K_`.
 
 | Variable | Description | Default |
 |---|---|---|
-| `L4K_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/code4kids` |
+| `L4K_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/kidplayai` |
 | `L4K_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
 | `L4K_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
 Local dev ports:

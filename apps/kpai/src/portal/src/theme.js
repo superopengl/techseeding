@@ -1,4 +1,4 @@
-// Code4Kids Design Tokens
+// KidPlayAI Design Tokens
 // See docs/color-palette.md for full documentation.
 
 export const colors = {

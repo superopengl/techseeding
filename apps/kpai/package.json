@@ -1,5 +1,5 @@
 {
-  "name": "code4kids",
+  "name": "kidplayai",
   "version": "1.0.0",
   "description": "",
   "type": "module",
@@ -8,8 +8,8 @@
     "postinstall": "chmod +x node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true",
     "dev": "concurrently \"pnpm start:api\" \"pnpm start:portal\"",
     "start:api": "node --env-file=.env --watch-path=src/api --inspect src/api/server.js",
-    "start:portal": "pnpm --filter code4kids-portal dev",
-    "build": "pnpm --filter code4kids-portal build",
+    "start:portal": "pnpm --filter kidplayai-portal dev",
+    "build": "pnpm --filter kidplayai-portal build",
     "start:prod": "node --env-file=.env.production src/api/server.js",
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",

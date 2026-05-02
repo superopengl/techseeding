@@ -1,6 +1,6 @@
 # Color Palette
 
-Code4Kids uses a bright, playful, kid-friendly light theme.
+KidPlayAI uses a bright, playful, kid-friendly light theme.
 
 ## Brand Colors
 

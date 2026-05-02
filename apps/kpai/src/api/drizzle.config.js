@@ -8,6 +8,6 @@ export default {
   out: "src/api/drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.L4K_DATABASE_URL || "postgres://localhost:5432/code4kids",
+    url: process.env.L4K_DATABASE_URL || "postgres://localhost:5432/kidplayai",
   },
 };
