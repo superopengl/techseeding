@@ -35,7 +35,7 @@ export function ShareCraftModal({ open, onCancel, sandboxId, zIndex, description
             fgColor={colors.primary}
             level="H"
             imageSettings={{
-              src: "/logo.png",
+              src: "/logo-square.png",
               width: 40,
               height: 40,
               excavate: true,
