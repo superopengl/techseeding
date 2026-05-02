@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "../db/index.js";
 import { user, studentProfile, otpCode } from "../db/schema.js";
 import { eq } from "drizzle-orm";
@@ -34,7 +35,7 @@ export function sendOtp(fastify) {
     });
 
     if (!result) {
-      return error(reply, 404, "NOT_FOUND", "No user found with this email");
+      return success({ id: randomUUID() });
     }
 
     return success({ id: result.id });

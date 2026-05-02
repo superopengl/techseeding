@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Input, Typography, Card, Space, Spin, Result, message } from "antd";
-import { IdcardOutlined, LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
+import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, Segmented, message } from "antd";
+import { LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { apiCall } from "../api";
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
+
+const PHONE_NUMBER = "04XX XXX XXX";
+const WECHAT_ID = "your-wechat-id";
 
 export function LoginPage() {
   useEffect(() => { document.title = "Login"; }, []);
@@ -22,6 +25,8 @@ export function LoginPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [loginTab, setLoginTab] = useState("in-class");
   const otpRefs = useRef([]);
   const pollingRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -105,12 +110,11 @@ export function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
-      message.success("Verification code sent!");
-      setStatus("otp");
-    } catch (e) {
-      message.error(e.message || "Failed to send verification code");
+    } catch {
+      // Silently proceed to OTP screen regardless of whether the email exists
     } finally {
       setEmailLoading(false);
+      setStatus("otp");
     }
   };
 
@@ -304,7 +308,11 @@ export function LoginPage() {
           >
             Re-login
           </Button>
-          <div style={{ color: colors.muted, fontSize: 13, margin: "8px 0" }}>or</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0" }}>
+            <div style={{ flex: 1, height: 1, background: colors.border }} />
+            <span style={{ color: colors.muted, fontSize: 13 }}>or</span>
+            <div style={{ flex: 1, height: 1, background: colors.border }} />
+          </div>
           <Button
             type="link"
             onClick={() => setStatus("otp")}
@@ -356,66 +364,6 @@ export function LoginPage() {
     );
   }
 
-  if (status === "email-otp") {
-    return (
-      <div style={containerStyle}>
-        <Decorations />
-        <Card style={{ ...cardStyle, textAlign: "center" }} styles={{ body: { padding: "48px 32px" } }}>
-          <MailOutlined style={{ fontSize: 40, color: colors.accentPurple, marginBottom: 12 }} />
-          <Title
-            level={3}
-            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
-          >
-            Login with Verification Code
-          </Title>
-          <Paragraph style={{ color: colors.body, marginBottom: 24 }}>
-            For registered users — enter your email and we'll send you a verification code
-          </Paragraph>
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-            <Input
-              size="large"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onPressEnter={handleSendOtp}
-              style={{ borderRadius: 12, height: 48 }}
-              styles={{ input: { textAlign: "center" } }}
-            />
-            <Button
-              type="primary"
-              size="large"
-              block
-              loading={emailLoading}
-              onClick={handleSendOtp}
-              disabled={!email.trim()}
-              icon={<SendOutlined />}
-              style={{
-                height: 48,
-                borderRadius: 12,
-                fontSize: 16,
-                fontWeight: 600,
-                background: colors.ctaYellow,
-                color: colors.heading,
-                border: "none",
-                boxShadow: shadows.ctaButtonSmall,
-              }}
-            >
-              Send Verification Code
-            </Button>
-          </Space>
-          <Button
-            type="link"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => setStatus(null)}
-            style={{ color: colors.body, fontSize: 14, marginTop: 16 }}
-          >
-            Back to Login
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
   if (status === "otp") {
     return (
       <div style={containerStyle}>
@@ -429,7 +377,7 @@ export function LoginPage() {
             Enter Verification Code
           </Title>
           <Paragraph style={{ color: colors.body, marginBottom: 32 }}>
-            Ask your teacher for the 6-digit code
+            A 6-digit verification code has been sent to your registered email
           </Paragraph>
           <div
             style={{
@@ -539,72 +487,186 @@ export function LoginPage() {
     <div style={containerStyle}>
       <Decorations />
       <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
           <Logo size={80} square style={{ marginBottom: 12, marginInline: "auto" }} />
           <Title
             level={3}
-            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
+            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 0 }}
           >
             Welcome to KidPlayAI!
           </Title>
-          <Paragraph style={{ color: colors.body }}>
-            Enter your Student ID to get started
-          </Paragraph>
         </div>
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <Input
-            size="large"
-            placeholder="Student ID"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onPressEnter={handleSubmit}
-            style={{ borderRadius: 12, height: 48 }}
-            styles={{ input: { textAlign: "center" } }}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+          <Segmented
+            value={loginTab}
+            onChange={setLoginTab}
+            options={[
+              { label: "In Class", value: "in-class" },
+              { label: "After Class", value: "after-class" },
+            ]}
+            style={{ fontWeight: 600 }}
           />
-          <Button
-            type="primary"
-            size="large"
-            block
-            loading={loading}
-            onClick={handleSubmit}
-            disabled={!name.trim()}
-            style={{
-              height: 48,
-              borderRadius: 12,
-              fontSize: 16,
-              fontWeight: 600,
-              background: colors.ctaYellow,
-              color: colors.heading,
-              border: "none",
-              boxShadow: shadows.ctaButtonSmall,
-            }}
-          >
-            Request Login
-          </Button>
-          {loginError && (
-            <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, textAlign: "center" }}>
-              {loginError}
-            </div>
-          )}
-        </Space>
-        <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
-          Don't have a Student ID? Contact us or ask your parents to contact us to register for you.
-        </Paragraph>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 20 }}>
-          <div style={{ flex: 1, height: 1, background: colors.border }} />
-          <span style={{ color: colors.muted, fontSize: 13 }}>or</span>
-          <div style={{ flex: 1, height: 1, background: colors.border }} />
         </div>
-        <div style={{ textAlign: "center", marginTop: 12 }}>
-          <Button
-            type="link"
-            onClick={() => setStatus("email-otp")}
-            style={{ color: colors.primary, fontSize: 14, padding: 0 }}
-          >
-            Login with Verification Code
-          </Button>
-        </div>
+
+        {loginTab === "in-class" ? (
+          <>
+            <Paragraph style={{ color: colors.body, fontSize: 14, textAlign: "center", marginBottom: 20 }}>
+              Enter your Student ID to jump in
+            </Paragraph>
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <Input
+                size="large"
+                placeholder="Student ID"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onPressEnter={handleSubmit}
+                style={{ borderRadius: 12, height: 48 }}
+                styles={{ input: { textAlign: "center" } }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                block
+                loading={loading}
+                onClick={handleSubmit}
+                disabled={!name.trim()}
+                style={{
+                  height: 48,
+                  borderRadius: 12,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  background: colors.ctaYellow,
+                  color: colors.heading,
+                  border: "none",
+                  boxShadow: shadows.ctaButtonSmall,
+                }}
+              >
+                Request Login
+              </Button>
+              {loginError && (
+                <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, textAlign: "center" }}>
+                  {loginError}
+                </div>
+              )}
+            </Space>
+            <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
+              Don't have a Student ID?{" "}
+              <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
+                Contact us
+              </a>{" "}
+              to register.
+            </Paragraph>
+          </>
+        ) : (
+          <>
+            <Paragraph style={{ color: colors.body, fontSize: 14, textAlign: "center", marginBottom: 20 }}>
+              Practise at home — enter your registered email and we'll send a verification code
+            </Paragraph>
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+              <Input
+                size="large"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onPressEnter={handleSendOtp}
+                style={{ borderRadius: 12, height: 48 }}
+                styles={{ input: { textAlign: "center" } }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                block
+                loading={emailLoading}
+                onClick={handleSendOtp}
+                disabled={!email.trim()}
+                style={{
+                  height: 48,
+                  borderRadius: 12,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  background: colors.ctaYellow,
+                  color: colors.heading,
+                  border: "none",
+                  boxShadow: shadows.ctaButtonSmall,
+                }}
+              >
+                Send Verification Code
+              </Button>
+            </Space>
+            <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
+              Ask a parent or guardian for help with your registered email.{" "}
+              <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
+                Contact us
+              </a>{" "}
+              if you haven't registered yet.
+            </Paragraph>
+          </>
+        )}
       </Card>
+
+      {/* Contact Modal */}
+      <Modal
+        open={contactOpen}
+        onCancel={() => setContactOpen(false)}
+        footer={null}
+        centered
+        width={480}
+        styles={{
+          content: { borderRadius: 24, padding: "40px 32px", textAlign: "center" },
+        }}
+      >
+        <RocketOutlined style={{ fontSize: 40, color: colors.primary, marginBottom: 16 }} />
+        <Title
+          level={3}
+          style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
+        >
+          Get in Touch
+        </Title>
+        <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 32, maxWidth: 360, marginInline: "auto" }}>
+          Reach out to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
+        </Paragraph>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12}>
+            <a href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`} style={{ textDecoration: "none" }}>
+              <Card
+                hoverable
+                style={{
+                  borderRadius: 16,
+                  border: `2px solid ${colors.primary}`,
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "24px 16px" } }}
+              >
+                <PhoneOutlined style={{ fontSize: 32, color: colors.primary, marginBottom: 12 }} />
+                <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
+                  Call Us
+                </Title>
+                <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
+                  {PHONE_NUMBER}
+                </Text>
+              </Card>
+            </a>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card
+              style={{
+                borderRadius: 16,
+                border: `2px solid ${colors.successGreen}`,
+                textAlign: "center",
+              }}
+              styles={{ body: { padding: "24px 16px" } }}
+            >
+              <WechatOutlined style={{ fontSize: 32, color: colors.successGreen, marginBottom: 12 }} />
+              <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
+                WeChat
+              </Title>
+              <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
+                {WECHAT_ID}
+              </Text>
+            </Card>
+          </Col>
+        </Row>
+      </Modal>
     </div>
   );
 }
