@@ -2,7 +2,7 @@ import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date } f
 
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
-  displayName: text("display_name").notNull(),
+  userName: text("user_name").notNull().unique(),
   role: text("role").notNull(), // student | teacher | admin
   email: text("email").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

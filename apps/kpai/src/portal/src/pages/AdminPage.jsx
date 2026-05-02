@@ -55,7 +55,7 @@ export function AdminPage() {
       return;
     }
     setAddLoading(true);
-    const displayName = `${values.firstName.trim()} ${values.lastName.trim()}`;
+    const userName = `${values.firstName.trim()} ${values.lastName.trim()}`;
     const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.kidplayai`;
     try {
       await apiCall("/api/admin/student", {
@@ -63,7 +63,7 @@ export function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          displayName,
+          userName,
           email,
           dob: values.dob ? values.dob.format("YYYY-MM-DD") : null,
         }),
@@ -128,8 +128,8 @@ export function AdminPage() {
     },
     {
       title: "Display Name",
-      dataIndex: "displayName",
-      key: "displayName",
+      dataIndex: "userName",
+      key: "userName",
     },
     {
       title: "First Name",
@@ -247,7 +247,7 @@ export function AdminPage() {
         />
       </Content>
       <Drawer
-        title={drawerStudent ? `${drawerStudent.displayName}'s Sandboxes` : "Sandboxes"}
+        title={drawerStudent ? `${drawerStudent.userName}'s Sandboxes` : "Sandboxes"}
         placement="right"
         size="large"
         open={drawerOpen}
@@ -299,7 +299,7 @@ export function AdminPage() {
         open={reviewOpen}
         sandboxId={reviewSandbox?.id}
         sandboxTitle={reviewSandbox?.title || "Untitled Sandbox"}
-        studentName={drawerStudent?.displayName}
+        studentName={drawerStudent?.userName}
         onClose={() => setReviewOpen(false)}
       />
       <Modal

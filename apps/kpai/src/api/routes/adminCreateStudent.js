@@ -14,7 +14,7 @@ export function adminCreateStudent(fastify) {
     const { newUser, profile: newProfile } = await db.transaction(async (tx) => {
       const [newUser] = await tx
         .insert(user)
-        .values({ displayName: nickname, role: "student" })
+        .values({ userName: nickname, role: "student" })
         .returning();
 
       const studentId = generateStudentId();
@@ -41,7 +41,7 @@ export function adminCreateStudent(fastify) {
 
     return reply.status(201).send(success({
       id: newUser.id,
-      displayName: newUser.displayName,
+      userName: newUser.userName,
       role: newUser.role,
       profile: {
         id: newProfile.id,

@@ -14,7 +14,7 @@ export function adminStudents(fastify) {
 
     return success(profiles.map((row) => ({
       id: row.user.id,
-      displayName: row.user.displayName,
+      userName: row.user.userName,
       email: row.user.email,
       studentId: row.student_profile.studentId,
       firstName: row.student_profile.firstName,

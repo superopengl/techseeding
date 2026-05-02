@@ -21,7 +21,7 @@ export function SandboxPage() {
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
-  const [displayName, setDisplayName] = useState("");
+  const [userName, setDisplayName] = useState("");
   const [title, setTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -32,7 +32,7 @@ export function SandboxPage() {
 
   useEffect(() => {
     apiCall("/api/me").then((data) => {
-      setDisplayName(data.displayName);
+      setDisplayName(data.userName);
     }).catch(() => {});
   }, []);
 
@@ -163,7 +163,7 @@ export function SandboxPage() {
           }}
         >
           <Logo size={36} square />
-          {displayName && (
+          {userName && (
             <span
               style={{
                 fontFamily: fonts.body,
@@ -172,7 +172,7 @@ export function SandboxPage() {
                 color: colors.onDark,
               }}
             >
-              {displayName}
+              {userName}
             </span>
           )}
           <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>

@@ -12,7 +12,7 @@ export function me(fastify) {
     }
 
     const [record] = await db
-      .select({ displayName: user.displayName, role: user.role })
+      .select({ userName: user.userName, role: user.role })
       .from(user)
       .where(eq(user.id, payload.userId));
 

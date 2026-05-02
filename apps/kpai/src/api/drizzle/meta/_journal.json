@@ -162,6 +162,13 @@
       "when": 1777522000000,
       "tag": "0022_otp_code_user_id_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1777522100000,
+      "tag": "0023_rename_display_name_to_user_name",
+      "breakpoints": true
     }
   ]
 }

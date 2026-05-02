@@ -48,7 +48,7 @@ Request a one-time passcode. Creates an `otp_code` record with a 10-minute expir
 - **Request body:**
   ```json
   {
-    "displayName": "string"
+    "userName": "string"
   }
   ```
 - **Response:** `200`
@@ -120,7 +120,7 @@ Create a new student user with profile.
 - **Request body:**
   ```json
   {
-    "displayName": "string",
+    "userName": "string",
     "email": "string",
     "studentId": "string",
     "firstName": "string",
@@ -138,7 +138,7 @@ Create a new student user with profile.
   ```json
   {
     "id": "uuid",
-    "displayName": "string",
+    "userName": "string",
     "email": "string",
     "role": "student",
     "profile": {
@@ -152,7 +152,7 @@ Create a new student user with profile.
   }
   ```
 - **Errors:**
-  - `400` — Missing required fields (displayName, email, studentId, firstName, lastName)
+  - `400` — Missing required fields (userName, email, studentId, firstName, lastName)
 - **Side effects:** Inserts a row into `user` (role=student) and `student_profile`.
 
 ---
