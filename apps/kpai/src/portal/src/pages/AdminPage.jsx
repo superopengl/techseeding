@@ -276,12 +276,18 @@ export function AdminPage() {
                 <div>
                   <div style={{ fontWeight: 500, color: colors.heading }}>{item.title || "Untitled Sandbox"}</div>
                   <div style={{ fontSize: 12, color: colors.muted }}>
-                    Created {new Date(item.createdAt).toLocaleString()} · Updated {new Date(item.updatedAt).toLocaleString()}
+                    Created {new Date(item.createdAt).toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 12 }}>
+                    <span style={{ color: colors.accentBlue }}>Request: <b>{Number(item.totalRequestLength || 0).toLocaleString()}</b></span>
+                    {" · "}
+                    <span style={{ color: colors.accentPurple }}>Response: <b>{Number(item.totalResponseLength || 0).toLocaleString()}</b></span>
+                    {" · "}
+                    <span style={{ color: colors.accentAmber }}>Total: <b>{(Number(item.totalRequestLength || 0) + Number(item.totalResponseLength || 0)).toLocaleString()}</b></span>
                   </div>
                 </div>
                 <Button
-                  type="link"
-                  size="small"
+                  type="primary"
                   icon={<CodeOutlined />}
                   onClick={() => {
                     setReviewSandbox(item);
