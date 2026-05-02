@@ -81,15 +81,21 @@ export function LoginPage() {
     };
   }, [loginRequestId, status, navigate]);
 
+  const STUDENT_ID_RE = /^[A-Z0-9]{6}$/;
+
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    const id = name.trim().toUpperCase();
+    if (!STUDENT_ID_RE.test(id)) {
+      setLoginError("Student ID must be exactly 6 letters or numbers");
+      return;
+    }
     setLoading(true);
     setLoginError(null);
     try {
       const data = await apiCall("/api/login/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId: name.trim() }),
+        body: JSON.stringify({ studentId: id }),
       });
       setLoginRequestId(data.loginRequestId);
       setRemaining(600);
@@ -518,11 +524,12 @@ export function LoginPage() {
                 size="large"
                 placeholder="Student ID"
                 allowClear
+                maxLength={6}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")); setLoginError(null); }}
                 onPressEnter={handleSubmit}
                 style={{ borderRadius: 12, height: 48 }}
-                styles={{ input: { textAlign: "center" } }}
+                styles={{ input: { textAlign: "center", letterSpacing: 4, fontWeight: 600 } }}
               />
               <Button
                 type="primary"
