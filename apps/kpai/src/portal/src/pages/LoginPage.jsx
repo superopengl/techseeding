@@ -517,6 +517,7 @@ export function LoginPage() {
               <Input
                 size="large"
                 placeholder="Student ID"
+                allowClear
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onPressEnter={handleSubmit}
@@ -566,6 +567,7 @@ export function LoginPage() {
               <Input
                 size="large"
                 placeholder="Email"
+                allowClear
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onPressEnter={handleSendOtp}
