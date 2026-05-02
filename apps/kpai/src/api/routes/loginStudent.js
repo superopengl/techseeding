@@ -9,8 +9,8 @@ export function loginStudent(fastify) {
     if (!studentId || typeof studentId !== "string" || studentId.trim().length === 0) {
       return error(reply, 400, "VALIDATION_ERROR", "Student ID is required");
     }
-    if (!/^[A-Z0-9]{6}$/i.test(studentId.trim())) {
-      return error(reply, 400, "VALIDATION_ERROR", "Student ID must be exactly 6 letters or numbers");
+    if (!/^[A-Z1-9]{6}$/i.test(studentId.trim())) {
+      return error(reply, 400, "VALIDATION_ERROR", "Student ID must be exactly 6 letters or digits (no zero)");
     }
 
     const [result] = await db

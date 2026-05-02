@@ -1,3 +1,4 @@
 export function generateStudentId() {
-  return Array.from({ length: 6 }, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[Math.floor(Math.random() * 36)]).join("");
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
+  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }

@@ -81,7 +81,7 @@ export function LoginPage() {
     };
   }, [loginRequestId, status, navigate]);
 
-  const STUDENT_ID_RE = /^[A-Z0-9]{6}$/;
+  const STUDENT_ID_RE = /^[A-Z1-9]{6}$/;
 
   const handleSubmit = async () => {
     const id = name.trim().toUpperCase();
@@ -526,7 +526,7 @@ export function LoginPage() {
                 allowClear
                 maxLength={6}
                 value={name}
-                onChange={(e) => { setName(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")); setLoginError(null); }}
+                onChange={(e) => { setName(e.target.value.toUpperCase().replace(/[^A-Z1-9]/g, "")); setLoginError(null); }}
                 onPressEnter={handleSubmit}
                 style={{ borderRadius: 12, height: 48 }}
                 styles={{ input: { textAlign: "center", letterSpacing: 4, fontWeight: 600 } }}
