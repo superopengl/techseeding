@@ -158,13 +158,13 @@ Two environments: **local dev** and **production**.
 | `.env.production` | Production | No |
 | `.env.sample` | Template with defaults | Yes |
 
-All env vars are prefixed with `L4K_`.
+All env vars are prefixed with `KPAI_`.
 
 | Variable | Description | Default |
 |---|---|---|
-| `L4K_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/kidplayai` |
-| `L4K_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
-| `L4K_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
+| `KPAI_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/kidplayai` |
+| `KPAI_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
+| `KPAI_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)
