@@ -13,11 +13,6 @@ import {
   SafetyCertificateOutlined,
   BookOutlined,
   TrophyOutlined,
-  SoundOutlined,
-  ToolOutlined,
-  ReadOutlined,
-  LineChartOutlined,
-  AppstoreOutlined,
   CalendarOutlined,
   LaptopOutlined,
   ScheduleOutlined,
@@ -167,46 +162,40 @@ const programs = [
 
 const beyondGames = [
   {
-    icon: <ExperimentOutlined />,
-    color: colors.primary,
-    bg: colors.mintBg,
+    image: "/beyond/science.svg",
     title: "Science Simulations",
     examples: "Solar system orbits, ecosystem models, physics playgrounds",
+    borderColor: colors.primary,
   },
   {
-    icon: <BulbOutlined />,
-    color: colors.accentPurple,
-    bg: "#f3f0ff",
+    image: "/beyond/art.svg",
     title: "Interactive Art",
     examples: "Drawing apps, generative art, animated greeting cards",
+    borderColor: colors.accentPurple,
   },
   {
-    icon: <SoundOutlined />,
-    color: colors.accentBlue,
-    bg: colors.skyBg,
+    image: "/beyond/music.svg",
     title: "Music & Sound",
     examples: "Drum machines, piano keyboards, sound effect boards",
+    borderColor: colors.accentBlue,
   },
   {
-    icon: <ToolOutlined />,
-    color: colors.accentAmber,
-    bg: colors.amberBg,
+    image: "/beyond/tools.svg",
     title: "Tools & Utilities",
     examples: "Calculators, timers, quiz makers, to-do lists",
+    borderColor: colors.accentAmber,
   },
   {
-    icon: <ReadOutlined />,
-    color: colors.successGreen,
-    bg: "#edfcef",
+    image: "/beyond/stories.svg",
     title: "Stories & Chatbots",
     examples: "Choose-your-own-adventure, virtual pets, mad libs",
+    borderColor: colors.successGreen,
   },
   {
-    icon: <LineChartOutlined />,
-    color: colors.heading,
-    bg: colors.canvas,
+    image: "/beyond/data.svg",
     title: "Data & Dashboards",
     examples: "Polls with live charts, personal dashboards, family trees",
+    borderColor: colors.accentBlue,
   },
 ];
 
@@ -585,7 +574,6 @@ export function HomePage() {
           textAlign: "center",
         }}
       >
-        <AppstoreOutlined style={{ fontSize: 36, color: colors.accentPurple, marginBottom: 16 }} />
         <Title
           level={2}
           style={{
@@ -608,42 +596,34 @@ export function HomePage() {
               <Card
                 style={{
                   borderRadius: 16,
-                  border: "none",
+                  border: `2px solid ${item.borderColor}`,
                   boxShadow: shadows.cardSubtle,
                   height: "100%",
                   textAlign: "center",
+                  overflow: "hidden",
                 }}
-                styles={{ body: { padding: "24px 16px" } }}
+                styles={{ body: { padding: 0 } }}
               >
-                <div
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 16,
-                    background: item.bg,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 14,
-                    fontSize: 26,
-                    color: item.color,
-                  }}
-                >
-                  {item.icon}
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }}
+                />
+                <div style={{ padding: "16px 16px 20px" }}>
+                  <Title
+                    level={5}
+                    style={{
+                      fontFamily: fonts.heading,
+                      color: colors.heading,
+                      marginBottom: 6,
+                    }}
+                  >
+                    {item.title}
+                  </Title>
+                  <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
+                    {item.examples}
+                  </Text>
                 </div>
-                <Title
-                  level={5}
-                  style={{
-                    fontFamily: fonts.heading,
-                    color: colors.heading,
-                    marginBottom: 6,
-                  }}
-                >
-                  {item.title}
-                </Title>
-                <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
-                  {item.examples}
-                </Text>
               </Card>
             </Col>
           ))}
