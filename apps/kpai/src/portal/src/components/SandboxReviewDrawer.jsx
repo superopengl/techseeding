@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Spin, Timeline, Tag, Button, Modal, Input, message, ConfigProvider, theme as antTheme } from "antd";
+import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme } from "antd";
 import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined } from "@ant-design/icons";
-import { QRCodeSVG } from "qrcode.react";
+import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
 import { GamePreview } from "./GamePreview";
 import { apiCall } from "../api";
@@ -282,67 +282,12 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
           )}
         </div>
       </div>
-      <Modal
-        title="Share Your Craft"
+      <ShareCraftModal
         open={showShare}
         onCancel={() => setShowShare(false)}
-        footer={null}
-        width={400}
-        destroyOnHidden
-      >
-        {(() => {
-          const shareUrl = `${window.location.origin}/api/sandbox/${sandboxId}/preview`;
-          return (
-            <div style={{ textAlign: "center", padding: "24px 0" }}>
-              <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>
-                Scan the QR code or copy the URL below to share this game.
-              </p>
-              <div style={{
-                display: "inline-block",
-                padding: 20,
-                borderRadius: 20,
-                background: colors.mintBg,
-                boxShadow: "0 2px 12px rgba(124,92,252,0.10)",
-              }}>
-                <QRCodeSVG
-                  value={shareUrl}
-                  size={180}
-                  fgColor={colors.primary}
-                  level="H"
-                  imageSettings={{
-                    src: "/logo.png",
-                    width: 40,
-                    height: 40,
-                    excavate: true,
-                  }}
-                />
-              </div>
-              <Input.Search
-                value={shareUrl}
-                readOnly
-                enterButton="Copy"
-                onSearch={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  message.success("Link copied!");
-                }}
-                style={{ marginTop: 16 }}
-                styles={{ affixWrapper: { borderRadius: 12, height: 44 } }}
-                enterButtonProps={{
-                  style: {
-                    height: 44,
-                    borderRadius: "0 12px 12px 0",
-                    background: colors.ctaYellow,
-                    color: colors.heading,
-                    border: "none",
-                    fontWeight: 600,
-                    boxShadow: shadows.ctaButtonSmall,
-                  },
-                }}
-              />
-            </div>
-          );
-        })()}
-      </Modal>
+        sandboxId={sandboxId}
+        description="Scan the QR code or copy the URL below to share this game."
+      />
     </Drawer>
   );
 }
