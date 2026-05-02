@@ -658,14 +658,11 @@ export function HomePage() {
         <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
           {parentReasons.map((r, i) => (
             <Col xs={24} sm={8} key={i}>
-              <div style={{ fontSize: 36, color: r.color, marginBottom: 16 }}>
-                {r.icon}
-              </div>
               <Title
                 level={4}
                 style={{
                   fontFamily: fonts.heading,
-                  color: colors.heading,
+                  color: r.color,
                   marginBottom: 8,
                 }}
               >
@@ -688,6 +685,7 @@ export function HomePage() {
           textAlign: "center",
         }}
       >
+        <Logo size={48} style={{ display: "inline-block", marginBottom: 20 }} />
         <Title
           level={2}
           style={{
