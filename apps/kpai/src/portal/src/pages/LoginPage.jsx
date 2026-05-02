@@ -20,6 +20,7 @@ export function LoginPage() {
   const [emailLoading, setEmailLoading] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
   const otpRefs = useRef([]);
   const pollingRef = useRef(null);
@@ -119,6 +120,7 @@ export function LoginPage() {
     const newDigits = [...otpDigits];
     newDigits[index] = digit;
     setOtpDigits(newDigits);
+    setOtpError(null);
 
     // Auto-focus next input
     if (digit && index < 5) {
@@ -156,17 +158,22 @@ export function LoginPage() {
 
   const verifyOtp = async (code) => {
     setOtpLoading(true);
+    setOtpError(null);
     try {
-      const data = await apiCall("/api/verify", {
+      const res = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      sessionStorage.setItem("c4k_token", data.token);
-      sessionStorage.setItem("c4k_role", data.role);
-      navigate(data.role === "admin" ? "/admin" : "/sandbox");
+      const body = await res.json();
+      if (!body.success) {
+        throw new Error(body.error?.message || "Verification failed");
+      }
+      sessionStorage.setItem("c4k_token", body.data.token);
+      sessionStorage.setItem("c4k_role", body.data.role);
+      navigate(body.data.role === "admin" ? "/admin" : "/sandbox");
     } catch (e) {
-      message.error(e.message || "Verification failed");
+      setOtpError(e.message || "Verification failed");
       setOtpDigits(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
     } finally {
@@ -462,6 +469,11 @@ export function LoginPage() {
               />
             ))}
           </div>
+          {otpError && (
+            <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, marginBottom: 8 }}>
+              {otpError}
+            </div>
+          )}
           {otpLoading && (
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: colors.primary }} />} />
           )}
@@ -528,12 +540,12 @@ export function LoginPage() {
       <Decorations />
       <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
+          <Logo size={80} square style={{ marginBottom: 12, marginInline: "auto" }} />
           <Title
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
           >
-            Welcome to Code4Kids!
+            Welcome to KidPlayAI!
           </Title>
           <Paragraph style={{ color: colors.body }}>
             Enter your Student ID to get started
