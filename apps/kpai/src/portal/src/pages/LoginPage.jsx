@@ -120,6 +120,8 @@ export function LoginPage() {
       // Silently proceed to OTP screen regardless of whether the email exists
     } finally {
       setEmailLoading(false);
+      setOtpError(null);
+      setOtpDigits(["", "", "", "", "", ""]);
       setStatus("otp");
     }
   };
@@ -321,7 +323,7 @@ export function LoginPage() {
           </div>
           <Button
             type="link"
-            onClick={() => setStatus("otp")}
+            onClick={() => { setOtpError(null); setOtpDigits(["", "", "", "", "", ""]); setStatus("otp"); }}
             style={{ color: colors.primary, fontSize: 14 }}
           >
             Use Verification Code

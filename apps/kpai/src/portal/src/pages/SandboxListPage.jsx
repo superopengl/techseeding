@@ -31,7 +31,7 @@ export function SandboxListPage() {
             marginLeft: 8,
           }}
         >
-          My Games
+          My Crafts
         </span>
       </Header>
 

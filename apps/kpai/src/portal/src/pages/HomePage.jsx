@@ -351,7 +351,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real game built by a kid using KidPlayAI. Your turn next!
+          Road Racer — a real craft built by a kid using KidPlayAI. Your turn next!
         </Paragraph>
       </div>
 

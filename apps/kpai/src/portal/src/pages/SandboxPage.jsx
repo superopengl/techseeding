@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, message } from "antd";
 import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined } from "@ant-design/icons";
-import { QRCodeSVG } from "qrcode.react";
+import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
 import { GamePreview } from "../components/GamePreview";
@@ -219,7 +219,7 @@ export function SandboxPage() {
           </div>
           <Space size={8}>
             <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyGames(true)} style={{ color: colors.onDark }}>
-              My Games
+              My Crafts
             </Button>
             <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
               Share
@@ -284,7 +284,7 @@ export function SandboxPage() {
         </div>
       </div>
       <Modal
-        title="My Games"
+        title="My Crafts"
         open={showMyGames}
         onCancel={sandboxNotFound ? undefined : () => setShowMyGames(false)}
         closable={!sandboxNotFound}
@@ -301,68 +301,13 @@ export function SandboxPage() {
           onDeleteCurrent={() => setSandboxNotFound(true)}
         />
       </Modal>
-      <Modal
-        title="Share Your Game"
+      <ShareCraftModal
         open={showShare}
         onCancel={() => setShowShare(false)}
-        footer={null}
-        width={400}
-        destroyOnHidden
+        sandboxId={sandboxId}
         zIndex={1002}
-      >
-        {(() => {
-          const shareUrl = `${window.location.origin}/api/sandbox/${sandboxId}/preview`;
-          return (
-            <div style={{ textAlign: "center", padding: "24px 0" }}>
-              <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>
-                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀
-              </p>
-              <div style={{
-                display: "inline-block",
-                padding: 20,
-                borderRadius: 20,
-                background: colors.mintBg,
-                boxShadow: "0 2px 12px rgba(124,92,252,0.10)",
-              }}>
-                <QRCodeSVG
-                  value={shareUrl}
-                  size={180}
-                  fgColor={colors.primary}
-                  level="H"
-                  imageSettings={{
-                    src: "/logo.png",
-                    width: 40,
-                    height: 40,
-                    excavate: true,
-                  }}
-                />
-              </div>
-              <Input.Search
-                value={shareUrl}
-                readOnly
-                enterButton="Copy"
-                onSearch={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  message.success("Link copied!");
-                }}
-                style={{ marginTop: 16 }}
-                styles={{ affixWrapper: { borderRadius: 12, height: 44 } }}
-                enterButtonProps={{
-                  style: {
-                    height: 44,
-                    borderRadius: "0 12px 12px 0",
-                    background: colors.ctaYellow,
-                    color: colors.heading,
-                    border: "none",
-                    fontWeight: 600,
-                    boxShadow: shadows.ctaButtonSmall,
-                  },
-                }}
-              />
-            </div>
-          );
-        })()}
-      </Modal>
+        description="📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
+      />
     </Layout>
   );
 }

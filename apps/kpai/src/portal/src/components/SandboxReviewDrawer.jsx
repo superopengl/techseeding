@@ -283,7 +283,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
         </div>
       </div>
       <Modal
-        title="Share Your Game"
+        title="Share Your Craft"
         open={showShare}
         onCancel={() => setShowShare(false)}
         footer={null}
