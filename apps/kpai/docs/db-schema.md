@@ -135,6 +135,7 @@ Chat messages exchanged between a student and the AI agent within a sandbox.
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | sandbox_session_id | uuid | NOT NULL, FK → `sandbox_session.id` | Owning session |
 | content | jsonb | NOT NULL | Message payload |
+| content_length | integer | NOT NULL, default `0` | Length of content text |
 | type | text | NOT NULL, one of `request`, `response` | Direction of message |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |

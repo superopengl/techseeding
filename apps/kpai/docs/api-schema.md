@@ -249,6 +249,6 @@ Bidirectional WebSocket connection for real-time communication within a sandbox 
 
 ## Notes
 
-- JWT tokens are signed with `L4K_JWT_SECRET` env var.
+- JWT tokens are signed with `KPAI_JWT_SECRET` env var.
 - All request/response bodies are JSON (`Content-Type: application/json`).
 - Timestamps are ISO 8601 format.

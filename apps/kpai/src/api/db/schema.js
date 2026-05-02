@@ -75,6 +75,7 @@ export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
   sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => sandboxSession.id),
   content: jsonb("content").notNull(),
+  contentLength: integer("content_length").notNull().default(0),
   type: text("type").notNull(), // request | response
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
