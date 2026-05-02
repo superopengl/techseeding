@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Button, Typography, Card, Row, Col } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Typography, Card, Row, Col, Modal } from "antd";
 import {
   RocketOutlined,
   ThunderboltOutlined,
@@ -12,7 +12,6 @@ import {
   WechatOutlined,
   SafetyCertificateOutlined,
   BookOutlined,
-  TrophyOutlined,
   CalendarOutlined,
   LaptopOutlined,
   ScheduleOutlined,
@@ -201,22 +200,22 @@ const beyondGames = [
 
 const parentReasons = [
   {
+    icon: <BulbOutlined />,
+    color: colors.accentAmber,
+    title: "AI-Ready for the Future",
+    description: "AI is reshaping every field. Give your child a head start — they'll learn to use AI as a creative tool, turning their own ideas into real projects and building confidence with technology that will define their generation.",
+  },
+  {
+    icon: <ExperimentOutlined />,
+    color: colors.accentPurple,
+    title: "Sparks Curiosity & Creativity",
+    description: "When kids see AI bring their ideas to life, it lights a fire. They start asking \"what if?\" and \"how does that work?\" — building genuine interest in science, engineering, and problem-solving through play.",
+  },
+  {
     icon: <SafetyCertificateOutlined />,
     color: colors.primary,
     title: "Safe & Supervised",
-    description: "Every session is supervised. AI tools are sandboxed with strict safety controls — no open internet, no unsafe content.",
-  },
-  {
-    icon: <BookOutlined />,
-    color: colors.accentBlue,
-    title: "Real Skills, Real Learning",
-    description: "Kids learn computational thinking, problem-solving, and how AI actually works — skills that matter for their future.",
-  },
-  {
-    icon: <TrophyOutlined />,
-    color: colors.accentAmber,
-    title: "Small Classes, Big Impact",
-    description: "Small group sessions so every child gets personal attention and guidance. No experience required to start.",
+    description: "Every session is guided by an instructor. AI tools are sandboxed with strict safety controls — no open internet, no unsafe content. Small groups so every child gets personal attention.",
   },
 ];
 
@@ -224,6 +223,8 @@ export function HomePage() {
   useEffect(() => { document.title = "KidPlayAI — Unleash Kid's Idea. Drive AI to Build It."; }, []);
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
+  const [enquireOpen, setEnquireOpen] = useState(false);
+  const openEnquire = () => setEnquireOpen(true);
   const scrollToContact = () => {
     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
   };
@@ -304,7 +305,7 @@ export function HomePage() {
           </Paragraph>
           <Button
             size="large"
-            onClick={scrollToContact}
+            onClick={openEnquire}
             icon={<RocketOutlined />}
             style={ctaButtonStyle}
           >
@@ -652,7 +653,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
         >
-          We take your child's safety and learning seriously. Here's what you can expect.
+          AI is the most powerful creative tool of their lifetime — let them start using it now
         </Paragraph>
         <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
           {parentReasons.map((r, i) => (
@@ -779,6 +780,70 @@ export function HomePage() {
           <a href="/admin" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Admin Portal</a>
         </div>
       </div>
+
+      {/* Enquire Modal */}
+      <Modal
+        open={enquireOpen}
+        onCancel={() => setEnquireOpen(false)}
+        footer={null}
+        centered
+        width={480}
+        styles={{
+          content: { borderRadius: 24, padding: "40px 32px", textAlign: "center" },
+        }}
+      >
+        <RocketOutlined style={{ fontSize: 40, color: colors.primary, marginBottom: 16 }} />
+        <Title
+          level={3}
+          style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
+        >
+          Let's Get Started!
+        </Title>
+        <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 32, maxWidth: 360, marginInline: "auto" }}>
+          Reach out to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
+        </Paragraph>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12}>
+            <a href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`} style={{ textDecoration: "none" }}>
+              <Card
+                hoverable
+                style={{
+                  borderRadius: 16,
+                  border: `2px solid ${colors.primary}`,
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "24px 16px" } }}
+              >
+                <PhoneOutlined style={{ fontSize: 32, color: colors.primary, marginBottom: 12 }} />
+                <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
+                  Call Us
+                </Title>
+                <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
+                  {PHONE_NUMBER}
+                </Text>
+              </Card>
+            </a>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card
+              style={{
+                borderRadius: 16,
+                border: `2px solid ${colors.successGreen}`,
+                textAlign: "center",
+              }}
+              styles={{ body: { padding: "24px 16px" } }}
+            >
+              <WechatOutlined style={{ fontSize: 32, color: colors.successGreen, marginBottom: 12 }} />
+              <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
+                WeChat
+              </Title>
+              <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
+                {WECHAT_ID}
+              </Text>
+            </Card>
+          </Col>
+        </Row>
+      </Modal>
     </div>
   );
 }
