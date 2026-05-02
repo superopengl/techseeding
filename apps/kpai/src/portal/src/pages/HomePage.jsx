@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Typography, Card, Row, Col } from "antd";
 import {
   RocketOutlined,
@@ -8,6 +8,11 @@ import {
   ExperimentOutlined,
   TeamOutlined,
   LoginOutlined,
+  PhoneOutlined,
+  WechatOutlined,
+  SafetyCertificateOutlined,
+  BookOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -118,9 +123,37 @@ function NavBar({ onStart }) {
   );
 }
 
+const PHONE_NUMBER = "04XX XXX XXX";
+const WECHAT_ID = "your-wechat-id";
+
+const parentReasons = [
+  {
+    icon: <SafetyCertificateOutlined />,
+    color: colors.primary,
+    title: "Safe & Supervised",
+    description: "Every session is supervised. AI tools are sandboxed with strict safety controls — no open internet, no unsafe content.",
+  },
+  {
+    icon: <BookOutlined />,
+    color: colors.accentBlue,
+    title: "Real Skills, Real Learning",
+    description: "Kids learn computational thinking, problem-solving, and how AI actually works — skills that matter for their future.",
+  },
+  {
+    icon: <TrophyOutlined />,
+    color: colors.accentAmber,
+    title: "Small Classes, Big Impact",
+    description: "Small group sessions so every child gets personal attention and guidance. No experience required to start.",
+  },
+];
+
 export function HomePage() {
+  useEffect(() => { document.title = "KidPlayAI — Unleash Kid's Idea. Drive AI to Build It."; }, []);
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
+  const scrollToContact = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: colors.surface }}>
@@ -182,7 +215,7 @@ export function HomePage() {
               textShadow: shadows.textOnGradient,
             }}
           >
-            Unleash Kid's Idea.<br />Drive <span style={{ color: colors.ctaYellow }}>AI</span> to Build It.
+            Unleash Kid's Idea<br />Drive <span style={{ color: colors.ctaYellow }}>AI</span> to Build It
           </Title>
           <Paragraph
             style={{
@@ -199,14 +232,14 @@ export function HomePage() {
           </Paragraph>
           <Button
             size="large"
-            onClick={goLogin}
+            onClick={scrollToContact}
             icon={<RocketOutlined />}
             style={ctaButtonStyle}
           >
-            Register Your Child Today
+            Enquire Now
           </Button>
           <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 12, marginBottom: 0 }}>
-            Parents & guardians — contact us to get your child started!
+            Parents & guardians — reach out to learn about classes, schedule & fees
           </Paragraph>
         </div>
       </div>
@@ -389,8 +422,57 @@ export function HomePage() {
         </Row>
       </div>
 
-      {/* CTA Section */}
+      {/* For Parents Section */}
       <div
+        style={{
+          background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          For Parents & Guardians
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+        >
+          We take your child's safety and learning seriously. Here's what you can expect.
+        </Paragraph>
+        <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+          {parentReasons.map((r, i) => (
+            <Col xs={24} sm={8} key={i}>
+              <div style={{ fontSize: 36, color: r.color, marginBottom: 16 }}>
+                {r.icon}
+              </div>
+              <Title
+                level={4}
+                style={{
+                  fontFamily: fonts.heading,
+                  color: colors.heading,
+                  marginBottom: 8,
+                }}
+              >
+                {r.title}
+              </Title>
+              <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                {r.description}
+              </Text>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* Contact / Enquiry Section */}
+      <div
+        id="contact"
         style={{
           background: gradients.cta,
           padding: "80px 24px",
@@ -407,24 +489,56 @@ export function HomePage() {
             textShadow: shadows.textOnGradient,
           }}
         >
-          Ready to Unleash Your Kid's Ideas?
+          Ready to Get Your Child Started?
         </Title>
         <Paragraph
-          style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 36 }}
+          style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 48, maxWidth: 520, marginInline: "auto" }}
         >
-          Your kid imagines it. AI builds it. They learn how it all works along the way.
+          Contact us to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
         </Paragraph>
-        <Button
-          size="large"
-          onClick={goLogin}
-          icon={<RocketOutlined />}
-          style={ctaButtonStyle}
-        >
-          Register Your Child Today
-        </Button>
-        <Paragraph style={{ color: colors.onDarkSecondary, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
-          Parents & guardians — contact us to get your child started!
-        </Paragraph>
+        <Row gutter={[32, 32]} justify="center" style={{ maxWidth: 640, margin: "0 auto" }}>
+          <Col xs={24} sm={12}>
+            <a href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`} style={{ textDecoration: "none" }}>
+              <Card
+                hoverable
+                style={{
+                  borderRadius: 20,
+                  border: "2px solid rgba(255,255,255,0.2)",
+                  background: "rgba(255,255,255,0.12)",
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "32px 24px" } }}
+              >
+                <PhoneOutlined style={{ fontSize: 40, color: colors.onDark, marginBottom: 16 }} />
+                <Title level={4} style={{ fontFamily: fonts.heading, color: colors.onDark, marginBottom: 4 }}>
+                  Call Us
+                </Title>
+                <Text style={{ color: colors.onDarkSecondary, fontSize: 18, fontWeight: 600 }}>
+                  {PHONE_NUMBER}
+                </Text>
+              </Card>
+            </a>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card
+              style={{
+                borderRadius: 20,
+                border: "2px solid rgba(255,255,255,0.2)",
+                background: "rgba(255,255,255,0.12)",
+                textAlign: "center",
+              }}
+              styles={{ body: { padding: "32px 24px" } }}
+            >
+              <WechatOutlined style={{ fontSize: 40, color: colors.onDark, marginBottom: 16 }} />
+              <Title level={4} style={{ fontFamily: fonts.heading, color: colors.onDark, marginBottom: 4 }}>
+                WeChat
+              </Title>
+              <Text style={{ color: colors.onDarkSecondary, fontSize: 18, fontWeight: 600 }}>
+                {WECHAT_ID}
+              </Text>
+            </Card>
+          </Col>
+        </Row>
       </div>
 
       {/* Footer */}
