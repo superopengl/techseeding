@@ -13,6 +13,14 @@ import {
   SafetyCertificateOutlined,
   BookOutlined,
   TrophyOutlined,
+  SoundOutlined,
+  ToolOutlined,
+  ReadOutlined,
+  LineChartOutlined,
+  AppstoreOutlined,
+  CalendarOutlined,
+  LaptopOutlined,
+  ScheduleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -126,6 +134,82 @@ function NavBar({ onStart }) {
 const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
 
+const programs = [
+  {
+    icon: <BookOutlined />,
+    color: colors.primary,
+    bg: colors.mintBg,
+    title: "After School Workshop",
+    description: "Weekly hands-on sessions after school. Kids build projects at their own pace with guided support.",
+  },
+  {
+    icon: <CalendarOutlined />,
+    color: colors.accentPurple,
+    bg: "#f3f0ff",
+    title: "Weekend Workshop",
+    description: "Saturday or Sunday sessions for kids who want dedicated creative time on the weekend.",
+  },
+  {
+    icon: <ScheduleOutlined />,
+    color: colors.accentAmber,
+    bg: colors.amberBg,
+    title: "Holiday Camp",
+    description: "Multi-day intensive camps during school holidays. Deep dive into bigger projects with friends.",
+  },
+  {
+    icon: <LaptopOutlined />,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+    title: "Online Coaching",
+    description: "Live 1-on-1 or small group sessions from home. Same hands-on experience, no commute needed.",
+  },
+];
+
+const beyondGames = [
+  {
+    icon: <ExperimentOutlined />,
+    color: colors.primary,
+    bg: colors.mintBg,
+    title: "Science Simulations",
+    examples: "Solar system orbits, ecosystem models, physics playgrounds",
+  },
+  {
+    icon: <BulbOutlined />,
+    color: colors.accentPurple,
+    bg: "#f3f0ff",
+    title: "Interactive Art",
+    examples: "Drawing apps, generative art, animated greeting cards",
+  },
+  {
+    icon: <SoundOutlined />,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+    title: "Music & Sound",
+    examples: "Drum machines, piano keyboards, sound effect boards",
+  },
+  {
+    icon: <ToolOutlined />,
+    color: colors.accentAmber,
+    bg: colors.amberBg,
+    title: "Tools & Utilities",
+    examples: "Calculators, timers, quiz makers, to-do lists",
+  },
+  {
+    icon: <ReadOutlined />,
+    color: colors.successGreen,
+    bg: "#edfcef",
+    title: "Stories & Chatbots",
+    examples: "Choose-your-own-adventure, virtual pets, mad libs",
+  },
+  {
+    icon: <LineChartOutlined />,
+    color: colors.heading,
+    bg: colors.canvas,
+    title: "Data & Dashboards",
+    examples: "Polls with live charts, personal dashboards, family trees",
+  },
+];
+
 const parentReasons = [
   {
     icon: <SafetyCertificateOutlined />,
@@ -227,8 +311,7 @@ export function HomePage() {
               lineHeight: 1.6,
             }}
           >
-            For kids aged 8–12 who love games, science, engineering, and AI.
-            Describe your dream game — then watch a real AI agent design and build it before your eyes.
+            Kids dream it up, AI builds it — and they learn how it all works along the way.
           </Paragraph>
           <Button
             size="large"
@@ -422,10 +505,155 @@ export function HomePage() {
         </Row>
       </div>
 
-      {/* For Parents Section */}
+      {/* Programs Section */}
       <div
         style={{
           background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Our Programs
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
+        >
+          Flexible options to fit every schedule — all ages 8–12 welcome, no experience needed
+        </Paragraph>
+        <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+          {programs.map((p, i) => (
+            <Col xs={24} sm={12} md={6} key={i}>
+              <Card
+                style={{
+                  borderRadius: 20,
+                  border: "none",
+                  boxShadow: shadows.card,
+                  height: "100%",
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "32px 20px" } }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 18,
+                    background: p.bg,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 18,
+                    fontSize: 28,
+                    color: p.color,
+                  }}
+                >
+                  {p.icon}
+                </div>
+                <Title
+                  level={4}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 8,
+                  }}
+                >
+                  {p.title}
+                </Title>
+                <Text style={{ color: colors.bodyStrong, fontSize: 14, lineHeight: 1.6 }}>
+                  {p.description}
+                </Text>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* Beyond Games Section */}
+      <div
+        style={{
+          background: gradients.login,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <AppstoreOutlined style={{ fontSize: 36, color: colors.accentPurple, marginBottom: 16 }} />
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Games Are Just the Start
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+        >
+          Building games is how kids get hooked — but with AI as their creative partner, they can make anything they imagine
+        </Paragraph>
+        <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+          {beyondGames.map((item, i) => (
+            <Col xs={12} sm={8} key={i}>
+              <Card
+                style={{
+                  borderRadius: 16,
+                  border: "none",
+                  boxShadow: shadows.cardSubtle,
+                  height: "100%",
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "24px 16px" } }}
+              >
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 16,
+                    background: item.bg,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 14,
+                    fontSize: 26,
+                    color: item.color,
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <Title
+                  level={5}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 6,
+                  }}
+                >
+                  {item.title}
+                </Title>
+                <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
+                  {item.examples}
+                </Text>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* For Parents Section */}
+      <div
+        style={{
+          background: colors.canvas,
           padding: "80px 24px",
           textAlign: "center",
         }}
