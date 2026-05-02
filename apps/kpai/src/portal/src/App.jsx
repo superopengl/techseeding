@@ -9,6 +9,7 @@ import { SandboxRedirectPage } from "./pages/SandboxRedirectPage";
 import { AdminPage } from "./pages/AdminPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { TermsOfUsePage } from "./pages/TermsOfUsePage";
+import { LogoPage } from "./pages/LogoPage";
 
 function RoleGuard({ role, children }) {
   const token = sessionStorage.getItem("c4k_token");
@@ -31,6 +32,7 @@ export function App() {
           <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
           <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
           <Route path="/terms_of_use" element={<TermsOfUsePage />} />
+          <Route path="/logo" element={<LogoPage />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>
