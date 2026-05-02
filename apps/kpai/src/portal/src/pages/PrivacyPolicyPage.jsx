@@ -27,7 +27,7 @@ export function PrivacyPolicyPage() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Link to="/"><Logo size={48} style={{ marginInline: "auto" }} /></Link>
+          <Link to="/"><Logo size={56} square style={{ marginInline: "auto" }} /></Link>
         </div>
 
         <Title
@@ -50,12 +50,12 @@ export function PrivacyPolicyPage() {
               1. Introduction
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Code4Kids ("we", "us", or "our") is an AI-powered game making platform
+              KidPlayAI ("we", "us", or "our") is an AI-powered game making platform
               for children aged 8–12, operated by Techseeding PTY LTD (ABN
               35631597450 / ACN 631597450). We are committed to protecting the
               privacy of all users, especially children. This Privacy Policy
               explains how we collect, use, and safeguard information when you
-              use our platform at code4kids.techseeding.com.au.
+              use our platform at kidplayai.techseeding.com.au.
             </Paragraph>
           </div>
 
@@ -90,7 +90,7 @@ export function PrivacyPolicyPage() {
               We use collected information solely to:
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
-              <li>Provide and operate the Code4Kids game-making platform</li>
+              <li>Provide and operate the KidPlayAI game-making platform</li>
               <li>
                 Manage student sessions and sandbox environments
               </li>
@@ -106,7 +106,7 @@ export function PrivacyPolicyPage() {
             </ul>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We do not use any collected data for advertising, marketing
-              profiling, or any purpose unrelated to delivering the Code4Kids
+              profiling, or any purpose unrelated to delivering the KidPlayAI
               service.
             </Paragraph>
           </div>
@@ -116,7 +116,7 @@ export function PrivacyPolicyPage() {
               4. AI Interaction and Content
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Code4Kids uses AI (Claude by Anthropic) to help students create games.
+              KidPlayAI uses AI (Claude by Anthropic) to help students create games.
               Messages sent by students to the AI assistant are processed to
               generate game code. These interactions are stored as part of the
               sandbox session and may be reviewed by administrators for safety
@@ -155,7 +155,7 @@ export function PrivacyPolicyPage() {
               6. Children's Privacy
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              Code4Kids is designed for children aged 8–12. We take children's
+              KidPlayAI is designed for children aged 8–12. We take children's
               privacy seriously:
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
@@ -242,7 +242,7 @@ export function PrivacyPolicyPage() {
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We may update this Privacy Policy from time to time. Any changes
               will be posted on this page with an updated "Last updated" date.
-              Continued use of Code4Kids after changes constitutes acceptance of the
+              Continued use of KidPlayAI after changes constitutes acceptance of the
               updated policy.
             </Paragraph>
           </div>
@@ -260,7 +260,7 @@ export function PrivacyPolicyPage() {
               <br />
               ABN: 35631597450 / ACN: 631597450
               <br />
-              Website: code4kids.techseeding.com.au
+              Website: kidplayai.techseeding.com.au
             </Paragraph>
           </div>
         </div>

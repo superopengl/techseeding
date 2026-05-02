@@ -22,17 +22,7 @@ export function SandboxListPage() {
           height: 56,
         }}
       >
-        <Logo />
-        <span
-          style={{
-            fontFamily: fonts.heading,
-            fontSize: 22,
-            fontWeight: 700,
-            color: colors.heading,
-          }}
-        >
-          Code4Kids
-        </span>
+        <Logo size={36} square />
         <span
           style={{
             fontFamily: fonts.heading,

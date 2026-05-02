@@ -56,7 +56,7 @@ export function AdminPage() {
     }
     setAddLoading(true);
     const displayName = `${values.firstName.trim()} ${values.lastName.trim()}`;
-    const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.code4kids`;
+    const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.kidplayai`;
     try {
       await apiCall("/api/admin/student", {
         method: "POST",
@@ -205,7 +205,7 @@ export function AdminPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Logo />
+          <Logo size={36} square />
           <span style={{ color: colors.muted, fontSize: 14 }}>
             Admin Dashboard
           </span>

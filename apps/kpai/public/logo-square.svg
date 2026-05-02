@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="102" ry="102" fill="#fff"/>
+  <text x="256" y="194" text-anchor="middle" font-family="'Baloo 2', cursive" font-weight="800" font-size="113">
+    <tspan fill="#2d3748">Kid</tspan><tspan fill="#43b88c">Play</tspan>
+  </text>
+  <text x="256" y="389" text-anchor="middle" fill="#6ec1e4" font-family="'Baloo 2', cursive" font-weight="800" font-size="194">AI</text>
+</svg>

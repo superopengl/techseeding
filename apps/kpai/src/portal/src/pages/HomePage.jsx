@@ -4,7 +4,7 @@ import {
   RocketOutlined,
   ThunderboltOutlined,
   SmileOutlined,
-  CodeOutlined,
+  BulbOutlined,
   ExperimentOutlined,
   TeamOutlined,
   LoginOutlined,
@@ -22,7 +22,7 @@ const features = [
     bg: colors.mintBg,
     title: "Built for Ages 8\u201312",
     description:
-      "No coding experience needed. If you can describe an idea, you can build a game. Code4Kids meets you where you are.",
+      "No experience needed. If you can imagine it, you can build it. Just describe your idea and let AI bring it to life.",
   },
   {
     icon: <ThunderboltOutlined />,
@@ -30,15 +30,15 @@ const features = [
     bg: colors.amberBg,
     title: "See How AI Thinks",
     description:
-      "Watch a real AI agent reason, write code, and solve problems — not hidden behind a button, but right in front of you.",
+      "Watch a real AI agent reason, design, and solve problems — not hidden behind a button, but right in front of you.",
   },
   {
-    icon: <CodeOutlined />,
+    icon: <BulbOutlined />,
     color: colors.accentBlue,
     bg: colors.skyBg,
-    title: "Real Code, Real Games",
+    title: "Your Ideas, Real Games",
     description:
-      "Every game is built with real HTML, CSS, and JavaScript. Play it, share it, and learn how it works.",
+      "Every game is built with real technology. Play it, share it, and see how AI turned your vision into something real.",
   },
 ];
 
@@ -55,7 +55,7 @@ const steps = [
     color: colors.primary,
     num: "2",
     title: "Watch AI Build It",
-    description: "See the AI think, plan, and write real code line by line — like a coding partner that works at lightning speed.",
+    description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working game.",
   },
   {
     icon: <TeamOutlined />,
@@ -87,7 +87,7 @@ function NavBar({ onStart }) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "16px 48px",
-        background: "transparent",
+        background: "linear-gradient(to right, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.85) 220px, rgba(255,255,255,0) 50%)",
         position: "absolute",
         top: 0,
         left: 0,
@@ -95,19 +95,7 @@ function NavBar({ onStart }) {
         zIndex: 100,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <Logo size={36} />
-        <span
-          style={{
-            fontFamily: fonts.heading,
-            fontSize: 26,
-            fontWeight: 700,
-            color: colors.onDark,
-          }}
-        >
-          Code4Kids
-        </span>
-      </div>
+      <Logo size={36} />
       <Button
         type="primary"
         size="large"
@@ -142,7 +130,7 @@ export function HomePage() {
       <div
         style={{
           background: gradients.hero,
-          padding: "120px 24px 180px",
+          padding: "150px 24px 180px",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -194,20 +182,20 @@ export function HomePage() {
               textShadow: shadows.textOnGradient,
             }}
           >
-            Where Kids Build Games<br />with <span style={{ color: colors.ctaYellow }}>AI</span>
+            Unleash Kid's Idea.<br />Drive <span style={{ color: colors.ctaYellow }}>AI</span> to Build It.
           </Title>
           <Paragraph
             style={{
               fontSize: 20,
               color: colors.onDarkSecondary,
-              marginBottom: 40,
+              marginBottom: 44,
               maxWidth: 540,
               marginInline: "auto",
               lineHeight: 1.6,
             }}
           >
-            For kids aged 8–12 who love games, coding, science, and AI.
-            Describe your dream game — then watch a real AI agent write the code and bring it to life.
+            For kids aged 8–12 who love games, science, engineering, and AI.
+            Describe your dream game — then watch a real AI agent design and build it before your eyes.
           </Paragraph>
           <Button
             size="large"
@@ -215,8 +203,11 @@ export function HomePage() {
             icon={<RocketOutlined />}
             style={ctaButtonStyle}
           >
-            Start Making Games
+            Register Your Child Today
           </Button>
+          <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 12, marginBottom: 0 }}>
+            Parents & guardians — contact us to get your child started!
+          </Paragraph>
         </div>
       </div>
 
@@ -242,7 +233,7 @@ export function HomePage() {
         >
           <img
             src="/car-racer.png"
-            alt="A kid building a Road Racer game with AI in Code4Kids"
+            alt="A kid building a Road Racer game with AI in KidPlayAI"
             style={{ width: "100%", display: "block" }}
           />
         </div>
@@ -254,7 +245,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real game built by a kid using Code4Kids. Your turn next!
+          Road Racer — a real game built by a kid using KidPlayAI. Your turn next!
         </Paragraph>
       </div>
 
@@ -276,12 +267,12 @@ export function HomePage() {
             marginBottom: 12,
           }}
         >
-          Why Kids Love Code4Kids
+          Why Kids Love <Logo size={43} style={{ display: "inline-block", verticalAlign: "middle", position: "relative", top: -6 }} />
         </Title>
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          A playground for young minds who love games, engineering, and figuring out how things work
+          Where young creators imagine games and real AI builds them — learning to think, code, and create along the way
         </Paragraph>
         <Row gutter={[32, 32]}>
           {features.map((f, i) => (
@@ -416,12 +407,12 @@ export function HomePage() {
             textShadow: shadows.textOnGradient,
           }}
         >
-          Ready to Build Your First Game?
+          Ready to Unleash Your Kid's Ideas?
         </Title>
         <Paragraph
           style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 36 }}
         >
-          Join thousands of young makers who are learning AI, coding, and game design — all at once.
+          Your kid imagines it. AI builds it. They learn how it all works along the way.
         </Paragraph>
         <Button
           size="large"
@@ -429,8 +420,11 @@ export function HomePage() {
           icon={<RocketOutlined />}
           style={ctaButtonStyle}
         >
-          Start Making Games
+          Register Your Child Today
         </Button>
+        <Paragraph style={{ color: colors.onDarkSecondary, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
+          Parents & guardians — contact us to get your child started!
+        </Paragraph>
       </div>
 
       {/* Footer */}
@@ -446,10 +440,10 @@ export function HomePage() {
         }}
       >
         <Text style={{ color: colors.onDarkTertiary, fontSize: 14 }}>
-          Code4Kids — Where Kids Build Games with AI
+          KidPlayAI — Unleash Kid's Idea. Drive AI to Build It.
         </Text>
         <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-          Code4Kids is a product owned by Techseeding
+          KidPlayAI is a product owned by Techseeding
         </Text>
         <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           &copy;2019&ndash;2026 Techseeding PTY LTD. All rights reserved.

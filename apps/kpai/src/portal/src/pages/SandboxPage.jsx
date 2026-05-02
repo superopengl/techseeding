@@ -162,7 +162,7 @@ export function SandboxPage() {
             height: "100%",
           }}
         >
-          <Logo />
+          <Logo size={36} square />
           {displayName && (
             <span
               style={{
@@ -315,7 +315,7 @@ export function SandboxPage() {
           return (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
               <p style={{ color: "#4a5568", marginBottom: 20, fontSize: 15, lineHeight: 1.7 }}>
-                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun Code4Kids is! 🚀
+                📱 Scan the QR code or open the URL below in any browser to play your game — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀
               </p>
               <div style={{
                 display: "inline-block",
