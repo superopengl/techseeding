@@ -93,10 +93,14 @@ export function SandboxPage() {
 
     const brandColors = ["#43b88c", "#fcd63c", "#7c5cfc", "#6ec1e4", "#f59e0b", "#61ce70"];
     let animId;
+    let frameCount = 0;
 
     function frame() {
-      fire({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors: brandColors });
-      fire({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors: brandColors });
+      if (frameCount % 2 === 0) {
+        fire({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors: brandColors });
+        fire({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors: brandColors });
+      }
+      frameCount++;
       animId = requestAnimationFrame(frame);
     }
     frame();
