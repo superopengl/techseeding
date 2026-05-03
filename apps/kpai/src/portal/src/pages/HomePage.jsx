@@ -9,13 +9,17 @@ import {
   ExperimentOutlined,
   TeamOutlined,
   LoginOutlined,
-  PhoneOutlined,
-  WechatOutlined,
   SafetyCertificateOutlined,
   BookOutlined,
   CalendarOutlined,
   LaptopOutlined,
   ScheduleOutlined,
+  ToolOutlined,
+  CustomerServiceOutlined,
+  ReadOutlined,
+  BarChartOutlined,
+  FormatPainterOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -55,7 +59,7 @@ const steps = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     num: "1",
-    title: "Imagine a Craft",
+    title: "Imagine an AI Craft",
     description: 'Type what you want — "a racing craft with power-ups" or "a puzzle where gravity flips."',
   },
   {
@@ -105,7 +109,6 @@ function NavBar({ onStart }) {
     >
       <Logo size={36} />
       <Button
-        type="primary"
         size="large"
         icon={<LoginOutlined />}
         onClick={onStart}
@@ -114,10 +117,11 @@ function NavBar({ onStart }) {
           paddingInline: 28,
           fontWeight: 600,
           height: 44,
-          background: colors.ctaYellow,
-          color: colors.heading,
-          border: "none",
-          boxShadow: shadows.ctaButtonSmall,
+          background: "rgba(255,255,255,0.15)",
+          color: colors.onDark,
+          border: "1.5px solid rgba(255,255,255,0.4)",
+          boxShadow: "none",
+          backdropFilter: "blur(8px)",
         }}
       >
         Student Login
@@ -126,8 +130,7 @@ function NavBar({ onStart }) {
   );
 }
 
-const PHONE_NUMBER = "04XX XXX XXX";
-const WECHAT_ID = "your-wechat-id";
+const CONTACT_EMAIL = "hello@techseeding.com.au";
 
 const programs = [
   {
@@ -162,40 +165,46 @@ const programs = [
 
 const beyondCrafts = [
   {
-    image: "/beyond/science.svg",
+    icon: <ExperimentOutlined />,
     title: "Science Simulations",
     examples: "Solar system orbits, ecosystem models, physics playgrounds",
-    borderColor: colors.primary,
+    color: colors.primary,
+    bg: colors.mintBg,
   },
   {
-    image: "/beyond/art.svg",
+    icon: <FormatPainterOutlined />,
     title: "Interactive Art",
     examples: "Drawing apps, generative art, animated greeting cards",
-    borderColor: colors.accentPurple,
+    color: colors.accentPurple,
+    bg: "#f3f0ff",
   },
   {
-    image: "/beyond/music.svg",
+    icon: <CustomerServiceOutlined />,
     title: "Music & Sound",
     examples: "Drum machines, piano keyboards, sound effect boards",
-    borderColor: colors.accentBlue,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
   },
   {
-    image: "/beyond/tools.svg",
+    icon: <ToolOutlined />,
     title: "Tools & Utilities",
     examples: "Calculators, timers, quiz makers, to-do lists",
-    borderColor: colors.accentAmber,
+    color: colors.accentAmber,
+    bg: colors.amberBg,
   },
   {
-    image: "/beyond/stories.svg",
+    icon: <ReadOutlined />,
     title: "Stories & Chatbots",
     examples: "Choose-your-own-adventure, virtual pets, mad libs",
-    borderColor: colors.successGreen,
+    color: colors.successGreen,
+    bg: "#e8f8e8",
   },
   {
-    image: "/beyond/data.svg",
+    icon: <BarChartOutlined />,
     title: "Data & Dashboards",
     examples: "Polls with live charts, personal dashboards, family trees",
-    borderColor: colors.accentBlue,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
   },
 ];
 
@@ -226,9 +235,6 @@ export function HomePage() {
   const goLogin = () => navigate("/login");
   const [enquireOpen, setEnquireOpen] = useState(false);
   const openEnquire = () => setEnquireOpen(true);
-  const scrollToContact = () => {
-    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <div style={{ minHeight: "100vh", background: colors.surface }}>
@@ -290,7 +296,7 @@ export function HomePage() {
               textShadow: shadows.textOnGradient,
             }}
           >
-            Unleash Kid's Idea<br />Drive <span style={{ color: colors.ctaYellow }}>AI</span> to Build It
+            Unleash Kids' Ideas<br />Tell <span style={{ color: colors.ctaYellow }}>AI</span> to Build It
           </Title>
           <Paragraph
             style={{
@@ -302,7 +308,7 @@ export function HomePage() {
               lineHeight: 1.6,
             }}
           >
-            Kids dream it up, AI builds it — and they learn how it all works along the way.
+            Kids dream up AI crafts, watch AI build them — and learn how it all works along the way.
           </Paragraph>
           <Button
             size="large"
@@ -315,6 +321,14 @@ export function HomePage() {
           <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 12, marginBottom: 0 }}>
             Parents & guardians — reach out to learn about classes, schedule & fees
           </Paragraph>
+          <div style={{ marginTop: 16 }}>
+            <Text
+              style={{ color: "rgba(255,255,255,0.85)", fontSize: 15, cursor: "pointer" }}
+              onClick={goLogin}
+            >
+              Already a student? <span style={{ textDecoration: "underline", fontWeight: 600 }}>Log in here</span>
+            </Text>
+          </div>
         </div>
       </div>
 
@@ -352,7 +366,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real craft built by a kid using KidPlayAI. Your turn next!
+          Road Racer — a real AI craft built by a kid using KidPlayAI. Your turn next!
         </Paragraph>
       </div>
 
@@ -379,7 +393,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          Where young creators imagine crafts and real AI builds them — learning to think, code, and create along the way
+          Where young creators imagine AI crafts and watch AI build them — learning to think, create, and understand AI along the way
         </Paragraph>
         <Row gutter={[32, 32]}>
           {features.map((f, i) => (
@@ -502,70 +516,167 @@ export function HomePage() {
           background: colors.surface,
           padding: "80px 24px",
           textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <Title
-          level={2}
+        {/* Decorative background patterns */}
+        <div
           style={{
-            fontFamily: fonts.heading,
-            fontSize: 38,
-            color: colors.heading,
-            marginBottom: 12,
+            position: "absolute",
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.04)",
+            top: -60,
+            left: -50,
           }}
-        >
-          Our Programs
-        </Title>
-        <Paragraph
-          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
-        >
-          Flexible options to fit every schedule — all ages 8–12 welcome, no experience needed
-        </Paragraph>
-        <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
-          {programs.map((p, i) => (
-            <Col xs={24} sm={12} md={6} key={i}>
-              <Card
-                style={{
-                  borderRadius: 20,
-                  border: "none",
-                  boxShadow: shadows.card,
-                  height: "100%",
-                  textAlign: "center",
-                }}
-                styles={{ body: { padding: "32px 20px" } }}
-              >
-                <div
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 160,
+            height: 160,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.04)",
+            bottom: -40,
+            right: -30,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            background: "rgba(110,193,228,0.05)",
+            top: 40,
+            right: "10%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            border: "2px dashed rgba(67,184,140,0.08)",
+            bottom: 30,
+            left: "15%",
+          }}
+        />
+        {/* Small accent dots */}
+        <div
+          style={{
+            position: "absolute",
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: "rgba(245,158,11,0.15)",
+            top: 60,
+            left: "25%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.12)",
+            bottom: 80,
+            right: "22%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.12)",
+            top: "45%",
+            left: "5%",
+          }}
+        />
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <Title
+            level={2}
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: 38,
+              color: colors.heading,
+              marginBottom: 12,
+            }}
+          >
+            Our Programs
+          </Title>
+          <Paragraph
+            style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
+          >
+            Flexible options to fit every schedule — all ages 8–12 welcome, no experience needed
+          </Paragraph>
+          <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+            {programs.map((p, i) => (
+              <Col xs={24} sm={12} md={6} key={i}>
+                <Card
                   style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 18,
-                    background: p.bg,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 18,
-                    fontSize: 28,
-                    color: p.color,
+                    borderRadius: 20,
+                    border: "none",
+                    boxShadow: shadows.card,
+                    height: "100%",
+                    textAlign: "center",
                   }}
+                  styles={{ body: { padding: "32px 20px" } }}
                 >
-                  {p.icon}
-                </div>
-                <Title
-                  level={4}
-                  style={{
-                    fontFamily: fonts.heading,
-                    color: colors.heading,
-                    marginBottom: 8,
-                  }}
-                >
-                  {p.title}
-                </Title>
-                <Text style={{ color: colors.bodyStrong, fontSize: 14, lineHeight: 1.6 }}>
-                  {p.description}
-                </Text>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 18,
+                      background: p.bg,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 18,
+                      fontSize: 28,
+                      color: p.color,
+                    }}
+                  >
+                    {p.icon}
+                  </div>
+                  <Title
+                    level={4}
+                    style={{
+                      fontFamily: fonts.heading,
+                      color: colors.heading,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {p.title}
+                  </Title>
+                  <Text style={{ color: colors.bodyStrong, fontSize: 14, lineHeight: 1.6 }}>
+                    {p.description}
+                  </Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div style={{ marginTop: 40 }}>
+            <Button
+              size="large"
+              onClick={openEnquire}
+              icon={<RocketOutlined />}
+              style={ctaButtonStyle}
+            >
+              Enquire for Details
+            </Button>
+            <Paragraph style={{ color: colors.body, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
+              Ask about schedules, pricing, and availability
+            </Paragraph>
+          </div>
+        </div>
       </div>
 
       {/* Beyond Crafts Section */}
@@ -598,34 +709,42 @@ export function HomePage() {
               <Card
                 style={{
                   borderRadius: 16,
-                  border: `2px solid ${item.borderColor}`,
-                  boxShadow: shadows.cardSubtle,
+                  border: "none",
+                  boxShadow: shadows.card,
                   height: "100%",
                   textAlign: "center",
-                  overflow: "hidden",
                 }}
-                styles={{ body: { padding: 0 } }}
+                styles={{ body: { padding: "28px 16px" } }}
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }}
-                />
-                <div style={{ padding: "16px 16px 20px" }}>
-                  <Title
-                    level={5}
-                    style={{
-                      fontFamily: fonts.heading,
-                      color: colors.heading,
-                      marginBottom: 6,
-                    }}
-                  >
-                    {item.title}
-                  </Title>
-                  <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
-                    {item.examples}
-                  </Text>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 16,
+                    background: item.bg,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 14,
+                    fontSize: 26,
+                    color: item.color,
+                  }}
+                >
+                  {item.icon}
                 </div>
+                <Title
+                  level={5}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 6,
+                  }}
+                >
+                  {item.title}
+                </Title>
+                <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
+                  {item.examples}
+                </Text>
               </Card>
             </Col>
           ))}
@@ -659,6 +778,22 @@ export function HomePage() {
         <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
           {parentReasons.map((r, i) => (
             <Col xs={24} sm={8} key={i}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: `${r.color}15`,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                  fontSize: 28,
+                  color: r.color,
+                }}
+              >
+                {r.icon}
+              </div>
               <Title
                 level={4}
                 style={{
@@ -684,69 +819,145 @@ export function HomePage() {
           background: gradients.cta,
           padding: "80px 24px",
           textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <Logo size={48} style={{ display: "inline-block", marginBottom: 20 }} />
-        <Title
-          level={2}
+        {/* Decorative background patterns */}
+        <div
           style={{
-            fontFamily: fonts.heading,
-            fontSize: 38,
-            color: colors.onDark,
-            marginBottom: 16,
-            textShadow: shadows.textOnGradient,
+            position: "absolute",
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.07)",
+            top: -80,
+            right: -60,
           }}
-        >
-          Ready to Get Your Child Started?
-        </Title>
-        <Paragraph
-          style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 48, maxWidth: 520, marginInline: "auto" }}
-        >
-          Contact us to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
-        </Paragraph>
-        <Row gutter={[32, 32]} justify="center" style={{ maxWidth: 640, margin: "0 auto" }}>
-          <Col xs={24} sm={12}>
-            <a href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`} style={{ textDecoration: "none" }}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 20,
-                  border: "2px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.12)",
-                  textAlign: "center",
-                }}
-                styles={{ body: { padding: "32px 24px" } }}
-              >
-                <PhoneOutlined style={{ fontSize: 40, color: colors.onDark, marginBottom: 16 }} />
-                <Title level={4} style={{ fontFamily: fonts.heading, color: colors.onDark, marginBottom: 4 }}>
-                  Call Us
-                </Title>
-                <Text style={{ color: colors.onDarkSecondary, fontSize: 18, fontWeight: 600 }}>
-                  {PHONE_NUMBER}
-                </Text>
-              </Card>
-            </a>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Card
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.05)",
+            bottom: -50,
+            left: -40,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: 30,
+            left: "12%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 140,
+            height: 140,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            bottom: 20,
+            right: "15%",
+          }}
+        />
+        {/* Dotted ring */}
+        <div
+          style={{
+            position: "absolute",
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            border: "2px dashed rgba(255,255,255,0.1)",
+            top: -30,
+            left: "30%",
+          }}
+        />
+        {/* Small accent dots */}
+        <div
+          style={{
+            position: "absolute",
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            background: "rgba(252,214,60,0.3)",
+            top: 50,
+            right: "25%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "rgba(252,214,60,0.25)",
+            bottom: 60,
+            left: "20%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.15)",
+            top: "40%",
+            right: "8%",
+          }}
+        />
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <Logo size={48} style={{ display: "inline-block", marginBottom: 20 }} />
+          <Title
+            level={2}
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: 38,
+              color: colors.onDark,
+              marginBottom: 16,
+              textShadow: shadows.textOnGradient,
+            }}
+          >
+            Ready to Get Your Child Started?
+          </Title>
+          <Paragraph
+            style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 48, maxWidth: 520, marginInline: "auto" }}
+          >
+            Contact us to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
+          </Paragraph>
+          <a href={`mailto:${CONTACT_EMAIL}?subject=KidPlayAI Enquiry`} style={{ textDecoration: "none" }}>
+            <Button
+              size="large"
+              icon={<MailOutlined />}
               style={{
-                borderRadius: 20,
-                border: "2px solid rgba(255,255,255,0.2)",
-                background: "rgba(255,255,255,0.12)",
-                textAlign: "center",
+                height: 56,
+                paddingInline: 48,
+                fontSize: 20,
+                fontWeight: 700,
+                borderRadius: 28,
+                background: colors.ctaYellow,
+                color: colors.heading,
+                border: "none",
+                boxShadow: shadows.ctaButton,
+                fontFamily: fonts.heading,
               }}
-              styles={{ body: { padding: "32px 24px" } }}
             >
-              <WechatOutlined style={{ fontSize: 40, color: colors.onDark, marginBottom: 16 }} />
-              <Title level={4} style={{ fontFamily: fonts.heading, color: colors.onDark, marginBottom: 4 }}>
-                WeChat
-              </Title>
-              <Text style={{ color: colors.onDarkSecondary, fontSize: 18, fontWeight: 600 }}>
-                {WECHAT_ID}
-              </Text>
-            </Card>
-          </Col>
-        </Row>
+              Email Us
+            </Button>
+          </a>
+          <Paragraph style={{ color: colors.onDarkSecondary, fontSize: 16, marginTop: 16, marginBottom: 0 }}>
+            {CONTACT_EMAIL}
+          </Paragraph>
+        </div>
       </div>
 
       {/* Footer */}
@@ -761,9 +972,6 @@ export function HomePage() {
           gap: 4,
         }}
       >
-        <Text style={{ color: colors.onDarkTertiary, fontSize: 14 }}>
-          KidPlayAI — Unleash Kid's Idea. Drive AI to Build It.
-        </Text>
         <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
           KidPlayAI is a product owned by Techseeding
         </Text>
@@ -801,47 +1009,26 @@ export function HomePage() {
         <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 32, maxWidth: 360, marginInline: "auto" }}>
           Reach out to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
         </Paragraph>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12}>
-            <a href={`tel:${PHONE_NUMBER.replace(/\s/g, "")}`} style={{ textDecoration: "none" }}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 16,
-                  border: `2px solid ${colors.primary}`,
-                  textAlign: "center",
-                }}
-                styles={{ body: { padding: "24px 16px" } }}
-              >
-                <PhoneOutlined style={{ fontSize: 32, color: colors.primary, marginBottom: 12 }} />
-                <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
-                  Call Us
-                </Title>
-                <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
-                  {PHONE_NUMBER}
-                </Text>
-              </Card>
-            </a>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Card
-              style={{
-                borderRadius: 16,
-                border: `2px solid ${colors.successGreen}`,
-                textAlign: "center",
-              }}
-              styles={{ body: { padding: "24px 16px" } }}
-            >
-              <WechatOutlined style={{ fontSize: 32, color: colors.successGreen, marginBottom: 12 }} />
-              <Title level={5} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}>
-                WeChat
-              </Title>
-              <Text style={{ color: colors.bodyStrong, fontSize: 16, fontWeight: 600 }}>
-                {WECHAT_ID}
-              </Text>
-            </Card>
-          </Col>
-        </Row>
+        <a href={`mailto:${CONTACT_EMAIL}?subject=KidPlayAI Enquiry`} style={{ textDecoration: "none" }}>
+          <Button
+            type="primary"
+            size="large"
+            icon={<MailOutlined />}
+            style={{
+              height: 48,
+              paddingInline: 36,
+              fontSize: 18,
+              fontWeight: 700,
+              borderRadius: 24,
+              fontFamily: fonts.heading,
+            }}
+          >
+            Send Us an Email
+          </Button>
+        </a>
+        <Paragraph style={{ color: colors.body, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
+          {CONTACT_EMAIL}
+        </Paragraph>
       </Modal>
     </div>
   );
