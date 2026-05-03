@@ -28,9 +28,6 @@ export function LoginPage() {
   const [contactOpen, setContactOpen] = useState(false);
   const [loginTab, setLoginTab] = useState("in-class");
   const otpRefs = useRef([]);
-  const pollingRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const countdownRef = useRef(null);
 
   useEffect(() => {
     if (!loginRequestId || status !== "pending") return;
@@ -40,33 +37,24 @@ export function LoginPage() {
     const deadline = Date.now() + TIMEOUT_MS;
     setRemaining(Math.ceil(TIMEOUT_MS / 1000));
 
-    countdownRef.current = setInterval(() => {
+    let cancelled = false;
+
+    const tickId = setInterval(() => {
       const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
       setRemaining(left);
-      if (left <= 0) clearInterval(countdownRef.current);
+      if (left <= 0) setStatus("timedout");
     }, 1000);
 
-    timeoutRef.current = setTimeout(() => {
-      clearInterval(pollingRef.current);
-      clearInterval(countdownRef.current);
-      setStatus("timedout");
-    }, TIMEOUT_MS);
-
-    pollingRef.current = setInterval(async () => {
+    const pollId = setInterval(async () => {
       try {
         const data = await apiCall(`/api/login/student/${loginRequestId}/status`);
+        if (cancelled) return;
         if (data.status === "approved") {
-          clearInterval(pollingRef.current);
-          clearTimeout(timeoutRef.current);
-          clearInterval(countdownRef.current);
           sessionStorage.setItem("c4k_token", data.token);
           sessionStorage.setItem("c4k_role", "student");
           setStatus("approved");
           navigate("/sandbox");
         } else if (data.status === "rejected") {
-          clearInterval(pollingRef.current);
-          clearTimeout(timeoutRef.current);
-          clearInterval(countdownRef.current);
           setStatus("rejected");
         }
       } catch {
@@ -75,9 +63,9 @@ export function LoginPage() {
     }, POLL_INTERVAL_MS);
 
     return () => {
-      clearInterval(pollingRef.current);
-      clearTimeout(timeoutRef.current);
-      clearInterval(countdownRef.current);
+      cancelled = true;
+      clearInterval(tickId);
+      clearInterval(pollId);
     };
   }, [loginRequestId, status, navigate]);
 
@@ -306,9 +294,6 @@ export function LoginPage() {
           <Button
             type="link"
             onClick={() => {
-              clearInterval(pollingRef.current);
-              clearTimeout(timeoutRef.current);
-              clearInterval(countdownRef.current);
               setStatus(null);
               setName("");
             }}
