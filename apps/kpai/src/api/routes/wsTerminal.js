@@ -113,6 +113,10 @@ export function wsTerminal(fastify) {
       const ptyProcess = spawnTerminal(sandboxWorkDir);
       const { cleanup } = watchIndexHtml(sandboxWorkDir, sandboxId, socket, fastify);
 
+      // Rate limiting: max 30 requests per minute per session
+      const MAX_REQUESTS_PER_MINUTE = 30;
+      const requestTimestamps = [];
+
       // Message capture buffers
       let inputBuffer = "";
       let outputBuffer = "";
@@ -162,6 +166,19 @@ export function wsTerminal(fastify) {
           ptyProcess.write(data);
           if (data === "\r" || data === "\n") {
             if (inputBuffer.length > 0) {
+              // Rate limit check
+              const now = Date.now();
+              while (requestTimestamps.length > 0 && now - requestTimestamps[0] > 60_000) {
+                requestTimestamps.shift();
+              }
+              if (requestTimestamps.length >= MAX_REQUESTS_PER_MINUTE) {
+                try {
+                  socket.send(JSON.stringify({ type: "output", data: "\x1b[33mRate limit reached. Please wait a moment before sending more messages.\x1b[0m\r\n" }));
+                } catch { /* client disconnected */ }
+                inputBuffer = "";
+                return;
+              }
+              requestTimestamps.push(now);
               // Flush any pending output before saving the new input
               clearTimeout(outputDebounceTimer);
               flushOutput();
