@@ -25,7 +25,7 @@ export function sandboxCreate(fastify) {
         id,
         userId: payload.userId,
         workDir,
-        title: title || "Untitled Game",
+        title: title || "Untitled Craft",
       })
       .returning();
 

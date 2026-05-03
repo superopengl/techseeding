@@ -43,9 +43,9 @@ const features = [
     icon: <BulbOutlined />,
     color: colors.accentBlue,
     bg: colors.skyBg,
-    title: "Your Ideas, Real Games",
+    title: "Your Ideas, Real Crafts",
     description:
-      "Every game is built with real technology. Play it, share it, and see how AI turned your vision into something real.",
+      "Every craft is built with real technology. Play it, share it, and see how AI turned your vision into something real.",
   },
 ];
 
@@ -54,22 +54,22 @@ const steps = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     num: "1",
-    title: "Imagine a Game",
-    description: 'Type what you want — "a racing game with power-ups" or "a puzzle where gravity flips."',
+    title: "Imagine a Craft",
+    description: 'Type what you want — "a racing craft with power-ups" or "a puzzle where gravity flips."',
   },
   {
     icon: <RocketOutlined />,
     color: colors.primary,
     num: "2",
     title: "Watch AI Build It",
-    description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working game.",
+    description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working craft.",
   },
   {
     icon: <TeamOutlined />,
     color: colors.accentAmber,
     num: "3",
     title: "Play, Tweak, Share",
-    description: "Your game runs instantly. Keep improving it, experiment with new ideas, and share it with friends.",
+    description: "Your craft runs instantly. Keep improving it, experiment with new ideas, and share it with friends.",
   },
 ];
 
@@ -159,7 +159,7 @@ const programs = [
   },
 ];
 
-const beyondGames = [
+const beyondCrafts = [
   {
     image: "/beyond/science.svg",
     title: "Science Simulations",
@@ -209,7 +209,7 @@ const parentReasons = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     title: "Sparks Curiosity & Creativity",
-    description: "When kids see AI bring their ideas to life, it lights a fire. They start asking \"what if?\" and \"how does that work?\" — building genuine interest in science, engineering, and problem-solving through play.",
+    description: "When kids see AI bring their ideas to life, it lights a fire. They start asking \"what if?\" and \"how does that work?\" — building genuine interest in games, science, engineering, and problem-solving through play.",
   },
   {
     icon: <SafetyCertificateOutlined />,
@@ -220,7 +220,7 @@ const parentReasons = [
 ];
 
 export function HomePage() {
-  useEffect(() => { document.title = "KidPlayAI — Unleash Kid's Idea. Drive AI to Build It."; }, []);
+  useEffect(() => { document.title = "KidPlayAI — AI Craft Maker for Kids"; }, []);
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
   const [enquireOpen, setEnquireOpen] = useState(false);
@@ -339,7 +339,7 @@ export function HomePage() {
         >
           <img
             src="/car-racer.png"
-            alt="A kid building a Road Racer game with AI in KidPlayAI"
+            alt="A kid building a Road Racer craft with AI in KidPlayAI"
             style={{ width: "100%", display: "block" }}
           />
         </div>
@@ -378,7 +378,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          Where young creators imagine games and real AI builds them — learning to think, code, and create along the way
+          Where young creators imagine crafts and real AI builds them — learning to think, code, and create along the way
         </Paragraph>
         <Row gutter={[32, 32]}>
           {features.map((f, i) => (
@@ -451,7 +451,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          From idea to playable game in minutes
+          From idea to playable craft in minutes
         </Paragraph>
         <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
           {steps.map((s, i) => (
@@ -567,7 +567,7 @@ export function HomePage() {
         </Row>
       </div>
 
-      {/* Beyond Games Section */}
+      {/* Beyond Crafts Section */}
       <div
         style={{
           background: gradients.login,
@@ -584,15 +584,15 @@ export function HomePage() {
             marginBottom: 12,
           }}
         >
-          Games Are Just the Start
+          Crafts Are Just the Start
         </Title>
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
         >
-          Building games is how kids get hooked — but with AI as their creative partner, they can make anything they imagine
+          Building crafts is how kids get hooked — but with AI as their creative partner, they can make anything they imagine
         </Paragraph>
         <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
-          {beyondGames.map((item, i) => (
+          {beyondCrafts.map((item, i) => (
             <Col xs={12} sm={8} key={i}>
               <Card
                 style={{

@@ -81,7 +81,7 @@ Tracks a student's login request lifecycle. Created when a student requests to l
 
 ### `sandbox_session`
 
-Represents a student's sandbox session. A student can have multiple sessions over time. Each session is linked to a sandbox (game workspace) where the student builds a game.
+Represents a student's sandbox session. A student can have multiple sessions over time. Each session is linked to a sandbox (craft workspace) where the student builds a craft.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
@@ -96,15 +96,15 @@ Represents a student's sandbox session. A student can have multiple sessions ove
 
 ### `sandbox`
 
-A game workspace owned by a student. Each sandbox represents one game creation and contains the game files served at `sandbox_root_url`. A student can have multiple sandboxes (one per game).
+A craft workspace owned by a student. Each sandbox represents one craft creation and contains the craft files served at `sandbox_root_url`. A student can have multiple sandboxes (one per craft).
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | user_id | uuid | NOT NULL, FK → `user.id` | The student who owns this sandbox |
 | work_dir | text | nullable | Filesystem path to the sandbox working directory |
-| title | text | nullable | Game title |
-| description | text | nullable | Game description |
+| title | text | nullable | Craft title |
+| description | text | nullable | Craft description |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
@@ -112,7 +112,7 @@ A game workspace owned by a student. Each sandbox represents one game creation a
 
 ### `sandbox_release`
 
-A published snapshot of a sandbox game. Each release captures a point-in-time version that can be shared publicly.
+A published snapshot of a sandbox craft. Each release captures a point-in-time version that can be shared publicly.
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|

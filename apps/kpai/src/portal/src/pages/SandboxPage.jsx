@@ -5,7 +5,7 @@ import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined } from "@ant-design/ic
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
-import { GamePreview } from "../components/GamePreview";
+import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
 import confetti from "canvas-confetti";
@@ -25,7 +25,7 @@ export function SandboxPage() {
   const [title, setTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
-  const [showMyGames, setShowMyGames] = useState(false);
+  const [showMyCrafts, setShowMyCrafts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
   const titleInputRef = useRef(null);
@@ -39,11 +39,11 @@ export function SandboxPage() {
   useEffect(() => {
     if (!sandboxId) return;
     apiCall(`/api/sandbox/${sandboxId}`).then((data) => {
-      setTitle(data.title || "Untitled Game");
+      setTitle(data.title || "Untitled Craft");
     }).catch((err) => {
       if (err.status === 404) {
         setSandboxNotFound(true);
-        setShowMyGames(true);
+        setShowMyCrafts(true);
       }
     });
   }, [sandboxId]);
@@ -217,12 +217,12 @@ export function SandboxPage() {
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)")}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
               >
-                {title || "Untitled Game"}
+                {title || "Untitled Craft"}
               </span>
             )}
           </div>
           <Space size={8}>
-            <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyGames(true)} style={{ color: colors.onDark }}>
+            <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyCrafts(true)} style={{ color: colors.onDark }}>
               My Crafts
             </Button>
             <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
@@ -268,7 +268,7 @@ export function SandboxPage() {
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
           <div style={{ width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
-            <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
+            <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
           </div>
         </div>
         <div
@@ -289,8 +289,8 @@ export function SandboxPage() {
       </div>
       <Modal
         title="My Crafts"
-        open={showMyGames}
-        onCancel={sandboxNotFound ? undefined : () => setShowMyGames(false)}
+        open={showMyCrafts}
+        onCancel={sandboxNotFound ? undefined : () => setShowMyCrafts(false)}
         closable={!sandboxNotFound}
         maskClosable={!sandboxNotFound}
         keyboard={!sandboxNotFound}
@@ -301,7 +301,7 @@ export function SandboxPage() {
       >
         <SandboxList
           currentSandboxId={sandboxId}
-          onSelect={() => { setShowMyGames(false); setSandboxNotFound(false); }}
+          onSelect={() => { setShowMyCrafts(false); setSandboxNotFound(false); }}
           onDeleteCurrent={() => setSandboxNotFound(true)}
         />
       </Modal>

@@ -33,26 +33,26 @@ async function lookupSandbox(sandboxId) {
   return record || null;
 }
 
-function configureOpenCode(gamePath) {
-  const configPath = path.join(gamePath, "opencode.json");
+function configureOpenCode(sandboxWorkDirPath) {
+  const configPath = path.join(sandboxWorkDirPath, "opencode.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   config.provider.deepseek.options.apiKey = process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY;
-  fs.mkdirSync(gamePath, { recursive: true });
+  fs.mkdirSync(sandboxWorkDirPath, { recursive: true });
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 }
 
-function spawnTerminal(gamePath) {
+function spawnTerminal(sandboxWorkDirPath) {
   return pty.spawn("opencode", [], {
     name: "xterm-256color",
     cols: 80,
     rows: 24,
-    cwd: gamePath,
+    cwd: sandboxWorkDirPath,
     env: { ...process.env, HOME: os.homedir() },
   });
 }
 
-function watchIndexHtml(gamePath, sandboxId, socket, fastify) {
-  const indexPath = path.join(gamePath, "index.html");
+function watchIndexHtml(sandboxWorkDirPath, sandboxId, socket, fastify) {
+  const indexPath = path.join(sandboxWorkDirPath, "index.html");
   let debounceTimer = null;
 
   const watcher = fs.watch(indexPath, () => {

@@ -2,7 +2,7 @@ import React from "react";
 import { Empty } from "antd";
 import { colors } from "../theme";
 
-export function GamePreview({ sandboxId, refreshKey }) {
+export function CraftPreview({ sandboxId, refreshKey }) {
   if (!sandboxId) {
     return (
       <div

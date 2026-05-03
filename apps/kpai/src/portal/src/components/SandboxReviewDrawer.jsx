@@ -3,7 +3,7 @@ import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme 
 import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
-import { GamePreview } from "./GamePreview";
+import { CraftPreview } from "./CraftPreview";
 import { apiCall } from "../api";
 import { stripAnsi } from "../utils/stripAnsi";
 
@@ -254,7 +254,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
             border: `2px solid ${colors.border}`,
             boxShadow: shadows.cardSubtle,
           }}>
-            <GamePreview sandboxId={sandboxId} refreshKey={previewKey} />
+            <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
           </div>
         </div>
         <div
@@ -288,7 +288,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
         open={showShare}
         onCancel={() => setShowShare(false)}
         sandboxId={sandboxId}
-        description="Scan the QR code or copy the URL below to share this game."
+        description="Scan the QR code or copy the URL below to share this craft."
       />
     </Drawer>
   );

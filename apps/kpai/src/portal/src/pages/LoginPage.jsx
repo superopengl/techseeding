@@ -193,7 +193,7 @@ export function LoginPage() {
   };
 
   const bgSvg = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'>
-    <!-- Game controller -->
+    <!-- Craft controller -->
     <g transform='translate(80,60) rotate(-15)' opacity='0.07'>
       <rect x='0' y='10' width='60' height='36' rx='12' fill='%2343b88c'/>
       <rect x='14' y='4' width='8' height='18' rx='2' fill='%2343b88c'/>

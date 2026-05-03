@@ -14,7 +14,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
   useEffect(() => {
     apiCall("/api/sandbox")
       .then(setSandboxes)
-      .catch(() => message.error("Failed to load your games"))
+      .catch(() => message.error("Failed to load your crafts"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,7 +29,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
       navigate(`/sandbox/${data.id}`);
       onSelect?.();
     } catch {
-      message.error("Failed to create game");
+      message.error("Failed to create craft");
     } finally {
       setCreating(false);
     }
@@ -38,8 +38,8 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
   const handleDelete = (e, sandboxItem) => {
     e.stopPropagation();
     Modal.confirm({
-      title: "Delete Game",
-      content: `Are you sure you want to delete "${sandboxItem.title || "Untitled Game"}"? This cannot be undone.`,
+      title: "Delete Craft",
+      content: `Are you sure you want to delete "${sandboxItem.title || "Untitled Craft"}"? This cannot be undone.`,
       okText: "Delete",
       cancelText: "Keep",
       okButtonProps: {
@@ -59,12 +59,12 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
         try {
           await apiCall(`/api/sandbox/${sandboxItem.id}`, { method: "DELETE" });
           setSandboxes((prev) => prev.filter((s) => s.id !== sandboxItem.id));
-          message.success(`${sandboxItem.title || "Untitled Game"} deleted`);
+          message.success(`${sandboxItem.title || "Untitled Craft"} deleted`);
           if (sandboxItem.id === currentSandboxId) {
             onDeleteCurrent?.();
           }
         } catch {
-          message.error("Failed to delete game");
+          message.error("Failed to delete craft");
         }
       },
     });
@@ -102,7 +102,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
               color: colors.primary,
             }}
           >
-            New Game
+            New Craft
           </div>
           <div style={{ color: colors.muted, fontSize: 12 }}>
             Start a new project
@@ -140,7 +140,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
                   whiteSpace: "nowrap",
                 }}
               >
-                {s.title || "Untitled Game"}
+                {s.title || "Untitled Craft"}
               </div>
               <div style={{ color: colors.muted, fontSize: 12 }}>
                 {new Date(s.createdAt).toLocaleString()}

@@ -50,7 +50,7 @@ export function PrivacyPolicyPage() {
               1. Introduction
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              KidPlayAI ("we", "us", or "our") is an AI-powered game making platform
+              KidPlayAI ("we", "us", or "our") is an AI-powered craft making platform
               for children aged 8–12, operated by Techseeding PTY LTD (ABN
               35631597450 / ACN 631597450). We are committed to protecting the
               privacy of all users, especially children. This Privacy Policy
@@ -71,7 +71,7 @@ export function PrivacyPolicyPage() {
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               <strong>Session Data:</strong> We store session identifiers and
               sandbox activity (messages sent to the AI assistant and generated
-              game code) to provide the service. Messages are associated with a
+              craft code) to provide the service. Messages are associated with a
               session ID, not with any personally identifiable information beyond
               the student's first name.
             </Paragraph>
@@ -90,12 +90,12 @@ export function PrivacyPolicyPage() {
               We use collected information solely to:
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
-              <li>Provide and operate the KidPlayAI game-making platform</li>
+              <li>Provide and operate the KidPlayAI craft-making platform</li>
               <li>
                 Manage student sessions and sandbox environments
               </li>
               <li>
-                Enable the AI assistant to help students create games
+                Enable the AI assistant to help students create crafts
               </li>
               <li>
                 Administer access through our approval system
@@ -116,9 +116,9 @@ export function PrivacyPolicyPage() {
               4. AI Interaction and Content
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              KidPlayAI uses AI (Claude by Anthropic) to help students create games.
+              KidPlayAI uses AI (Claude by Anthropic) to help students create crafts.
               Messages sent by students to the AI assistant are processed to
-              generate game code. These interactions are stored as part of the
+              generate craft code. These interactions are stored as part of the
               sandbox session and may be reviewed by administrators for safety
               and quality purposes. The AI operates within a restricted sandbox
               environment with limited tool access for security.
@@ -170,7 +170,7 @@ export function PrivacyPolicyPage() {
                 personal contact information
               </li>
               <li>
-                Student-created games and interactions are contained within
+                Student-created crafts and interactions are contained within
                 isolated sandbox environments
               </li>
               <li>

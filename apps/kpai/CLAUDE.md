@@ -2,7 +2,7 @@
 
 ## Product Vision
 
-KidPlayAI is an AI-powered game maker platform for kids aged 8-12 who are passionate about games, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the game they imagine, then watch a real AI agent think, design, and build it step by step. Rather than hiding AI behind a polished UI, KidPlayAI surfaces the raw interaction so kids see exactly how AI reasons, creates, and solves problems. The result: kids don't just make games — they learn to harness AI as a creative tool and develop a genuine understanding of how AI works.
+KidPlayAI is an AI-powered craft maker platform for kids aged 8-12 who are passionate about games, science, engineering, and AI. It sits at the intersection of play and learning — kids describe the craft they imagine, then watch a real AI agent think, design, and build it step by step. Rather than hiding AI behind a polished UI, KidPlayAI surfaces the raw interaction so kids see exactly how AI reasons, creates, and solves problems. The result: kids don't just make crafts — they learn to harness AI as a creative tool and develop a genuine understanding of how AI works.
 
 ## Target Users
 
@@ -12,22 +12,22 @@ Kids aged 8-12 who love games, science, engineering, and AI. No prior experience
 
 Multi-page app with four views:
 
-1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Games" CTA
+1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Crafts" CTA
 2. **Login** (`/login`) — Student enters their name and clicks "Request Login"; waits for admin approval
-3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's game, right panel is xterm.js terminal running Claude Code
+3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is xterm.js terminal running Claude Code
 4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students (name, status, session active, sandbox link, message count, token info) with approve/reject actions
 
 ## How It Works
 
-1. Student visits the homepage and clicks "Start Making Games"
+1. Student visits the homepage and clicks "Start Making Crafts"
 2. On the login page, they enter their name and click "Request Login"
 3. A record is created in PostgreSQL with status `pending`; the student sees a "Waiting for Approval" screen
 4. An admin visits `/admin`, sees pending students, and clicks "Approve"
 5. The login page polls `/api/login/status/:studentId` and navigates to `/sandbox/:studentId` once approved
-6. A WebSocket connection spawns Claude Code scoped to the student's `game/` folder
-7. Kids type natural language requests in the terminal (e.g., "make a game where I catch falling stars")
+6. A WebSocket connection spawns Claude Code scoped to the student's craft folder
+7. Kids type natural language requests in the terminal (e.g., "make a craft where I catch falling stars")
 8. Claude Code edits HTML/JS/CSS files inside the sandbox
-9. The left panel iframe shows the updated game
+9. The left panel iframe shows the updated craft
 
 ## Architecture
 
@@ -59,7 +59,7 @@ Summary:
 - Routing via react-router-dom v7
 - Source lives in `src/portal/src/`, builds to `public/` (served by Fastify in production)
 - Pages: `HomePage`, `LoginPage`, `SandboxPage`, `AdminPage`
-- Components: `Terminal` (xterm.js wrapper), `GamePreview` (iframe)
+- Components: `Terminal` (xterm.js wrapper), `CraftPreview` (iframe)
 - Design tokens centralized in `src/portal/src/theme.js` — all pages import colors, gradients, shadows, fonts from there
 - Color palette documentation: [docs/color-palette.md](docs/color-palette.md)
 - During development, Vite dev server proxies API/WebSocket to the Fastify backend
@@ -96,7 +96,7 @@ src/
       App.jsx             # Root component with routing
       theme.js            # Shared design tokens (colors, gradients, shadows, fonts)
       pages/              # Page components (Home, Login, Sandbox, Admin, ...)
-      components/         # UI components (Terminal, GamePreview)
+      components/         # UI components (Terminal, CraftPreview)
     vite.config.js        # Vite config with dev proxy and build output to public/
     package.json          # Frontend dependencies
 public/                   # Built frontend assets (output of pnpm build, served by Fastify)
@@ -108,7 +108,7 @@ public/                   # Built frontend assets (output of pnpm build, served 
 
 ## Publishing (Planned)
 
-Finished games can be pushed to a public location (e.g., S3) so kids can share and play each other's games in their community.
+Finished crafts can be pushed to a public location (e.g., S3) so kids can share and play each other's crafts in their community.
 
 ## Security Model
 
