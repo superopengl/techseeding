@@ -43,8 +43,30 @@ export function AdminPage() {
 
   useEffect(() => {
     fetchStudents();
-    const interval = setInterval(fetchStudents, 5000);
-    return () => clearInterval(interval);
+    let interval = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(fetchStudents, 5000);
+    };
+    const stop = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = null;
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        fetchStudents();
+        start();
+      }
+    };
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   const handleAddStudent = async () => {
