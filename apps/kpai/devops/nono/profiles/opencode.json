@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "name": "opencode",
+    "version": "1.0.0",
+    "description": "KidPlayAI sandbox: read-only cwd, write only index.html"
+  },
+  "workdir": {
+    "access": "read"
+  },
+  "filesystem": {
+    "allow": [
+      "$XDG_CONFIG_HOME/opencode",
+      "$XDG_DATA_HOME/opencode",
+      "$XDG_DATA_HOME/opentui",
+      "$XDG_CACHE_HOME/opencode",
+      "$XDG_STATE_HOME/opencode"
+    ]
+  },
+  "network": {
+    "block": false
+  }
+}

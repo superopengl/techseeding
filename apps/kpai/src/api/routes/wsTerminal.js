@@ -37,14 +37,19 @@ function configureOpenCode(sandboxWorkDirPath) {
 }
 
 function spawnTerminal(sandboxWorkDirPath) {
-  return pty.spawn("opencode", [], {
+  return pty.spawn("nono", [
+    "run",
+    "--silent",
+    "--profile", "opencode",
+    "--write-file", path.join(sandboxWorkDirPath, "index.html"),
+    "--", "opencode", ".",
+  ], {
     name: "xterm-256color",
     cols: 80,
     rows: 24,
     cwd: sandboxWorkDirPath,
     env: {
       ...process.env,
-      HOME: sandboxWorkDirPath,
       DEEPSEEK_API_KEY: process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY,
     },
   });

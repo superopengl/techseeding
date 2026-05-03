@@ -6,12 +6,10 @@
     "disabled_providers": ["openai", "anthropic", "gemini", "openrouter"],
     "permission": {
         "read": {
-            "index.html": "allow",
-            "*": "deny"
+            "index.html": "allow"
         },
         "edit": {
-            "index.html": "allow",
-            "*": "deny"
+            "index.html": "allow"
         },
         "bash": {
             "*": "deny"

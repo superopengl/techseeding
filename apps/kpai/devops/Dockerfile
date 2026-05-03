@@ -12,6 +12,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://opencode.ai/install | bash
 ENV PATH="/root/.opencode/bin:${PATH}"
 
+# Install nono (kernel-enforced sandbox for AI agent processes)
+RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/latest | grep -i location | grep -oP 'v\K[0-9.]+') && \
+    ARCH=$(dpkg --print-architecture) && \
+    curl -fsSL -o /tmp/nono.deb "https://github.com/always-further/nono/releases/download/v${NONO_VERSION}/nono-cli_${NONO_VERSION}_${ARCH}.deb" && \
+    dpkg -i /tmp/nono.deb && \
+    rm /tmp/nono.deb
+
+# Copy nono profile for sandboxed opencode
+COPY devops/nono/profiles/opencode.json /root/.config/nono/profiles/opencode.json
+
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
 
