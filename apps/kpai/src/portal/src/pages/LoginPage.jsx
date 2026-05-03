@@ -462,7 +462,6 @@ export function LoginPage() {
                 type="primary"
                 onClick={() => {
                   setStatus(null);
-                  setStudentId(null);
                   setName("");
                 }}
                 style={{ borderRadius: 20, height: 44, paddingInline: 28 }}
