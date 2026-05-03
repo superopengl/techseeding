@@ -176,6 +176,13 @@
       "when": 1777522200000,
       "tag": "0024_add_session_message_content_length",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1777522300000,
+      "tag": "0025_add_fk_indexes",
+      "breakpoints": true
     }
   ]
 }

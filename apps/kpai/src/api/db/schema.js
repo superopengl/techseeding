@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date, index } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -44,7 +44,9 @@ export const sandbox = pgTable("sandbox", {
   indexHtmlContent: text("index_html_content"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("sandbox_user_id_idx").on(table.userId),
+]);
 
 export const loginRequest = pgTable("login_request", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -60,7 +62,10 @@ export const sandboxSession = pgTable("sandbox_session", {
   sandboxId: uuid("sandbox_id").references(() => sandbox.id),
   closedAt: timestamp("closed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("sandbox_session_sandbox_id_idx").on(table.sandboxId),
+  index("sandbox_session_user_id_idx").on(table.userId),
+]);
 
 export const sandboxRelease = pgTable("sandbox_release", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -69,7 +74,9 @@ export const sandboxRelease = pgTable("sandbox_release", {
   releasedAt: timestamp("released_at").notNull().defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("sandbox_release_sandbox_id_idx").on(table.sandboxId),
+]);
 
 export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -78,4 +85,6 @@ export const sessionMessage = pgTable("session_message", {
   contentLength: integer("content_length").notNull().default(0),
   type: text("type").notNull(), // request | response
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("session_message_sandbox_session_id_idx").on(table.sandboxSessionId),
+]);
