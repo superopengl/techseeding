@@ -153,7 +153,7 @@ Create a new student user with profile.
 
 ### `POST /api/admin/check-user-name`
 
-Check whether an account name (user_name) is available.
+Check whether an user name (user_name) is available.
 
 - **Auth:** None (TODO: restrict to admin/teacher)
 - **Request body:**

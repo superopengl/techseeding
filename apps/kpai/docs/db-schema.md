@@ -22,7 +22,7 @@ user 1──* otp_code
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| user_name | text | NOT NULL, UNIQUE | Username (account name) |
+| user_name | text | NOT NULL, UNIQUE | Username |
 | role | text | NOT NULL, one of `student`, `teacher`, `admin` | User role |
 | email | text | nullable, UNIQUE | Email address |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |

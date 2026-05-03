@@ -352,16 +352,16 @@ export function AdminPage() {
         <Form form={addForm} layout="horizontal" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} clearOnDestroy style={{ marginTop: 16 }}>
           <Form.Item
             name="accountName"
-            label="Account Name"
+            label="User Name"
             rules={[
-              { required: true, message: "Account Name is required" },
-              { max: 50, message: "Account Name must be 50 characters or less" },
+              { required: true, message: "User Name is required" },
+              { max: 50, message: "User Name must be 50 characters or less" },
               { pattern: /^[a-zA-Z0-9_/]+$/, message: "Only letters, digits, underscore, and slash are allowed" },
               {
                 validator: async (_, value) => {
                   if (!value || !/^[a-zA-Z0-9_/]+$/.test(value)) return;
                   const result = await apiCall("/api/admin/check-user-name", { method: "POST", body: JSON.stringify({ userName: value }), headers: { "Content-Type": "application/json" } });
-                  if (!result.available) throw new Error("Account Name is already taken");
+                  if (!result.available) throw new Error("User Name is already taken");
                 },
               },
             ]}
