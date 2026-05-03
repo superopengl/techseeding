@@ -98,6 +98,26 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
 
 // --- Start ---
 
+function redactEnvValue(name, value) {
+  if (/SECRET|KEY|TOKEN|PASSWORD/i.test(name)) return "***";
+  try {
+    const url = new URL(value);
+    if (url.password) {
+      url.password = "***";
+      return url.toString();
+    }
+  } catch { /* not a URL */ }
+  return value;
+}
+
+const kpaiEnv = Object.fromEntries(
+  Object.entries(process.env)
+    .filter(([k]) => k.startsWith("KPAI_"))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => [k, redactEnvValue(k, v)])
+);
+fastify.log.info({ env: kpaiEnv }, "KidPlayAI environment");
+
 const serviceUrl = new URL(process.env.KPAI_API_SERVICE_URL);
 const port = serviceUrl.port || (serviceUrl.protocol === "https:" ? 443 : 80);
 fastify.listen({ port: Number(port), host: serviceUrl.hostname }, (err) => {
