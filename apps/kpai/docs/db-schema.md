@@ -22,7 +22,7 @@ user 1──* otp_code
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
-| user_name | text | NOT NULL, UNIQUE | Username |
+| user_name | text | NOT NULL, UNIQUE | Username (account name) |
 | role | text | NOT NULL, one of `student`, `teacher`, `admin` | User role |
 | email | text | nullable, UNIQUE | Email address |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
@@ -53,7 +53,6 @@ Extended profile information for a student user. One-to-one relationship with `u
 | student_id | text | NOT NULL, UNIQUE | Student ID (used for login and display) |
 | first_name | text | NOT NULL | Student's first name |
 | last_name | text | NOT NULL | Student's last name |
-| nickname | text | NOT NULL | Preferred nickname |
 | dob | date | nullable | Date of birth |
 | gender | text | nullable | Gender |
 | home_address | text | nullable | Home address |

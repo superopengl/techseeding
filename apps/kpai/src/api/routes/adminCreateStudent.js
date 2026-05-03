@@ -5,16 +5,24 @@ import { success, error } from "../lib/response.js";
 
 export function adminCreateStudent(fastify) {
   fastify.post("/api/admin/student", async (request, reply) => {
-    const { firstName, lastName, nickname, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
+    const { accountName, firstName, lastName, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
 
-    if (!firstName || !lastName) {
-      return error(reply, 400, "VALIDATION_ERROR", "firstName and lastName are required");
+    if (!accountName || !firstName || !lastName) {
+      return error(reply, 400, "VALIDATION_ERROR", "accountName, firstName and lastName are required");
+    }
+
+    const limits = { accountName: 50, firstName: 50, lastName: 50, homeAddress: 100, contactNumber: 20, custodianName: 50, notes: 2000 };
+    for (const [field, max] of Object.entries(limits)) {
+      const val = request.body[field];
+      if (val && val.length > max) {
+        return error(reply, 400, "VALIDATION_ERROR", `${field} must be ${max} characters or less`);
+      }
     }
 
     const { newUser, profile: newProfile } = await db.transaction(async (tx) => {
       const [newUser] = await tx
         .insert(user)
-        .values({ userName: nickname, role: "student" })
+        .values({ userName: accountName, role: "student" })
         .returning();
 
       const studentId = generateStudentId();
@@ -26,7 +34,6 @@ export function adminCreateStudent(fastify) {
           studentId,
           firstName: firstName,
           lastName: lastName,
-          nickname: nickname || firstName,
           dob: dob || null,
           gender: gender || null,
           homeAddress: homeAddress || null,
@@ -48,7 +55,6 @@ export function adminCreateStudent(fastify) {
         studentId: newProfile.studentId,
         firstName: newProfile.firstName,
         lastName: newProfile.lastName,
-        nickname: newProfile.nickname,
         joinedAt: newProfile.joinedAt,
       },
     }));

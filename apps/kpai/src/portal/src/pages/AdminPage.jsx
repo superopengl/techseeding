@@ -22,12 +22,26 @@ export function AdminPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addForm] = Form.useForm();
   const [addLoading, setAddLoading] = useState(false);
+  const [addSubmittable, setAddSubmittable] = useState(false);
+  const addFormValues = Form.useWatch([], addForm);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerStudent, setDrawerStudent] = useState(null);
   const [sandboxes, setSandboxes] = useState([]);
   const [sandboxesLoading, setSandboxesLoading] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewSandbox, setReviewSandbox] = useState(null);
+
+  useEffect(() => {
+    const { accountName, firstName, lastName } = addFormValues || {};
+    if (!accountName || !firstName || !lastName) {
+      setAddSubmittable(false);
+      return;
+    }
+    addForm.validateFields({ validateOnly: true }).then(
+      () => setAddSubmittable(true),
+      () => setAddSubmittable(false),
+    );
+  }, [addFormValues, addForm]);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -162,11 +176,6 @@ export function AdminPage() {
       title: "Last Name",
       dataIndex: "lastName",
       key: "lastName",
-    },
-    {
-      title: "Nickname",
-      dataIndex: "nickname",
-      key: "nickname",
     },
     {
       title: "Email",
@@ -338,22 +347,32 @@ export function AdminPage() {
         destroyOnHidden
         confirmLoading={addLoading}
         okText="Submit"
+        okButtonProps={{ disabled: !addSubmittable }}
       >
         <Form form={addForm} layout="horizontal" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} clearOnDestroy style={{ marginTop: 16 }}>
-          <Form.Item name="firstName" label="First Name" rules={[{ required: true, message: "First Name is required" }]}>
-            <Input
-              onBlur={() => {
-                if (!addForm.getFieldValue("nickname")) {
-                  addForm.setFieldValue("nickname", addForm.getFieldValue("firstName"));
-                }
-              }}
-            />
-          </Form.Item>
-          <Form.Item name="lastName" label="Last Name" rules={[{ required: true, message: "Last Name is required" }]}>
+          <Form.Item
+            name="accountName"
+            label="Account Name"
+            rules={[
+              { required: true, message: "Account Name is required" },
+              { max: 50, message: "Account Name must be 50 characters or less" },
+              {
+                validator: async (_, value) => {
+                  if (!value) return;
+                  const result = await apiCall("/api/admin/check-user-name", { method: "POST", body: JSON.stringify({ userName: value }), headers: { "Content-Type": "application/json" } });
+                  if (!result.available) throw new Error("Account Name is already taken");
+                },
+              },
+            ]}
+            validateTrigger="onBlur"
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="nickname" label="Nickname" rules={[{ required: true, message: "Nickname is required" }]}>
-            <Input />
+          <Form.Item name="firstName" label="First Name" rules={[{ required: true, message: "First Name is required" }, { max: 50, message: "First Name must be 50 characters or less" }]}>
+            <Input maxLength={50} />
+          </Form.Item>
+          <Form.Item name="lastName" label="Last Name" rules={[{ required: true, message: "Last Name is required" }, { max: 50, message: "Last Name must be 50 characters or less" }]}>
+            <Input maxLength={50} />
           </Form.Item>
           <Form.Item name="dob" label="Date of Birth">
             <DatePicker style={{ width: "100%" }} defaultPickerValue={dayjs().subtract(10, "year")} />
@@ -364,17 +383,17 @@ export function AdminPage() {
               <Radio value="girl">Girl</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item name="homeAddress" label="Home Address">
-            <Input />
+          <Form.Item name="homeAddress" label="Home Address" rules={[{ max: 100, message: "Home Address must be 100 characters or less" }]}>
+            <Input maxLength={100} />
           </Form.Item>
-          <Form.Item name="contactNumber" label="Contact Number">
-            <Input />
+          <Form.Item name="contactNumber" label="Contact Number" rules={[{ max: 20, message: "Contact Number must be 20 characters or less" }]}>
+            <Input maxLength={20} />
           </Form.Item>
-          <Form.Item name="custodianName" label="Parent/Guardian">
-            <Input />
+          <Form.Item name="custodianName" label="Parent/Guardian" rules={[{ max: 50, message: "Parent/Guardian must be 50 characters or less" }]}>
+            <Input maxLength={50} />
           </Form.Item>
-          <Form.Item name="notes" label="Notes">
-            <Input.TextArea rows={2} />
+          <Form.Item name="notes" label="Notes" rules={[{ max: 2000, message: "Notes must be 2000 characters or less" }]}>
+            <Input.TextArea rows={2} maxLength={2000} showCount />
           </Form.Item>
         </Form>
       </Modal>

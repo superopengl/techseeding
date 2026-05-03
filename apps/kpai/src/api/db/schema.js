@@ -7,7 +7,9 @@ export const user = pgTable("user", {
   email: text("email").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("user_user_name_idx").on(table.userName),
+]);
 
 export const otpCode = pgTable("otp_code", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -23,7 +25,6 @@ export const studentProfile = pgTable("student_profile", {
   studentId: text("student_id").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  nickname: text("nickname").notNull(),
   dob: date("dob"),
   gender: text("gender"),
   homeAddress: text("home_address"),

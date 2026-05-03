@@ -120,12 +120,9 @@ Create a new student user with profile.
 - **Request body:**
   ```json
   {
-    "userName": "string",
-    "email": "string",
-    "studentId": "string",
+    "accountName": "string (saved as user.user_name)",
     "firstName": "string",
     "lastName": "string",
-    "nickname": "string (optional)",
     "dob": "date string (optional)",
     "gender": "string (optional)",
     "homeAddress": "string (optional)",
@@ -146,14 +143,33 @@ Create a new student user with profile.
       "studentId": "string",
       "firstName": "string",
       "lastName": "string",
-      "nickname": "string | null",
       "joinedAt": "timestamp"
     }
   }
   ```
 - **Errors:**
-  - `400` — Missing required fields (userName, email, studentId, firstName, lastName)
+  - `400` — Missing required fields (accountName, firstName, lastName)
 - **Side effects:** Inserts a row into `user` (role=student) and `student_profile`.
+
+### `POST /api/admin/check-user-name`
+
+Check whether an account name (user_name) is available.
+
+- **Auth:** None (TODO: restrict to admin/teacher)
+- **Request body:**
+  ```json
+  {
+    "userName": "string"
+  }
+  ```
+- **Response:** `200`
+  ```json
+  {
+    "available": true
+  }
+  ```
+- **Errors:**
+  - `400` — Missing `userName`
 
 ---
 

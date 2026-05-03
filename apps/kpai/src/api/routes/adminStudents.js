@@ -27,7 +27,6 @@ export function adminStudents(fastify) {
       studentId: row.student_profile.studentId,
       firstName: row.student_profile.firstName,
       lastName: row.student_profile.lastName,
-      nickname: row.student_profile.nickname,
       joinedAt: row.student_profile.joinedAt,
       createdAt: row.student_profile.createdAt,
       loginRequestId: row.login_request?.id ?? null,
