@@ -5,7 +5,9 @@
     "enabled": true
   },
   "sidebar": "hide",
-  "display_thinking": "hide",
+  "header_visible": false,
+  "scrollbar_toggle": false,
+  "show_thinking": false,
   "diff_style": "auto",
   "mouse": true
 }
