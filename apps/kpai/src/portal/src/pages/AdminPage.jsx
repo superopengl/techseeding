@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin, Tabs } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin, Tabs, Badge } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
@@ -337,7 +337,21 @@ export function AdminPage() {
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
       defaultSortOrder: "descend",
     },
+    {
+      title: "Read At",
+      dataIndex: "readAt",
+      key: "readAt",
+      render: (t) => (t ? new Date(t).toLocaleString() : "-"),
+      sorter: (a, b) => {
+        const av = a.readAt ? new Date(a.readAt).getTime() : 0;
+        const bv = b.readAt ? new Date(b.readAt).getTime() : 0;
+        return av - bv;
+      },
+    },
   ];
+
+  const unreadEnquiryCount = enquiries.filter((e) => !e.readAt).length;
+  const pendingApprovalCount = students.filter((s) => s.loginRequestStatus === "requesting").length;
 
   return (
     <Layout style={{ minHeight: "100vh", background: colors.canvas }}>
@@ -369,7 +383,14 @@ export function AdminPage() {
           items={[
             {
               key: "students",
-              label: "Students",
+              label: (
+                <Space size={8}>
+                  <span>Students</span>
+                  {pendingApprovalCount > 0 && (
+                    <Badge count={pendingApprovalCount} style={{ backgroundColor: colors.primary }} />
+                  )}
+                </Space>
+              ),
               children: (
                 <>
                   <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
@@ -410,7 +431,12 @@ export function AdminPage() {
             },
             {
               key: "enquiries",
-              label: "Enquiries",
+              label: (
+                <Space size={8}>
+                  <span>Enquiries</span>
+                  {unreadEnquiryCount > 0 && <Badge count={unreadEnquiryCount} />}
+                </Space>
+              ),
               children: (
                 <>
                   <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
@@ -428,6 +454,9 @@ export function AdminPage() {
                     rowKey="id"
                     loading={enquiriesLoading}
                     pagination={false}
+                    onRow={(record) => ({
+                      style: record.readAt ? undefined : { fontWeight: 700 },
+                    })}
                     style={{
                       background: colors.surface,
                       borderRadius: 16,
