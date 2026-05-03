@@ -20,9 +20,9 @@ const dark = {
   outputBg: "rgba(255, 255, 255, 0.05)",
 };
 
-function OutputMessage({ msg }) {
+const OutputMessage = React.memo(function OutputMessage({ msg }) {
   const [expanded, setExpanded] = useState(false);
-  const text = stripAnsi(msg.content?.text || "");
+  const text = msg.text;
   const preview = text.slice(0, 80).split("\n")[0];
 
   return (
@@ -66,9 +66,9 @@ function OutputMessage({ msg }) {
       )}
     </div>
   );
-}
+});
 
-function MessageTimeline({ sessions, showAi }) {
+const MessageTimeline = React.memo(function MessageTimeline({ sessions, showAi }) {
   if (sessions.length === 0) {
     return (
       <div style={{ padding: 24, color: dark.textMuted, textAlign: "center" }}>
@@ -118,14 +118,13 @@ function MessageTimeline({ sessions, showAi }) {
                 background: "rgba(67, 184, 140, 0.35)",
                 border: "1px solid rgba(67, 184, 140, 0.4)",
               }}>
-                {stripAnsi(msg.content?.text || "")}
+                {msg.text}
               </pre>
             </div>
           ),
         });
       } else if (showAi) {
-        const stripped = stripAnsi(msg.content?.text || "");
-        if (!stripped) return;
+        if (!msg.text) return;
         items.push({
           color: "gray",
           content: <OutputMessage msg={msg} />,
@@ -148,7 +147,7 @@ function MessageTimeline({ sessions, showAi }) {
       </div>
     </ConfigProvider>
   );
-}
+});
 
 export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName, onClose }) {
   const [leftPct, setLeftPct] = useState(50);
@@ -164,7 +163,10 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
     if (!open || !sandboxId) return;
     setLoading(true);
     apiCall(`/api/admin/sandbox/${sandboxId}/messages`)
-      .then(setSessions)
+      .then((data) => setSessions(data.map((s) => ({
+        ...s,
+        messages: s.messages.map((m) => ({ ...m, text: stripAnsi(m.content?.text || "") })),
+      }))))
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
   }, [open, sandboxId]);
