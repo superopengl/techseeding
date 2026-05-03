@@ -1,5 +1,5 @@
 {
-  "name": "kidplayai",
+  "name": "@techseeding/kidplayai",
   "version": "1.0.0",
   "description": "",
   "type": "module",
@@ -9,7 +9,8 @@
     "dev": "concurrently \"pnpm start:api\" \"pnpm start:portal\"",
     "start:api": "node --env-file=.env --watch-path=src/api --inspect src/api/server.js",
     "start:portal": "pnpm --filter kidplayai-portal dev",
-    "build:prod": "rm -rf dist && pnpm --filter kidplayai-portal build && mkdir -p dist/src && cp -r src/api dist/src/api && cp package.json dist/",
+    "build:prod": "rm -rf dist && pnpm --filter kidplayai-portal build && mkdir -p dist/src && cp -r src/api dist/src/api && cp package.json pnpm-lock.yaml dist/",
+    "build:docker": "pnpm build:prod && docker build -t techseeding/kidplayai -f devops/Dockerfile .",
     "start:prod": "node --env-file=.env.production dist/src/api/server.js",
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",
@@ -28,6 +29,9 @@
     "jsonwebtoken": "^9.0.3",
     "node-pty": "^1.1.0",
     "postgres": "^3.4.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["node-pty"]
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

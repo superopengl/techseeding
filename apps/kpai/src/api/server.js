@@ -98,8 +98,9 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
 
 // --- Start ---
 
-const { port, hostname } = new URL(process.env.KPAI_API_SERVICE_URL);
-fastify.listen({ port: Number(port), host: hostname }, (err) => {
+const serviceUrl = new URL(process.env.KPAI_API_SERVICE_URL);
+const port = serviceUrl.port || (serviceUrl.protocol === "https:" ? 443 : 80);
+fastify.listen({ port: Number(port), host: serviceUrl.hostname }, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);

@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: techseeding/kidplayai
     build:
       context: ..
       dockerfile: devops/Dockerfile
