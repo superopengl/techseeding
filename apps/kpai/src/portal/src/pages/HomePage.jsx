@@ -1037,7 +1037,7 @@ export function HomePage() {
                     { max: 100, message: "Must be 100 characters or less" },
                   ]}
                 >
-                  <Input placeholder="e.g. parent@email.com or 0412 345 678" maxLength={100} size="large" />
+                  <Input placeholder="parent@email.com or 0412 345 678" maxLength={100} size="large" />
                 </Form.Item>
 
                 <Form.Item
@@ -1053,7 +1053,7 @@ export function HomePage() {
                 </Form.Item>
 
                 <Form.Item
-                  label="Questions or Message"
+                  label="Message"
                   name="message"
                   rules={[
                     { required: true, message: "Please enter your message" },
