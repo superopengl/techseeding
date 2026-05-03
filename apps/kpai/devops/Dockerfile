@@ -25,6 +25,9 @@ RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/late
 RUN mkdir -p /root/.local/share/opencode /root/.local/share/opentui \
     /root/.config/opencode /root/.cache/opencode /root/.local/state/opencode
 
+# Copy opencode user-level config (model, permissions, TUI settings)
+COPY devops/opencode-config/ /root/.config/opencode/
+
 # Enable pnpm (version is pinned via the "packageManager" field in package.json)
 RUN corepack enable
 
