@@ -31,6 +31,8 @@ COPY devops/opencode-config/ /root/.config/opencode/
 # Enable pnpm (version is pinned via the "packageManager" field in package.json)
 RUN corepack enable
 
+ENV NODE_ENV=production
+
 WORKDIR /app
 
 # Copy pre-built production dist from local
