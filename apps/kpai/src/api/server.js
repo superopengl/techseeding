@@ -4,6 +4,8 @@ import fastifyWebsocket from "@fastify/websocket";
 import path from "path";
 import { fileURLToPath } from "url";
 import { ROOT_DIR } from "./lib/sandboxManager.js";
+import { verifyToken } from "./lib/verifyToken.js";
+import { error } from "./lib/response.js";
 import { healthcheck } from "./routes/healthcheck.js";
 import { loginStudent } from "./routes/loginStudent.js";
 import { loginStatus } from "./routes/loginStatus.js";
@@ -39,6 +41,17 @@ await fastify.register(fastifyStatic, {
   prefix: "/",
 });
 
+
+// --- Auth ---
+
+fastify.addHook("onRequest", async (request, reply) => {
+  if (!request.url.startsWith("/api/admin/")) return;
+  const payload = verifyToken(request);
+  if (!payload || payload.role !== "admin") {
+    return error(reply, 401, "UNAUTHORIZED", "Admin authentication required");
+  }
+  request.user = payload;
+});
 
 // --- Routes ---
 
