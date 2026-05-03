@@ -6,12 +6,104 @@
   <title>KidPlayAI Student Craft</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", "Fira Code", "Consolas", "Menlo", "Monaco", "Liberation Mono", "Courier New", monospace;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #e8f8f0 0%, #e8f4fa 100%);
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      overflow: auto;
+    }
+    .stage {
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+    .emoji {
+      font-size: 72px;
+      line-height: 1;
+      display: inline-block;
+      animation: float 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 6px 18px rgba(67,184,140,0.25));
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 18px 0 8px;
+      color: #2d3748;
+      letter-spacing: -0.01em;
+    }
+    p.lede {
+      font-size: 15px;
+      color: #4a5568;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .arrow {
+      display: inline-block;
+      animation: nudge 1.4s ease-in-out infinite;
+      color: #43b88c;
+      font-weight: 700;
+    }
+    @keyframes nudge {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+    .examples-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #718096;
+      margin-bottom: 10px;
+    }
+    .examples {
+      display: grid;
+      gap: 10px;
+      text-align: left;
+    }
+    .example {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(67,184,140,0.18);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #4a5568;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .example .icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+    @media (max-height: 520px) {
+      .examples { display: none; }
+      .examples-label { display: none; }
+      h1 { font-size: 22px; }
+      .emoji { font-size: 56px; }
     }
   </style>
 </head>
 <body>
-KidPlayAI - Empty sandbox
+  <div class="stage">
+    <div class="emoji">✨</div>
+    <h1>Your craft will appear here!</h1>
+    <p class="lede">Tell the AI in the terminal what you want to build <span class="arrow">&rarr;</span></p>
+    <div class="examples-label">Try one of these</div>
+    <div class="examples">
+      <div class="example"><span class="icon">⭐</span><span>Make a game where I catch falling stars</span></div>
+      <div class="example"><span class="icon">🐶</span><span>Build a virtual pet that gets hungry</span></div>
+      <div class="example"><span class="icon">🌀</span><span>Create a maze I can solve with arrow keys</span></div>
+    </div>
+  </div>
 </body>
 </html>

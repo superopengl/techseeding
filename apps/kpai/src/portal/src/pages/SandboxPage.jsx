@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal } from "antd";
-import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
@@ -152,10 +152,9 @@ export function SandboxPage() {
           flexShrink: 0,
         }}
       >
-        {/* Decorative circles */}
-        <div style={{ position: "absolute", width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.08)", top: -40, left: -20 }} />
-        <div style={{ position: "absolute", width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.06)", bottom: -30, right: 60 }} />
-        <div style={{ position: "absolute", width: 60, height: 60, borderRadius: "50%", background: "rgba(255,255,255,0.1)", top: -10, right: "30%" }} />
+        {/* Decorative circles — kept on the far left/center to avoid the action buttons on the right */}
+        <div style={{ position: "absolute", width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,0.08)", top: -40, left: -20, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.07)", bottom: -28, left: 140, pointerEvents: "none" }} />
         <div
           style={{
             position: "relative",
@@ -203,6 +202,7 @@ export function SandboxPage() {
             ) : (
               <span
                 onClick={startEditing}
+                title="Click to rename"
                 style={{
                   fontFamily: fonts.heading,
                   fontSize: 16,
@@ -211,14 +211,24 @@ export function SandboxPage() {
                   cursor: "pointer",
                   padding: "4px 12px",
                   borderRadius: 8,
-                  border: "1px dashed transparent",
-                  transition: "border-color 0.2s",
+                  border: "1px dashed rgba(255,255,255,0.25)",
+                  transition: "border-color 0.2s, background 0.2s",
                   textShadow: shadows.textOnGradient,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
-                {title || "Untitled Craft"}
+                <span>{title || "Untitled Craft"}</span>
+                <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
               </span>
             )}
           </div>
@@ -268,22 +278,76 @@ export function SandboxPage() {
       </div>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
-          <div style={{ width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
+          <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
             <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
+            <div
+              title="Preview updates automatically as the AI builds"
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "4px 10px",
+                background: "rgba(255,255,255,0.92)",
+                borderRadius: 999,
+                boxShadow: shadows.cardSubtle,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                color: colors.bodyStrong,
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: colors.successGreen,
+                  boxShadow: `0 0 0 0 ${colors.successGreen}`,
+                  animation: "kpaiLivePulse 1.8s ease-out infinite",
+                }}
+              />
+              LIVE
+            </div>
           </div>
         </div>
         <div
           onMouseDown={onMouseDown}
+          title="Drag to resize"
           style={{
             width: DIVIDER_WIDTH,
             cursor: "col-resize",
             background: colors.border,
             flexShrink: 0,
             transition: "background 0.15s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.background = colors.primary)}
           onMouseLeave={(e) => (e.currentTarget.style.background = colors.border)}
-        />
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+              pointerEvents: "none",
+              opacity: 0.55,
+            }}
+          >
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+          </div>
+        </div>
         <div style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
           <Terminal sandboxId={sandboxId} onFileChanged={handleFileChanged} />
         </div>

@@ -1,3 +1,16 @@
+/* Pulsing dot used by the LIVE preview indicator on the sandbox page. */
+@keyframes kpaiLivePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(97, 206, 112, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(97, 206, 112, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(97, 206, 112, 0);
+  }
+}
+
 /* Override Chrome/Safari autofill background so inputs don't tint yellow/blue. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
