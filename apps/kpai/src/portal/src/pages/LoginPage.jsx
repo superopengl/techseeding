@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, Divider, message } from "antd";
-import { LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined } from "@ant-design/icons";
+import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, message } from "antd";
+import { LoadingOutlined, KeyOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
@@ -69,30 +69,8 @@ export function LoginPage() {
   }, [loginRequestId, status, navigate]);
 
   const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
-
-  const handleSubmit = async () => {
-    const id = identifier.trim();
-    if (!USER_NAME_RE.test(id)) {
-      setLoginError("User Name may only contain letters, digits, underscore, and slash");
-      return;
-    }
-    setLoading(true);
-    setLoginError(null);
-    try {
-      const data = await apiCall("/api/login/student", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userName: id }),
-      });
-      setLoginRequestId(data.loginRequestId);
-      setRemaining(600);
-      setStatus("pending");
-    } catch (e) {
-      setLoginError(e.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const trimmedId = identifier.trim();
+  const isEmail = trimmedId.includes("@");
 
   const handleSendOtp = async () => {
     const id = identifier.trim();
@@ -112,6 +90,35 @@ export function LoginPage() {
       setOtpError(null);
       setOtpDigits(["", "", "", "", "", ""]);
       setStatus("otp");
+    }
+  };
+
+  const handleSubmit = async () => {
+    const id = identifier.trim();
+    if (!id) return;
+    if (id.includes("@")) {
+      handleSendOtp();
+      return;
+    }
+    if (!USER_NAME_RE.test(id)) {
+      setLoginError("Your name can only have letters, numbers, _ or /");
+      return;
+    }
+    setLoading(true);
+    setLoginError(null);
+    try {
+      const data = await apiCall("/api/login/student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userName: id }),
+      });
+      setLoginRequestId(data.loginRequestId);
+      setRemaining(600);
+      setStatus("pending");
+    } catch (e) {
+      setLoginError(e.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -285,34 +292,37 @@ export function LoginPage() {
           >
             Waiting for Approval
           </Title>
-          <Paragraph style={{ color: colors.body, fontSize: 16 }}>
+          <Paragraph style={{ color: colors.body, fontSize: 16, marginBottom: 8 }}>
             Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher
             will approve your login shortly. Hang tight!
           </Paragraph>
-          <div style={{ color: colors.muted, fontSize: 14, marginTop: 4, marginBottom: 16 }}>
-            {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")} remaining
+          <div
+            style={{
+              background: colors.mintBg,
+              color: colors.bodyStrong,
+              fontSize: 14,
+              borderRadius: 12,
+              padding: "10px 16px",
+              marginTop: 16,
+              marginBottom: 16,
+            }}
+          >
+            👉 Let your teacher know you're ready!
           </div>
+          {remaining <= 120 && remaining > 0 && (
+            <div style={{ color: colors.accentAmber, fontSize: 13, marginBottom: 12 }}>
+              Still waiting — {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")} left before timeout
+            </div>
+          )}
           <Button
             type="link"
             onClick={() => {
               setStatus(null);
               setIdentifier("");
             }}
-            style={{ color: colors.body, fontSize: 14 }}
-          >
-            Re-login
-          </Button>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "8px 0" }}>
-            <div style={{ flex: 1, height: 1, background: colors.border }} />
-            <span style={{ color: colors.muted, fontSize: 13 }}>or</span>
-            <div style={{ flex: 1, height: 1, background: colors.border }} />
-          </div>
-          <Button
-            type="link"
-            onClick={() => { setOtpError(null); setOtpDigits(["", "", "", "", "", ""]); setStatus("otp"); }}
             style={{ color: colors.primary, fontSize: 14 }}
           >
-            Use Verification Code
+            Wrong name? Start over
           </Button>
         </Card>
       </div>
@@ -434,14 +444,15 @@ export function LoginPage() {
             )}
             <Button
               type="link"
-              icon={<ArrowLeftOutlined />}
               onClick={() => {
-                setStatus(loginRequestId ? "pending" : null);
+                setStatus(null);
+                setIdentifier("");
+                setLoginRequestId(null);
                 setOtpDigits(["", "", "", "", "", ""]);
               }}
-              style={{ color: colors.body, fontSize: 14 }}
+              style={{ color: colors.primary, fontSize: 14 }}
             >
-              {loginRequestId ? "Back to Waiting" : "Back to Login"}
+              Re-login
             </Button>
           </div>
         </Card>
@@ -492,7 +503,7 @@ export function LoginPage() {
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Input
             size="large"
-            placeholder="User Name or Email"
+            placeholder="User name or email"
             allowClear
             maxLength={100}
             value={identifier}
@@ -506,9 +517,9 @@ export function LoginPage() {
               type="primary"
               size="large"
               block
-              loading={loading}
+              loading={loading || emailLoading}
               onClick={handleSubmit}
-              disabled={!identifier.trim()}
+              disabled={!trimmedId}
               style={{
                 height: 48,
                 borderRadius: 12,
@@ -520,10 +531,12 @@ export function LoginPage() {
                 boxShadow: shadows.ctaButtonSmall,
               }}
             >
-              Login by Request Approval
+              {isEmail ? "Email me a code" : "Ask my teacher"}
             </Button>
             <div style={{ color: colors.muted, fontSize: 12, textAlign: "center", marginTop: 6 }}>
-              Waiting for coach's approval. Used in-class.
+              {isEmail
+                ? "We'll send a 6-digit code to your email."
+                : "Type your user name to ask your teacher, or your email for a code."}
             </div>
           </div>
           {loginError && (
@@ -531,29 +544,6 @@ export function LoginPage() {
               {loginError}
             </div>
           )}
-          <Divider style={{ margin: "4px 0", color: colors.muted, fontSize: 13 }}>or</Divider>
-          <div>
-            <Button
-              size="large"
-              block
-              loading={emailLoading}
-              onClick={handleSendOtp}
-              disabled={!identifier.trim()}
-              style={{
-                height: 48,
-                borderRadius: 12,
-                fontSize: 16,
-                fontWeight: 600,
-                borderColor: colors.primary,
-                color: colors.primary,
-              }}
-            >
-              Login by Verification Code
-            </Button>
-            <div style={{ color: colors.muted, fontSize: 12, textAlign: "center", marginTop: 6 }}>
-              A verification code will be sent to your registered email.
-            </div>
-          </div>
         </Space>
         <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
           Don't have an account?{" "}
