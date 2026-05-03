@@ -7,7 +7,7 @@ LABEL com.docker.compose.project="techseeding"
 #   curl, ca-certificates — opencode install
 #   git — opencode runtime (version control operations)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ curl ca-certificates git \
+    python3 make g++ curl ca-certificates git libdbus-1-3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install opencode CLI
