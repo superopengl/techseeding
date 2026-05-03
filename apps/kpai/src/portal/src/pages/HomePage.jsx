@@ -98,13 +98,17 @@ function NavBar({ onStart }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "16px 48px",
-        background: "linear-gradient(to right, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.85) 220px, rgba(255,255,255,0) 50%)",
-        position: "absolute",
+        gap: 12,
+        padding: "14px clamp(16px, 4vw, 48px)",
+        position: "sticky",
         top: 0,
-        left: 0,
-        right: 0,
         zIndex: 100,
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(67,184,140,0.28) 1px, transparent 0), linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)`,
+        backgroundSize: "22px 22px, auto",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        borderBottom: "1px solid rgba(226,232,240,0.6)",
+        boxShadow: shadows.cardSubtle,
       }}
     >
       <Logo size={36} />
@@ -114,14 +118,13 @@ function NavBar({ onStart }) {
         onClick={onStart}
         style={{
           borderRadius: 24,
-          paddingInline: 28,
+          paddingInline: 20,
           fontWeight: 600,
           height: 44,
-          background: "rgba(255,255,255,0.15)",
-          color: colors.onDark,
-          border: "1.5px solid rgba(255,255,255,0.4)",
-          boxShadow: "none",
-          backdropFilter: "blur(8px)",
+          background: colors.surface,
+          color: colors.primary,
+          border: `1.5px solid ${colors.primary}`,
+          boxShadow: shadows.cardSubtle,
         }}
       >
         Student Login
@@ -244,7 +247,7 @@ export function HomePage() {
       <div
         style={{
           background: gradients.hero,
-          padding: "150px 24px 180px",
+          padding: "clamp(60px, 12vw, 90px) 20px 180px",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -289,7 +292,7 @@ export function HomePage() {
           <Title
             style={{
               fontFamily: fonts.heading,
-              fontSize: 56,
+              fontSize: "clamp(34px, 8vw, 56px)",
               color: colors.onDark,
               marginBottom: 16,
               lineHeight: 1.2,
@@ -300,7 +303,7 @@ export function HomePage() {
           </Title>
           <Paragraph
             style={{
-              fontSize: 20,
+              fontSize: "clamp(16px, 2.4vw, 20px)",
               color: colors.onDarkSecondary,
               marginBottom: 44,
               maxWidth: 540,
