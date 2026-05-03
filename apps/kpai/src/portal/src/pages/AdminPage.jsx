@@ -9,6 +9,7 @@ import {
   CodeOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { Link } from "react-router-dom";
 import { colors, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { SandboxReviewDrawer } from "../components/SandboxReviewDrawer";
@@ -233,7 +234,9 @@ export function AdminPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Logo size={36} square />
+          <Link to="/" aria-label="Go to homepage" style={{ display: "inline-flex", alignItems: "center" }}>
+            <Logo size={36} square />
+          </Link>
           <span style={{ color: colors.muted, fontSize: 14 }}>
             Admin Dashboard
           </span>
