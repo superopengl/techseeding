@@ -1,5 +1,7 @@
 FROM node:24-slim
 
+LABEL com.docker.compose.project="techseeding"
+
 # System dependencies:
 #   python3, make, g++  — node-pty native compilation
 #   curl, ca-certificates — opencode install
