@@ -12,7 +12,7 @@
     "build:prod": "rm -rf dist && pnpm --filter kidplayai-portal build && mkdir -p dist/src && cp -r src/api dist/src/api && cp package.json pnpm-lock.yaml dist/",
     "build:docker": "pnpm build:prod && docker build -t techseeding/kidplayai -f devops/Dockerfile .",
     "start:prod": "node --env-file=.env.production dist/src/api/server.js",
-    "start:prod:docker": "pnpm build:docker && docker rm -f kidplayai 2>/dev/null; docker run -d --name kidplayai -p 9515:80 --env-file .env -e KPAI_API_SERVICE_URL=http://0.0.0.0:80 -e KPAI_DATABASE_URL=postgres://host.docker.internal:5432/kidplayai techseeding/kidplayai",
+    "start:prod:docker": "pnpm build:docker && docker rm -f kidplayai 2>/dev/null; docker run -d --name kidplayai -p 9515:80 --env-file .env.localdocker techseeding/kidplayai",
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config src/api/drizzle.config.js",
