@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Typography } from "antd";
 import { Link } from "react-router-dom";
 import { Logo } from "../components/Logo";
+import { setPageTitle } from "../utils/setPageTitle";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -16,7 +17,7 @@ const sectionTitle = {
 };
 
 export function TermsOfUsePage() {
-  useEffect(() => { document.title = "Terms of Use"; }, []);
+  useEffect(() => { setPageTitle("Terms of Use"); }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
       <div

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, Segmented, message } from "antd";
+import { setPageTitle } from "../utils/setPageTitle";
+import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, Divider, message } from "antd";
 import { LoadingOutlined, KeyOutlined, ArrowLeftOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -12,21 +13,19 @@ const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
 
 export function LoginPage() {
-  useEffect(() => { document.title = "Login"; }, []);
+  useEffect(() => { setPageTitle("Login"); }, []);
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
   const [loginRequestId, setLoginRequestId] = useState(null);
   const [status, setStatus] = useState(null);
-  const [email, setEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
   const [contactOpen, setContactOpen] = useState(false);
-  const [loginTab, setLoginTab] = useState("in-class");
   const otpRefs = useRef([]);
 
   useEffect(() => {
@@ -72,7 +71,7 @@ export function LoginPage() {
   const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
 
   const handleSubmit = async () => {
-    const id = name.trim();
+    const id = identifier.trim();
     if (!USER_NAME_RE.test(id)) {
       setLoginError("User Name may only contain letters, digits, underscore, and slash");
       return;
@@ -96,13 +95,15 @@ export function LoginPage() {
   };
 
   const handleSendOtp = async () => {
-    if (!email.trim()) return;
+    const id = identifier.trim();
+    if (!id) return;
     setEmailLoading(true);
+    setLoginError(null);
     try {
       await apiCall("/api/login/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: id }),
       });
     } catch {
       // Silently proceed to OTP screen regardless of whether the email exists
@@ -285,7 +286,7 @@ export function LoginPage() {
             Waiting for Approval
           </Title>
           <Paragraph style={{ color: colors.body, fontSize: 16 }}>
-            Hi <strong style={{ color: colors.heading }}>{name}</strong>! Your teacher
+            Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher
             will approve your login shortly. Hang tight!
           </Paragraph>
           <div style={{ color: colors.muted, fontSize: 14, marginTop: 4, marginBottom: 16 }}>
@@ -295,7 +296,7 @@ export function LoginPage() {
             type="link"
             onClick={() => {
               setStatus(null);
-              setName("");
+              setIdentifier("");
             }}
             style={{ color: colors.body, fontSize: 14 }}
           >
@@ -337,7 +338,7 @@ export function LoginPage() {
             type="primary"
             onClick={() => {
               setStatus(null);
-              setName("");
+              setIdentifier("");
             }}
             style={{
               borderRadius: 20,
@@ -419,7 +420,7 @@ export function LoginPage() {
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: colors.primary }} />} />
           )}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 8, gap: 4 }}>
-            {email && (
+            {identifier && (
               <Button
                 type="link"
                 onClick={() => {
@@ -462,7 +463,7 @@ export function LoginPage() {
                 type="primary"
                 onClick={() => {
                   setStatus(null);
-                  setName("");
+                  setIdentifier("");
                 }}
                 style={{ borderRadius: 20, height: 44, paddingInline: 28 }}
               >
@@ -488,115 +489,79 @@ export function LoginPage() {
             Welcome to KidPlayAI!
           </Title>
         </div>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
-          <Segmented
-            value={loginTab}
-            onChange={setLoginTab}
-            options={[
-              { label: "In Class", value: "in-class" },
-              { label: "After Class", value: "after-class" },
-            ]}
-            style={{ fontWeight: 600 }}
+        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Input
+            size="large"
+            placeholder="User Name or Email"
+            allowClear
+            maxLength={100}
+            value={identifier}
+            onChange={(e) => { setIdentifier(e.target.value); setLoginError(null); }}
+            onPressEnter={handleSubmit}
+            style={{ borderRadius: 12, height: 48 }}
+            styles={{ input: { textAlign: "center", fontWeight: 600 } }}
           />
-        </div>
-
-        {loginTab === "in-class" ? (
-          <>
-            <Paragraph style={{ color: colors.body, fontSize: 14, textAlign: "center", marginBottom: 20 }}>
-              Enter your User Name to jump in
-            </Paragraph>
-            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-              <Input
-                size="large"
-                placeholder="User Name"
-                allowClear
-                maxLength={50}
-                value={name}
-                onChange={(e) => { setName(e.target.value.replace(/[^a-zA-Z0-9_/]/g, "")); setLoginError(null); }}
-                onPressEnter={handleSubmit}
-                style={{ borderRadius: 12, height: 48 }}
-                styles={{ input: { textAlign: "center", fontWeight: 600 } }}
-              />
-              <Button
-                type="primary"
-                size="large"
-                block
-                loading={loading}
-                onClick={handleSubmit}
-                disabled={!name.trim()}
-                style={{
-                  height: 48,
-                  borderRadius: 12,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  background: colors.ctaYellow,
-                  color: colors.heading,
-                  border: "none",
-                  boxShadow: shadows.ctaButtonSmall,
-                }}
-              >
-                Request Login
-              </Button>
-              {loginError && (
-                <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, textAlign: "center" }}>
-                  {loginError}
-                </div>
-              )}
-            </Space>
-            <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
-              Don't have a User Name?{" "}
-              <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
-                Contact us
-              </a>{" "}
-              to register.
-            </Paragraph>
-          </>
-        ) : (
-          <>
-            <Paragraph style={{ color: colors.body, fontSize: 14, textAlign: "center", marginBottom: 20 }}>
-              Practise at home — enter your registered email and we'll send a verification code
-            </Paragraph>
-            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-              <Input
-                size="large"
-                placeholder="Email"
-                allowClear
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onPressEnter={handleSendOtp}
-                style={{ borderRadius: 12, height: 48 }}
-                styles={{ input: { textAlign: "center" } }}
-              />
-              <Button
-                type="primary"
-                size="large"
-                block
-                loading={emailLoading}
-                onClick={handleSendOtp}
-                disabled={!email.trim()}
-                style={{
-                  height: 48,
-                  borderRadius: 12,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  background: colors.ctaYellow,
-                  color: colors.heading,
-                  border: "none",
-                  boxShadow: shadows.ctaButtonSmall,
-                }}
-              >
-                Send Verification Code
-              </Button>
-            </Space>
-            <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
-              Ask a parent or guardian for help with your registered email.{" "}
-              <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
-                Contact us
-              </a>{" "}
-              if you haven't registered yet.
-            </Paragraph>
-          </>
-        )}
+          <div>
+            <Button
+              type="primary"
+              size="large"
+              block
+              loading={loading}
+              onClick={handleSubmit}
+              disabled={!identifier.trim()}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 600,
+                background: colors.ctaYellow,
+                color: colors.heading,
+                border: "none",
+                boxShadow: shadows.ctaButtonSmall,
+              }}
+            >
+              Login by Request Approval
+            </Button>
+            <div style={{ color: colors.muted, fontSize: 12, textAlign: "center", marginTop: 6 }}>
+              Waiting for coach's approval. Used in-class.
+            </div>
+          </div>
+          {loginError && (
+            <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, textAlign: "center" }}>
+              {loginError}
+            </div>
+          )}
+          <Divider style={{ margin: "4px 0", color: colors.muted, fontSize: 13 }}>or</Divider>
+          <div>
+            <Button
+              size="large"
+              block
+              loading={emailLoading}
+              onClick={handleSendOtp}
+              disabled={!identifier.trim()}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 600,
+                borderColor: colors.primary,
+                color: colors.primary,
+              }}
+            >
+              Login by Verification Code
+            </Button>
+            <div style={{ color: colors.muted, fontSize: 12, textAlign: "center", marginTop: 6 }}>
+              A verification code will be sent to your registered email.
+            </div>
+          </div>
+        </Space>
+        <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
+          Don't have an account?{" "}
+          <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
+            Contact us
+          </a>{" "}
+          to register.
+        </Paragraph>
       </Card>
 
       {/* Contact Modal */}

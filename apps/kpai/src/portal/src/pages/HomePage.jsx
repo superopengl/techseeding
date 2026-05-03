@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
 import { Button, Typography, Card, Row, Col, Modal } from "antd";
 import {
   RocketOutlined,
@@ -220,7 +221,7 @@ const parentReasons = [
 ];
 
 export function HomePage() {
-  useEffect(() => { document.title = "KidPlayAI — AI Craft Maker for Kids"; }, []);
+  useEffect(() => { setPageTitle("KidPlayAI — AI Craft Maker for Kids"); }, []);
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
   const [enquireOpen, setEnquireOpen] = useState(false);

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
 import { Layout } from "antd";
 import { colors, fonts } from "../theme";
 import { SandboxList } from "../components/SandboxList";
@@ -7,7 +8,7 @@ import { Logo } from "../components/Logo";
 const { Header, Content } = Layout;
 
 export function SandboxListPage() {
-  useEffect(() => { document.title = "Sandbox List"; }, []);
+  useEffect(() => { setPageTitle("Sandbox List"); }, []);
 
   return (
     <Layout style={{ minHeight: "100vh", background: colors.canvas }}>

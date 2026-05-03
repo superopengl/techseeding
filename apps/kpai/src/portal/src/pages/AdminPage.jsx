@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
 import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin } from "antd";
 import {
   ReloadOutlined,
@@ -16,7 +17,7 @@ import { apiCall } from "../api";
 const { Header, Content } = Layout;
 
 export function AdminPage() {
-  useEffect(() => { document.title = "Admin Dashboard"; }, []);
+  useEffect(() => { setPageTitle("Admin Dashboard"); }, []);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);

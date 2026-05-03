@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal } from "antd";
 import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined } from "@ant-design/icons";
@@ -49,7 +50,7 @@ export function SandboxPage() {
   }, [sandboxId]);
 
   useEffect(() => {
-    document.title = title ? `Sandbox: ${title}` : "Sandbox";
+    setPageTitle(title ? `Sandbox: ${title}` : "Sandbox");
   }, [title]);
 
   const startEditing = useCallback(() => {

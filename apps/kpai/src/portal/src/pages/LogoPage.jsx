@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
 import { Typography, Slider } from "antd";
 import { colors, gradients, fonts } from "../theme";
 import { Logo } from "../components/Logo";
@@ -54,7 +55,7 @@ function Swatch({ name, value }) {
 }
 
 export function LogoPage() {
-  useEffect(() => { document.title = "Logo Showcase"; }, []);
+  useEffect(() => { setPageTitle("Logo Showcase"); }, []);
   const [sliderSize, setSliderSize] = useState(64);
 
   return (
