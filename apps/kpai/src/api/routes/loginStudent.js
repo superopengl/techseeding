@@ -13,29 +13,33 @@ export function loginStudent(fastify) {
       return error(reply, 400, "VALIDATION_ERROR", "Student ID must be exactly 6 letters or digits (no zero)");
     }
 
-    const [result] = await db
-      .select({
-        user: user,
-        profile: studentProfile,
-      })
-      .from(studentProfile)
-      .innerJoin(user, eq(user.id, studentProfile.userId))
-      .where(eq(studentProfile.studentId, studentId.trim()));
+    const loginReq = await db.transaction(async (tx) => {
+      const [result] = await tx
+        .select({
+          user: user,
+          profile: studentProfile,
+        })
+        .from(studentProfile)
+        .innerJoin(user, eq(user.id, studentProfile.userId))
+        .where(eq(studentProfile.studentId, studentId.trim()));
 
-    if (!result) {
+      if (!result) return null;
+
+      const [req] = await tx
+        .insert(loginRequest)
+        .values({ userId: result.user.id, status: "requesting" })
+        .onConflictDoUpdate({
+          target: loginRequest.userId,
+          set: { status: "requesting", updatedAt: new Date() },
+        })
+        .returning();
+
+      return req;
+    });
+
+    if (!loginReq) {
       return error(reply, 404, "NOT_FOUND", "Student not found");
     }
-
-    const { user: studentUser } = result;
-
-    const [loginReq] = await db
-      .insert(loginRequest)
-      .values({ userId: studentUser.id, status: "requesting" })
-      .onConflictDoUpdate({
-        target: loginRequest.userId,
-        set: { status: "requesting", updatedAt: new Date() },
-      })
-      .returning();
 
     return success({ loginRequestId: loginReq.id });
   });
