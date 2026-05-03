@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { enquiry } from "../db/schema.js";
 import { success, error } from "../lib/response.js";
+import { publishAdminEvent } from "../lib/adminEvents.js";
 
 const VALID_AGES = ["<8", "8", "9", "10", "11", "12", "12+"];
 
@@ -39,6 +40,8 @@ export function createEnquiry(fastify) {
         message: message.trim(),
       })
       .returning();
+
+    publishAdminEvent("enquiry_created", { id: row.id });
 
     return reply.status(201).send(success({ id: row.id }));
   });

@@ -73,38 +73,45 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    if (activeTab !== "students") return;
-    fetchStudents();
-    let interval = null;
-    const start = () => {
-      if (interval) return;
-      interval = setInterval(fetchStudents, 5000);
-    };
-    const stop = () => {
-      if (!interval) return;
-      clearInterval(interval);
-      interval = null;
-    };
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        stop();
-      } else {
-        fetchStudents();
-        start();
-      }
-    };
-    if (!document.hidden) start();
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      stop();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
+    if (activeTab === "students") fetchStudents();
+    else if (activeTab === "enquiries") fetchEnquiries();
   }, [activeTab]);
 
   useEffect(() => {
-    if (activeTab !== "enquiries") return;
-    fetchEnquiries();
-  }, [activeTab]);
+    let ws = null;
+    let reconnectTimer = null;
+    let cancelled = false;
+
+    const connect = () => {
+      if (cancelled) return;
+      const token = sessionStorage.getItem("c4k_token");
+      if (!token) return;
+      const proto = location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(`${proto}//${location.host}/api/ws/admin?token=${token}`);
+      ws.onmessage = (e) => {
+        try {
+          const { type } = JSON.parse(e.data);
+          if (type === "login_request_changed") fetchStudents();
+          else if (type === "enquiry_created") fetchEnquiries();
+        } catch { /* ignore malformed frames */ }
+      };
+      ws.onclose = () => {
+        if (cancelled) return;
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+      ws.onerror = () => {
+        try { ws.close(); } catch { /* already closing */ }
+      };
+    };
+
+    connect();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(reconnectTimer);
+      try { ws?.close(); } catch { /* already closed */ }
+    };
+  }, []);
 
   const handleAddStudent = async () => {
     let values;

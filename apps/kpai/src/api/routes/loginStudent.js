@@ -3,6 +3,7 @@ import { user, loginRequest } from "../db/schema.js";
 import { sql } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 import { isValidUserName } from "../lib/isValidUserName.js";
+import { publishAdminEvent } from "../lib/adminEvents.js";
 
 export function loginStudent(fastify) {
   fastify.post("/api/login/student", async (request, reply) => {
@@ -37,6 +38,12 @@ export function loginStudent(fastify) {
     if (!loginReq) {
       return error(reply, 404, "NOT_FOUND", "Student not found");
     }
+
+    publishAdminEvent("login_request_changed", {
+      loginRequestId: loginReq.id,
+      userId: loginReq.userId,
+      status: loginReq.status,
+    });
 
     return success({ loginRequestId: loginReq.id });
   });

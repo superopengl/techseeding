@@ -29,6 +29,7 @@ import { sandboxUpdate } from "./routes/sandboxUpdate.js";
 import { sandboxDelete } from "./routes/sandboxDelete.js";
 import { sandboxPreview } from "./routes/sandboxPreview.js";
 import { wsTerminal } from "./routes/wsTerminal.js";
+import { wsAdmin } from "./routes/wsAdmin.js";
 import { createEnquiry } from "./routes/enquiry.js";
 import { listEnquiries } from "./routes/listEnquiries.js";
 
@@ -80,6 +81,7 @@ sandboxUpdate(fastify);
 sandboxDelete(fastify);
 sandboxPreview(fastify);
 wsTerminal(fastify);
+wsAdmin(fastify);
 createEnquiry(fastify);
 listEnquiries(fastify);
 
