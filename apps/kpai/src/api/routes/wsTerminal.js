@@ -118,15 +118,18 @@ export function wsTerminal(fastify) {
       let inputBuffer = "";
       let outputBuffer = "";
       let outputDebounceTimer = null;
+      const pendingWrites = new Set();
 
       function saveMessage(type, text) {
         const cleaned = stripAnsi(text);
         if (!cleaned) return;
-        db.insert(sessionMessage)
+        const p = db.insert(sessionMessage)
           .values({ sandboxSessionId: session.id, content: { text: cleaned }, contentLength: cleaned.length, type })
           .catch((err) => {
             fastify.log.error({ sessionId: session.id, type, err }, "Failed to save session message");
-          });
+          })
+          .finally(() => pendingWrites.delete(p));
+        pendingWrites.add(p);
       }
 
       function flushOutput() {
@@ -177,12 +180,14 @@ export function wsTerminal(fastify) {
         if (type === "resize") ptyProcess.resize(cols, rows);
       });
 
-      socket.on("close", () => {
+      socket.on("close", async () => {
         clearTimeout(outputDebounceTimer);
         flushOutput();
         cleanup();
         ptyProcess.kill();
-        db.update(sandboxSession)
+        // Wait for any in-flight message inserts to land before marking the session closed
+        await Promise.allSettled(pendingWrites);
+        await db.update(sandboxSession)
           .set({ closedAt: new Date() })
           .where(eq(sandboxSession.id, session.id))
           .catch((err) => {
