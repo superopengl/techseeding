@@ -11,6 +11,14 @@ const { Title, Paragraph, Text } = Typography;
 
 const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
+const RESEND_COOLDOWN_S = 30;
+
+function maskEmail(email) {
+  if (!email || !email.includes("@")) return email;
+  const [local, domain] = email.split("@");
+  if (local.length <= 1) return `•••@${domain}`;
+  return `${local[0]}•••@${domain}`;
+}
 
 export function LoginPage() {
   useEffect(() => { setPageTitle("Login"); }, []);
@@ -25,8 +33,15 @@ export function LoginPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [contactOpen, setContactOpen] = useState(false);
   const otpRefs = useRef([]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (!loginRequestId || status !== "pending") return;
@@ -75,6 +90,7 @@ export function LoginPage() {
   const handleSendOtp = async () => {
     const id = identifier.trim();
     if (!id) return;
+    const isResend = status === "otp";
     setEmailLoading(true);
     setLoginError(null);
     try {
@@ -89,7 +105,9 @@ export function LoginPage() {
       setEmailLoading(false);
       setOtpError(null);
       setOtpDigits(["", "", "", "", "", ""]);
+      setResendCooldown(RESEND_COOLDOWN_S);
       setStatus("otp");
+      if (isResend) message.success("Code sent!");
     }
   };
 
@@ -380,9 +398,13 @@ export function LoginPage() {
           >
             Enter Verification Code
           </Title>
-          <Paragraph style={{ color: colors.body, marginBottom: 32 }}>
-            A 6-digit verification code has been sent to your registered email
+          <Paragraph style={{ color: colors.body, marginBottom: 4 }}>
+            We emailed a 6-digit code to{" "}
+            <strong style={{ color: colors.heading }}>{maskEmail(identifier)}</strong>
           </Paragraph>
+          <div style={{ color: colors.muted, fontSize: 13, marginBottom: 28 }}>
+            Code expires in 10 minutes.
+          </div>
           <div
             style={{
               display: "flex",
@@ -433,13 +455,15 @@ export function LoginPage() {
             {identifier && (
               <Button
                 type="link"
+                disabled={resendCooldown > 0 || emailLoading}
+                loading={emailLoading}
                 onClick={() => {
                   setOtpDigits(["", "", "", "", "", ""]);
                   handleSendOtp();
                 }}
-                style={{ color: colors.primary, fontSize: 14 }}
+                style={{ color: resendCooldown > 0 ? colors.muted : colors.primary, fontSize: 14 }}
               >
-                Resend Verification Code
+                {resendCooldown > 0 ? `Resend in 0:${String(resendCooldown).padStart(2, "0")}` : "Resend Verification Code"}
               </Button>
             )}
             <Button
@@ -452,7 +476,7 @@ export function LoginPage() {
               }}
               style={{ color: colors.primary, fontSize: 14 }}
             >
-              Re-login
+              Use a different email
             </Button>
           </div>
         </Card>
