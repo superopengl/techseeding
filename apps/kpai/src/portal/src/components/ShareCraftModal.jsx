@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Input, message } from "antd";
+import { LinkOutlined } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import { colors, shadows } from "../theme";
 
@@ -64,6 +65,12 @@ export function ShareCraftModal({ open, onCancel, sandboxId, zIndex, description
             },
           }}
         />
+        <a
+          onClick={() => window.open(shareUrl, "_blank")}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 10, cursor: "pointer", color: colors.primary, fontSize: 14 }}
+        >
+          <LinkOutlined /> Open in new tab
+        </a>
       </div>
     </Modal>
   );
