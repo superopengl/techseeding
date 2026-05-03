@@ -35,6 +35,7 @@ export function AdminPage() {
   const [sandboxesLoading, setSandboxesLoading] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewSandbox, setReviewSandbox] = useState(null);
+  const [markingReadIds, setMarkingReadIds] = useState(() => new Set());
 
   useEffect(() => {
     const { accountName, firstName, lastName } = addFormValues || {};
@@ -63,12 +64,32 @@ export function AdminPage() {
   const fetchEnquiries = async () => {
     setEnquiriesLoading(true);
     try {
-      const data = await apiCall("/api/enquiries");
+      const data = await apiCall("/api/admin/enquiries");
       setEnquiries(data);
     } catch {
       message.error("Failed to load enquiries");
     } finally {
       setEnquiriesLoading(false);
+    }
+  };
+
+  const handleMarkEnquiryRead = async (id) => {
+    setMarkingReadIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    try {
+      const updated = await apiCall(`/api/admin/enquiries/${id}/read`, { method: "POST" });
+      setEnquiries((prev) => prev.map((e) => (e.id === id ? updated : e)));
+    } catch (e) {
+      message.error(e.message || "Failed to mark as read");
+    } finally {
+      setMarkingReadIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
@@ -322,7 +343,7 @@ export function AdminPage() {
       key: "message",
       render: (v) => (
         <Typography.Paragraph
-          style={{ marginBottom: 0, maxWidth: 480, whiteSpace: "pre-wrap" }}
+          style={{ marginBottom: 0, maxWidth: 480, whiteSpace: "pre-wrap", color: "inherit" }}
           ellipsis={{ rows: 2, expandable: true, symbol: "more" }}
         >
           {v}
@@ -341,7 +362,19 @@ export function AdminPage() {
       title: "Read At",
       dataIndex: "readAt",
       key: "readAt",
-      render: (t) => (t ? new Date(t).toLocaleString() : "-"),
+      render: (t, record) => {
+        if (t) return new Date(t).toLocaleString();
+        return (
+          <Button
+            icon={<CheckOutlined />}
+            loading={markingReadIds.has(record.id)}
+            onClick={() => handleMarkEnquiryRead(record.id)}
+            aria-label="Mark as read"
+            title="Mark as read"
+            style={{ borderRadius: 8 }}
+          />
+        );
+      },
       sorter: (a, b) => {
         const av = a.readAt ? new Date(a.readAt).getTime() : 0;
         const bv = b.readAt ? new Date(b.readAt).getTime() : 0;
@@ -455,7 +488,9 @@ export function AdminPage() {
                     loading={enquiriesLoading}
                     pagination={false}
                     onRow={(record) => ({
-                      style: record.readAt ? undefined : { fontWeight: 700 },
+                      style: record.readAt
+                        ? { color: colors.muted }
+                        : { color: colors.heading, fontWeight: 700 },
                     })}
                     style={{
                       background: colors.surface,

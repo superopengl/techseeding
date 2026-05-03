@@ -32,6 +32,7 @@ import { wsTerminal } from "./routes/wsTerminal.js";
 import { wsAdmin } from "./routes/wsAdmin.js";
 import { createEnquiry } from "./routes/enquiry.js";
 import { listEnquiries } from "./routes/listEnquiries.js";
+import { markEnquiryRead } from "./routes/markEnquiryRead.js";
 
 const fastify = Fastify({ logger: true });
 
@@ -84,6 +85,7 @@ wsTerminal(fastify);
 wsAdmin(fastify);
 createEnquiry(fastify);
 listEnquiries(fastify);
+markEnquiryRead(fastify);
 
 // --- SPA fallback ---
 
