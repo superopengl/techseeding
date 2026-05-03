@@ -17,7 +17,7 @@ export function sandboxCreate(fastify) {
       return error(reply, 400, "BAD_REQUEST", "Title must be 50 characters or less");
     }
     const id = crypto.randomUUID();
-    const { workDir } = ensureSandboxWorkDir(id);
+    const { workDir } = await ensureSandboxWorkDir(id);
 
     const [newSandbox] = await db
       .insert(sandbox)

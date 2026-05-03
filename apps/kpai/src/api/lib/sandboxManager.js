@@ -1,18 +1,23 @@
 import path from "path";
 import os from "os";
-import fs from "fs";
+import fs from "fs/promises";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, "..", "..", "..");
 const SANDBOX_SAMPLE_DIR = path.join(__dirname, "..", "resources", "sandbox_sample");
 
-export function ensureSandboxWorkDir(sandboxId) {
+export async function ensureSandboxWorkDir(sandboxId) {
   const workDir = path.join(os.tmpdir(), "kidplayai", "sandbox", sandboxId);
-  const existed = fs.existsSync(workDir);
+  let existed = true;
+  try {
+    await fs.access(workDir);
+  } catch {
+    existed = false;
+  }
 
   if (!existed) {
-    fs.cpSync(SANDBOX_SAMPLE_DIR, workDir, { recursive: true });
+    await fs.cp(SANDBOX_SAMPLE_DIR, workDir, { recursive: true });
   }
 
   return { workDir, isNew: !existed };

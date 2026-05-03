@@ -100,7 +100,7 @@ export function wsTerminal(fastify) {
         return;
       }
 
-      const { workDir: sandboxWorkDir, isNew } = ensureSandboxWorkDir(sandboxId);
+      const { workDir: sandboxWorkDir, isNew } = await ensureSandboxWorkDir(sandboxId);
       if (isNew && record.indexHtmlContent) {
         fs.writeFileSync(path.join(sandboxWorkDir, "index.html"), record.indexHtmlContent);
       }
