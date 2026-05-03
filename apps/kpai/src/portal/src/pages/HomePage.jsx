@@ -347,10 +347,10 @@ export function HomePage() {
       >
         <div
           style={{
-            borderRadius: 16,
+            borderRadius: 20,
             overflow: "hidden",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.35)",
-            border: "2px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)",
+            border: "6px solid rgba(255,255,255,0.85)",
             maxWidth: 900,
             marginInline: "auto",
           }}
