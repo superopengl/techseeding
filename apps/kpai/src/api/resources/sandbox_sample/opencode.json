@@ -6,18 +6,25 @@
     "disabled_providers": ["openai", "anthropic", "gemini", "openrouter"],
     "permission": {
         "read": {
-            "index.html": "allow"
+            "index.html": "allow",
+            "*": "deny"
         },
         "edit": {
-            "index.html": "allow"
-        }
+            "index.html": "allow",
+            "*": "deny"
+        },
+        "bash": {
+            "*": "deny"
+        },
+        "external_directory": "deny",
+        "doom_loop": "deny"
     },
     "mcp": {},
     "plugin": [],
     "provider": {
         "deepseek": {
             "options": {
-                "apiKey": "deepseek-api-key"
+                "apiKey": "{env:DEEPSEEK_API_KEY}"
             }
         }
     }

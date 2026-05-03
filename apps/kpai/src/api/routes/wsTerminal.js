@@ -2,7 +2,6 @@ import pty from "node-pty";
 import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
 import { sandbox, sandboxSession, sessionMessage } from "../db/schema.js";
-import os from "os";
 import fs from "fs";
 import path from "path";
 import { eq } from "drizzle-orm";
@@ -34,11 +33,7 @@ async function lookupSandbox(sandboxId) {
 }
 
 function configureOpenCode(sandboxWorkDirPath) {
-  const configPath = path.join(sandboxWorkDirPath, "opencode.json");
-  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-  config.provider.deepseek.options.apiKey = process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY;
   fs.mkdirSync(sandboxWorkDirPath, { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 }
 
 function spawnTerminal(sandboxWorkDirPath) {
@@ -47,7 +42,11 @@ function spawnTerminal(sandboxWorkDirPath) {
     cols: 80,
     rows: 24,
     cwd: sandboxWorkDirPath,
-    env: { ...process.env, HOME: os.homedir() },
+    env: {
+      ...process.env,
+      HOME: sandboxWorkDirPath,
+      DEEPSEEK_API_KEY: process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY,
+    },
   });
 }
 
