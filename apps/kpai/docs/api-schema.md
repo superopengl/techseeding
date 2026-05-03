@@ -42,7 +42,7 @@ Health check endpoint. Always returns `OK`.
 
 ### `POST /api/login/student`
 
-Request a one-time passcode. Creates an `otp_code` record with a 10-minute expiry.
+Submit a student login request. Looks up the student by `userName` (case-insensitive) and creates or refreshes a `login_request` row with status `requesting`.
 
 - **Auth:** None
 - **Request body:**
@@ -54,10 +54,13 @@ Request a one-time passcode. Creates an `otp_code` record with a 10-minute expir
 - **Response:** `200`
   ```json
   {
-    "otpCodeId": "uuid"
+    "loginRequestId": "uuid"
   }
   ```
-- **Side effects:** Inserts a row into `otp_code` with a random 6-digit code and `expired_at` set to now + 10 minutes.
+- **Errors:**
+  - `400` — `userName` missing or contains characters other than letters, digits, underscore, or slash
+  - `404` — Student not found
+- **Side effects:** Upserts a row into `login_request` for the matched user with status `requesting`.
 
 ### `GET /api/login/student/:loginRequestId/status`
 
@@ -140,7 +143,6 @@ Create a new student user with profile.
     "role": "student",
     "profile": {
       "id": "uuid",
-      "studentId": "string",
       "firstName": "string",
       "lastName": "string",
       "joinedAt": "timestamp"

@@ -1,6 +1,5 @@
 import { db } from "../db/index.js";
 import { user, studentProfile } from "../db/schema.js";
-import { generateStudentId } from "../lib/generateStudentId.js";
 import { isValidUserName } from "../lib/isValidUserName.js";
 import { success, error } from "../lib/response.js";
 
@@ -29,13 +28,10 @@ export function adminCreateStudent(fastify) {
         .values({ userName: accountName, role: "student" })
         .returning();
 
-      const studentId = generateStudentId();
-
       const [profile] = await tx
         .insert(studentProfile)
         .values({
           userId: newUser.id,
-          studentId,
           firstName: firstName,
           lastName: lastName,
           dob: dob || null,
@@ -56,7 +52,6 @@ export function adminCreateStudent(fastify) {
       role: newUser.role,
       profile: {
         id: newProfile.id,
-        studentId: newProfile.studentId,
         firstName: newProfile.firstName,
         lastName: newProfile.lastName,
         joinedAt: newProfile.joinedAt,

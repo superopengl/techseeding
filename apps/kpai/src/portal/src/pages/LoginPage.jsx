@@ -69,12 +69,12 @@ export function LoginPage() {
     };
   }, [loginRequestId, status, navigate]);
 
-  const STUDENT_ID_RE = /^[A-Z1-9]{6}$/;
+  const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
 
   const handleSubmit = async () => {
-    const id = name.trim().toUpperCase();
-    if (!STUDENT_ID_RE.test(id)) {
-      setLoginError("Student ID must be exactly 6 letters or numbers");
+    const id = name.trim();
+    if (!USER_NAME_RE.test(id)) {
+      setLoginError("User Name may only contain letters, digits, underscore, and slash");
       return;
     }
     setLoading(true);
@@ -83,7 +83,7 @@ export function LoginPage() {
       const data = await apiCall("/api/login/student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId: id }),
+        body: JSON.stringify({ userName: id }),
       });
       setLoginRequestId(data.loginRequestId);
       setRemaining(600);
@@ -503,19 +503,19 @@ export function LoginPage() {
         {loginTab === "in-class" ? (
           <>
             <Paragraph style={{ color: colors.body, fontSize: 14, textAlign: "center", marginBottom: 20 }}>
-              Enter your Student ID to jump in
+              Enter your User Name to jump in
             </Paragraph>
             <Space direction="vertical" size="middle" style={{ width: "100%" }}>
               <Input
                 size="large"
-                placeholder="Student ID"
+                placeholder="User Name"
                 allowClear
-                maxLength={6}
+                maxLength={50}
                 value={name}
-                onChange={(e) => { setName(e.target.value.toUpperCase().replace(/[^A-Z1-9]/g, "")); setLoginError(null); }}
+                onChange={(e) => { setName(e.target.value.replace(/[^a-zA-Z0-9_/]/g, "")); setLoginError(null); }}
                 onPressEnter={handleSubmit}
                 style={{ borderRadius: 12, height: 48 }}
-                styles={{ input: { textAlign: "center", letterSpacing: 4, fontWeight: 600 } }}
+                styles={{ input: { textAlign: "center", fontWeight: 600 } }}
               />
               <Button
                 type="primary"
@@ -544,7 +544,7 @@ export function LoginPage() {
               )}
             </Space>
             <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 20, marginBottom: 0 }}>
-              Don't have a Student ID?{" "}
+              Don't have a User Name?{" "}
               <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
                 Contact us
               </a>{" "}

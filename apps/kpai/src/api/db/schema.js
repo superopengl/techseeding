@@ -23,7 +23,6 @@ export const otpCode = pgTable("otp_code", {
 export const studentProfile = pgTable("student_profile", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().unique().references(() => user.id),
-  studentId: text("student_id").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   dob: date("dob"),

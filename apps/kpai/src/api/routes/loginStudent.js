@@ -1,33 +1,30 @@
 import { db } from "../db/index.js";
-import { user, studentProfile, loginRequest } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { user, loginRequest } from "../db/schema.js";
+import { sql } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
+import { isValidUserName } from "../lib/isValidUserName.js";
 
 export function loginStudent(fastify) {
   fastify.post("/api/login/student", async (request, reply) => {
-    const { studentId } = request.body || {};
-    if (!studentId || typeof studentId !== "string" || studentId.trim().length === 0) {
-      return error(reply, 400, "VALIDATION_ERROR", "Student ID is required");
+    const { userName } = request.body || {};
+    if (!userName || typeof userName !== "string" || userName.trim().length === 0) {
+      return error(reply, 400, "VALIDATION_ERROR", "User Name is required");
     }
-    if (!/^[A-Z1-9]{6}$/i.test(studentId.trim())) {
-      return error(reply, 400, "VALIDATION_ERROR", "Student ID must be exactly 6 letters or digits (no zero)");
+    if (!isValidUserName(userName.trim())) {
+      return error(reply, 400, "VALIDATION_ERROR", "User Name may only contain letters, digits, underscore, and slash");
     }
 
     const loginReq = await db.transaction(async (tx) => {
-      const [result] = await tx
-        .select({
-          user: user,
-          profile: studentProfile,
-        })
-        .from(studentProfile)
-        .innerJoin(user, eq(user.id, studentProfile.userId))
-        .where(eq(studentProfile.studentId, studentId.trim()));
+      const [matchedUser] = await tx
+        .select()
+        .from(user)
+        .where(sql`lower(${user.userName}) = lower(${userName.trim()}) and ${user.role} = 'student'`);
 
-      if (!result) return null;
+      if (!matchedUser) return null;
 
       const [req] = await tx
         .insert(loginRequest)
-        .values({ userId: result.user.id, status: "requesting" })
+        .values({ userId: matchedUser.id, status: "requesting" })
         .onConflictDoUpdate({
           target: loginRequest.userId,
           set: { status: "requesting", updatedAt: new Date() },

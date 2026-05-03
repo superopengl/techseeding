@@ -50,7 +50,6 @@ Extended profile information for a student user. One-to-one relationship with `u
 |---|---|---|---|
 | id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
 | user_id | uuid | NOT NULL, UNIQUE, FK → `user.id` | The user this profile belongs to |
-| student_id | text | NOT NULL, UNIQUE | Student ID (used for login and display) |
 | first_name | text | NOT NULL | Student's first name |
 | last_name | text | NOT NULL | Student's last name |
 | dob | date | nullable | Date of birth |
@@ -63,7 +62,7 @@ Extended profile information for a student user. One-to-one relationship with `u
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `user_id` (unique), `student_id` (unique)
+**Indexes:** `user_id` (unique)
 
 ### `login_request`
 

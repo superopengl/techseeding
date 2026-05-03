@@ -145,9 +145,9 @@ export function AdminPage() {
 
   const columns = [
     {
-      title: "Student ID",
-      dataIndex: "studentId",
-      key: "studentId",
+      title: "User Name",
+      dataIndex: "userName",
+      key: "userName",
       render: (id) => (
         <Space size={4}>
           <span>{id}</span>
@@ -156,26 +156,22 @@ export function AdminPage() {
             onClick={(e) => {
               e.stopPropagation();
               navigator.clipboard.writeText(id);
-              message.success("Student ID copied");
+              message.success("User Name copied");
             }}
           />
         </Space>
       ),
     },
     {
-      title: "Display Name",
-      dataIndex: "userName",
-      key: "userName",
+      title: "Name",
+      key: "name",
+      render: (_, record) => `${record.firstName} ${record.lastName}`,
     },
     {
-      title: "First Name",
-      dataIndex: "firstName",
-      key: "firstName",
-    },
-    {
-      title: "Last Name",
-      dataIndex: "lastName",
-      key: "lastName",
+      title: "Phone",
+      dataIndex: "contactNumber",
+      key: "contactNumber",
+      render: (v) => v || "-",
     },
     {
       title: "Email",
@@ -278,7 +274,7 @@ export function AdminPage() {
         />
       </Content>
       <Drawer
-        title={drawerStudent ? `${drawerStudent.userName}'s Sandboxes` : "Sandboxes"}
+        title={drawerStudent ? `${drawerStudent.firstName} ${drawerStudent.lastName}'s Sandboxes` : "Sandboxes"}
         placement="right"
         size="large"
         open={drawerOpen}
@@ -336,7 +332,7 @@ export function AdminPage() {
         open={reviewOpen}
         sandboxId={reviewSandbox?.id}
         sandboxTitle={reviewSandbox?.title || "Untitled Sandbox"}
-        studentName={drawerStudent?.userName}
+        studentName={drawerStudent ? `${drawerStudent.firstName} ${drawerStudent.lastName}` : undefined}
         onClose={() => setReviewOpen(false)}
       />
       <Modal
