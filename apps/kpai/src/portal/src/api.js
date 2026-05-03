@@ -1,10 +1,13 @@
+const DEFAULT_TIMEOUT_MS = 30_000;
+
 export function fetchWithAuth(url, options = {}) {
   const token = sessionStorage.getItem("c4k_token");
   const headers = { ...options.headers };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  return fetch(url, { ...options, headers });
+  const signal = options.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
+  return fetch(url, { ...options, headers, signal });
 }
 
 export async function apiCall(url, options = {}) {
