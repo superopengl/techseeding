@@ -211,6 +211,13 @@
       "when": 1777522700000,
       "tag": "0029_add_enquiry",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1777522800000,
+      "tag": "0030_add_enquiry_read_at",
+      "breakpoints": true
     }
   ]
 }
