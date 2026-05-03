@@ -2,10 +2,10 @@
   "meta": {
     "name": "opencode",
     "version": "1.0.0",
-    "description": "KidPlayAI sandbox: read-write cwd, write only index.html"
+    "description": "KidPlayAI sandbox: read cwd, write only index.html"
   },
   "workdir": {
-    "access": "readwrite"
+    "access": "read"
   },
   "filesystem": {
     "allow": [
