@@ -25,15 +25,16 @@ RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/late
 RUN mkdir -p /root/.local/share/opencode /root/.local/share/opentui \
     /root/.config/opencode /root/.cache/opencode /root/.local/state/opencode
 
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
+# Enable pnpm (version is pinned via the "packageManager" field in package.json)
+RUN corepack enable
 
 WORKDIR /app
 
 # Copy pre-built production dist from local
 COPY dist ./
 
-# Install production Node dependencies (uses BuildKit cache mount for pnpm store)
+# Install production Node dependencies (uses BuildKit cache mount for pnpm store).
+# Corepack reads "packageManager" from package.json and activates that exact pnpm version.
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --prod
 
