@@ -3,7 +3,7 @@ import { sandbox, sandboxSession, sessionMessage, sandboxRelease } from "../db/s
 import { eq, and, inArray } from "drizzle-orm";
 import { verifyToken } from "../lib/verifyToken.js";
 import { success, error } from "../lib/response.js";
-import fs from "fs";
+import fs from "fs/promises";
 
 export function sandboxDelete(fastify) {
   fastify.delete("/api/sandbox/:id", async (request, reply) => {
@@ -38,9 +38,11 @@ export function sandboxDelete(fastify) {
       await tx.delete(sandbox).where(eq(sandbox.id, record.id));
     });
 
-    // Clean up sandbox directory
-    if (record.workDir && fs.existsSync(record.workDir)) {
-      fs.rmSync(record.workDir, { recursive: true, force: true });
+    // Clean up sandbox directory in the background — don't block the response
+    if (record.workDir) {
+      fs.rm(record.workDir, { recursive: true, force: true }).catch((err) => {
+        fastify.log.error({ err, workDir: record.workDir }, "failed to remove sandbox dir");
+      });
     }
 
     return success({ id: record.id });
