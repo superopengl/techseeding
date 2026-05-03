@@ -57,7 +57,7 @@ Summary:
 
 - Built with React 19 + Ant Design 6, bundled via Vite
 - Routing via react-router-dom v7
-- Source lives in `src/portal/src/`, builds to `public/` (served by Fastify in production)
+- Source lives in `src/portal/src/`, builds to `dist/public/` (served by Fastify in production)
 - Pages: `HomePage`, `LoginPage`, `SandboxPage`, `AdminPage`
 - Components: `Terminal` (xterm.js wrapper), `CraftPreview` (iframe)
 - Design tokens centralized in `src/portal/src/theme.js` — all pages import colors, gradients, shadows, fonts from there
@@ -97,9 +97,9 @@ src/
       theme.js            # Shared design tokens (colors, gradients, shadows, fonts)
       pages/              # Page components (Home, Login, Sandbox, Admin, ...)
       components/         # UI components (Terminal, CraftPreview)
-    vite.config.js        # Vite config with dev proxy and build output to public/
+    vite.config.js        # Vite config with dev proxy and build output to dist/public/
     package.json          # Frontend dependencies
-public/                   # Built frontend assets (output of pnpm build, served by Fastify)
+dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
 ```
 
 ## Deployment
@@ -140,9 +140,9 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 
 ```bash
 pnpm install        # install all dependencies (root + portal)
-pnpm build          # build React frontend to public/
+pnpm build:prod     # build React frontend to dist/public/ and copy api to dist/src/
 pnpm dev            # local dev: Fastify server + Vite dev server (loads .env)
-pnpm start          # production: Fastify server (loads .env.production)
+pnpm start:prod     # production: Fastify server from dist/ (loads .env.production)
 pnpm db:generate    # generate Drizzle migration from schema changes
 pnpm db:migrate     # run pending migrations against PostgreSQL
 pnpm db:studio      # open Drizzle Studio (DB GUI)
