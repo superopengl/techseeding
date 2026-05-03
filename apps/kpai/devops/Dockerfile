@@ -19,9 +19,6 @@ RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/late
     dpkg -i /tmp/nono.deb && \
     rm /tmp/nono.deb
 
-# Copy nono profile for sandboxed opencode
-COPY devops/nono/profiles/opencode.json /root/.config/nono/profiles/opencode.json
-
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
 

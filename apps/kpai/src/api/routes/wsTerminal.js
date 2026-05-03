@@ -40,7 +40,7 @@ function spawnTerminal(sandboxWorkDirPath) {
   return pty.spawn("nono", [
     "run",
     "--silent",
-    "--profile", "opencode",
+    "--profile", path.join(sandboxWorkDirPath, "nono-opencode-profile.json"),
     "--write-file", path.join(sandboxWorkDirPath, "index.html"),
     "--", "opencode", ".",
   ], {
