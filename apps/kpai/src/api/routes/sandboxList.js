@@ -1,8 +1,9 @@
 import { db } from "../db/index.js";
 import { sandbox } from "../db/schema.js";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { verifyToken } from "../lib/verifyToken.js";
 import { success, error } from "../lib/response.js";
+import { parsePagination } from "../lib/parsePagination.js";
 
 export function sandboxList(fastify) {
   fastify.get("/api/sandbox", async (request, reply) => {
@@ -11,12 +12,22 @@ export function sandboxList(fastify) {
       return error(reply, 401, "UNAUTHORIZED", "Authentication required");
     }
 
-    const sandboxes = await db
-      .select()
-      .from(sandbox)
-      .where(eq(sandbox.userId, payload.userId))
-      .orderBy(desc(sandbox.updatedAt));
+    const { page, pageSize, limit, offset } = parsePagination(request.query);
 
-    return success(sandboxes);
+    const [sandboxes, [{ count: total }]] = await Promise.all([
+      db
+        .select()
+        .from(sandbox)
+        .where(eq(sandbox.userId, payload.userId))
+        .orderBy(desc(sandbox.updatedAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: sql`count(*)::int` })
+        .from(sandbox)
+        .where(eq(sandbox.userId, payload.userId)),
+    ]);
+
+    return success(sandboxes, { total, page, pageSize });
   });
 }
