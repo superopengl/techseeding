@@ -29,6 +29,8 @@ import { sandboxUpdate } from "./routes/sandboxUpdate.js";
 import { sandboxDelete } from "./routes/sandboxDelete.js";
 import { sandboxPreview } from "./routes/sandboxPreview.js";
 import { wsTerminal } from "./routes/wsTerminal.js";
+import { createEnquiry } from "./routes/enquiry.js";
+import { listEnquiries } from "./routes/listEnquiries.js";
 
 const fastify = Fastify({ logger: true });
 
@@ -78,6 +80,8 @@ sandboxUpdate(fastify);
 sandboxDelete(fastify);
 sandboxPreview(fastify);
 wsTerminal(fastify);
+createEnquiry(fastify);
+listEnquiries(fastify);
 
 // --- SPA fallback ---
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin, Tabs } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
@@ -19,8 +19,11 @@ const { Header, Content } = Layout;
 
 export function AdminPage() {
   useEffect(() => { setPageTitle("Admin Dashboard"); }, []);
+  const [activeTab, setActiveTab] = useState("students");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [enquiries, setEnquiries] = useState([]);
+  const [enquiriesLoading, setEnquiriesLoading] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addForm] = Form.useForm();
   const [addLoading, setAddLoading] = useState(false);
@@ -57,7 +60,20 @@ export function AdminPage() {
     }
   };
 
+  const fetchEnquiries = async () => {
+    setEnquiriesLoading(true);
+    try {
+      const data = await apiCall("/api/enquiries");
+      setEnquiries(data);
+    } catch {
+      message.error("Failed to load enquiries");
+    } finally {
+      setEnquiriesLoading(false);
+    }
+  };
+
   useEffect(() => {
+    if (activeTab !== "students") return;
     fetchStudents();
     let interval = null;
     const start = () => {
@@ -83,7 +99,12 @@ export function AdminPage() {
       stop();
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, []);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "enquiries") return;
+    fetchEnquiries();
+  }, [activeTab]);
 
   const handleAddStudent = async () => {
     let values;
@@ -150,6 +171,7 @@ export function AdminPage() {
       title: "User Name",
       dataIndex: "userName",
       key: "userName",
+      sorter: (a, b) => (a.userName || "").localeCompare(b.userName || ""),
       render: (id) => (
         <Space size={4}>
           <span>{id}</span>
@@ -167,18 +189,22 @@ export function AdminPage() {
     {
       title: "Name",
       key: "name",
+      sorter: (a, b) =>
+        `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`),
       render: (_, record) => `${record.firstName} ${record.lastName}`,
     },
     {
       title: "Phone",
       dataIndex: "contactNumber",
       key: "contactNumber",
+      sorter: (a, b) => (a.contactNumber || "").localeCompare(b.contactNumber || ""),
       render: (v) => v || "-",
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      sorter: (a, b) => (a.email || "").localeCompare(b.email || ""),
       render: (v) => v || "-",
     },
     {
@@ -220,6 +246,92 @@ export function AdminPage() {
     },
   ];
 
+  const enquiryColumns = [
+    {
+      title: "Contact Name",
+      dataIndex: "contactName",
+      key: "contactName",
+      sorter: (a, b) => a.contactName.localeCompare(b.contactName),
+    },
+    {
+      title: "Method",
+      dataIndex: "method",
+      key: "method",
+      sorter: (a, b) => a.method.localeCompare(b.method),
+      render: (v) => (
+        <Space size={4}>
+          <span>{v}</span>
+          <CopyOutlined
+            style={{ color: colors.muted, cursor: "pointer", fontSize: 13 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(v);
+              message.success("Method copied");
+            }}
+          />
+        </Space>
+      ),
+    },
+    {
+      title: "Child Age",
+      dataIndex: "childAge",
+      key: "childAge",
+      sorter: (a, b) => {
+        const order = { "<8": 0, "8": 1, "9": 2, "10": 3, "11": 4, "12": 5, "12+": 6 };
+        const av = a.childAge in order ? order[a.childAge] : -1;
+        const bv = b.childAge in order ? order[b.childAge] : -1;
+        return av - bv;
+      },
+      render: (v) => {
+        if (!v) return "-";
+        const colorMap = {
+          "<8": "#e53e3e",
+          "8": "#f56565",
+          "9": "#f59e0b",
+          "10": "#ecc94b",
+          "11": "#84cc16",
+          "12": "#43b88c",
+          "12+": "#15803d",
+        };
+        return (
+          <Tag
+            style={{
+              background: colorMap[v] || colors.muted,
+              color: colors.onDark,
+              border: "none",
+              fontWeight: 600,
+              borderRadius: 12,
+              padding: "2px 10px",
+            }}
+          >
+            {v}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "Message",
+      dataIndex: "message",
+      key: "message",
+      render: (v) => (
+        <Typography.Paragraph
+          style={{ marginBottom: 0, maxWidth: 480, whiteSpace: "pre-wrap" }}
+          ellipsis={{ rows: 2, expandable: true, symbol: "more" }}
+        >
+          {v}
+        </Typography.Paragraph>
+      ),
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (t) => (t ? new Date(t).toLocaleString() : "-"),
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      defaultSortOrder: "descend",
+    },
+  ];
+
   return (
     <Layout style={{ minHeight: "100vh", background: colors.canvas }}>
       <Header
@@ -241,40 +353,84 @@ export function AdminPage() {
             Admin Dashboard
           </span>
         </div>
-        <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setAddModalOpen(true)}
-            style={{ borderRadius: 8 }}
-          >
-            Add Student
-          </Button>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={fetchStudents}
-            style={{ borderRadius: 8 }}
-          >
-            Refresh
-          </Button>
-        </Space>
       </Header>
       <Content style={{ padding: 24 }}>
-        <Table
-          columns={columns}
-          dataSource={students}
-          rowKey="id"
-          loading={loading}
-          pagination={false}
-          onRow={(record) => ({
-            onClick: () => handleRowClick(record),
-            style: { cursor: "pointer" },
-          })}
-          style={{
-            background: colors.surface,
-            borderRadius: 16,
-            boxShadow: shadows.cardSubtle,
-          }}
+        <Tabs
+          activeKey={activeTab}
+          type="card"
+          onChange={setActiveTab}
+          items={[
+            {
+              key: "students",
+              label: "Students",
+              children: (
+                <>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 16 }}>
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onClick={() => setAddModalOpen(true)}
+                      style={{ borderRadius: 8 }}
+                    >
+                      Add Student
+                    </Button>
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={fetchStudents}
+                      style={{ borderRadius: 8 }}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+                  <Table
+                    columns={columns}
+                    dataSource={students}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={false}
+                    onRow={(record) => ({
+                      onClick: () => handleRowClick(record),
+                      style: { cursor: "pointer" },
+                    })}
+                    style={{
+                      background: colors.surface,
+                      borderRadius: 16,
+                      boxShadow: shadows.cardSubtle,
+                    }}
+                  />
+                </>
+              ),
+            },
+            {
+              key: "enquiries",
+              label: "Enquiries",
+              children: (
+                <>
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={fetchEnquiries}
+                      style={{ borderRadius: 8 }}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+                  <Table
+                    columns={enquiryColumns}
+                    dataSource={enquiries}
+                    rowKey="id"
+                    loading={enquiriesLoading}
+                    pagination={false}
+                    style={{
+                      background: colors.surface,
+                      borderRadius: 16,
+                      boxShadow: shadows.cardSubtle,
+                    }}
+                  />
+                </>
+              ),
+            },
+          ]}
         />
       </Content>
       <Drawer

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date, index, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
@@ -78,6 +78,15 @@ export const sandboxRelease = pgTable("sandbox_release", {
 }, (table) => [
   index("sandbox_release_sandbox_id_idx").on(table.sandboxId),
 ]);
+
+export const enquiry = pgTable("enquiry", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  contactName: varchar("contact_name", { length: 50 }).notNull(),
+  method: varchar("method", { length: 100 }).notNull(), // email | phone | wechat
+  childAge: text("child_age"), // <8 | 8 | 9 | 10 | 11 | 12 | 12+
+  message: varchar("message", { length: 2000 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),

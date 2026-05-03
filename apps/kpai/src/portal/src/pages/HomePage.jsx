@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Button, Typography, Card, Row, Col, Modal } from "antd";
+import { Button, Typography, Card, Row, Col, Form, Input, Select, message as antMessage } from "antd";
 import {
   RocketOutlined,
   ThunderboltOutlined,
@@ -19,7 +19,8 @@ import {
   ReadOutlined,
   BarChartOutlined,
   FormatPainterOutlined,
-  MailOutlined,
+  SendOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -103,8 +104,7 @@ function NavBar({ onStart }) {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(67,184,140,0.28) 1px, transparent 0), linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)`,
-        backgroundSize: "22px 22px, auto",
+        background: "linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
         borderBottom: "1px solid rgba(226,232,240,0.6)",
@@ -133,7 +133,15 @@ function NavBar({ onStart }) {
   );
 }
 
-const CONTACT_EMAIL = "hello@techseeding.com.au";
+const AGE_OPTIONS = [
+  { value: "<8", label: "Under 8" },
+  { value: "8", label: "8" },
+  { value: "9", label: "9" },
+  { value: "10", label: "10" },
+  { value: "11", label: "11" },
+  { value: "12", label: "12" },
+  { value: "12+", label: "Over 12" },
+];
 
 const programs = [
   {
@@ -236,8 +244,35 @@ export function HomePage() {
   useEffect(() => { setPageTitle("KidPlayAI — AI Craft Maker for Kids"); }, []);
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
-  const [enquireOpen, setEnquireOpen] = useState(false);
-  const openEnquire = () => setEnquireOpen(true);
+  const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const scrollToEnquiry = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleEnquirySubmit = async (values) => {
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitted(true);
+        form.resetFields();
+      } else {
+        antMessage.error(data.error?.message || "Something went wrong. Please try again.");
+      }
+    } catch {
+      antMessage.error("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: colors.surface }}>
@@ -315,7 +350,7 @@ export function HomePage() {
           </Paragraph>
           <Button
             size="large"
-            onClick={openEnquire}
+            onClick={scrollToEnquiry}
             icon={<RocketOutlined />}
             style={ctaButtonStyle}
           >
@@ -669,7 +704,7 @@ export function HomePage() {
           <div style={{ marginTop: 40 }}>
             <Button
               size="large"
-              onClick={openEnquire}
+              onClick={scrollToEnquiry}
               icon={<RocketOutlined />}
               style={ctaButtonStyle}
             >
@@ -685,7 +720,8 @@ export function HomePage() {
       {/* Beyond Crafts Section */}
       <div
         style={{
-          background: gradients.login,
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(67,184,140,0.28) 1px, transparent 0), ${gradients.login}`,
+          backgroundSize: "22px 22px, auto",
           padding: "80px 24px",
           textAlign: "center",
         }}
@@ -935,31 +971,125 @@ export function HomePage() {
           <Paragraph
             style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 48, maxWidth: 520, marginInline: "auto" }}
           >
-            Contact us to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
+            Tell us a bit about yourself and we'll get back to you with class details, schedule, and fees.
           </Paragraph>
-          <a href={`mailto:${CONTACT_EMAIL}?subject=KidPlayAI Enquiry`} style={{ textDecoration: "none" }}>
-            <Button
-              size="large"
-              icon={<MailOutlined />}
+
+          {submitted ? (
+            <Card
               style={{
-                height: 56,
-                paddingInline: 48,
-                fontSize: 20,
-                fontWeight: 700,
-                borderRadius: 28,
-                background: colors.ctaYellow,
-                color: colors.heading,
+                maxWidth: 480,
+                margin: "0 auto",
+                borderRadius: 20,
                 border: "none",
-                boxShadow: shadows.ctaButton,
-                fontFamily: fonts.heading,
+                boxShadow: shadows.cardElevated,
+                textAlign: "center",
               }}
+              styles={{ body: { padding: "48px 32px" } }}
             >
-              Email Us
-            </Button>
-          </a>
-          <Paragraph style={{ color: colors.onDarkSecondary, fontSize: 16, marginTop: 16, marginBottom: 0 }}>
-            {CONTACT_EMAIL}
-          </Paragraph>
+              <CheckCircleOutlined style={{ fontSize: 48, color: colors.primary, marginBottom: 16 }} />
+              <Title level={3} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}>
+                Thank You!
+              </Title>
+              <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 24 }}>
+                We've received your enquiry and will get back to you soon.
+              </Paragraph>
+              <Button
+                onClick={() => setSubmitted(false)}
+                style={{ borderRadius: 20, fontWeight: 600 }}
+              >
+                Send Another Enquiry
+              </Button>
+            </Card>
+          ) : (
+            <Card
+              style={{
+                maxWidth: 480,
+                margin: "0 auto",
+                borderRadius: 20,
+                border: "none",
+                boxShadow: shadows.cardElevated,
+                textAlign: "left",
+              }}
+              styles={{ body: { padding: "36px 32px" } }}
+            >
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={handleEnquirySubmit}
+                requiredMark={false}
+              >
+                <Form.Item
+                  label="Parent / Guardian Name"
+                  name="contactName"
+                  rules={[
+                    { required: true, message: "Please enter your name" },
+                    { max: 50, message: "Name must be 50 characters or less" },
+                  ]}
+                >
+                  <Input placeholder="Your name" maxLength={50} size="large" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Email, Phone, or WeChat"
+                  name="method"
+                  rules={[
+                    { required: true, message: "Please enter how we can reach you" },
+                    { max: 100, message: "Must be 100 characters or less" },
+                  ]}
+                >
+                  <Input placeholder="e.g. parent@email.com or 0412 345 678" maxLength={100} size="large" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Child's Age"
+                  name="childAge"
+                >
+                  <Select
+                    placeholder="Select age (optional)"
+                    options={AGE_OPTIONS}
+                    allowClear
+                    size="large"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Questions or Message"
+                  name="message"
+                  rules={[
+                    { required: true, message: "Please enter your message" },
+                    { max: 2000, message: "Message must be 2000 characters or less" },
+                  ]}
+                >
+                  <Input.TextArea
+                    placeholder="What would you like to know? e.g. class schedule, pricing, what my child will learn..."
+                    rows={4}
+                    maxLength={2000}
+                    showCount
+                  />
+                </Form.Item>
+
+                <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    loading={submitting}
+                    icon={<SendOutlined />}
+                    style={{
+                      height: 48,
+                      paddingInline: 40,
+                      fontSize: 18,
+                      fontWeight: 700,
+                      borderRadius: 24,
+                      fontFamily: fonts.heading,
+                    }}
+                  >
+                    Send Enquiry
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          )}
         </div>
       </div>
 
@@ -990,49 +1120,6 @@ export function HomePage() {
           <a href="/admin" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Admin Portal</a>
         </div>
       </div>
-
-      {/* Enquire Modal */}
-      <Modal
-        open={enquireOpen}
-        onCancel={() => setEnquireOpen(false)}
-        footer={null}
-        centered
-        width={480}
-        styles={{
-          content: { borderRadius: 24, padding: "40px 32px", textAlign: "center" },
-        }}
-      >
-        <RocketOutlined style={{ fontSize: 40, color: colors.primary, marginBottom: 16 }} />
-        <Title
-          level={3}
-          style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
-        >
-          Let's Get Started!
-        </Title>
-        <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 32, maxWidth: 360, marginInline: "auto" }}>
-          Reach out to learn about upcoming classes, schedule, and fees. We'd love to hear from you!
-        </Paragraph>
-        <a href={`mailto:${CONTACT_EMAIL}?subject=KidPlayAI Enquiry`} style={{ textDecoration: "none" }}>
-          <Button
-            type="primary"
-            size="large"
-            icon={<MailOutlined />}
-            style={{
-              height: 48,
-              paddingInline: 36,
-              fontSize: 18,
-              fontWeight: 700,
-              borderRadius: 24,
-              fontFamily: fonts.heading,
-            }}
-          >
-            Send Us an Email
-          </Button>
-        </a>
-        <Paragraph style={{ color: colors.body, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
-          {CONTACT_EMAIL}
-        </Paragraph>
-      </Modal>
     </div>
   );
 }
