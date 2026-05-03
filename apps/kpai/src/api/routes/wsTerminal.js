@@ -38,9 +38,10 @@ function configureOpenCode(sandboxWorkDirPath) {
 
 function spawnTerminal(sandboxWorkDirPath) {
   return pty.spawn("nono", [
-    "run",
+    "wrap",
     "--silent",
-    "--profile", path.join(sandboxWorkDirPath, "nono-opencode-profile.json"),
+    "--allow-cwd",
+    "--profile", "opencode",
     "--write-file", path.join(sandboxWorkDirPath, "index.html"),
     "--", "opencode", ".",
   ], {
@@ -149,7 +150,13 @@ export function wsTerminal(fastify) {
 
       ptyProcess.onData((data) => {
         try {
-          socket.send(JSON.stringify({ type: "output", data }));
+          // Strip sequences that cause xterm.js issues:
+          // - DECRPM queries (\x1b[?...$p) — crashes xterm.js requestMode handler
+          // - Kitty graphics protocol (\x1b_...\x1b\\) — unsupported, may corrupt state
+          const cleaned = data
+            .replace(/\x1b\[\?\d+\$p/g, "")
+            .replace(/\x1b_[^\x1b]*\x1b\\/g, "");
+          if (cleaned) socket.send(JSON.stringify({ type: "output", data: cleaned }));
         } catch {
           // client disconnected
         }

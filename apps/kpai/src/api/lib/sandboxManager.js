@@ -1,6 +1,7 @@
 import path from "path";
 import os from "os";
 import fs from "fs/promises";
+import { execFileSync } from "child_process";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,7 @@ export async function ensureSandboxWorkDir(sandboxId) {
 
   if (!existed) {
     await fs.cp(SANDBOX_SAMPLE_DIR, workDir, { recursive: true });
+    execFileSync("git", ["init"], { cwd: workDir, stdio: "ignore" });
   }
 
   return { workDir, isNew: !existed };

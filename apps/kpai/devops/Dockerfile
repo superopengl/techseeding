@@ -7,7 +7,7 @@ LABEL com.docker.compose.project="techseeding"
 #   curl, ca-certificates — opencode install
 #   git — opencode runtime (version control operations)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ curl ca-certificates git libdbus-1-3 \
+    python3 make g++ curl ca-certificates git libdbus-1-3 ncurses-term \
     && rm -rf /var/lib/apt/lists/*
 
 # Install opencode CLI
@@ -20,6 +20,10 @@ RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/late
     curl -fsSL -o /tmp/nono.deb "https://github.com/always-further/nono/releases/download/v${NONO_VERSION}/nono-cli_${NONO_VERSION}_${ARCH}.deb" && \
     dpkg -i /tmp/nono.deb && \
     rm /tmp/nono.deb
+
+# Pre-create XDG directories for opencode (nono sandbox blocks mkdir on parent paths)
+RUN mkdir -p /root/.local/share/opencode /root/.local/share/opentui \
+    /root/.config/opencode /root/.cache/opencode /root/.local/state/opencode
 
 # Enable pnpm
 RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
