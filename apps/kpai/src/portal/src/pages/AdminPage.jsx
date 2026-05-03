@@ -356,9 +356,10 @@ export function AdminPage() {
             rules={[
               { required: true, message: "Account Name is required" },
               { max: 50, message: "Account Name must be 50 characters or less" },
+              { pattern: /^[a-zA-Z0-9_/]+$/, message: "Only letters, digits, underscore, and slash are allowed" },
               {
                 validator: async (_, value) => {
-                  if (!value) return;
+                  if (!value || !/^[a-zA-Z0-9_/]+$/.test(value)) return;
                   const result = await apiCall("/api/admin/check-user-name", { method: "POST", body: JSON.stringify({ userName: value }), headers: { "Content-Type": "application/json" } });
                   if (!result.available) throw new Error("Account Name is already taken");
                 },

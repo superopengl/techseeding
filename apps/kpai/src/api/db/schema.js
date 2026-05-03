@@ -1,14 +1,15 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, char, date, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userName: text("user_name").notNull().unique(),
+  userName: text("user_name").notNull(),
   role: text("role").notNull(), // student | teacher | admin
   email: text("email").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
-  index("user_user_name_idx").on(table.userName),
+  uniqueIndex("user_user_name_lower_unique_idx").on(sql`lower(${table.userName})`),
 ]);
 
 export const otpCode = pgTable("otp_code", {

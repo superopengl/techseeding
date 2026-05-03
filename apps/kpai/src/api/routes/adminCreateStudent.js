@@ -1,6 +1,7 @@
 import { db } from "../db/index.js";
 import { user, studentProfile } from "../db/schema.js";
 import { generateStudentId } from "../lib/generateStudentId.js";
+import { isValidUserName } from "../lib/isValidUserName.js";
 import { success, error } from "../lib/response.js";
 
 export function adminCreateStudent(fastify) {
@@ -9,6 +10,9 @@ export function adminCreateStudent(fastify) {
 
     if (!accountName || !firstName || !lastName) {
       return error(reply, 400, "VALIDATION_ERROR", "accountName, firstName and lastName are required");
+    }
+    if (!isValidUserName(accountName)) {
+      return error(reply, 400, "VALIDATION_ERROR", "accountName may only contain letters, digits, underscore, and slash");
     }
 
     const limits = { accountName: 50, firstName: 50, lastName: 50, homeAddress: 100, contactNumber: 20, custodianName: 50, notes: 2000 };
