@@ -559,11 +559,6 @@ export function SandboxPage() {
         description="📱 Scan the QR code or open the URL below in any browser — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
       />
       <PasswordModal
-        open={hasPassword === false}
-        mode="set"
-        onSuccess={() => setHasPassword(true)}
-      />
-      <PasswordModal
         open={showChangePassword}
         mode="change"
         onSuccess={() => setShowChangePassword(false)}
