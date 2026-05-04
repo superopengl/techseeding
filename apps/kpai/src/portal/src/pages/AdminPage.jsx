@@ -105,7 +105,7 @@ export function AdminPage() {
 
     const connect = () => {
       if (cancelled) return;
-      const token = sessionStorage.getItem("c4k_token");
+      const token = sessionStorage.getItem("kpai_token");
       if (!token) return;
       const proto = location.protocol === "https:" ? "wss:" : "ws:";
       ws = new WebSocket(`${proto}//${location.host}/api/ws/admin?token=${token}`);

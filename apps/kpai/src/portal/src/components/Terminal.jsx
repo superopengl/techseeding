@@ -18,7 +18,7 @@ export function Terminal({ sandboxId, onFileChanged }) {
     termRef.current = term;
 
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
-    const token = sessionStorage.getItem("c4k_token");
+    const token = sessionStorage.getItem("kpai_token");
     const ws = new WebSocket(
       `${proto}//${location.host}/api/ws?sandboxId=${sandboxId}&token=${token}`
     );

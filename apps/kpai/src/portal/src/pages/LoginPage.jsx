@@ -64,8 +64,8 @@ export function LoginPage() {
         const data = await apiCall(`/api/login/student/${loginRequestId}/status`);
         if (cancelled) return;
         if (data.status === "approved") {
-          sessionStorage.setItem("c4k_token", data.token);
-          sessionStorage.setItem("c4k_role", "student");
+          sessionStorage.setItem("kpai_token", data.token);
+          sessionStorage.setItem("kpai_role", "student");
           setStatus("approved");
           navigate("/sandbox");
         } else if (data.status === "rejected") {
@@ -195,8 +195,8 @@ export function LoginPage() {
       if (!body.success) {
         throw new Error(body.error?.message || "Verification failed");
       }
-      sessionStorage.setItem("c4k_token", body.data.token);
-      sessionStorage.setItem("c4k_role", body.data.role);
+      sessionStorage.setItem("kpai_token", body.data.token);
+      sessionStorage.setItem("kpai_role", body.data.role);
       navigate(body.data.role === "admin" ? "/admin" : "/sandbox");
     } catch (e) {
       setOtpError(e.message || "Verification failed");

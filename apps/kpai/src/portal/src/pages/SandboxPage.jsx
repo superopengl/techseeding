@@ -143,8 +143,8 @@ export function SandboxPage() {
         style: { borderRadius: 12, fontWeight: 600 },
       },
       onOk: () => {
-        sessionStorage.removeItem("c4k_token");
-        sessionStorage.removeItem("c4k_role");
+        sessionStorage.removeItem("kpai_token");
+        sessionStorage.removeItem("kpai_role");
         navigate("/login");
       },
     });

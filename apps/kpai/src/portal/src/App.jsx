@@ -25,8 +25,8 @@ const LogoPage = lazy(() =>
 );
 
 function RoleGuard({ role, children }) {
-  const token = sessionStorage.getItem("c4k_token");
-  const currentRole = sessionStorage.getItem("c4k_role");
+  const token = sessionStorage.getItem("kpai_token");
+  const currentRole = sessionStorage.getItem("kpai_role");
   if (!token || currentRole !== role) {
     return <Navigate to="/login" replace />;
   }
