@@ -13,7 +13,7 @@
   "section.about": "关于我们",
   "home.about_us": "关于我们",
   "home.about_us.content": "我们是一支拥有15年以上软件行业经验的资深工程师团队。从网站和移动应用到数据库架构和云平台，我们的技术栈涵盖 Node.js、Python、React、Angular、TypeScript、PostgreSQL、MongoDB、Docker、AWS 和 Azure 等主流技术。",
-  "home.why_us": "为什么选择我们？",
+  "home.why_us": "为什么选择我们",
   "home.why_us.content": "模板化的建站工具能力有限。随着业务增长，您需要一个能够随之扩展的数字平台。我们围绕您独特的业务流程，量身打造云原生解决方案，让您专注于最重要的事。",
   "home.contact": "联系方式",
   "home.contact.website": "网站",
