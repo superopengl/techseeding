@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Layout, Menu, Drawer, Button, Dropdown } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 import { MenuOutlined, DownOutlined } from '@ant-design/icons';
-import { AiFillMessage } from "react-icons/ai";
 import { FaHome } from "react-icons/fa";
 import { MdRoomService, MdLanguage, MdApps } from "react-icons/md";
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -46,19 +45,6 @@ const NavLink = styled.a`
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
-
-  &:hover {
-    color: #ffffff;
-  }
-`;
-
-const NavButton = styled.span`
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: color 0.2s ease;
 
   &:hover {
     color: #ffffff;
@@ -230,14 +216,11 @@ function smoothScrollTo(id, offset = 0) {
   }
 }
 
-function HomeHeader({ onClickContact }) {
+function HomeHeader() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery({ minWidth: 801 });
-
-  const origin = searchParams.get('origin');
-  const shouldShowContact = true || origin !== 'wechat-app';
 
   const scrollTo = useCallback((id) => (e) => {
     e.preventDefault();
@@ -249,11 +232,6 @@ function HomeHeader({ onClickContact }) {
     setDrawerVisible(false);
     smoothScrollTo(id, headerHeight);
   }, []);
-
-  const handleClickContact = useCallback(() => {
-    setDrawerVisible(false);
-    onClickContact();
-  }, [onClickContact]);
 
   const toggleLanguage = useCallback(() => {
     const lng = searchParams.get('lng');
@@ -297,12 +275,6 @@ function HomeHeader({ onClickContact }) {
       icon: <MdRoomService />,
       label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
     },
-    ...(shouldShowContact ? [{
-      key: 'contact',
-      icon: <AiFillMessage />,
-      label: <Trans i18nKey="header.contact" />,
-      onClick: handleClickContact,
-    }] : []),
     {
       key: 'lang',
       icon: <MdLanguage />,
@@ -330,7 +302,6 @@ function HomeHeader({ onClickContact }) {
             </NavTrigger>
           </Dropdown>
           <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
-          {shouldShowContact && <NavButton onClick={handleClickContact}><Trans i18nKey="header.contact" /></NavButton>}
           <LangToggleButton onClick={toggleLanguage} />
         </DesktopNav>
       ) : (

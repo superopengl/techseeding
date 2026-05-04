@@ -6,7 +6,7 @@ import HomeFooter from 'components/HomeFooter';
 import { RiComputerLine } from "react-icons/ri";
 import { GoDeviceMobile } from "react-icons/go";
 import { BsStars } from "react-icons/bs";
-import { AiOutlineWechat, AiOutlineMessage } from "react-icons/ai";
+import { AiOutlineWechat } from "react-icons/ai";
 import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import ContactForm from 'components/ContactForm';
 import { Trans } from 'react-i18next';
@@ -382,36 +382,6 @@ const StyledTag = styled(Tag)`
   }
 `;
 
-const AffixContactButton = styled(Button)`
-  && {
-    width: 52px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    border-radius: 14px;
-    transition: all 0.3s ease;
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 10;
-
-    &:hover, &:focus, &:active {
-      background: rgba(99, 102, 241, 0.2);
-      border-color: rgba(99, 102, 241, 0.4);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.25);
-    }
-  }
-`;
-
 /* ─── Sections ─── */
 
 const SectionBand = styled.div`
@@ -674,7 +644,7 @@ function HomePage() {
 
   return (
     <LayoutStyled>
-      <HomeHeader onClickContact={openContactForm} />
+      <HomeHeader />
       <ContentStyled>
         <HeroSection id="home" style={{ minHeight: posterHeight }}>
           <AuroraBackground />
@@ -746,11 +716,6 @@ function HomePage() {
         <BottomGridOverlay />
       </BottomBackdrop>
       <HomeFooter />
-      {shouldShowContact && (
-        <AffixContactButton shape="default" size="large" onClick={openContactForm}>
-          <AiOutlineMessage size={22} />
-        </AffixContactButton>
-      )}
     </LayoutStyled>
   );
 }
