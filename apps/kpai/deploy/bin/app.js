@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { App, Tags } from "aws-cdk-lib";
 import { KidPlayAiStack } from "../lib/kidPlayAiStack.js";
+import { KidPlayAiRepoStack } from "../lib/kidPlayAiRepoStack.js";
 
 const app = new App();
 
@@ -15,13 +16,22 @@ const hostedZoneName =
   app.node.tryGetContext("hostedZoneName") ??
   process.env.KPAI_HOSTED_ZONE_NAME ??
   "techseeding.com.au";
+const imageTag =
+  app.node.tryGetContext("imageTag") ?? process.env.IMAGE_TAG ?? "latest";
 
-new KidPlayAiStack(app, `KidPlayAi-${stage}`, {
+const repoStack = new KidPlayAiRepoStack(app, "KidPlayAi-Repo", {
+  env: { account, region },
+});
+
+const appStack = new KidPlayAiStack(app, `KidPlayAi-${stage}`, {
   env: { account, region },
   stage,
   domainName,
   hostedZoneName,
+  appRepo: repoStack.appRepo,
+  imageTag,
 });
+appStack.addDependency(repoStack);
 
 Tags.of(app).add("Project", "KidPlayAI");
 Tags.of(app).add("Stage", stage);

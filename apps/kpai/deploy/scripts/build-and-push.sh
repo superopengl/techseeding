@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build the production Docker image and push it to ECR.
-# Usage: STAGE=prod TAG=$(git rev-parse --short HEAD) ./scripts/build-and-push.sh
+# Build the production Docker image and push it to the kpai ECR repository.
+# Usage: TAG=$(git rev-parse --short HEAD) ./scripts/build-and-push.sh
 
-STAGE="${STAGE:-prod}"
 TAG="${TAG:-latest}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-STACK_NAME="KidPlayAi-${STAGE}"
+REPO_STACK_NAME="KidPlayAi-Repo"
 
 REPO_URI=$(aws cloudformation describe-stacks \
-  --stack-name "$STACK_NAME" \
+  --stack-name "$REPO_STACK_NAME" \
   --region "$REGION" \
   --query "Stacks[0].Outputs[?OutputKey=='EcrRepositoryUri'].OutputValue" \
   --output text)
 
 if [ -z "$REPO_URI" ] || [ "$REPO_URI" = "None" ]; then
-  echo "ERROR: ECR repository not found. Run 'pnpm deploy' first to create infra."
+  echo "ERROR: ECR repository not found. Deploy $REPO_STACK_NAME first."
   exit 1
 fi
 

@@ -2,6 +2,11 @@
 
 AWS CDK app that provisions everything needed to host KidPlayAI in `ap-southeast-2`: VPC, Aurora Postgres Serverless v2, EFS (sandbox persistence), ECR, Fargate service, ALB, ACM cert, Route53 alias, and Secrets Manager entries.
 
+## Stacks
+
+- **`KidPlayAi-Repo`** — fixed-name `kpai` ECR repository. Deployed independently so the image can be pushed before the app stack tries to pull it. Retained on stack destroy.
+- **`KidPlayAi-<stage>`** — everything else, pinned to an image tag in `kpai` via the `imageTag` context (defaults to `latest`).
+
 ## Architecture
 
 ```

@@ -1,32 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# End-to-end deploy: build image, push to ECR, force Fargate to redeploy.
+# End-to-end deploy: deploy the kpai ECR repo, push the image, then deploy
+# the app stack pinned to that image tag.
 # Usage: STAGE=prod ./scripts/deploy.sh
 
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-STACK_NAME="KidPlayAi-${STAGE}"
+REPO_STACK_NAME="KidPlayAi-Repo"
+APP_STACK_NAME="KidPlayAi-${STAGE}"
 TAG="${TAG:-$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)}"
 
 cd "$(dirname "$0")/.."
 
-# 1. CDK deploy (idempotent — provisions or updates infra)
-echo "==> Deploying infra stack: $STACK_NAME"
-STAGE="$STAGE" TAG="$TAG" pnpm exec cdk deploy --all --require-approval never
+# 1. Ensure the kpai ECR repo exists.
+echo "==> Deploying repo stack: $REPO_STACK_NAME"
+pnpm exec cdk deploy "$REPO_STACK_NAME" --require-approval never
 
-# 2. Build + push image (depends on ECR repo from step 1)
+# 2. Build + push image (uses repo URI from step 1's stack output).
 echo "==> Building and pushing image (tag: $TAG)"
-STAGE="$STAGE" TAG="$TAG" ./scripts/build-and-push.sh
+TAG="$TAG" ./scripts/build-and-push.sh
 
-# 3. Force Fargate service to pull the new image
+# 3. Deploy the app stack pinned to the just-pushed tag.
+echo "==> Deploying app stack: $APP_STACK_NAME"
+pnpm exec cdk deploy "$APP_STACK_NAME" \
+  --require-approval never \
+  -c stage="$STAGE" \
+  -c imageTag="$TAG"
+
+# 4. Force Fargate to roll the new task definition (idempotent — task def
+#    update from step 3 already triggers a deployment, but force ensures it
+#    pulls the latest tag if you reused one).
 SERVICE_NAME=$(aws cloudformation describe-stacks \
-  --stack-name "$STACK_NAME" \
+  --stack-name "$APP_STACK_NAME" \
   --region "$REGION" \
   --query "Stacks[0].Outputs[?OutputKey=='ServiceName'].OutputValue" \
   --output text)
 CLUSTER_NAME=$(aws cloudformation describe-stacks \
-  --stack-name "$STACK_NAME" \
+  --stack-name "$APP_STACK_NAME" \
   --region "$REGION" \
   --query "Stacks[0].Outputs[?OutputKey=='ClusterName'].OutputValue" \
   --output text)

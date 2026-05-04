@@ -1,7 +1,5 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import { Stack, Duration, RemovalPolicy, CfnOutput } from "aws-cdk-lib";
-import { Vpc, SubnetType, Port } from "aws-cdk-lib/aws-ec2";
+import { Vpc, SubnetType, Port, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import {
   Cluster,
   ContainerInsights,
@@ -11,7 +9,6 @@ import {
   LogDrivers,
 } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
-import { DockerImageAsset, Platform } from "aws-cdk-lib/aws-ecr-assets";
 import { FileSystem, PerformanceMode, ThroughputMode } from "aws-cdk-lib/aws-efs";
 import {
   DatabaseCluster,
@@ -25,13 +22,10 @@ import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ApplicationProtocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..", "..");
-
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    const { stage, domainName, hostedZoneName } = props;
+    const { stage, domainName, hostedZoneName, appRepo, imageTag } = props;
     const isProd = stage === "prod";
 
     const vpc = new Vpc(this, "Vpc", {
@@ -74,12 +68,6 @@ export class KidPlayAiStack extends Stack {
       path: "/sandbox",
       createAcl: { ownerUid: "0", ownerGid: "0", permissions: "755" },
       posixUser: { uid: "0", gid: "0" },
-    });
-
-    const appImage = new DockerImageAsset(this, "AppImage", {
-      directory: repoRoot,
-      file: "devops/Dockerfile",
-      platform: Platform.LINUX_AMD64,
     });
 
     const jwtSecret = new Secret(this, "JwtSecret", {
@@ -127,7 +115,7 @@ export class KidPlayAiStack extends Stack {
     sandboxFs.grantRootAccess(taskDef.taskRole);
 
     const container = taskDef.addContainer("App", {
-      image: ContainerImage.fromDockerImageAsset(appImage),
+      image: ContainerImage.fromEcrRepository(appRepo, imageTag),
       logging: LogDrivers.awsLogs({ logGroup, streamPrefix: "app" }),
       environment: {
         NODE_ENV: "production",
@@ -156,9 +144,22 @@ export class KidPlayAiStack extends Stack {
       ? HostedZone.fromLookup(this, "Zone", { domainName: hostedZoneName })
       : undefined;
 
+    // Pre-create the Fargate service security group so EFS/DB ingress rules
+    // can reference it without forming a CloudFormation circular dependency
+    // through the auto-created service SG.
+    const serviceSg = new SecurityGroup(this, "ServiceSecurityGroup", {
+      vpc,
+      description: "KidPlayAI Fargate service",
+      allowAllOutbound: true,
+    });
+
+    dbCluster.connections.allowFrom(serviceSg, Port.tcp(5432), "Fargate to Aurora");
+    sandboxFs.connections.allowFrom(serviceSg, Port.tcp(2049), "Fargate to EFS");
+
     const service = new ApplicationLoadBalancedFargateService(this, "Service", {
       cluster: ecsCluster,
       taskDefinition: taskDef,
+      securityGroups: [serviceSg],
       desiredCount: 1,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
@@ -182,9 +183,6 @@ export class KidPlayAiStack extends Stack {
 
     service.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "3600");
 
-    dbCluster.connections.allowFrom(service.service, Port.tcp(5432), "Fargate to Aurora");
-    sandboxFs.connections.allowFrom(service.service, Port.tcp(2049), "Fargate to EFS");
-
     new CfnOutput(this, "ClusterName", { value: ecsCluster.clusterName });
     new CfnOutput(this, "ServiceName", { value: service.service.serviceName });
     new CfnOutput(this, "LoadBalancerDns", { value: service.loadBalancer.loadBalancerDnsName });
@@ -192,5 +190,6 @@ export class KidPlayAiStack extends Stack {
     new CfnOutput(this, "DbClusterEndpoint", { value: dbCluster.clusterEndpoint.hostname });
     new CfnOutput(this, "JwtSecretArn", { value: jwtSecret.secretArn });
     new CfnOutput(this, "DeepseekSecretArn", { value: deepseekSecret.secretArn });
+    new CfnOutput(this, "ImageTag", { value: imageTag });
   }
 }

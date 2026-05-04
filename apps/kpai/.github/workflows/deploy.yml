@@ -58,12 +58,9 @@ jobs:
         working-directory: deploy
         run: pnpm install --frozen-lockfile
 
-      - name: CDK deploy
+      - name: CDK deploy ECR repo
         working-directory: deploy
-        env:
-          KPAI_DOMAIN_NAME: ${{ vars.KPAI_DOMAIN_NAME }}
-          KPAI_HOSTED_ZONE_NAME: ${{ vars.KPAI_HOSTED_ZONE_NAME }}
-        run: pnpm exec cdk deploy --all --require-approval never -c stage=$STAGE
+        run: pnpm exec cdk deploy KidPlayAi-Repo --require-approval never
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -74,10 +71,16 @@ jobs:
           TAG: ${{ github.sha }}
         run: ./scripts/build-and-push.sh
 
-      - name: Force ECS redeploy
+      - name: CDK deploy app stack
+        working-directory: deploy
+        env:
+          KPAI_DOMAIN_NAME: ${{ vars.KPAI_DOMAIN_NAME }}
+          KPAI_HOSTED_ZONE_NAME: ${{ vars.KPAI_HOSTED_ZONE_NAME }}
+        run: pnpm exec cdk deploy "KidPlayAi-$STAGE" --require-approval never -c stage=$STAGE -c imageTag=${{ github.sha }}
+
+      - name: Wait for ECS service to stabilize
         run: |
           STACK_NAME="KidPlayAi-$STAGE"
           CLUSTER_NAME=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='ClusterName'].OutputValue" --output text)
           SERVICE_NAME=$(aws cloudformation describe-stacks --stack-name "$STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='ServiceName'].OutputValue" --output text)
-          aws ecs update-service --cluster "$CLUSTER_NAME" --service "$SERVICE_NAME" --force-new-deployment --query "service.deployments[0].status" --output text
           aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME"
