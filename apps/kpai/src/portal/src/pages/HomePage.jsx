@@ -995,7 +995,7 @@ export function HomePage() {
           <Paragraph
             style={{ color: colors.onDarkSecondary, fontSize: 18, maxWidth: 520, marginInline: "auto" }}
           >
-            For our young learners' safety, accounts are only created offline. Contact us and we'll get back to you with class details, schedule, and fees.
+            To keep our young learners safe, we set up accounts offline. Reach out below and we'll follow up with class details, schedule, and fees.
           </Paragraph>
           {mountForm ? (
             <Suspense fallback={<div style={{ minHeight: 540 }} aria-hidden="true" />}>

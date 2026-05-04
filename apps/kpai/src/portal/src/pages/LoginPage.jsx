@@ -770,7 +770,7 @@ export function LoginPage() {
           )}
         </Space>
         <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
-          New here?{" "} For our young learners' safety, accounts are only created offline. Parents or guardians, please <Link onClick={() => navigate("/#contact")}>contact us</Link> directly to register your child.
+          New here? To keep our young learners safe, we set up accounts offline. <Link onClick={() => navigate("/#contact")}>Get in touch</Link> and we'll follow up with class details, schedule, and fees.
         </Paragraph>
         <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
           By logging in you agree to our{" "}
