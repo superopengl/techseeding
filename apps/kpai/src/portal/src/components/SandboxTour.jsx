@@ -16,6 +16,16 @@ const bodyStyle = {
   color: colors.bodyStrong,
 };
 
+function findMenuItemTarget(selector, avatarRef) {
+  const span = document.querySelector(selector);
+  if (span) {
+    const row = span.closest(".ant-dropdown-menu-item");
+    if (row) return row;
+    return span;
+  }
+  return avatarRef?.current ?? null;
+}
+
 export function SandboxTour({
   open,
   current,
@@ -87,10 +97,7 @@ export function SandboxTour({
             building, or start a brand new adventure! ✨
           </div>
         ),
-        target: () =>
-          document.querySelector(".kpai-tour-my-crafts") ??
-          avatarRef?.current ??
-          null,
+        target: () => findMenuItemTarget(".kpai-tour-my-crafts", avatarRef),
         placement: "leftTop",
       },
       {
@@ -102,10 +109,7 @@ export function SandboxTour({
             tour all over again. Promise! 🤝
           </div>
         ),
-        target: () =>
-          document.querySelector(".kpai-tour-guidance") ??
-          avatarRef?.current ??
-          null,
+        target: () => findMenuItemTarget(".kpai-tour-guidance", avatarRef),
         placement: "leftTop",
       },
       {
@@ -121,10 +125,7 @@ export function SandboxTour({
             Now go make something amazing! 🚀
           </div>
         ),
-        target: () =>
-          document.querySelector(".kpai-tour-logout") ??
-          avatarRef?.current ??
-          null,
+        target: () => findMenuItemTarget(".kpai-tour-logout", avatarRef),
         placement: "leftTop",
       },
     ],

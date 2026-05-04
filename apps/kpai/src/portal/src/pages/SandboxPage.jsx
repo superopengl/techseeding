@@ -101,10 +101,22 @@ export function SandboxPage() {
   useEffect(() => {
     if (!tourOpen) {
       setDropdownOpen(false);
+    }
+  }, [tourOpen]);
+
+  const handleTourChange = useCallback((next) => {
+    const shouldOpenMenu = TOUR_MENU_STEPS.has(next);
+    if (shouldOpenMenu && !dropdownOpen) {
+      // Open the menu first so its DOM is mounted before Tour re-targets.
+      setDropdownOpen(true);
+      requestAnimationFrame(() => setTourCurrent(next));
       return;
     }
-    setDropdownOpen(TOUR_MENU_STEPS.has(tourCurrent));
-  }, [tourOpen, tourCurrent]);
+    if (!shouldOpenMenu && dropdownOpen) {
+      setDropdownOpen(false);
+    }
+    setTourCurrent(next);
+  }, [dropdownOpen]);
 
   const handleLogout = useCallback(() => {
     Modal.confirm({
@@ -148,28 +160,25 @@ export function SandboxPage() {
   const userMenuItems = [
     {
       key: "my-crafts",
-      label: "My Crafts",
+      label: <span className="kpai-tour-my-crafts">My Crafts</span>,
       icon: <AppstoreOutlined style={{ fontSize: 16 }} />,
       style: menuItemStyle,
-      className: "kpai-tour-my-crafts",
       onClick: () => setShowMyCrafts(true),
     },
     {
       key: "guidance",
-      label: "Show Guidance",
+      label: <span className="kpai-tour-guidance">Show Guidance</span>,
       icon: <QuestionCircleOutlined style={{ fontSize: 16 }} />,
       style: menuItemStyle,
-      className: "kpai-tour-guidance",
       onClick: openTour,
     },
     { type: "divider" },
     {
       key: "logout",
-      label: "Logout",
+      label: <span className="kpai-tour-logout">Logout</span>,
       icon: <LogoutOutlined style={{ fontSize: 16 }} />,
       danger: true,
       style: menuItemStyle,
-      className: "kpai-tour-logout",
       onClick: handleLogout,
     },
   ];
@@ -529,7 +538,7 @@ export function SandboxPage() {
           <SandboxTour
             open={tourOpen}
             current={tourCurrent}
-            onChange={setTourCurrent}
+            onChange={handleTourChange}
             onClose={handleTourClose}
             onFinish={handleTourFinish}
             previewRef={previewRef}
