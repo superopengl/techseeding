@@ -16,8 +16,6 @@ const bodyStyle = {
   color: colors.bodyStrong,
 };
 
-export const TOUR_MENU_STEPS = [3, 4, 5];
-
 export function SandboxTour({
   open,
   current,
@@ -26,6 +24,7 @@ export function SandboxTour({
   onFinish,
   previewRef,
   terminalRef,
+  titleRef,
   shareRef,
   avatarRef,
 }) {
@@ -54,6 +53,18 @@ export function SandboxTour({
         ),
         target: () => terminalRef?.current ?? null,
         placement: "left",
+      },
+      {
+        title: <span style={headingStyle}>✏️ Name Your Craft</span>,
+        description: (
+          <div style={bodyStyle}>
+            This is your craft's name. Click it to rename anytime! 🏷️ Give it
+            something fun like <em>"Star Catcher 3000"</em> or{" "}
+            <em>"My Pet Dragon"</em>. Your name = your craft's identity! ✨
+          </div>
+        ),
+        target: () => titleRef?.current ?? null,
+        placement: "bottom",
       },
       {
         title: <span style={headingStyle}>🎉 Show Off Your Creation</span>,
@@ -117,7 +128,7 @@ export function SandboxTour({
         placement: "leftTop",
       },
     ],
-    [previewRef, terminalRef, shareRef, avatarRef]
+    [previewRef, terminalRef, titleRef, shareRef, avatarRef]
   );
 
   return (

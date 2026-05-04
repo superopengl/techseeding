@@ -15,7 +15,7 @@ const SandboxTour = lazy(() =>
   import("../components/SandboxTour").then((m) => ({ default: m.SandboxTour }))
 );
 
-const TOUR_MENU_STEPS = new Set([4, 5, 6, 7]);
+const TOUR_MENU_STEPS = new Set([4, 5, 6]);
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
 
@@ -44,6 +44,7 @@ export function SandboxPage() {
   const titleInputRef = useRef(null);
   const previewRef = useRef(null);
   const terminalRef = useRef(null);
+  const titleRef = useRef(null);
   const shareRef = useRef(null);
   const avatarRef = useRef(null);
 
@@ -110,16 +111,19 @@ export function SandboxPage() {
       title: "Logout",
       content: "Are you sure you want to logout?",
       okText: "Logout",
+      okType: "danger",
       cancelText: "Stay",
       autoFocusButton: "cancel",
       okButtonProps: {
+        type: "primary",
+        danger: true,
         style: {
           borderRadius: 12,
           fontWeight: 600,
-          background: colors.ctaYellow,
-          color: colors.heading,
+          background: "#ff4d4f",
+          color: "#fff",
           border: "none",
-          boxShadow: shadows.ctaButtonSmall,
+          boxShadow: "0 2px 0 #d9363e",
         },
       },
       cancelButtonProps: {
@@ -295,6 +299,7 @@ export function SandboxPage() {
           }}
         >
           <Logo size={36} square />
+          <div ref={titleRef} style={{ display: "inline-flex", alignItems: "center" }}>
           {editingTitle ? (
             <Input
               ref={titleInputRef}
@@ -345,6 +350,7 @@ export function SandboxPage() {
               <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
             </span>
           )}
+          </div>
           <div style={{ flex: 1 }} />
           <Space size={8}>
             <Button ref={shareRef} icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
@@ -528,6 +534,7 @@ export function SandboxPage() {
             onFinish={handleTourFinish}
             previewRef={previewRef}
             terminalRef={terminalRef}
+            titleRef={titleRef}
             shareRef={shareRef}
             avatarRef={avatarRef}
           />
