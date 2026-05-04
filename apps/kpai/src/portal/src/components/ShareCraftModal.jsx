@@ -39,7 +39,7 @@ export function ShareCraftModal({ open, onCancel, sandboxId, zIndex, description
               src: "/logo-square.png",
               width: 40,
               height: 40,
-              excavate: true,
+              excavate: false,
             }}
           />
         </div>
