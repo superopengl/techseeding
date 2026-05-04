@@ -72,8 +72,7 @@ src/
     routes/               # One route controller per file (filename = exported function name)
       healthcheck.js      # GET /healthcheck
       loginStudent.js     # POST /api/login/student
-      loginStudentStatus.js # GET /api/login/:loginRequestId/status
-      loginStatus.js      # GET /api/login/status/:studentId
+      loginStatus.js # GET /api/login/:loginRequestId/status
       adminStudents.js    # GET /api/admin/students
       adminApprove.js     # POST /api/admin/approve/:studentId
       adminReject.js      # POST /api/admin/reject/:studentId

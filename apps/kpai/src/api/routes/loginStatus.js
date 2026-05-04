@@ -1,20 +1,30 @@
 import { db } from "../db/index.js";
-import { sandboxSession } from "../db/schema.js";
+import { loginRequest, user } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+import { createJwtToken } from "../lib/createJwtToken.js";
 import { success, error } from "../lib/response.js";
 
 export function loginStatus(fastify) {
-  fastify.get("/api/login/status/:sessionId", async (request, reply) => {
-    const { sessionId } = request.params;
-    const [session] = await db
-      .select()
-      .from(sandboxSession)
-      .where(eq(sandboxSession.id, sessionId));
+  fastify.get("/api/login/:loginRequestId/status", async (request, reply) => {
+    const { loginRequestId } = request.params;
 
-    if (!session) {
-      return error(reply, 404, "NOT_FOUND", "Session not found");
+    const [record] = await db
+      .select()
+      .from(loginRequest)
+      .innerJoin(user, eq(user.id, loginRequest.userId))
+      .where(eq(loginRequest.id, loginRequestId));
+
+    if (!record) {
+      return error(reply, 404, "NOT_FOUND", "Login request not found");
     }
 
-    return success({ status: session.status, sessionId: session.id });
+    const { login_request: req, user } = record;
+
+    if (req.status === "approved") {
+      const token = createJwtToken({ userId: user.id, role: user.role });
+      return success({ loginRequestId: req.id, status: req.status, token, role: user.role });
+    }
+
+    return success({ loginRequestId: req.id, status: req.status });
   });
 }

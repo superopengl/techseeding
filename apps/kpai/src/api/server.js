@@ -9,7 +9,6 @@ import { error } from "./lib/response.js";
 import { healthcheck } from "./routes/healthcheck.js";
 import { login } from "./routes/login.js";
 import { loginStatus } from "./routes/loginStatus.js";
-import { loginStudentStatus } from "./routes/loginStudentStatus.js";
 import { adminStudents } from "./routes/adminStudents.js";
 import { adminApprove } from "./routes/adminApprove.js";
 import { adminReject } from "./routes/adminReject.js";
@@ -73,7 +72,6 @@ fastify.addHook("onRequest", async (request, reply) => {
 healthcheck(fastify);
 login(fastify);
 loginStatus(fastify);
-loginStudentStatus(fastify);
 adminStudents(fastify);
 adminApprove(fastify);
 adminReject(fastify);
