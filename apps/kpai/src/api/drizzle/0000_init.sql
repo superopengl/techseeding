@@ -105,5 +105,5 @@ CREATE INDEX "sandbox_session_user_id_idx" ON "sandbox_session" USING btree ("us
 CREATE INDEX "session_message_sandbox_session_id_idx" ON "session_message" USING btree ("sandbox_session_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_user_name_lower_unique_idx" ON "user" USING btree (lower("user_name"));--> statement-breakpoint
 INSERT INTO "user" ("id", "user_name", "role", "email")
-VALUES (gen_random_uuid(), 'Admin Sir', 'admin', 'admin@lab67.techseeding.com.au')
+VALUES (gen_random_uuid(), 'admin', 'admin', 'admin@kidplayai.techseeding.com.au')
 ON CONFLICT ("email") DO NOTHING;
