@@ -137,7 +137,6 @@ export function EnquiryForm({ autoFocusOnMount = false }) {
             placeholder="What would you like to know? e.g. class schedule, pricing, what my child will learn..."
             rows={4}
             maxLength={2000}
-            showCount
           />
         </Form.Item>
 

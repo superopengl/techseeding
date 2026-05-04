@@ -621,7 +621,7 @@ export function AdminPage() {
             <Input maxLength={50} />
           </Form.Item>
           <Form.Item name="notes" label="Notes" rules={[{ max: 2000, message: "Notes must be 2000 characters or less" }]}>
-            <Input.TextArea rows={2} maxLength={2000} showCount />
+            <Input.TextArea rows={2} maxLength={2000} />
           </Form.Item>
         </Form>
       </Modal>
