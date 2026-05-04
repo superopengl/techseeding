@@ -18,7 +18,9 @@ export const otpCode = pgTable("otp_code", {
   code: char("code", { length: 6 }).notNull(),
   expiredAt: timestamp("expired_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("otp_code_code_idx").on(table.code),
+]);
 
 export const studentProfile = pgTable("student_profile", {
   id: uuid("id").primaryKey().defaultRandom(),
