@@ -15,5 +15,14 @@ export default defineConfig({
   build: {
     outDir: "../../dist/public",
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          antd: ["antd", "@ant-design/icons"],
+        },
+      },
+    },
   },
 });
