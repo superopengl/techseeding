@@ -12,7 +12,11 @@ if (!connectionString) {
   process.exit(1);
 }
 
-const sql = postgres(connectionString, { max: 1, connect_timeout: 30 });
+const sql = postgres(connectionString, {
+  max: 1,
+  connect_timeout: 30,
+  ssl: process.env.NODE_ENV === "production" ? "require" : false,
+});
 const db = drizzle(sql);
 
 await migrate(db, { migrationsFolder: path.resolve(__dirname, "drizzle") });

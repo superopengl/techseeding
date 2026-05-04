@@ -8,6 +8,7 @@ const sql = postgres(connectionString, {
   max: 20,
   idle_timeout: 30,
   connect_timeout: 10,
+  ssl: process.env.NODE_ENV === "production" ? "require" : false,
 });
 
 export const db = drizzle(sql, { schema });
