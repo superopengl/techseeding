@@ -59,7 +59,11 @@ export const fonts = {
 };
 
 // Ant Design theme config — pass to <ConfigProvider theme={antTheme}>
+// cssVar + hashed:false switch AntD's cssinjs runtime to a single shared
+// stylesheet using CSS variables, avoiding per-component <style> injections.
 export const antTheme = {
+  cssVar: true,
+  hashed: false,
   token: {
     colorPrimary: colors.primary,
     colorSuccess: colors.successGreen,

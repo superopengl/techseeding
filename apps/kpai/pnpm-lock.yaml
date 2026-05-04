@@ -55,6 +55,9 @@ importers:
 
   src/portal:
     dependencies:
+      '@ant-design/cssinjs':
+        specifier: ^2.1.2
+        version: 2.1.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@ant-design/icons':
         specifier: ^6.2.2
         version: 6.2.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)

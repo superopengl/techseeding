@@ -1,10 +1,13 @@
 import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ConfigProvider } from "antd";
+import { StyleProvider } from "@ant-design/cssinjs";
 import { antTheme, antModalConfig } from "./theme";
 import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
 
+const LoginPage = lazy(() =>
+  import("./pages/LoginPage").then((m) => ({ default: m.LoginPage }))
+);
 const SandboxPage = lazy(() =>
   import("./pages/SandboxPage").then((m) => ({ default: m.SandboxPage }))
 );
@@ -35,21 +38,23 @@ function RoleGuard({ role, children }) {
 
 export function App() {
   return (
-    <ConfigProvider theme={antTheme} modal={antModalConfig}>
-      <BrowserRouter>
-        <Suspense fallback={null}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
-            <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
-            <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
-            <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms_of_use" element={<TermsOfUsePage />} />
-            <Route path="/logo" element={<LogoPage />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </ConfigProvider>
+    <StyleProvider hashPriority="high">
+      <ConfigProvider theme={antTheme} modal={antModalConfig}>
+        <BrowserRouter>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
+              <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
+              <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
+              <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms_of_use" element={<TermsOfUsePage />} />
+              <Route path="/logo" element={<LogoPage />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ConfigProvider>
+    </StyleProvider>
   );
 }
