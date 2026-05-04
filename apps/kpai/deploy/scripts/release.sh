@@ -31,9 +31,11 @@ fi
 echo "==> Building and pushing image (tag: $TAG)"
 TAG="$TAG" APP_REPO_NAME="$REPO_NAME" ./scripts/build-and-push.sh
 
-# 3. Deploy the app stack pinned to the just-pushed tag.
-echo "==> Deploying app stack: $APP_STACK_NAME"
-pnpm exec cdk deploy "$APP_STACK_NAME" \
+# 3. Deploy all stacks (CDN cert in us-east-1, then app stack in $REGION).
+#    `--all` ensures the cross-region cert exists before the app stack
+#    references it through SSM.
+echo "==> Deploying CDK stacks (app stack: $APP_STACK_NAME)"
+pnpm exec cdk deploy --all \
   --require-approval never \
   -c stage="$STAGE" \
   -c imageTag="$TAG" \

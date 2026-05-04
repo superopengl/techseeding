@@ -45,6 +45,16 @@ await fastify.register(fastifyWebsocket);
 await fastify.register(fastifyStatic, {
   root: path.join(ROOT_DIR, "public"),
   prefix: "/",
+  setHeaders: (res, filePath) => {
+    // Vite emits content-hashed filenames under /assets/, so they're safe to
+    // cache forever. Everything else (index.html, favicons) gets revalidated
+    // on each request so deploys land instantly.
+    if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    } else {
+      res.setHeader("Cache-Control", "no-cache");
+    }
+  },
 });
 
 
