@@ -516,7 +516,21 @@ export function LoginPage() {
       <Decorations />
       <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <Logo size={80} square style={{ marginBottom: 12, marginInline: "auto" }} />
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate("/")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate("/");
+              }
+            }}
+            style={{ display: "inline-block", cursor: "pointer" }}
+            aria-label="Go to home"
+          >
+            <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
+          </span>
           <Title
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 0 }}
