@@ -62,7 +62,6 @@ jobs:
         working-directory: deploy
         env:
           KPAI_DOMAIN_NAME: ${{ vars.KPAI_DOMAIN_NAME }}
-          KPAI_HOSTED_ZONE_ID: ${{ vars.KPAI_HOSTED_ZONE_ID }}
           KPAI_HOSTED_ZONE_NAME: ${{ vars.KPAI_HOSTED_ZONE_NAME }}
         run: pnpm exec cdk deploy --all --require-approval never -c stage=$STAGE
 

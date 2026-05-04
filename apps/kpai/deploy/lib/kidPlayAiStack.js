@@ -1,14 +1,8 @@
 import { Stack, Duration, RemovalPolicy, CfnOutput } from "aws-cdk-lib";
-import {
-  Vpc,
-  SubnetType,
-  InstanceType,
-  InstanceClass,
-  InstanceSize,
-  Port,
-} from "aws-cdk-lib/aws-ec2";
+import { Vpc, SubnetType, Port } from "aws-cdk-lib/aws-ec2";
 import {
   Cluster,
+  ContainerInsights,
   FargateTaskDefinition,
   ContainerImage,
   Secret as EcsSecret,
@@ -18,9 +12,10 @@ import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patte
 import { Repository, TagMutability } from "aws-cdk-lib/aws-ecr";
 import { FileSystem, PerformanceMode, ThroughputMode } from "aws-cdk-lib/aws-efs";
 import {
-  DatabaseInstance,
-  DatabaseInstanceEngine,
-  PostgresEngineVersion,
+  DatabaseCluster,
+  DatabaseClusterEngine,
+  AuroraPostgresEngineVersion,
+  ClusterInstance,
   Credentials,
 } from "aws-cdk-lib/aws-rds";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -31,46 +26,40 @@ import { HostedZone } from "aws-cdk-lib/aws-route53";
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    const { stage, domainName, hostedZoneId, hostedZoneName } = props;
+    const { stage, domainName, hostedZoneName } = props;
     const isProd = stage === "prod";
 
     const vpc = new Vpc(this, "Vpc", {
       maxAzs: 2,
-      natGateways: 1,
+      natGateways: 0,
       subnetConfiguration: [
         { name: "Public", subnetType: SubnetType.PUBLIC, cidrMask: 24 },
-        { name: "Private", subnetType: SubnetType.PRIVATE_WITH_EGRESS, cidrMask: 24 },
         { name: "Isolated", subnetType: SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },
       ],
     });
 
-    const dbSecret = new Secret(this, "DbCredentials", {
-      secretName: `kidplayai/${stage}/db`,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({ username: "kidplayai" }),
-        generateStringKey: "password",
-        excludePunctuation: true,
-        passwordLength: 32,
-      },
-    });
-
-    const db = new DatabaseInstance(this, "Database", {
+    const dbCluster = new DatabaseCluster(this, "Database", {
       vpc,
       vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
-      engine: DatabaseInstanceEngine.postgres({ version: PostgresEngineVersion.VER_16_3 }),
-      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
-      credentials: Credentials.fromSecret(dbSecret),
-      databaseName: "kidplayai",
-      allocatedStorage: 20,
-      maxAllocatedStorage: 100,
-      backupRetention: Duration.days(isProd ? 7 : 1),
+      engine: DatabaseClusterEngine.auroraPostgres({
+        version: AuroraPostgresEngineVersion.VER_16_6,
+      }),
+      credentials: Credentials.fromGeneratedSecret("kidplayai", {
+        secretName: `kidplayai/${stage}/db`,
+      }),
+      defaultDatabaseName: "kidplayai",
+      writer: ClusterInstance.serverlessV2("Writer"),
+      serverlessV2MinCapacity: 0.5,
+      serverlessV2MaxCapacity: 2,
+      storageEncrypted: true,
+      backup: { retention: Duration.days(isProd ? 7 : 1) },
       removalPolicy: isProd ? RemovalPolicy.SNAPSHOT : RemovalPolicy.DESTROY,
       deletionProtection: isProd,
     });
 
     const sandboxFs = new FileSystem(this, "SandboxFs", {
       vpc,
-      vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
       performanceMode: PerformanceMode.GENERAL_PURPOSE,
       throughputMode: ThroughputMode.BURSTING,
       encrypted: true,
@@ -104,7 +93,10 @@ export class KidPlayAiStack extends Stack {
         "Populate after first deploy: aws secretsmanager put-secret-value --secret-id kidplayai/<stage>/deepseek --secret-string sk-...",
     });
 
-    const cluster = new Cluster(this, "Cluster", { vpc, containerInsights: true });
+    const ecsCluster = new Cluster(this, "Cluster", {
+      vpc,
+      containerInsightsV2: ContainerInsights.ENABLED,
+    });
 
     const logGroup = new LogGroup(this, "LogGroup", {
       logGroupName: `/kidplayai/${stage}`,
@@ -141,11 +133,11 @@ export class KidPlayAiStack extends Stack {
         KPAI_API_SERVICE_URL: domainName ? `https://${domainName}` : "http://0.0.0.0:80",
       },
       secrets: {
-        PG_HOST: EcsSecret.fromSecretsManager(dbSecret, "host"),
-        PG_PORT: EcsSecret.fromSecretsManager(dbSecret, "port"),
-        PG_USER: EcsSecret.fromSecretsManager(dbSecret, "username"),
-        PG_PASSWORD: EcsSecret.fromSecretsManager(dbSecret, "password"),
-        PG_DATABASE: EcsSecret.fromSecretsManager(dbSecret, "dbname"),
+        PG_HOST: EcsSecret.fromSecretsManager(dbCluster.secret, "host"),
+        PG_PORT: EcsSecret.fromSecretsManager(dbCluster.secret, "port"),
+        PG_USER: EcsSecret.fromSecretsManager(dbCluster.secret, "username"),
+        PG_PASSWORD: EcsSecret.fromSecretsManager(dbCluster.secret, "password"),
+        PG_DATABASE: EcsSecret.fromSecretsManager(dbCluster.secret, "dbname"),
         KPAI_JWT_SECRET: EcsSecret.fromSecretsManager(jwtSecret),
         KPAI_SANDBOX_DEEPSEEK_API_KEY: EcsSecret.fromSecretsManager(deepseekSecret),
       },
@@ -157,21 +149,19 @@ export class KidPlayAiStack extends Stack {
       readOnly: false,
     });
 
-    const domainZone =
-      hostedZoneId && hostedZoneName
-        ? HostedZone.fromHostedZoneAttributes(this, "Zone", {
-            hostedZoneId,
-            zoneName: hostedZoneName,
-          })
-        : undefined;
+    const domainZone = hostedZoneName
+      ? HostedZone.fromLookup(this, "Zone", { domainName: hostedZoneName })
+      : undefined;
 
     const service = new ApplicationLoadBalancedFargateService(this, "Service", {
-      cluster,
+      cluster: ecsCluster,
       taskDefinition: taskDef,
       desiredCount: 1,
+      minHealthyPercent: 100,
+      maxHealthyPercent: 200,
       publicLoadBalancer: true,
-      assignPublicIp: false,
-      taskSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      assignPublicIp: true,
+      taskSubnets: { subnetType: SubnetType.PUBLIC },
       protocol: domainName ? ApplicationProtocol.HTTPS : ApplicationProtocol.HTTP,
       redirectHTTP: !!domainName,
       domainName,
@@ -189,14 +179,15 @@ export class KidPlayAiStack extends Stack {
 
     service.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "3600");
 
-    db.connections.allowFrom(service.service, Port.tcp(5432), "Fargate -> RDS");
+    dbCluster.connections.allowFrom(service.service, Port.tcp(5432), "Fargate -> Aurora");
     sandboxFs.connections.allowFrom(service.service, Port.tcp(2049), "Fargate -> EFS");
 
     new CfnOutput(this, "EcrRepositoryUri", { value: repo.repositoryUri });
-    new CfnOutput(this, "ClusterName", { value: cluster.clusterName });
+    new CfnOutput(this, "ClusterName", { value: ecsCluster.clusterName });
     new CfnOutput(this, "ServiceName", { value: service.service.serviceName });
     new CfnOutput(this, "LoadBalancerDns", { value: service.loadBalancer.loadBalancerDnsName });
-    new CfnOutput(this, "DbSecretArn", { value: dbSecret.secretArn });
+    new CfnOutput(this, "DbSecretArn", { value: dbCluster.secret.secretArn });
+    new CfnOutput(this, "DbClusterEndpoint", { value: dbCluster.clusterEndpoint.hostname });
     new CfnOutput(this, "JwtSecretArn", { value: jwtSecret.secretArn });
     new CfnOutput(this, "DeepseekSecretArn", { value: deepseekSecret.secretArn });
   }

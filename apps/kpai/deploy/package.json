@@ -9,6 +9,7 @@
     "diff": "cdk diff",
     "destroy": "cdk destroy --all",
     "bootstrap": "cdk bootstrap",
+    "release": "./scripts/release.sh",
     "build-and-push": "./scripts/build-and-push.sh",
     "migrate": "./scripts/run-migration.sh"
   },

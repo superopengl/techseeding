@@ -107,7 +107,7 @@ dist/                     # Production build artifacts (gitignored): dist/public
 ## Deployment
 
 - **Domain**: `kidplayai.techseeding.com.au` (subdomain under TechSeeding company domain)
-- **Target**: AWS — ECS Fargate (single task) behind ALB, RDS Postgres, EFS for sandbox persistence, ECR for the image, Secrets Manager for credentials.
+- **Target**: AWS `ap-southeast-2` (Sydney) — ECS Fargate (single task, 1 vCPU / 2 GB) behind ALB, Aurora Postgres Serverless v2 (0.5–2 ACU), EFS for sandbox persistence, ECR for the image, Secrets Manager for credentials, Route53 alias on the existing `techseeding.com.au` hosted zone.
 - **Infrastructure-as-code**: AWS CDK (JavaScript) in [deploy/](deploy/). Single stack `KidPlayAi-<stage>` defined in [deploy/lib/kidPlayAiStack.js](deploy/lib/kidPlayAiStack.js). See [deploy/README.md](deploy/README.md) for first-deploy walkthrough.
 - **Image**: built from [devops/Dockerfile](devops/Dockerfile) via `pnpm build:docker`. Production deploys go through [deploy/scripts/build-and-push.sh](deploy/scripts/build-and-push.sh).
 - **Migrations**: run on container start when `RUN_MIGRATIONS=true` (set in the task definition). Manual one-off via [deploy/scripts/run-migration.sh](deploy/scripts/run-migration.sh).
