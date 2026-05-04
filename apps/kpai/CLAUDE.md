@@ -180,7 +180,8 @@ All env vars are prefixed with `KPAI_`.
 | Variable | Description | Default |
 |---|---|---|
 | `KPAI_DATABASE_URL` | PostgreSQL connection string | `postgres://localhost:5432/kidplayai` |
-| `KPAI_API_SERVICE_URL` | API server URL | `http://localhost:9511` |
+| `KPAI_API_PORT` | Port the API server binds to (always binds `0.0.0.0`) | `9511` |
+| `KPAI_PUBLIC_URL` | Public-facing app origin (used in emails, share links, SMS) | `http://localhost:9512` |
 | `KPAI_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
 Local dev ports:
 - **API server**: `http://localhost:9511`

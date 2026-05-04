@@ -126,9 +126,8 @@ const kpaiEnv = Object.fromEntries(
 );
 fastify.log.info({ env: kpaiEnv }, "KidPlayAI environment");
 
-const serviceUrl = new URL(process.env.KPAI_API_SERVICE_URL);
-const port = serviceUrl.port || (serviceUrl.protocol === "https:" ? 443 : 80);
-fastify.listen({ port: Number(port), host: serviceUrl.hostname }, (err) => {
+const port = Number(process.env.KPAI_API_PORT);
+fastify.listen({ port, host: "0.0.0.0" }, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);

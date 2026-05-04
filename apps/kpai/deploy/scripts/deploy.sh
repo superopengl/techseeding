@@ -7,26 +7,33 @@ set -euo pipefail
 
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-REPO_STACK_NAME="kpai-Repo"
+REPO_NAME="${APP_REPO_NAME:-kpai}"
 APP_STACK_NAME="kpai-${STAGE}"
 TAG="${TAG:-$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)}"
 
 cd "$(dirname "$0")/.."
 
-# 1. Ensure the kpai ECR repo exists.
-echo "==> Deploying repo stack: $REPO_STACK_NAME"
-pnpm exec cdk deploy "$REPO_STACK_NAME" --require-approval never
+# 1. Ensure the kpai ECR repo exists (idempotent).
+if ! aws ecr describe-repositories --repository-names "$REPO_NAME" --region "$REGION" >/dev/null 2>&1; then
+  echo "==> Creating ECR repo: $REPO_NAME"
+  aws ecr create-repository \
+    --repository-name "$REPO_NAME" \
+    --region "$REGION" \
+    --image-scanning-configuration scanOnPush=true \
+    --image-tag-mutability MUTABLE >/dev/null
+fi
 
-# 2. Build + push image (uses repo URI from step 1's stack output).
+# 2. Build + push image.
 echo "==> Building and pushing image (tag: $TAG)"
-TAG="$TAG" ./scripts/build-and-push.sh
+TAG="$TAG" APP_REPO_NAME="$REPO_NAME" ./scripts/build-and-push.sh
 
 # 3. Deploy the app stack pinned to the just-pushed tag.
 echo "==> Deploying app stack: $APP_STACK_NAME"
 pnpm exec cdk deploy "$APP_STACK_NAME" \
   --require-approval never \
   -c stage="$STAGE" \
-  -c imageTag="$TAG"
+  -c imageTag="$TAG" \
+  -c appRepoName="$REPO_NAME"
 
 # 4. Force Fargate to roll the new task definition (idempotent — task def
 #    update from step 3 already triggers a deployment, but force ensures it

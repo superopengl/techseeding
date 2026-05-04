@@ -6,16 +6,18 @@ set -euo pipefail
 
 TAG="${TAG:-latest}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-REPO_STACK_NAME="kpai-Repo"
+REPO_NAME="${APP_REPO_NAME:-kpai}"
 
-REPO_URI=$(aws cloudformation describe-stacks \
-  --stack-name "$REPO_STACK_NAME" \
+REPO_URI=$(aws ecr describe-repositories \
+  --repository-names "$REPO_NAME" \
   --region "$REGION" \
-  --query "Stacks[0].Outputs[?OutputKey=='EcrRepositoryUri'].OutputValue" \
-  --output text)
+  --query "repositories[0].repositoryUri" \
+  --output text 2>/dev/null || true)
 
 if [ -z "$REPO_URI" ] || [ "$REPO_URI" = "None" ]; then
-  echo "ERROR: ECR repository not found. Deploy $REPO_STACK_NAME first."
+  echo "ERROR: ECR repository '$REPO_NAME' not found in $REGION."
+  echo "       Create it first with:"
+  echo "         aws ecr create-repository --repository-name $REPO_NAME --region $REGION --image-scanning-configuration scanOnPush=true"
   exit 1
 fi
 

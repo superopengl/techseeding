@@ -21,11 +21,13 @@ import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ApplicationProtocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
+import { Repository } from "aws-cdk-lib/aws-ecr";
 
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    const { stage, domainName, hostedZoneName, appRepo, imageTag } = props;
+    const { stage, domainName, hostedZoneName, appRepoName, imageTag } = props;
+    const appRepo = Repository.fromRepositoryName(this, "AppRepo", appRepoName);
     const isProd = stage === "prod";
 
     const vpc = new Vpc(this, "Vpc", {
@@ -121,7 +123,8 @@ export class KidPlayAiStack extends Stack {
         NODE_ENV: "production",
         RUN_MIGRATIONS: "true",
         TMPDIR: "/var/kpai",
-        KPAI_API_SERVICE_URL: domainName ? `https://${domainName}` : "http://0.0.0.0:80",
+        KPAI_API_PORT: "80",
+        KPAI_PUBLIC_URL: domainName ? `https://${domainName}` : "http://0.0.0.0:80",
       },
       secrets: {
         PG_HOST: EcsSecret.fromSecretsManager(dbCluster.secret, "host"),
