@@ -526,7 +526,6 @@ function HomePage() {
         </div>}
         open={modalVisible}
         destroyOnHidden={true}
-        maskClosable={true}
         onOk={handleContactCancel}
         onCancel={handleContactCancel}
         footer={null}

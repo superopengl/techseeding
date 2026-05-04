@@ -6,9 +6,9 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.5.0",
+    "@ant-design/icons": "^6.2.2",
     "@emailjs/browser": "^4.4.0",
-    "antd": "^5.22.0",
+    "antd": "^6.3.7",
     "i18next": "^24.2.0",
     "i18next-browser-languagedetector": "^8.0.0",
     "react": "^19.0.0",

@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { Layout, Menu, Drawer, Button } from 'antd';
+import { Layout, Menu, Drawer, Button, Dropdown } from 'antd';
 import { useMediaQuery } from 'react-responsive';
-import { MenuOutlined } from '@ant-design/icons';
+import { MenuOutlined, DownOutlined } from '@ant-design/icons';
 import { AiFillMessage } from "react-icons/ai";
 import { BsPeopleFill } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
-import { MdRoomService, MdLanguage } from "react-icons/md";
+import { MdRoomService, MdLanguage, MdApps } from "react-icons/md";
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import LangToggleButton from './LangToggleButton';
@@ -64,6 +64,38 @@ const NavButton = styled.span`
     color: #ffffff;
   }
 `;
+
+const NavTrigger = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+  }
+
+  .anticon {
+    font-size: 10px;
+    opacity: 0.6;
+  }
+`;
+
+const productMenuItems = [
+  {
+    key: 'kidplayai',
+    label: (
+      <a href="https://kidplayai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
+        KidPlayAI
+      </a>
+    ),
+  },
+];
 
 const headerHeight = 56;
 
@@ -182,6 +214,26 @@ function HomeHeader({ onClickContact }) {
       label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
     },
     {
+      key: 'products',
+      icon: <MdApps />,
+      label: <Trans i18nKey="header.products" />,
+      children: [
+        {
+          key: 'kidplayai',
+          label: (
+            <a
+              href="https://kidplayai.techseeding.com.au/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setDrawerVisible(false)}
+            >
+              KidPlayAI
+            </a>
+          ),
+        },
+      ],
+    },
+    {
       key: 'about_us',
       icon: <BsPeopleFill />,
       label: <a href="#about_us" onClick={scrollToAndClose('about_us')}><Trans i18nKey="header.about_us" /></a>,
@@ -209,6 +261,16 @@ function HomeHeader({ onClickContact }) {
         <DesktopNav>
           <NavLink href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></NavLink>
           <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
+          <Dropdown
+            menu={{ items: productMenuItems }}
+            placement="bottom"
+            overlayStyle={{ minWidth: 160 }}
+          >
+            <NavTrigger>
+              <Trans i18nKey="header.products" />
+              <DownOutlined />
+            </NavTrigger>
+          </Dropdown>
           <NavLink href="#about_us" onClick={scrollTo('about_us')}><Trans i18nKey="header.about_us" /></NavLink>
           {shouldShowContact && <NavButton onClick={handleClickContact}><Trans i18nKey="header.contact" /></NavButton>}
           <LangToggleButton onClick={toggleLanguage} />
@@ -227,7 +289,7 @@ function HomeHeader({ onClickContact }) {
             closable={false}
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}
-            width={260}
+            size={260}
             styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
           >
             <Menu mode="vertical" style={{ border: 0 }} items={mobileMenuItems} />
