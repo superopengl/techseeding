@@ -21,8 +21,9 @@ export function Logo({ size = 32, style, square = false, inverted = false }) {
       aria-label="KidPlayAI"
     >
       <text
-        x="0"
+        x={width / 2}
         y={height * 0.78}
+        textAnchor="middle"
         style={{
           fontFamily: "'Baloo 2', cursive",
           fontWeight: 800,
