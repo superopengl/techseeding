@@ -270,11 +270,6 @@ function HomeHeader({ onClickContact }) {
       label: <a href="#home" onClick={scrollToAndClose('home')}><Trans i18nKey="header.home" /></a>,
     },
     {
-      key: 'events',
-      icon: <MdRoomService />,
-      label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
-    },
-    {
       key: 'products',
       icon: <MdApps />,
       label: <Trans i18nKey="header.products" />,
@@ -297,6 +292,11 @@ function HomeHeader({ onClickContact }) {
           ),
         },
       ],
+    },
+    {
+      key: 'events',
+      icon: <MdRoomService />,
+      label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
     },
     {
       key: 'about_us',
@@ -325,7 +325,6 @@ function HomeHeader({ onClickContact }) {
       {isDesktop ? (
         <DesktopNav>
           <NavLink href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></NavLink>
-          <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
           <Dropdown
             menu={{ items: productMenuItems, style: productMenuStyle }}
             placement="bottom"
@@ -336,6 +335,7 @@ function HomeHeader({ onClickContact }) {
               <DownOutlined />
             </NavTrigger>
           </Dropdown>
+          <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
           <NavLink href="#about_us" onClick={scrollTo('about_us')}><Trans i18nKey="header.about_us" /></NavLink>
           {shouldShowContact && <NavButton onClick={handleClickContact}><Trans i18nKey="header.contact" /></NavButton>}
           <LangToggleButton onClick={toggleLanguage} />

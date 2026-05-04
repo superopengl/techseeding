@@ -154,8 +154,8 @@ const GridOverlay = styled.div`
   transform: rotate(-6deg);
   transform-origin: center;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 96px 96px;
   mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
