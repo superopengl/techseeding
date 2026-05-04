@@ -37,8 +37,8 @@ export function ShareCraftModal({ open, onCancel, sandboxId, zIndex, description
             level="H"
             imageSettings={{
               src: "/logo-square.png",
-              width: 40,
-              height: 40,
+              width: 50,
+              height: 50,
               excavate: false,
             }}
           />
