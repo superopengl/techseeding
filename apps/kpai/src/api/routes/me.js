@@ -1,5 +1,5 @@
 import { db } from "../db/index.js";
-import { user } from "../db/schema.js";
+import { user, studentProfile } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { verifyToken } from "../lib/verifyToken.js";
 import { success, error } from "../lib/response.js";
@@ -12,8 +12,14 @@ export function me(fastify) {
     }
 
     const [record] = await db
-      .select({ userName: user.userName, role: user.role })
+      .select({
+        userName: user.userName,
+        role: user.role,
+        firstName: studentProfile.firstName,
+        lastName: studentProfile.lastName,
+      })
       .from(user)
+      .leftJoin(studentProfile, eq(studentProfile.userId, user.id))
       .where(eq(user.id, payload.userId));
 
     if (!record) {

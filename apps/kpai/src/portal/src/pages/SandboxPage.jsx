@@ -3,8 +3,8 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { getCookie, setCookie } from "../utils/cookie";
 import { colorForName } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown } from "antd";
-import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
+import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography } from "antd";
+import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
@@ -16,7 +16,7 @@ const SandboxTour = lazy(() =>
   import("../components/SandboxTour").then((m) => ({ default: m.SandboxTour }))
 );
 
-const TOUR_MENU_STEPS = new Set([4, 5, 6]);
+const TOUR_MENU_STEPS = new Set([4, 5, 6, 7]);
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
 
@@ -33,6 +33,8 @@ export function SandboxPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [userName, setDisplayName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [title, setTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -52,7 +54,9 @@ export function SandboxPage() {
   useEffect(() => {
     apiCall("/api/me").then((data) => {
       setDisplayName(data.userName);
-    }).catch(() => {});
+      setFirstName(data.firstName || "");
+      setLastName(data.lastName || "");
+    }).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -119,6 +123,19 @@ export function SandboxPage() {
     setTourCurrent(next);
   }, [dropdownOpen]);
 
+  const handleNewCraft = useCallback(async () => {
+    try {
+      const data = await apiCall("/api/sandbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      navigate(`/sandbox/${data.id}`);
+    } catch {
+      message.error("Failed to create craft");
+    }
+  }, [navigate]);
+
   const handleLogout = useCallback(() => {
     Modal.confirm({
       title: "Logout",
@@ -158,11 +175,57 @@ export function SandboxPage() {
     padding: "0 18px",
   };
 
+  const fullName = [firstName, lastName].filter(Boolean).join(" ");
+  const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
+  const { bg: avatarBg, fg: avatarFg } = colorForName(userName);
+
   const userMenuItems = [
     {
+      key: "profile",
+      type: "group",
+      label: (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 2px", lineHeight: 1.3, minWidth: 0 }}>
+          <Avatar
+            size={42}
+            style={{
+              background: avatarBg,
+              color: avatarFg,
+              fontFamily: fonts.heading,
+              fontSize: 26,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+            icon={userName ? null : <UserOutlined />}
+          >
+            {userName ? avatarInitial : null}
+          </Avatar>
+          <div style={{ minWidth: 0, overflow: "hidden" }}>
+            <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <Typography.Text strong>{userName}</Typography.Text>
+            </div>
+            {userName && (
+              <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Typography.Text type="secondary">
+                  {fullName || userName || "—"}
+                </Typography.Text>
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    { type: "divider" },
+    {
+      key: "new-craft",
+      label: <span className="kpai-tour-new-craft">New Craft</span>,
+      icon: <PlusOutlined style={{ fontSize: 16 }} />,
+      style: menuItemStyle,
+      onClick: handleNewCraft,
+    },
+    {
       key: "my-crafts",
-      label: <span className="kpai-tour-my-crafts">My Crafts</span>,
-      icon: <AppstoreOutlined style={{ fontSize: 16 }} />,
+      label: <span className="kpai-tour-my-crafts">All Crafts</span>,
+      icon: <UnorderedListOutlined style={{ fontSize: 16 }} />,
       style: menuItemStyle,
       onClick: () => setShowMyCrafts(true),
     },
@@ -193,9 +256,6 @@ export function SandboxPage() {
     setDropdownOpen(next);
   };
 
-  const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
-  const { bg: avatarBg, fg: avatarFg } = colorForName(userName);
-
   const startEditing = useCallback(() => {
     setTitleDraft(title);
     setEditingTitle(true);
@@ -212,7 +272,7 @@ export function SandboxPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
-    }).catch(() => {});
+    }).catch(() => { });
   }, [titleDraft, title, sandboxId]);
 
   const handleFileChanged = useCallback(() => {
@@ -311,56 +371,56 @@ export function SandboxPage() {
         >
           <Logo size={36} square />
           <div ref={titleRef} style={{ display: "inline-flex", alignItems: "center" }}>
-          {editingTitle ? (
-            <Input
-              ref={titleInputRef}
-              value={titleDraft}
-              onChange={(e) => setTitleDraft(e.target.value)}
-              onBlur={saveTitle}
-              onPressEnter={saveTitle}
-              maxLength={50}
-              style={{
-                width: 260,
-                fontFamily: fonts.heading,
-                fontSize: 16,
-                fontWeight: 600,
-                background: "rgba(255,255,255,0.2)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                color: colors.onDark,
-              }}
-            />
-          ) : (
-            <span
-              onClick={startEditing}
-              title="Click to rename"
-              style={{
-                fontFamily: fonts.heading,
-                fontSize: 16,
-                fontWeight: 600,
-                color: colors.onDark,
-                cursor: "pointer",
-                padding: "4px 12px",
-                borderRadius: 8,
-                border: "1px dashed rgba(255,255,255,0.25)",
-                transition: "border-color 0.2s, background 0.2s",
-                textShadow: shadows.textOnGradient,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <span>{title || "Untitled Craft"}</span>
-              <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
-            </span>
-          )}
+            {editingTitle ? (
+              <Input
+                ref={titleInputRef}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={saveTitle}
+                onPressEnter={saveTitle}
+                maxLength={50}
+                style={{
+                  width: 260,
+                  fontFamily: fonts.heading,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  background: "rgba(255,255,255,0.2)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: colors.onDark,
+                }}
+              />
+            ) : (
+              <span
+                onClick={startEditing}
+                title="Click to rename"
+                style={{
+                  fontFamily: fonts.heading,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: colors.onDark,
+                  cursor: "pointer",
+                  padding: "4px 12px",
+                  borderRadius: 8,
+                  border: "1px dashed rgba(255,255,255,0.25)",
+                  transition: "border-color 0.2s, background 0.2s",
+                  textShadow: shadows.textOnGradient,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <span>{title || "Untitled Craft"}</span>
+                <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
+              </span>
+            )}
           </div>
           <div style={{ flex: 1 }} />
           <Space size={8}>
@@ -375,61 +435,12 @@ export function SandboxPage() {
               open={dropdownOpen}
               onOpenChange={handleDropdownOpenChange}
             >
-              <div
+              <Button
                 ref={avatarRef}
-                role="button"
-                tabIndex={0}
+                shape="circle"
                 aria-label="User menu"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "4px 10px 4px 4px",
-                  borderRadius: 999,
-                  cursor: "pointer",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                  background: "rgba(255,255,255,0.08)",
-                  transition: "background 0.2s, border-color 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.18)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                }}
-              >
-                <Avatar
-                  size={32}
-                  style={{
-                    background: avatarBg,
-                    color: avatarFg,
-                    fontFamily: fonts.heading,
-                    fontWeight: 700,
-                  }}
-                  icon={userName ? null : <UserOutlined />}
-                >
-                  {userName ? avatarInitial : null}
-                </Avatar>
-                {userName && (
-                  <span
-                    style={{
-                      fontFamily: fonts.body,
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: colors.onDark,
-                      maxWidth: 140,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {userName}
-                  </span>
-                )}
-                <DownOutlined style={{ fontSize: 10, color: colors.onDarkSecondary }} />
-              </div>
+                icon={<UserOutlined style={{ fontSize: 18 }} />}
+              />
             </Dropdown>
           </Space>
         </div>
@@ -511,7 +522,7 @@ export function SandboxPage() {
         </div>
       </div>
       <Modal
-        title="My Crafts"
+        title="All Crafts"
         open={showMyCrafts}
         onCancel={sandboxNotFound ? undefined : () => setShowMyCrafts(false)}
         closable={!sandboxNotFound}

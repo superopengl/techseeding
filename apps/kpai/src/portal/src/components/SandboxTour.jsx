@@ -89,10 +89,22 @@ export function SandboxTour({
         placement: "bottom",
       },
       {
+        title: <span style={headingStyle}>✨ Start Something New</span>,
+        description: (
+          <div style={bodyStyle}>
+            Got a fresh idea? Pick <strong>New Craft</strong> to spin up a
+            brand new project in a snap! 🚀 Each craft lives in its own
+            magical workspace, so you can build as many as you dream up. 🎨
+          </div>
+        ),
+        target: () => findMenuItemTarget(".kpai-tour-new-craft", avatarRef),
+        placement: "leftTop",
+      },
+      {
         title: <span style={headingStyle}>📦 Your Craft Collection</span>,
         description: (
           <div style={bodyStyle}>
-            Pick <strong>My Crafts</strong> to open your magic toy box! 🧰
+            Pick <strong>All Crafts</strong> to open your magic toy box! 🧰
             Every craft you've ever made is saved here. Open one to keep
             building, or start a brand new adventure! ✨
           </div>
