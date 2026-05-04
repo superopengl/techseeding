@@ -242,17 +242,13 @@ function HomeHeader() {
 
   const mobileMenuItems = [
     {
-      key: 'home',
-      icon: <FaHome />,
-      label: <a href="#home" onClick={scrollToAndClose('home')}><Trans i18nKey="header.home" /></a>,
-    },
-    {
       key: 'products',
       icon: <MdApps />,
       label: <Trans i18nKey="header.products" />,
       children: [
         {
           key: 'kidplayai',
+          style: { height: 'auto', lineHeight: 1.2, padding: '8px 12px' },
           label: (
             <ProductMenuItemLink
               href="https://kidplayai.techseeding.com.au/"
@@ -271,11 +267,6 @@ function HomeHeader() {
       ],
     },
     {
-      key: 'events',
-      icon: <MdRoomService />,
-      label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
-    },
-    {
       key: 'lang',
       icon: <MdLanguage />,
       label: 'EN / 简中',
@@ -290,7 +281,6 @@ function HomeHeader() {
       </HeaderLogo>
       {isDesktop ? (
         <DesktopNav>
-          <NavLink href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></NavLink>
           <Dropdown
             menu={{ items: productMenuItems, style: productMenuStyle }}
             placement="bottom"
@@ -301,7 +291,6 @@ function HomeHeader() {
               <DownOutlined />
             </NavTrigger>
           </Dropdown>
-          <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
           <LangToggleButton onClick={toggleLanguage} />
         </DesktopNav>
       ) : (
@@ -318,10 +307,10 @@ function HomeHeader() {
             closable={false}
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}
-            size={260}
+            size={320}
             styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
           >
-            <Menu mode="vertical" style={{ border: 0 }} items={mobileMenuItems} />
+            <Menu mode="inline" inlineIndent={16} style={{ border: 0 }} items={mobileMenuItems} />
           </StyledDrawer>
         </>
       )}

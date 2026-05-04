@@ -474,18 +474,21 @@ const ServicesSection = styled.section`
 `;
 
 const ContactSection = styled.section`
-  max-width: 500px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 80px 1.5rem;
   position: relative;
 `;
 
 const ContactPanel = styled.div`
-  background: linear-gradient(170deg, #1a1f3a 0%, #0e1124 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  padding: 28px 32px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  padding: 48px 56px;
+
+  @media (max-width: 600px) {
+    padding: 32px 24px;
+  }
 `;
 
 const ContactPrompt = styled.p`
