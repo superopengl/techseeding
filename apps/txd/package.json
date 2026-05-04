@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cd txd-web; pnpm dev",
+    "start": "cd txd-web; pnpm dev",
     "release": "cd *web; pnpm release"
   },
   "author": "mr.shaojun@gmail.com",
