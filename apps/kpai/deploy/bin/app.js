@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { App, Tags } from "aws-cdk-lib";
-import { KidPlayAiStack } from "../lib/kidPlayAiStack.js";
-import { KidPlayAiRepoStack } from "../lib/kidPlayAiRepoStack.js";
+import { KidPlayAiStack } from "../lib/kpaiStack.js";
+import { KidPlayAiRepoStack } from "../lib/kpaiRepoStack.js";
 
 const app = new App();
 
