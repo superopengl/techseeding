@@ -90,14 +90,14 @@ CREATE TABLE "user" (
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
-ALTER TABLE "login_request" ADD CONSTRAINT "login_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "otp_code" ADD CONSTRAINT "otp_code_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "sandbox_release" ADD CONSTRAINT "sandbox_release_sandbox_id_sandbox_id_fk" FOREIGN KEY ("sandbox_id") REFERENCES "public"."sandbox"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "sandbox_session" ADD CONSTRAINT "sandbox_session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "sandbox_session" ADD CONSTRAINT "sandbox_session_sandbox_id_sandbox_id_fk" FOREIGN KEY ("sandbox_id") REFERENCES "public"."sandbox"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "session_message" ADD CONSTRAINT "session_message_sandbox_session_id_sandbox_session_id_fk" FOREIGN KEY ("sandbox_session_id") REFERENCES "public"."sandbox_session"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "student_profile" ADD CONSTRAINT "student_profile_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "login_request" ADD CONSTRAINT "login_request_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "otp_code" ADD CONSTRAINT "otp_code_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sandbox_release" ADD CONSTRAINT "sandbox_release_sandbox_id_sandbox_id_fk" FOREIGN KEY ("sandbox_id") REFERENCES "sandbox"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sandbox_session" ADD CONSTRAINT "sandbox_session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sandbox_session" ADD CONSTRAINT "sandbox_session_sandbox_id_sandbox_id_fk" FOREIGN KEY ("sandbox_id") REFERENCES "sandbox"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "session_message" ADD CONSTRAINT "session_message_sandbox_session_id_sandbox_session_id_fk" FOREIGN KEY ("sandbox_session_id") REFERENCES "sandbox_session"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "student_profile" ADD CONSTRAINT "student_profile_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "sandbox_user_id_idx" ON "sandbox" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "sandbox_release_sandbox_id_idx" ON "sandbox_release" USING btree ("sandbox_id");--> statement-breakpoint
 CREATE INDEX "sandbox_session_sandbox_id_idx" ON "sandbox_session" USING btree ("sandbox_id");--> statement-breakpoint
