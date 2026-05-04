@@ -31,6 +31,7 @@ export function adminStudents(fastify) {
       createdAt: row.student_profile.createdAt,
       loginRequestId: row.login_request?.id ?? null,
       loginRequestStatus: row.login_request?.status ?? null,
+      loginRequestResetPassword: row.login_request?.resetPassword ?? false,
     }));
 
     return success(items, { total, page, pageSize });

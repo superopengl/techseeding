@@ -15,6 +15,13 @@
       "when": 1777865981362,
       "tag": "0001_tearful_triton",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777931567068,
+      "tag": "0002_mature_killmonger",
+      "breakpoints": true
     }
   ]
 }

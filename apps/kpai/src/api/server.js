@@ -7,7 +7,7 @@ import { ROOT_DIR } from "./lib/sandboxManager.js";
 import { verifyToken } from "./lib/verifyToken.js";
 import { error } from "./lib/response.js";
 import { healthcheck } from "./routes/healthcheck.js";
-import { loginStudent } from "./routes/loginStudent.js";
+import { login } from "./routes/login.js";
 import { loginStatus } from "./routes/loginStatus.js";
 import { loginStudentStatus } from "./routes/loginStudentStatus.js";
 import { verify } from "./routes/verify.js";
@@ -22,6 +22,8 @@ import { sendOtp } from "./routes/sendOtp.js";
 import { adminStudentSandboxes } from "./routes/adminStudentSandboxes.js";
 import { adminSandboxMessages } from "./routes/adminSandboxMessages.js";
 import { me } from "./routes/me.js";
+import { meSetPassword } from "./routes/meSetPassword.js";
+import { meChangePassword } from "./routes/meChangePassword.js";
 import { sandboxList } from "./routes/sandboxList.js";
 import { sandboxCreate } from "./routes/sandboxCreate.js";
 import { sandboxGet } from "./routes/sandboxGet.js";
@@ -72,7 +74,7 @@ fastify.addHook("onRequest", async (request, reply) => {
 // --- Routes ---
 
 healthcheck(fastify);
-loginStudent(fastify);
+login(fastify);
 loginStatus(fastify);
 loginStudentStatus(fastify);
 verify(fastify);
@@ -87,6 +89,8 @@ adminLoginApprove(fastify);
 adminStudentSandboxes(fastify);
 adminSandboxMessages(fastify);
 me(fastify);
+meSetPassword(fastify);
+meChangePassword(fastify);
 sandboxList(fastify);
 sandboxCreate(fastify);
 sandboxGet(fastify);

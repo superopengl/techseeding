@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
 import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, message } from "antd";
-import { LoadingOutlined, KeyOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined } from "@ant-design/icons";
+import { LoadingOutlined, KeyOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
@@ -24,18 +24,23 @@ export function LoginPage() {
   useEffect(() => { setPageTitle("Login"); }, []);
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
   const [loginRequestId, setLoginRequestId] = useState(null);
   const [status, setStatus] = useState(null);
+  const [pendingReason, setPendingReason] = useState("first_time");
   const [emailLoading, setEmailLoading] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const otpRefs = useRef([]);
+  const passwordRef = useRef(null);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -111,6 +116,36 @@ export function LoginPage() {
     }
   };
 
+  const submitLogin = async (body) => {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!json.success) {
+      const err = new Error(json.error?.message || "Login failed");
+      err.code = json.error?.code;
+      err.status = res.status;
+      throw err;
+    }
+    return json.data;
+  };
+
+  const handleApprovalResponse = (data, reason) => {
+    setLoginRequestId(data.loginRequestId);
+    setRemaining(600);
+    setPendingReason(reason);
+    setStatus("pending");
+    setPassword("");
+  };
+
+  const handleAuthenticated = (data) => {
+    sessionStorage.setItem("kpai_token", data.token);
+    sessionStorage.setItem("kpai_role", data.role || "student");
+    navigate(data.role === "admin" ? "/admin" : "/sandbox");
+  };
+
   const handleSubmit = async () => {
     const id = identifier.trim();
     if (!id) return;
@@ -124,19 +159,72 @@ export function LoginPage() {
     }
     setLoading(true);
     setLoginError(null);
+    setPasswordError(null);
     try {
-      const data = await apiCall("/api/login/student", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userName: id }),
-      });
-      setLoginRequestId(data.loginRequestId);
-      setRemaining(600);
-      setStatus("pending");
+      const data = await submitLogin({ userName: id });
+      if (data.needsApproval) {
+        handleApprovalResponse(data, "first_time");
+        return;
+      }
+      if (data.needsPassword) {
+        setPassword("");
+        setStatus("password");
+        setTimeout(() => passwordRef.current?.focus(), 0);
+        return;
+      }
+      if (data.token) {
+        handleAuthenticated(data);
+        return;
+      }
+      setLoginError("Unexpected response. Please try again.");
     } catch (e) {
-      setLoginError(e.message || "Login failed");
+      setLoginError(e.message || "Wrong username or password");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    const id = identifier.trim();
+    if (!id) return;
+    if (!password) {
+      setPasswordError("Please enter your password");
+      return;
+    }
+    setLoading(true);
+    setPasswordError(null);
+    try {
+      const data = await submitLogin({ userName: id, password });
+      if (data.needsApproval) {
+        handleApprovalResponse(data, "first_time");
+        return;
+      }
+      if (data.token) {
+        handleAuthenticated(data);
+        return;
+      }
+      setPasswordError("Unexpected response. Please try again.");
+    } catch (e) {
+      setPasswordError(e.message || "Wrong username or password");
+      setPassword("");
+      passwordRef.current?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const id = identifier.trim();
+    if (!id) return;
+    setForgotLoading(true);
+    setPasswordError(null);
+    try {
+      const data = await submitLogin({ userName: id, resetPassword: true });
+      handleApprovalResponse(data, "forgot");
+    } catch (e) {
+      setPasswordError(e.message || "Could not send request. Try again.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -298,6 +386,89 @@ export function LoginPage() {
     zIndex: 1,
   };
 
+  if (status === "password") {
+    return (
+      <div style={containerStyle}>
+        <Decorations />
+        <Card style={cardStyle} styles={{ body: { padding: "48px 32px" } }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
+            <Title
+              level={3}
+              style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}
+            >
+              Welcome back, {identifier}!
+            </Title>
+            <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
+              Enter your password to log in.
+            </Paragraph>
+          </div>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <Input.Password
+              ref={passwordRef}
+              size="large"
+              placeholder="Password"
+              maxLength={128}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
+              onPressEnter={handlePasswordSubmit}
+              style={{ borderRadius: 12, height: 48 }}
+              styles={{ input: { textAlign: "center", fontWeight: 600 } }}
+              autoFocus
+            />
+            <Button
+              type="primary"
+              size="large"
+              block
+              loading={loading}
+              onClick={handlePasswordSubmit}
+              disabled={!password}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 600,
+                background: colors.ctaYellow,
+                color: colors.heading,
+                border: "none",
+                boxShadow: shadows.ctaButtonSmall,
+              }}
+            >
+              Login
+            </Button>
+            {passwordError && (
+              <div style={{ color: colors.error || "#ff4d4f", textAlign: "center" }}>
+                {passwordError}
+              </div>
+            )}
+          </Space>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
+            <Button
+              type="link"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => {
+                setStatus(null);
+                setPassword("");
+                setPasswordError(null);
+              }}
+              style={{ color: colors.muted, paddingInline: 0 }}
+            >
+              Back
+            </Button>
+            <Button
+              type="link"
+              loading={forgotLoading}
+              onClick={handleForgotPassword}
+              style={{ color: colors.primary, paddingInline: 0 }}
+            >
+              Forgot password?
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   if (status === "pending") {
     return (
       <div style={containerStyle}>
@@ -311,8 +482,11 @@ export function LoginPage() {
             Waiting for Approval
           </Title>
           <Paragraph style={{ color: colors.body, fontSize: 16, marginBottom: 8 }}>
-            Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher
-            will approve your login shortly. Hang tight!
+            {pendingReason === "forgot" ? (
+              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher will reset your password and approve your login shortly.</>
+            ) : (
+              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher will approve your login shortly. Hang tight!</>
+            )}
           </Paragraph>
           <div
             style={{
@@ -531,22 +705,16 @@ export function LoginPage() {
           >
             <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
           </span>
-          <Title
-            level={3}
-            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}
-          >
-            Log in to KidPlayAI
-          </Title>
           <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
               {isEmail
                 ? "We'll email you a 6-digit code."
-                : "Enter your username or email to log in."}
+                : "Enter your username to log in."}
             </Paragraph>
         </div>
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Input
             size="large"
-            placeholder="Username or email"
+            placeholder="Username"
             allowClear
             maxLength={100}
             value={identifier}
@@ -574,7 +742,7 @@ export function LoginPage() {
                 boxShadow: shadows.ctaButtonSmall,
               }}
             >
-              {isEmail ? "Email me a code" : "Ask my teacher"}
+              {isEmail ? "Email me a code" : "Continue"}
             </Button>
             
           </div>

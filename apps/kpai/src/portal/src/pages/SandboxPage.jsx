@@ -4,12 +4,13 @@ import { getCookie, setCookie } from "../utils/cookie";
 import { colorForName } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography } from "antd";
-import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
+import { PasswordModal } from "../components/PasswordModal";
 import { apiCall, fetchWithAuth } from "../api";
 
 const SandboxTour = lazy(() =>
@@ -44,6 +45,8 @@ export function SandboxPage() {
   const [tourOpen, setTourOpen] = useState(false);
   const [tourCurrent, setTourCurrent] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hasPassword, setHasPassword] = useState(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const titleInputRef = useRef(null);
   const previewRef = useRef(null);
   const terminalRef = useRef(null);
@@ -56,6 +59,7 @@ export function SandboxPage() {
       setDisplayName(data.userName);
       setFirstName(data.firstName || "");
       setLastName(data.lastName || "");
+      setHasPassword(Boolean(data.hasPassword));
     }).catch(() => { });
   }, []);
 
@@ -162,7 +166,7 @@ export function SandboxPage() {
       onOk: () => {
         sessionStorage.removeItem("kpai_token");
         sessionStorage.removeItem("kpai_role");
-        navigate("/login");
+        navigate("/");
       },
     });
   }, [navigate]);
@@ -235,6 +239,14 @@ export function SandboxPage() {
       icon: <QuestionCircleOutlined style={{ fontSize: 16 }} />,
       style: menuItemStyle,
       onClick: openTour,
+    },
+    {
+      key: "change-password",
+      label: "Change Password",
+      icon: <LockOutlined style={{ fontSize: 16 }} />,
+      style: menuItemStyle,
+      disabled: hasPassword === false,
+      onClick: () => setShowChangePassword(true),
     },
     { type: "divider" },
     {
@@ -545,6 +557,17 @@ export function SandboxPage() {
         sandboxId={sandboxId}
         zIndex={1002}
         description="📱 Scan the QR code or open the URL below in any browser — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
+      />
+      <PasswordModal
+        open={hasPassword === false}
+        mode="set"
+        onSuccess={() => setHasPassword(true)}
+      />
+      <PasswordModal
+        open={showChangePassword}
+        mode="change"
+        onSuccess={() => setShowChangePassword(false)}
+        onCancel={() => setShowChangePassword(false)}
       />
       {tourOpen && (
         <Suspense fallback={null}>

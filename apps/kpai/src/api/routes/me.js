@@ -15,6 +15,7 @@ export function me(fastify) {
       .select({
         userName: user.userName,
         role: user.role,
+        passwordHash: user.passwordHash,
         firstName: studentProfile.firstName,
         lastName: studentProfile.lastName,
       })
@@ -26,6 +27,7 @@ export function me(fastify) {
       return error(reply, 404, "NOT_FOUND", "User not found");
     }
 
-    return success(record);
+    const { passwordHash, ...rest } = record;
+    return success({ ...rest, hasPassword: Boolean(passwordHash) });
   });
 }

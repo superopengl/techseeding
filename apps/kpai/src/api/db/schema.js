@@ -6,6 +6,7 @@ export const user = pgTable("user", {
   userName: text("user_name").notNull(),
   role: text("role").notNull(), // student | teacher | admin
   email: text("email").unique(),
+  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
@@ -55,6 +56,7 @@ export const loginRequest = pgTable("login_request", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().unique().references(() => user.id),
   status: text("status").notNull(), // requesting | approved | loggedin
+  resetPassword: boolean("reset_password").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
