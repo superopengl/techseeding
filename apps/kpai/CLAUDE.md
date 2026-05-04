@@ -14,7 +14,7 @@ Multi-page app with four views:
 
 1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Crafts" CTA
 2. **Login** (`/login`) — Student enters their name and clicks "Request Login"; waits for admin approval
-3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is xterm.js terminal running Claude Code
+3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is xterm.js terminal running OpenCode (backed by DeepSeek)
 4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students (name, status, session active, sandbox link, message count, token info) with approve/reject actions
 
 ## How It Works
@@ -24,9 +24,9 @@ Multi-page app with four views:
 3. A record is created in PostgreSQL with status `pending`; the student sees a "Waiting for Approval" screen
 4. An admin visits `/admin`, sees pending students, and clicks "Approve"
 5. The login page polls `/api/login/status/:studentId` and navigates to `/sandbox/:studentId` once approved
-6. A WebSocket connection spawns Claude Code scoped to the student's craft folder
+6. A WebSocket connection spawns OpenCode (configured to use DeepSeek as the LLM) scoped to the student's craft folder
 7. Kids type natural language requests in the terminal (e.g., "make a craft where I catch falling stars")
-8. Claude Code edits HTML/JS/CSS files inside the sandbox
+8. OpenCode edits HTML/JS/CSS files inside the sandbox
 9. The left panel iframe shows the updated craft
 
 ## Architecture
@@ -121,7 +121,7 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 
 ## Security Model
 
-- **LLM-level**: Claude Code `--allowedTools` restricts tool usage to safe file operations
+- **LLM-level**: OpenCode is configured with a restricted tool allowlist (safe file operations only)
 - **OS-level (MVP)**: `HOME` env override limits default file access to sandbox
 - **Future**: Docker containers per student for true OS-level isolation
 - **iframe**: `sandbox="allow-scripts allow-same-origin"` restricts preview capabilities
@@ -142,7 +142,7 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 - **Backend**: Node.js, Fastify
 - **Database**: PostgreSQL with Drizzle ORM
 - **PTY**: `node-pty` for server-side pseudo-terminal
-- **AI Agent**: Claude Code CLI (spawned per student)
+- **AI Agent**: OpenCode CLI backed by DeepSeek (spawned per student)
 - **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
 - **Cloud / IaC**: AWS, CDK v2 (JavaScript)
 

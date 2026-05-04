@@ -28,7 +28,7 @@ export function PrivacyPolicyPage() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <Link to="/"><Logo size={56} square style={{ marginInline: "auto" }} /></Link>
+          <Link to="/"><Logo size={56} style={{ marginInline: "auto" }} /></Link>
         </div>
 
         <Title
@@ -42,7 +42,7 @@ export function PrivacyPolicyPage() {
           Privacy Policy
         </Title>
         <Text style={{ color: "#718096", fontSize: 14 }}>
-          Last updated: 30 April 2026
+          Last updated: 4 May 2026
         </Text>
 
         <div style={{ marginTop: 40 }}>
@@ -66,8 +66,26 @@ export function PrivacyPolicyPage() {
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               <strong>Account Information:</strong> When a student requests
-              access, we collect their first name. No email address, date of
-              birth, or other personal identifiers are required from children.
+              access, we collect their first name and date of birth. These
+              details are used only to identify the student inside the
+              Platform — to greet them, tell different students apart, and
+              let a teacher recognise them in a class — and not for any legal
+              verification, age compliance, or external identity-checking
+              purpose.
+            </Paragraph>
+            <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
+              Because name and date of birth are collected for in-platform
+              identification only, a nickname, preferred name, or approximate
+              date of birth is perfectly acceptable. If a student or their
+              parent/guardian chooses to provide a real legal name or accurate
+              date of birth, they do so voluntarily and at their own risk. By
+              registering for KidPlayAI, the student (or their parent/guardian
+              on their behalf) is deemed to accept that Techseeding PTY LTD
+              has no special obligation to treat voluntarily provided real
+              data differently from any other identification data, and
+              accepts no responsibility for any disclosure of such data
+              through any channel beyond the reasonable security measures
+              described in this policy.
             </Paragraph>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               <strong>Session Data:</strong> We store session identifiers and
@@ -104,11 +122,23 @@ export function PrivacyPolicyPage() {
               <li>
                 Maintain security and prevent misuse of the platform
               </li>
+              <li>
+                Communicate directly with the user about their account,
+                login approval, security notices, or important service
+                updates
+              </li>
             </ul>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              We do not use any collected data for advertising, marketing
-              profiling, or any purpose unrelated to delivering the KidPlayAI
-              service.
+              <strong>Personally identifiable information (PII)</strong> —
+              such as a student's name, date of birth, or any contact details
+              voluntarily shared by a parent or guardian — is used solely for
+              in-platform identification and direct communication with the
+              user. We do not run analytics, profiling, modelling, or any
+              other data-processing pipeline on PII; we do not derive
+              secondary datasets from it; we do not use it for advertising or
+              marketing; and we do not disclose it to any third party, except
+              as strictly necessary to deliver the service (see Section 5) or
+              as required by law.
             </Paragraph>
           </div>
 
@@ -117,7 +147,8 @@ export function PrivacyPolicyPage() {
               4. AI Interaction and Content
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
-              KidPlayAI uses AI (Claude by Anthropic) to help students create crafts.
+              KidPlayAI uses an open-source AI coding agent (OpenCode) backed
+              by the DeepSeek language model to help students create crafts.
               Messages sent by students to the AI assistant are processed to
               generate craft code. These interactions are stored as part of the
               sandbox session and may be reviewed by administrators for safety
@@ -136,9 +167,9 @@ export function PrivacyPolicyPage() {
             </Paragraph>
             <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
               <li>
-                <strong>Anthropic:</strong> Messages are sent to the Claude API
-                to power the AI assistant, subject to Anthropic's privacy
-                policies
+                <strong>DeepSeek:</strong> Messages are sent to the DeepSeek
+                API (via the OpenCode agent) to power the AI assistant,
+                subject to DeepSeek's privacy policies
               </li>
               <li>
                 <strong>Hosting Providers:</strong> Our infrastructure providers
@@ -183,7 +214,41 @@ export function PrivacyPolicyPage() {
 
           <div style={section}>
             <Title level={3} style={sectionTitle}>
-              7. Data Retention
+              7. User-Created Crafts and Content Rights
+            </Title>
+            <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
+              Crafts and code created on KidPlayAI by a student, with
+              assistance from our AI tools and our staff, belong to the
+              student as the original author of the underlying idea. By
+              using the Platform, the student (or their parent/guardian on
+              their behalf) grants Techseeding PTY LTD a perpetual,
+              worldwide, royalty-free, non-exclusive licence to:
+            </Paragraph>
+            <ul style={{ color: "#4a5568", lineHeight: 2.2, paddingLeft: 24 }}>
+              <li>
+                Store, host, share, demonstrate, modify, and publish the
+                craft and its underlying code, in whole or in part, for any
+                purpose related to operating, promoting, or improving
+                KidPlayAI
+              </li>
+              <li>
+                Do so without attributing the author by name
+              </li>
+            </ul>
+            <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
+              Students retain the right to download or copy their own crafts
+              at any time on request. The licence granted above survives any
+              termination of the user's account: even after a student stops
+              using KidPlayAI, Techseeding PTY LTD may continue to use,
+              share, demonstrate, modify, and publish the crafts created
+              during the student's time on the Platform on the same terms
+              set out above.
+            </Paragraph>
+          </div>
+
+          <div style={section}>
+            <Title level={3} style={sectionTitle}>
+              8. Data Retention
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               Session data and sandbox content are retained for the duration of
@@ -195,7 +260,7 @@ export function PrivacyPolicyPage() {
 
           <div style={section}>
             <Title level={3} style={sectionTitle}>
-              8. Security
+              9. Security
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We implement appropriate technical and organisational measures to
@@ -216,7 +281,7 @@ export function PrivacyPolicyPage() {
 
           <div style={section}>
             <Title level={3} style={sectionTitle}>
-              9. Your Rights
+              10. Your Rights
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               Under the Australian Privacy Act 1988, you have the right to:
@@ -238,7 +303,7 @@ export function PrivacyPolicyPage() {
 
           <div style={section}>
             <Title level={3} style={sectionTitle}>
-              10. Changes to This Policy
+              11. Changes to This Policy
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               We may update this Privacy Policy from time to time. Any changes
@@ -250,7 +315,7 @@ export function PrivacyPolicyPage() {
 
           <div style={section}>
             <Title level={3} style={sectionTitle}>
-              11. Contact Us
+              12. Contact Us
             </Title>
             <Paragraph style={{ color: "#4a5568", lineHeight: 1.8 }}>
               If you have questions about this Privacy Policy or wish to
@@ -261,7 +326,7 @@ export function PrivacyPolicyPage() {
               <br />
               ABN: 35631597450 / ACN: 631597450
               <br />
-              Website: kidplayai.techseeding.com.au
+              Website: https://kidplayai.techseeding.com.au
             </Paragraph>
           </div>
         </div>
