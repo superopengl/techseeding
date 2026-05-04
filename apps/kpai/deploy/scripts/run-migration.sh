@@ -9,7 +9,7 @@ set -euo pipefail
 
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-STACK_NAME="KidPlayAi-${STAGE}"
+STACK_NAME="kpai-${STAGE}"
 
 CLUSTER_NAME=$(aws cloudformation describe-stacks \
   --stack-name "$STACK_NAME" --region "$REGION" \

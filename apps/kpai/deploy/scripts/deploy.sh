@@ -7,8 +7,8 @@ set -euo pipefail
 
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-REPO_STACK_NAME="KidPlayAi-Repo"
-APP_STACK_NAME="KidPlayAi-${STAGE}"
+REPO_STACK_NAME="kpai-Repo"
+APP_STACK_NAME="kpai-${STAGE}"
 TAG="${TAG:-$(git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S)}"
 
 cd "$(dirname "$0")/.."
@@ -52,4 +52,4 @@ aws ecs update-service \
   --output table
 
 echo "==> Done. Tail logs with:"
-echo "    aws logs tail /kidplayai/${STAGE} --follow --region ${REGION}"
+echo "    aws logs tail /kpai/${STAGE} --follow --region ${REGION}"

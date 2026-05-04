@@ -6,7 +6,7 @@ set -euo pipefail
 
 TAG="${TAG:-latest}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
-REPO_STACK_NAME="KidPlayAi-Repo"
+REPO_STACK_NAME="kpai-Repo"
 
 REPO_URI=$(aws cloudformation describe-stacks \
   --stack-name "$REPO_STACK_NAME" \

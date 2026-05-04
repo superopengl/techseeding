@@ -43,10 +43,10 @@ export class KidPlayAiStack extends Stack {
       engine: DatabaseClusterEngine.auroraPostgres({
         version: AuroraPostgresEngineVersion.VER_16_6,
       }),
-      credentials: Credentials.fromGeneratedSecret("kidplayai", {
-        secretName: `kidplayai/${stage}/db`,
+      credentials: Credentials.fromGeneratedSecret("kpai", {
+        secretName: `kpai/${stage}/db`,
       }),
-      defaultDatabaseName: "kidplayai",
+      defaultDatabaseName: "kpai",
       writer: ClusterInstance.serverlessV2("Writer"),
       serverlessV2MinCapacity: 0.5,
       serverlessV2MaxCapacity: 2,
@@ -71,7 +71,7 @@ export class KidPlayAiStack extends Stack {
     });
 
     const jwtSecret = new Secret(this, "JwtSecret", {
-      secretName: `kidplayai/${stage}/jwt`,
+      secretName: `kpai/${stage}/jwt`,
       generateSecretString: {
         excludePunctuation: true,
         passwordLength: 64,
@@ -79,9 +79,9 @@ export class KidPlayAiStack extends Stack {
     });
 
     const deepseekSecret = new Secret(this, "DeepseekKey", {
-      secretName: `kidplayai/${stage}/deepseek`,
+      secretName: `kpai/${stage}/deepseek`,
       description:
-        "Populate after first deploy: aws secretsmanager put-secret-value --secret-id kidplayai/<stage>/deepseek --secret-string sk-...",
+        "Populate after first deploy: aws secretsmanager put-secret-value --secret-id kpai/<stage>/deepseek --secret-string sk-...",
     });
 
     const ecsCluster = new Cluster(this, "Cluster", {
@@ -90,7 +90,7 @@ export class KidPlayAiStack extends Stack {
     });
 
     const logGroup = new LogGroup(this, "LogGroup", {
-      logGroupName: `/kidplayai/${stage}`,
+      logGroupName: `/kpai/${stage}`,
       retention: RetentionDays.ONE_MONTH,
       removalPolicy: RemovalPolicy.DESTROY,
     });
@@ -120,7 +120,7 @@ export class KidPlayAiStack extends Stack {
       environment: {
         NODE_ENV: "production",
         RUN_MIGRATIONS: "true",
-        TMPDIR: "/var/kidplayai",
+        TMPDIR: "/var/kpai",
         KPAI_API_SERVICE_URL: domainName ? `https://${domainName}` : "http://0.0.0.0:80",
       },
       secrets: {
@@ -135,7 +135,7 @@ export class KidPlayAiStack extends Stack {
       portMappings: [{ containerPort: 80 }],
     });
     container.addMountPoints({
-      containerPath: "/var/kidplayai",
+      containerPath: "/var/kpai",
       sourceVolume: "sandbox",
       readOnly: false,
     });
@@ -149,7 +149,7 @@ export class KidPlayAiStack extends Stack {
     // through the auto-created service SG.
     const serviceSg = new SecurityGroup(this, "ServiceSecurityGroup", {
       vpc,
-      description: "KidPlayAI Fargate service",
+      description: "kpai Fargate service",
       allowAllOutbound: true,
     });
 

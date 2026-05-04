@@ -19,11 +19,11 @@ const hostedZoneName =
 const imageTag =
   app.node.tryGetContext("imageTag") ?? process.env.IMAGE_TAG ?? "latest";
 
-const repoStack = new KidPlayAiRepoStack(app, "KidPlayAi-Repo", {
+const repoStack = new KidPlayAiRepoStack(app, "kpai-Repo", {
   env: { account, region },
 });
 
-const appStack = new KidPlayAiStack(app, `KidPlayAi-${stage}`, {
+const appStack = new KidPlayAiStack(app, `kpai-${stage}`, {
   env: { account, region },
   stage,
   domainName,
@@ -33,5 +33,5 @@ const appStack = new KidPlayAiStack(app, `KidPlayAi-${stage}`, {
 });
 appStack.addDependency(repoStack);
 
-Tags.of(app).add("Project", "KidPlayAI");
+Tags.of(app).add("Project", "kpai");
 Tags.of(app).add("Stage", stage);

@@ -108,10 +108,10 @@ dist/                     # Production build artifacts (gitignored): dist/public
 
 - **Domain**: `kidplayai.techseeding.com.au` (subdomain under TechSeeding company domain)
 - **Target**: AWS `ap-southeast-2` (Sydney) — ECS Fargate (single task, 1 vCPU / 2 GB) behind ALB, Aurora Postgres Serverless v2 (0.5–2 ACU), EFS for sandbox persistence, ECR for the image, Secrets Manager for credentials, Route53 alias on the existing `techseeding.com.au` hosted zone.
-- **Infrastructure-as-code**: AWS CDK (JavaScript) in [deploy/](deploy/). Single stack `KidPlayAi-<stage>` defined in [deploy/lib/kidPlayAiStack.js](deploy/lib/kidPlayAiStack.js). See [deploy/README.md](deploy/README.md) for first-deploy walkthrough.
+- **Infrastructure-as-code**: AWS CDK (JavaScript) in [deploy/](deploy/). Single stack `kpai-<stage>` defined in [deploy/lib/kidPlayAiStack.js](deploy/lib/kidPlayAiStack.js). See [deploy/README.md](deploy/README.md) for first-deploy walkthrough.
 - **Image**: built from [devops/Dockerfile](devops/Dockerfile) via `pnpm build:docker`. Production deploys go through [deploy/scripts/build-and-push.sh](deploy/scripts/build-and-push.sh).
 - **Migrations**: run on container start when `RUN_MIGRATIONS=true` (set in the task definition). Manual one-off via [deploy/scripts/run-migration.sh](deploy/scripts/run-migration.sh).
-- **Sandbox persistence**: the container mounts EFS at `/var/kidplayai` and sets `TMPDIR` to that path so `os.tmpdir()` resolves to EFS, surviving container restarts.
+- **Sandbox persistence**: the container mounts EFS at `/var/kpai` and sets `TMPDIR` to that path so `os.tmpdir()` resolves to EFS, surviving container restarts.
 - **Secrets**: DB creds auto-generated; `KPAI_JWT_SECRET` auto-generated; `KPAI_SANDBOX_DEEPSEEK_API_KEY` populated manually post-deploy.
 - **CI/CD**: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — push to `main` deploys via GitHub OIDC.
 
