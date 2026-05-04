@@ -3,9 +3,8 @@ import styled from 'styled-components';
 import { Layout, Menu, Drawer, Button, Dropdown } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 import { MenuOutlined, DownOutlined } from '@ant-design/icons';
-import { FaHome } from "react-icons/fa";
-import { MdRoomService, MdLanguage, MdApps } from "react-icons/md";
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { MdLanguage, MdApps } from "react-icons/md";
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import LangToggleButton from './LangToggleButton';
 import kidPlayAiLogo from 'images/logo-kidplayai.png';
@@ -145,7 +144,7 @@ const productMenuItems = [
 
 const headerHeight = 56;
 
-const HeaderLogo = styled.a`
+const HeaderLogo = styled(Link)`
   display: flex;
   align-items: center;
   height: ${headerHeight}px;
@@ -208,30 +207,11 @@ const LogoImg = styled.img`
   }
 `;
 
-function smoothScrollTo(id, offset = 0) {
-  const element = document.getElementById(id);
-  if (element) {
-    const top = element.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top, behavior: 'smooth' });
-  }
-}
-
 function HomeHeader() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery({ minWidth: 801 });
-
-  const scrollTo = useCallback((id) => (e) => {
-    e.preventDefault();
-    smoothScrollTo(id, headerHeight);
-  }, []);
-
-  const scrollToAndClose = useCallback((id) => (e) => {
-    e.preventDefault();
-    setDrawerVisible(false);
-    smoothScrollTo(id, headerHeight);
-  }, []);
 
   const toggleLanguage = useCallback(() => {
     const lng = searchParams.get('lng');
@@ -276,7 +256,7 @@ function HomeHeader() {
 
   return (
     <HeaderStyled>
-      <HeaderLogo href="#home" onClick={scrollTo('home')}>
+      <HeaderLogo to="/">
         <LogoImg src="/logo-light.png" alt="TECHSEEDING LOGO" />
       </HeaderLogo>
       {isDesktop ? (
