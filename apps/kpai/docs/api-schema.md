@@ -78,39 +78,6 @@ Poll the status of a student login request. Used by the frontend to wait for adm
 - **Errors:**
   - `404` — Login request not found
 
-### `POST /api/verify`
-
-Verify an OTP code. On success, issues a JWT token with a 1-day TTL.
-
-- **Auth:** None
-- **Request body:**
-  ```json
-  {
-    "otpCodeId": "uuid",
-    "code": "string (6 digits)"
-  }
-  ```
-- **Response (success):** `200`
-  ```json
-  {
-    "token": "jwt string"
-  }
-  ```
-  JWT payload contains:
-  ```json
-  {
-    "userId": "uuid",
-    "role": "student | teacher | admin",
-    "exp": "<1 day from now>"
-  }
-  ```
-- **Response (failure):** `401`
-  ```json
-  {
-    "error": "Invalid or expired code"
-  }
-  ```
-
 ---
 
 ## Student

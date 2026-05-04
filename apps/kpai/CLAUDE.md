@@ -33,7 +33,7 @@ Multi-page app with four views:
 
 ### Database (PostgreSQL + Drizzle ORM)
 
-Six tables: `user`, `otp_code`, `student_profile`, `sandbox_session`, `sandbox`, `sandbox_message`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
+Tables: `user`, `student_profile`, `login_request`, `sandbox`, `sandbox_session`, `sandbox_release`, `session_message`, `enquiry`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
 
 Full schema documentation: [docs/db-schema.md](docs/db-schema.md)
 
@@ -47,7 +47,6 @@ Summary:
 - `GET /healthcheck` — public health check
 - `POST /api/login/student` — student login request
 - `GET /api/login/student/:loginRequestId/status` — poll login request status
-- `POST /api/verify` — verify OTP, receive JWT
 - `POST /api/admin/student` — create a new student user with profile
 - `GET /api/sandbox/:id` — get sandbox info (auth required)
 - `POST /api/sandbox/:id/message` — send message (auth required)
@@ -75,11 +74,9 @@ src/
       loginStudent.js     # POST /api/login/student
       loginStudentStatus.js # GET /api/login/student/:loginRequestId/status
       loginStatus.js      # GET /api/login/status/:studentId
-      verify.js           # POST /api/verify
       adminStudents.js    # GET /api/admin/students
       adminApprove.js     # POST /api/admin/approve/:studentId
       adminReject.js      # POST /api/admin/reject/:studentId
-      adminOtp.js         # POST /api/admin/otp/:studentId
       adminCreateStudent.js # POST /api/admin/student
       wsTerminal.js       # WS /api/ws
     resources/

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col, message } from "antd";
-import { LoadingOutlined, KeyOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { Button, Input, Typography, Card, Space, Spin, Result, Modal, Row, Col } from "antd";
+import { LoadingOutlined, ClockCircleOutlined, PhoneOutlined, WechatOutlined, RocketOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
@@ -11,16 +11,8 @@ const { Title, Paragraph, Text, Link } = Typography;
 
 const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
-const RESEND_COOLDOWN_S = 30;
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_MAX_LENGTH = 50;
-
-function maskEmail(email) {
-  if (!email || !email.includes("@")) return email;
-  const [local, domain] = email.split("@");
-  if (local.length <= 1) return `•••@${domain}`;
-  return `${local[0]}•••@${domain}`;
-}
 
 export function LoginPage() {
   useEffect(() => { setPageTitle("Login"); }, []);
@@ -33,22 +25,10 @@ export function LoginPage() {
   const [loginRequestId, setLoginRequestId] = useState(null);
   const [status, setStatus] = useState(null);
   const [pendingReason, setPendingReason] = useState("first_time");
-  const [emailLoading, setEmailLoading] = useState(false);
-  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError, setOtpError] = useState(null);
   const [remaining, setRemaining] = useState(600);
-  const [resendCooldown, setResendCooldown] = useState(0);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const otpRefs = useRef([]);
   const passwordRef = useRef(null);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const id = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(id);
-  }, [resendCooldown]);
 
   useEffect(() => {
     if (!loginRequestId || status !== "pending") return;
@@ -92,31 +72,6 @@ export function LoginPage() {
 
   const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
   const trimmedId = identifier.trim();
-  const isEmail = trimmedId.includes("@");
-
-  const handleSendOtp = async () => {
-    const id = identifier.trim();
-    if (!id) return;
-    const isResend = status === "otp";
-    setEmailLoading(true);
-    setLoginError(null);
-    try {
-      await apiCall("/api/login/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: id }),
-      });
-    } catch {
-      // Silently proceed to OTP screen regardless of whether the email exists
-    } finally {
-      setEmailLoading(false);
-      setOtpError(null);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setResendCooldown(RESEND_COOLDOWN_S);
-      setStatus("otp");
-      if (isResend) message.success("Code sent!");
-    }
-  };
 
   const submitLogin = async (body) => {
     const res = await fetch("/api/login", {
@@ -151,10 +106,6 @@ export function LoginPage() {
   const handleSubmit = async () => {
     const id = identifier.trim();
     if (!id) return;
-    if (id.includes("@")) {
-      handleSendOtp();
-      return;
-    }
     if (!USER_NAME_RE.test(id)) {
       setLoginError("Your name can only have letters, numbers, _ or /");
       return;
@@ -235,73 +186,6 @@ export function LoginPage() {
       setPasswordError(e.message || "Could not send request. Try again.");
     } finally {
       setForgotLoading(false);
-    }
-  };
-
-  const handleOtpChange = (index, value) => {
-    // Only allow single digit
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const newDigits = [...otpDigits];
-    newDigits[index] = digit;
-    setOtpDigits(newDigits);
-    setOtpError(null);
-
-    // Auto-focus next input
-    if (digit && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all 6 digits entered
-    if (newDigits.every((d) => d !== "")) {
-      verifyOtp(newDigits.join(""));
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (!pasted) return;
-    const newDigits = [...otpDigits];
-    for (let i = 0; i < 6; i++) {
-      newDigits[i] = pasted[i] || "";
-    }
-    setOtpDigits(newDigits);
-    // Focus last filled or next empty
-    const focusIndex = Math.min(pasted.length, 5);
-    otpRefs.current[focusIndex]?.focus();
-    if (newDigits.every((d) => d !== "")) {
-      verifyOtp(newDigits.join(""));
-    }
-  };
-
-  const verifyOtp = async (code) => {
-    setOtpLoading(true);
-    setOtpError(null);
-    try {
-      const res = await fetch("/api/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const body = await res.json();
-      if (!body.success) {
-        throw new Error(body.error?.message || "Verification failed");
-      }
-      sessionStorage.setItem("kpai_token", body.data.token);
-      sessionStorage.setItem("kpai_role", body.data.role);
-      navigate(body.data.role === "admin" ? "/admin" : "/sandbox");
-    } catch (e) {
-      setOtpError(e.message || "Verification failed");
-      setOtpDigits(["", "", "", "", "", ""]);
-      otpRefs.current[0]?.focus();
-    } finally {
-      setOtpLoading(false);
     }
   };
 
@@ -570,104 +454,6 @@ export function LoginPage() {
     );
   }
 
-  if (status === "otp") {
-    return (
-      <div style={containerStyle}>
-        <Decorations />
-        <Card style={{ ...cardStyle, textAlign: "center" }} styles={{ body: { padding: "48px 32px" } }}>
-          <KeyOutlined style={{ fontSize: 40, color: colors.accentPurple, marginBottom: 12 }} />
-          <Title
-            level={3}
-            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}
-          >
-            Enter Verification Code
-          </Title>
-          <Paragraph style={{ color: colors.body, marginBottom: 4 }}>
-            We emailed a 6-digit code to{" "}
-            <strong style={{ color: colors.heading }}>{maskEmail(identifier)}</strong>
-          </Paragraph>
-          <div style={{ color: colors.muted, fontSize: 13, marginBottom: 28 }}>
-            Code expires in 10 minutes.
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 8,
-              marginBottom: 32,
-            }}
-          >
-            {otpDigits.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => (otpRefs.current[i] = el)}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(i, e.target.value)}
-                onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                onPaste={i === 0 ? handleOtpPaste : undefined}
-                disabled={otpLoading}
-                style={{
-                  width: 48,
-                  height: 56,
-                  borderRadius: 12,
-                  border: `2px solid ${digit ? colors.primary : colors.border}`,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  textAlign: "center",
-                  outline: "none",
-                  fontFamily: fonts.heading,
-                  color: colors.heading,
-                  transition: "border-color 0.2s",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = colors.primary)}
-                onBlur={(e) => (e.target.style.borderColor = digit ? colors.primary : colors.border)}
-              />
-            ))}
-          </div>
-          {otpError && (
-            <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, marginBottom: 8 }}>
-              {otpError}
-            </div>
-          )}
-          {otpLoading && (
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: colors.primary }} />} />
-          )}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 8, gap: 4 }}>
-            {identifier && (
-              <Button
-                type="link"
-                disabled={resendCooldown > 0 || emailLoading}
-                loading={emailLoading}
-                onClick={() => {
-                  setOtpDigits(["", "", "", "", "", ""]);
-                  handleSendOtp();
-                }}
-                style={{ color: resendCooldown > 0 ? colors.muted : colors.primary, fontSize: 14 }}
-              >
-                {resendCooldown > 0 ? `Resend in 0:${String(resendCooldown).padStart(2, "0")}` : "Resend Verification Code"}
-              </Button>
-            )}
-            <Button
-              type="link"
-              onClick={() => {
-                setStatus(null);
-                setIdentifier("");
-                setLoginRequestId(null);
-                setOtpDigits(["", "", "", "", "", ""]);
-              }}
-              style={{ color: colors.primary, fontSize: 14 }}
-            >
-              Use a different email
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   if (status === "rejected") {
     return (
       <div style={containerStyle}>
@@ -722,9 +508,7 @@ export function LoginPage() {
             Login to KidPlayAI
           </Title>
           <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
-            {isEmail
-              ? "We'll email you a 6-digit code."
-              : "Enter your username to log in."}
+            Enter your username to log in.
           </Paragraph>
         </div>
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
@@ -745,7 +529,7 @@ export function LoginPage() {
               type="primary"
               size="large"
               block
-              loading={loading || emailLoading}
+              loading={loading}
               onClick={handleSubmit}
               disabled={!trimmedId}
               style={{
@@ -759,7 +543,7 @@ export function LoginPage() {
                 boxShadow: shadows.ctaButtonSmall,
               }}
             >
-              {isEmail ? "Email me a code" : "Continue"}
+              Continue
             </Button>
 
           </div>
