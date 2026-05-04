@@ -1,8 +1,8 @@
 import React from 'react';
 import { Layout, Row, Col } from 'antd';
 import styled from 'styled-components';
-import { useSearchParams } from 'react-router-dom';
-import { HomeOutlined } from '@ant-design/icons';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Trans } from 'react-i18next';
 
 const { Footer } = Layout;
 
@@ -38,13 +38,10 @@ function HomeFooter() {
       <section id="about">
         <Row gutter={[10, 4]}>
           <Col span={24}>&copy;2019-{new Date().getFullYear()} Techseeding PTY LTD. All rights reserved.</Col>
-          <Col span={24}>
-            <HomeOutlined style={{ marginRight: 6, opacity: 0.5 }} />
-            <a href="https://maps.google.com/?q=Unit 101, 11 Spring St., Chatswood, NSW 2067" target="_blank" rel="noopener noreferrer">
-              Unit 101, 11 Spring St., Chatswood, NSW 2067
-            </a>
-          </Col>
           <Col span={24}>ABN: 35631597450 / ACN: 631597450</Col>
+          <Col span={24}>
+            <Link to="/privacy_policy"><Trans i18nKey="footer.privacy_policy" /></Link>
+          </Col>
           <Col span={24} style={{ opacity: 0 }}>{versionInfo}</Col>
         </Row>
       </section>
