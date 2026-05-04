@@ -62,7 +62,7 @@ Submit a student login request. Looks up the student by `userName` (case-insensi
   - `404` — Student not found
 - **Side effects:** Upserts a row into `login_request` for the matched user with status `requesting`.
 
-### `GET /api/login/student/:loginRequestId/status`
+### `GET /api/login/:loginRequestId/status`
 
 Poll the status of a student login request. Used by the frontend to wait for admin approval.
 

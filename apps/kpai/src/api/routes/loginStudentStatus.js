@@ -5,7 +5,7 @@ import { createJwtToken } from "../lib/createJwtToken.js";
 import { success, error } from "../lib/response.js";
 
 export function loginStudentStatus(fastify) {
-  fastify.get("/api/login/student/:loginRequestId/status", async (request, reply) => {
+  fastify.get("/api/login/:loginRequestId/status", async (request, reply) => {
     const { loginRequestId } = request.params;
 
     const [record] = await db

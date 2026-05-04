@@ -48,7 +48,7 @@ export function LoginPage() {
 
     const pollId = setInterval(async () => {
       try {
-        const data = await apiCall(`/api/login/student/${loginRequestId}/status`);
+        const data = await apiCall(`/api/login/${loginRequestId}/status`);
         if (cancelled) return;
         if (data.status === "approved") {
           sessionStorage.setItem("kpai_token", data.token);

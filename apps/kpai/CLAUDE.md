@@ -46,7 +46,7 @@ Full API documentation: [docs/api-schema.md](docs/api-schema.md)
 Summary:
 - `GET /healthcheck` — public health check
 - `POST /api/login/student` — student login request
-- `GET /api/login/student/:loginRequestId/status` — poll login request status
+- `GET /api/login/:loginRequestId/status` — poll login request status
 - `POST /api/admin/student` — create a new student user with profile
 - `GET /api/sandbox/:id` — get sandbox info (auth required)
 - `POST /api/sandbox/:id/message` — send message (auth required)
@@ -72,7 +72,7 @@ src/
     routes/               # One route controller per file (filename = exported function name)
       healthcheck.js      # GET /healthcheck
       loginStudent.js     # POST /api/login/student
-      loginStudentStatus.js # GET /api/login/student/:loginRequestId/status
+      loginStudentStatus.js # GET /api/login/:loginRequestId/status
       loginStatus.js      # GET /api/login/status/:studentId
       adminStudents.js    # GET /api/admin/students
       adminApprove.js     # POST /api/admin/approve/:studentId
