@@ -14,6 +14,8 @@
     "start:prod": "node --env-file=.env.production dist/src/api/server.js",
     "start:local:docker": "pnpm build:docker && docker rm -f kidplayai 2>/dev/null; docker run -d --name kidplayai -p 9515:80 --env-file .env.localdocker techseeding/kidplayai",
     "release": "pnpm build:docker && AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy release",
+    "db:connect:prod": "AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy db:connect",
+    "db:jdbc:prod": "AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy db:jdbc",
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config src/api/drizzle.config.js",

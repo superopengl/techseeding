@@ -11,7 +11,9 @@
     "bootstrap": "cdk bootstrap",
     "release": "./scripts/release.sh",
     "build-and-push": "./scripts/build-and-push.sh",
-    "migrate": "./scripts/run-migration.sh"
+    "migrate": "./scripts/run-migration.sh",
+    "db:connect": "./scripts/db-connect.sh",
+    "db:jdbc": "./scripts/db-jdbc.sh"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.170.0",
