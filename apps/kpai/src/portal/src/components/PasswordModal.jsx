@@ -7,11 +7,13 @@ import { colors, fonts } from "../theme";
 const { Paragraph } = Typography;
 
 const MIN_LENGTH = 8;
+const MAX_LENGTH = 50;
 const PRINTABLE_ASCII = /^[\x20-\x7E]+$/;
 
 function validatePassword(value) {
   if (!value) return "Password is required";
   if (value.length < MIN_LENGTH) return `Password must be at least ${MIN_LENGTH} characters`;
+  if (value.length > MAX_LENGTH) return `Password must be at most ${MAX_LENGTH} characters`;
   if (!PRINTABLE_ASCII.test(value)) {
     return "Password may only contain letters, numbers, and visible characters";
   }
@@ -67,6 +69,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
   return (
     <Modal
       open={open}
+      width={420}
       title={
         <span style={{ fontFamily: fonts.heading, fontSize: 18, fontWeight: 700, color: colors.heading }}>
           <LockOutlined style={{ marginRight: 8, color: colors.primary }} />
@@ -104,7 +107,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             name="currentPassword"
             rules={[{ required: true, message: "Please enter your current password" }]}
           >
-            <Input.Password size="large" autoFocus maxLength={128} />
+            <Input.Password size="large" autoFocus maxLength={MAX_LENGTH} />
           </Form.Item>
         )}
         <Form.Item
@@ -119,7 +122,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             },
           ]}
         >
-          <Input.Password size="large" autoFocus={isSet} maxLength={128} />
+          <Input.Password size="large" autoFocus={isSet} maxLength={MAX_LENGTH} />
         </Form.Item>
         <Form.Item
           label="Confirm new password"
@@ -135,7 +138,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             }),
           ]}
         >
-          <Input.Password size="large" maxLength={128} />
+          <Input.Password size="large" maxLength={MAX_LENGTH} />
         </Form.Item>
       </Form>
       {serverError && (

@@ -12,6 +12,8 @@ const { Title, Paragraph, Text, Link } = Typography;
 const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
 const RESEND_COOLDOWN_S = 30;
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 50;
 
 function maskEmail(email) {
   if (!email || !email.includes("@")) return email;
@@ -189,6 +191,14 @@ export function LoginPage() {
     if (!id) return;
     if (!password) {
       setPasswordError("Please enter your password");
+      return;
+    }
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      setPasswordError(`Password must be at least ${PASSWORD_MIN_LENGTH} characters`);
+      return;
+    }
+    if (password.length > PASSWORD_MAX_LENGTH) {
+      setPasswordError(`Password must be at most ${PASSWORD_MAX_LENGTH} characters`);
       return;
     }
     setLoading(true);
@@ -408,7 +418,7 @@ export function LoginPage() {
               ref={passwordRef}
               size="large"
               placeholder="Password"
-              maxLength={128}
+              maxLength={PASSWORD_MAX_LENGTH}
               value={password}
               onChange={(e) => { setPassword(e.target.value); setPasswordError(null); }}
               onPressEnter={handlePasswordSubmit}
@@ -422,7 +432,7 @@ export function LoginPage() {
               block
               loading={loading}
               onClick={handlePasswordSubmit}
-              disabled={!password}
+              disabled={password.length < PASSWORD_MIN_LENGTH}
               style={{
                 height: 48,
                 borderRadius: 12,
@@ -705,11 +715,17 @@ export function LoginPage() {
           >
             <Logo size={56} style={{ marginBottom: 12, marginInline: "auto" }} />
           </span>
+          <Title
+            level={3}
+            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}
+          >
+            Login to KidPlayAI
+          </Title>
           <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
-              {isEmail
-                ? "We'll email you a 6-digit code."
-                : "Enter your username to log in."}
-            </Paragraph>
+            {isEmail
+              ? "We'll email you a 6-digit code."
+              : "Enter your username to log in."}
+          </Paragraph>
         </div>
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Input
@@ -744,7 +760,7 @@ export function LoginPage() {
             >
               {isEmail ? "Email me a code" : "Continue"}
             </Button>
-            
+
           </div>
           {loginError && (
             <div style={{ color: colors.error || "#ff4d4f", textAlign: "center" }}>
