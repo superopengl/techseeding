@@ -99,12 +99,21 @@ src/
       components/         # UI components (Terminal, CraftPreview)
     vite.config.js        # Vite config with dev proxy and build output to dist/public/
     package.json          # Frontend dependencies
+devops/                   # Docker image build (Dockerfile, entrypoint, opencode config)
+deploy/                   # AWS CDK app — provisions all infra and ships the image (see Deployment section)
 dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
 ```
 
 ## Deployment
 
 - **Domain**: `kidplayai.techseeding.com.au` (subdomain under TechSeeding company domain)
+- **Target**: AWS — ECS Fargate (single task) behind ALB, RDS Postgres, EFS for sandbox persistence, ECR for the image, Secrets Manager for credentials.
+- **Infrastructure-as-code**: AWS CDK (JavaScript) in [deploy/](deploy/). Single stack `KidPlayAi-<stage>` defined in [deploy/lib/kidPlayAiStack.js](deploy/lib/kidPlayAiStack.js). See [deploy/README.md](deploy/README.md) for first-deploy walkthrough.
+- **Image**: built from [devops/Dockerfile](devops/Dockerfile) via `pnpm build:docker`. Production deploys go through [deploy/scripts/build-and-push.sh](deploy/scripts/build-and-push.sh).
+- **Migrations**: run on container start when `RUN_MIGRATIONS=true` (set in the task definition). Manual one-off via [deploy/scripts/run-migration.sh](deploy/scripts/run-migration.sh).
+- **Sandbox persistence**: the container mounts EFS at `/var/kidplayai` and sets `TMPDIR` to that path so `os.tmpdir()` resolves to EFS, surviving container restarts.
+- **Secrets**: DB creds auto-generated; `KPAI_JWT_SECRET` auto-generated; `KPAI_SANDBOX_DEEPSEEK_API_KEY` populated manually post-deploy.
+- **CI/CD**: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — push to `main` deploys via GitHub OIDC.
 
 ## Publishing (Planned)
 
@@ -134,18 +143,26 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 - **Database**: PostgreSQL with Drizzle ORM
 - **PTY**: `node-pty` for server-side pseudo-terminal
 - **AI Agent**: Claude Code CLI (spawned per student)
-- **Package Manager**: pnpm (workspace monorepo)
+- **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
+- **Cloud / IaC**: AWS, CDK v2 (JavaScript)
 
 ## Commands
 
 ```bash
-pnpm install        # install all dependencies (root + portal)
+pnpm install        # install all dependencies (root + portal + deploy)
 pnpm build:prod     # build React frontend to dist/public/ and copy api to dist/src/
+pnpm build:docker   # build production Docker image (techseeding/kidplayai)
 pnpm dev            # local dev: Fastify server + Vite dev server (loads .env)
 pnpm start:prod     # production: Fastify server from dist/ (loads .env.production)
 pnpm db:generate    # generate Drizzle migration from schema changes
 pnpm db:migrate     # run pending migrations against PostgreSQL
 pnpm db:studio      # open Drizzle Studio (DB GUI)
+
+# AWS deploy (run from deploy/ or via filter)
+pnpm -F @techseeding/kidplayai-deploy synth       # render CloudFormation
+pnpm -F @techseeding/kidplayai-deploy diff        # diff against deployed stack
+pnpm -F @techseeding/kidplayai-deploy deploy      # cdk deploy --all
+pnpm -F @techseeding/kidplayai-deploy migrate     # run drizzle migrate as a one-off ECS task
 ```
 
 ## Environment

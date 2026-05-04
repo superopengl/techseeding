@@ -1,0 +1,22 @@
+{
+  "name": "@techseeding/kidplayai-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --all --require-approval never",
+    "diff": "cdk diff",
+    "destroy": "cdk destroy --all",
+    "bootstrap": "cdk bootstrap",
+    "build-and-push": "./scripts/build-and-push.sh",
+    "migrate": "./scripts/run-migration.sh"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.170.0"
+  }
+}
