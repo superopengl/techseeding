@@ -4,7 +4,6 @@ import { Layout, Menu, Drawer, Button, Dropdown } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 import { MenuOutlined, DownOutlined } from '@ant-design/icons';
 import { AiFillMessage } from "react-icons/ai";
-import { BsPeopleFill } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
 import { MdRoomService, MdLanguage, MdApps } from "react-icons/md";
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -298,11 +297,6 @@ function HomeHeader({ onClickContact }) {
       icon: <MdRoomService />,
       label: <a href="#services" onClick={scrollToAndClose('services')}><Trans i18nKey="header.services" /></a>,
     },
-    {
-      key: 'about_us',
-      icon: <BsPeopleFill />,
-      label: <a href="#about_us" onClick={scrollToAndClose('about_us')}><Trans i18nKey="header.about_us" /></a>,
-    },
     ...(shouldShowContact ? [{
       key: 'contact',
       icon: <AiFillMessage />,
@@ -336,7 +330,6 @@ function HomeHeader({ onClickContact }) {
             </NavTrigger>
           </Dropdown>
           <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
-          <NavLink href="#about_us" onClick={scrollTo('about_us')}><Trans i18nKey="header.about_us" /></NavLink>
           {shouldShowContact && <NavButton onClick={handleClickContact}><Trans i18nKey="header.contact" /></NavButton>}
           <LangToggleButton onClick={toggleLanguage} />
         </DesktopNav>

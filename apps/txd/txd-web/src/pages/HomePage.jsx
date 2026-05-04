@@ -3,7 +3,6 @@ import styled, { keyframes, css } from 'styled-components';
 import { Layout, Row, Col, Button, Tag } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
-import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
 import { RiComputerLine } from "react-icons/ri";
 import { GoDeviceMobile } from "react-icons/go";
 import { BsStars } from "react-icons/bs";
@@ -456,47 +455,6 @@ const ServicesBand = styled(SectionBand)`
   }
 `;
 
-const AboutBand = styled(SectionBand)`
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(6, 182, 212, 0.035) 45%, transparent 100%);
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /* Warm orb on the right */
-  &::before {
-    width: 460px;
-    height: 460px;
-    top: 5%;
-    right: -160px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(45, 212, 191, 0.14) 0%, transparent 65%);
-    filter: blur(70px);
-    animation: ${subtleFloat} 18s ease-in-out infinite;
-    animation-delay: -6s;
-  }
-
-  /* Diagonal line texture on the left */
-  &::after {
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      135deg,
-      transparent 0,
-      transparent 22px,
-      rgba(255, 255, 255, 0.025) 22px,
-      rgba(255, 255, 255, 0.025) 23px
-    );
-    mask-image: radial-gradient(ellipse 55% 50% at 15% 50%, black 0%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 55% 50% at 15% 50%, black 0%, transparent 70%);
-    opacity: 0.7;
-  }
-`;
-
 const ContactBand = styled(SectionBand)`
   background:
     linear-gradient(180deg, transparent 0%, rgba(244, 114, 182, 0.035) 50%, transparent 100%);
@@ -546,7 +504,7 @@ const ServicesSection = styled.section`
 `;
 
 const ContactSection = styled.section`
-  max-width: 580px;
+  max-width: 500px;
   margin: 0 auto;
   padding: 80px 1.5rem;
   position: relative;
@@ -765,14 +723,6 @@ function HomePage() {
             </ServicesSection>
           </section>
         </ServicesBand>
-
-        <SectionDivider />
-
-        <AboutBand>
-          <section id="about_us">
-            <HomeFeatureArea />
-          </section>
-        </AboutBand>
 
         {shouldShowContact && (
           <>
