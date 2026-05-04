@@ -6,7 +6,7 @@ set -euo pipefail
 # be overridden via env vars:
 #
 #   STAGE          (default: prod)
-#   STACK_NAME     (default: Kpai-${STAGE})
+#   STACK_NAME     (default: kpai-${STAGE})
 #   AWS_REGION     (default: ap-southeast-2)
 #   DB_HOST        (default: stack output 'DbClusterEndpoint')
 #   DB_PORT        (default: 5432)
@@ -22,7 +22,7 @@ set -euo pipefail
 #   DB_USER=readonly pnpm db:connect         # different user
 
 STAGE="${STAGE:-prod}"
-STACK_NAME="${STACK_NAME:-Kpai-${STAGE}}"
+STACK_NAME="${STACK_NAME:-kpai-${STAGE}}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-kpai}"
