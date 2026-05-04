@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Button, Typography, Card, Row, Col, Form, Input, Select, message as antMessage } from "antd";
+import { Button, Typography, Card, Row, Col } from "antd";
 import {
   RocketOutlined,
   ThunderboltOutlined,
@@ -19,8 +19,6 @@ import {
   ReadOutlined,
   BarChartOutlined,
   FormatPainterOutlined,
-  SendOutlined,
-  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
@@ -397,11 +395,29 @@ export function HomePage() {
             marginInline: "auto",
           }}
         >
-          <img
-            src="/car-racer.png"
-            alt="A kid building a Road Racer craft with AI in KidPlayAI"
-            style={{ width: "100%", display: "block" }}
-          />
+          <picture>
+            <source
+              type="image/avif"
+              srcSet="/img/car-racer-600.avif 600w, /img/car-racer-1200.avif 1200w, /img/car-racer-1465.avif 1465w"
+              sizes="(max-width: 932px) 100vw, 900px"
+            />
+            <source
+              type="image/webp"
+              srcSet="/img/car-racer-600.webp 600w, /img/car-racer-1200.webp 1200w, /img/car-racer-1465.webp 1465w"
+              sizes="(max-width: 932px) 100vw, 900px"
+            />
+            <img
+              src="/img/car-racer-1200.jpg"
+              srcSet="/img/car-racer-600.jpg 600w, /img/car-racer-1200.jpg 1200w, /img/car-racer-1465.jpg 1465w"
+              sizes="(max-width: 932px) 100vw, 900px"
+              width="1465"
+              height="993"
+              alt="A kid building a Road Racer craft with AI in KidPlayAI"
+              fetchPriority="high"
+              decoding="async"
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </picture>
         </div>
         <Paragraph
           style={{
@@ -861,6 +877,7 @@ export function HomePage() {
       {/* Contact / Enquiry Section */}
       <div
         id="contact"
+        ref={contactRef}
         style={{
           background: gradients.cta,
           padding: "80px 24px",

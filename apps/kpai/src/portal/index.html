@@ -19,9 +19,9 @@
   <meta property="og:url" content="https://kidplayai.techseeding.com.au/">
   <meta property="og:title" content="KidPlayAI — AI Craft Maker for Kids Ages 8-12">
   <meta property="og:description" content="Kids dream up AI crafts, watch AI build them — and learn how it all works along the way. Workshops, holiday camps, and online coaching for ages 8-12.">
-  <meta property="og:image" content="https://kidplayai.techseeding.com.au/car-racer.png">
-  <meta property="og:image:width" content="1634">
-  <meta property="og:image:height" content="974">
+  <meta property="og:image" content="https://kidplayai.techseeding.com.au/img/car-racer-1200.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="813">
   <meta property="og:image:alt" content="A kid building a Road Racer craft with AI in KidPlayAI">
   <meta property="og:locale" content="en_AU">
 
@@ -29,7 +29,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="KidPlayAI — AI Craft Maker for Kids Ages 8-12">
   <meta name="twitter:description" content="Kids dream up AI crafts, watch AI build them — and learn how it all works along the way. Workshops, holiday camps, and online coaching for ages 8-12.">
-  <meta name="twitter:image" content="https://kidplayai.techseeding.com.au/car-racer.png">
+  <meta name="twitter:image" content="https://kidplayai.techseeding.com.au/img/car-racer-1200.jpg">
   <meta name="twitter:image:alt" content="A kid building a Road Racer craft with AI in KidPlayAI">
 
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -43,6 +43,17 @@
        without a font-swap flash. Latin-ext loads only when needed. -->
   <link rel="preload" href="/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Preload the LCP image (the hero screenshot). Non-AVIF browsers ignore
+       this via the type filter and pick WebP/JPEG from the picture element. -->
+  <link
+    rel="preload"
+    as="image"
+    type="image/avif"
+    imagesrcset="/img/car-racer-600.avif 600w, /img/car-racer-1200.avif 1200w, /img/car-racer-1465.avif 1465w"
+    imagesizes="(max-width: 932px) 100vw, 900px"
+    fetchpriority="high"
+  >
 
   <script type="application/ld+json">
   {
