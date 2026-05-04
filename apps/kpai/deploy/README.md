@@ -28,16 +28,17 @@ The Route53 hosted zone for `techseeding.com.au` is auto-resolved via `HostedZon
 
 ## Prereqs
 
-- AWS account + credentials (`aws sts get-caller-identity` should work)
+- AWS account + credentials configured under the `kpai` profile (`aws sts get-caller-identity --profile kpai` should work). All deploy/admin commands assume `AWS_PROFILE=kpai` — either export it in your shell or prefix each command (the root pnpm wrappers like `pnpm release` and `pnpm db:connect:prod` already set it).
 - Node 24, pnpm 10
 - Docker with buildx (image is built `linux/amd64`)
-- One-time per account/region: `pnpm bootstrap`
+- One-time per account/region: `AWS_PROFILE=kpai pnpm bootstrap`
 
 ## First deploy
 
 ```bash
 cd deploy
 pnpm install
+export AWS_PROFILE=kpai                 # all aws/cdk calls below use this profile
 pnpm bootstrap                          # one-time CDK bootstrap in ap-southeast-2
 STAGE=prod ./scripts/deploy.sh          # provision infra + build image + push + redeploy service
 ```
@@ -46,6 +47,7 @@ Then populate the DeepSeek key (CDK creates an empty placeholder secret):
 
 ```bash
 aws secretsmanager put-secret-value \
+  --profile kpai \
   --secret-id kpai/prod/deepseek \
   --secret-string 'sk-...' \
   --region ap-southeast-2
@@ -67,19 +69,26 @@ aws ecs update-service \
 
 ## Common commands
 
+All commands below assume `AWS_PROFILE=kpai` is exported (or use the root `pnpm` wrappers, which set it automatically).
+
 From the repo root:
 
 ```bash
-pnpm -F @techseeding/kidplayai-deploy synth     # render CloudFormation
-pnpm -F @techseeding/kidplayai-deploy diff      # diff against deployed stack
-pnpm -F @techseeding/kidplayai-deploy deploy    # cdk deploy --all
-pnpm -F @techseeding/kidplayai-deploy migrate   # run drizzle-kit migrate as a one-off ECS task
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy synth     # render CloudFormation
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy diff      # diff against deployed stack
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy deploy    # cdk deploy --all
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy migrate   # run drizzle-kit migrate as a one-off ECS task
+
+# Wrappers that bake AWS_PROFILE=kpai in:
+pnpm release                                                     # build image + push + deploy stack
+pnpm db:connect:prod                                             # psql shell into prod DB
+pnpm db:jdbc:prod                                                # print JDBC URL for DBeaver
 ```
 
 Tail logs:
 
 ```bash
-aws logs tail /kpai/prod --follow --region ap-southeast-2
+aws logs tail /kpai/prod --follow --region ap-southeast-2 --profile kpai
 ```
 
 ## Overriding the domain

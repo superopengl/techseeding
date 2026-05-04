@@ -114,6 +114,7 @@ dist/                     # Production build artifacts (gitignored): dist/public
 - **Sandbox persistence**: the container mounts EFS at `/var/kpai` and sets `TMPDIR` to that path so `os.tmpdir()` resolves to EFS, surviving container restarts.
 - **Secrets**: DB creds auto-generated; `KPAI_JWT_SECRET` auto-generated; `KPAI_SANDBOX_DEEPSEEK_API_KEY` populated manually post-deploy.
 - **CI/CD**: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — push to `main` deploys via GitHub OIDC.
+- **AWS profile**: all local deploy/admin commands run under `AWS_PROFILE=kpai`. Root pnpm wrappers (`pnpm release`, `pnpm db:connect:prod`, `pnpm db:jdbc:prod`) set it automatically; for raw `aws` / `cdk` calls, export `AWS_PROFILE=kpai` first.
 
 ## Publishing (Planned)
 
