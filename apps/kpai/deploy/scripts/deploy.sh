@@ -5,6 +5,8 @@ set -euo pipefail
 # the app stack pinned to that image tag.
 # Usage: STAGE=prod ./scripts/deploy.sh
 
+export AWS_PROFILE="${AWS_PROFILE:-kpai}"
+
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
 REPO_NAME="${APP_REPO_NAME:-kpai}"
@@ -27,13 +29,14 @@ fi
 echo "==> Building and pushing image (tag: $TAG)"
 TAG="$TAG" APP_REPO_NAME="$REPO_NAME" ./scripts/build-and-push.sh
 
-# 3. Deploy all stacks (CDN cert in us-east-1, then app stack in $REGION).
-echo "==> Deploying CDK stacks (app stack: $APP_STACK_NAME)"
-pnpm exec cdk deploy --all \
+# 3. Deploy the app stack pinned to the just-pushed tag.
+echo "==> Deploying app stack: $APP_STACK_NAME"
+pnpm exec cdk deploy "$APP_STACK_NAME" \
   --require-approval never \
   -c stage="$STAGE" \
   -c imageTag="$TAG" \
-  -c appRepoName="$REPO_NAME"
+  -c appRepoName="$REPO_NAME" \
+  ${KPAI_CDN_CERT_ARN:+-c cdnCertificateArn="$KPAI_CDN_CERT_ARN"}
 
 # 4. Force Fargate to roll the new task definition (idempotent — task def
 #    update from step 3 already triggers a deployment, but force ensures it

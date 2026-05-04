@@ -23,6 +23,7 @@ import { ApplicationProtocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { HostedZone, ARecord, RecordTarget } from "aws-cdk-lib/aws-route53";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { Repository } from "aws-cdk-lib/aws-ecr";
+import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
 import {
   Distribution,
   ViewerProtocolPolicy,
@@ -38,10 +39,18 @@ import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    const { stage, domainName, hostedZoneName, appRepoName, imageTag, cdnCertificate } = props;
+    const { stage, domainName, hostedZoneName, appRepoName, imageTag, cdnCertificateArn } = props;
     const appRepo = Repository.fromRepositoryName(this, "AppRepo", appRepoName);
     const isProd = stage === "prod";
-    const originDomainName = domainName ? `origin.${domainName}` : undefined;
+    const cdnCertificate = cdnCertificateArn
+      ? Certificate.fromCertificateArn(this, "CdnCert", cdnCertificateArn)
+      : undefined;
+    // When CloudFront is in front of the ALB, the ALB takes the `origin.*`
+    // subdomain and the apex is owned by the distribution. Without a CDN cert
+    // the ALB keeps the apex.
+    const albDomainName = domainName
+      ? cdnCertificate ? `origin.${domainName}` : domainName
+      : undefined;
 
     const vpc = new Vpc(this, "Vpc", {
       maxAzs: 2,
@@ -63,7 +72,7 @@ export class KidPlayAiStack extends Stack {
       }),
       defaultDatabaseName: "kpai",
       writer: ClusterInstance.serverlessV2("Writer", { publiclyAccessible: true }),
-      serverlessV2MinCapacity: 0.5,
+      serverlessV2MinCapacity: 0,
       serverlessV2MaxCapacity: 2,
       storageEncrypted: true,
       backup: { retention: Duration.days(isProd ? 7 : 1) },
@@ -101,7 +110,7 @@ export class KidPlayAiStack extends Stack {
 
     const ecsCluster = new Cluster(this, "Cluster", {
       vpc,
-      containerInsightsV2: ContainerInsights.ENABLED,
+      containerInsightsV2: ContainerInsights.DISABLED,
     });
 
     const logGroup = new LogGroup(this, "LogGroup", {
@@ -186,9 +195,9 @@ export class KidPlayAiStack extends Stack {
       publicLoadBalancer: true,
       assignPublicIp: true,
       taskSubnets: { subnetType: SubnetType.PUBLIC },
-      protocol: originDomainName ? ApplicationProtocol.HTTPS : ApplicationProtocol.HTTP,
-      redirectHTTP: !!originDomainName,
-      domainName: originDomainName,
+      protocol: albDomainName ? ApplicationProtocol.HTTPS : ApplicationProtocol.HTTP,
+      redirectHTTP: !!albDomainName,
+      domainName: albDomainName,
       domainZone,
       healthCheckGracePeriod: Duration.seconds(300),
       circuitBreaker: { rollback: true },
@@ -207,8 +216,8 @@ export class KidPlayAiStack extends Stack {
     // the edge so the single Fargate task isn't the bottleneck for static
     // delivery; passes /api/* and the SPA HTML through uncached.
     let distribution;
-    if (domainName && originDomainName && cdnCertificate && domainZone) {
-      const origin = new HttpOrigin(originDomainName, {
+    if (domainName && albDomainName && cdnCertificate && domainZone) {
+      const origin = new HttpOrigin(albDomainName, {
         protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
         readTimeout: Duration.seconds(60),
         keepaliveTimeout: Duration.seconds(60),

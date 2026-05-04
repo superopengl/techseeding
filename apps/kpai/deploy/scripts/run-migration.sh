@@ -7,6 +7,8 @@ set -euo pipefail
 #
 # Usage: STAGE=prod ./scripts/run-migration.sh
 
+export AWS_PROFILE="${AWS_PROFILE:-kpai}"
+
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
 STACK_NAME="kpai-${STAGE}"

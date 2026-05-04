@@ -4,6 +4,8 @@ set -euo pipefail
 # Build the production Docker image and push it to the kpai ECR repository.
 # Usage: TAG=$(git rev-parse --short HEAD) ./scripts/build-and-push.sh
 
+export AWS_PROFILE="${AWS_PROFILE:-kpai}"
+
 TAG="${TAG:-latest}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
 REPO_NAME="${APP_REPO_NAME:-kpai}"

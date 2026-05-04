@@ -9,6 +9,10 @@ set -euo pipefail
 #                                    warms the docker layer cache)
 #    or: STAGE=prod ./scripts/release.sh
 
+# Default to the kpai IAM profile so direct invocations don't fall back to
+# whatever happens to be the shell default (often a less-privileged user).
+export AWS_PROFILE="${AWS_PROFILE:-kpai}"
+
 STAGE="${STAGE:-prod}"
 REGION="${AWS_REGION:-${CDK_DEFAULT_REGION:-ap-southeast-2}}"
 REPO_NAME="${APP_REPO_NAME:-kpai}"
@@ -31,15 +35,14 @@ fi
 echo "==> Building and pushing image (tag: $TAG)"
 TAG="$TAG" APP_REPO_NAME="$REPO_NAME" ./scripts/build-and-push.sh
 
-# 3. Deploy all stacks (CDN cert in us-east-1, then app stack in $REGION).
-#    `--all` ensures the cross-region cert exists before the app stack
-#    references it through SSM.
-echo "==> Deploying CDK stacks (app stack: $APP_STACK_NAME)"
-pnpm exec cdk deploy --all \
+# 3. Deploy the app stack pinned to the just-pushed tag.
+echo "==> Deploying app stack: $APP_STACK_NAME"
+pnpm exec cdk deploy "$APP_STACK_NAME" \
   --require-approval never \
   -c stage="$STAGE" \
   -c imageTag="$TAG" \
-  -c appRepoName="$REPO_NAME"
+  -c appRepoName="$REPO_NAME" \
+  ${KPAI_CDN_CERT_ARN:+-c cdnCertificateArn="$KPAI_CDN_CERT_ARN"}
 
 echo ""
 echo "==> Released. Tail logs with:"

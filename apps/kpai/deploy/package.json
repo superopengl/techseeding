@@ -13,7 +13,8 @@
     "build-and-push": "./scripts/build-and-push.sh",
     "migrate": "./scripts/run-migration.sh",
     "db:connect": "./scripts/db-connect.sh",
-    "db:jdbc": "./scripts/db-jdbc.sh"
+    "db:jdbc": "./scripts/db-jdbc.sh",
+    "ecr:lifecycle": "./scripts/ecr-lifecycle.sh"
   },
   "dependencies": {
     "aws-cdk-lib": "^2.170.0",
