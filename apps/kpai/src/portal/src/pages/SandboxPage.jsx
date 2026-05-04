@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
 import { getCookie, setCookie } from "../utils/cookie";
+import { colorForName } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown } from "antd";
 import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
@@ -193,6 +194,7 @@ export function SandboxPage() {
   };
 
   const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
+  const { bg: avatarBg, fg: avatarFg } = colorForName(userName);
 
   const startEditing = useCallback(() => {
     setTitleDraft(title);
@@ -401,8 +403,8 @@ export function SandboxPage() {
                 <Avatar
                   size={32}
                   style={{
-                    background: colors.ctaYellow,
-                    color: colors.heading,
+                    background: avatarBg,
+                    color: avatarFg,
                     fontFamily: fonts.heading,
                     fontWeight: 700,
                   }}
