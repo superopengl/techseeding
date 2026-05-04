@@ -174,13 +174,13 @@ const ContactForm = forwardRef(function ContactForm({ onDone, showCancel = true 
 
   return (
     <StyledForm form={form} onFinish={handleSubmit}>
-      <Form.Item name="name" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
+      <Form.Item name="name" rules={[{ required: true, message: t('contact.error.name'), whitespace: true, max: 100 }]}>
         <Input ref={firstInputRef} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending} />
       </Form.Item>
-      <Form.Item name="reply" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
+      <Form.Item name="reply" rules={[{ required: true, message: t('contact.error.reply'), whitespace: true, max: 100 }]}>
         <Input placeholder={t('contact.placeholder.reply')} allowClear={true} maxLength={100} disabled={sending} />
       </Form.Item>
-      <Form.Item name="message" rules={[{ required: true, message: ' ', whitespace: true, max: 1000 }]}>
+      <Form.Item name="message" rules={[{ required: true, message: t('contact.error.message'), whitespace: true, max: 1000 }]}>
         <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000} disabled={sending} placeholder={t('contact.placeholder.message')} />
       </Form.Item>
       <Form.Item style={{ marginBottom: 8 }}>
