@@ -345,24 +345,134 @@ const AffixContactButton = styled(Button)`
 
 /* ─── Sections ─── */
 
+const SectionBand = styled.div`
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+`;
+
+const ServicesBand = styled(SectionBand)`
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.04) 50%, transparent 100%);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Floating orb on the left */
+  &::before {
+    width: 520px;
+    height: 520px;
+    top: 10%;
+    left: -180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.16) 0%, transparent 65%);
+    filter: blur(60px);
+    animation: ${subtleFloat} 14s ease-in-out infinite;
+  }
+
+  /* Dot grid texture on the right */
+  &::after {
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 60% 50% at 85% 30%, black 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 85% 30%, black 0%, transparent 70%);
+    opacity: 0.6;
+  }
+`;
+
+const AboutBand = styled(SectionBand)`
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(6, 182, 212, 0.035) 45%, transparent 100%);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Warm orb on the right */
+  &::before {
+    width: 460px;
+    height: 460px;
+    top: 5%;
+    right: -160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(45, 212, 191, 0.14) 0%, transparent 65%);
+    filter: blur(70px);
+    animation: ${subtleFloat} 18s ease-in-out infinite;
+    animation-delay: -6s;
+  }
+
+  /* Diagonal line texture on the left */
+  &::after {
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 22px,
+      rgba(255, 255, 255, 0.025) 22px,
+      rgba(255, 255, 255, 0.025) 23px
+    );
+    mask-image: radial-gradient(ellipse 55% 50% at 15% 50%, black 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 55% 50% at 15% 50%, black 0%, transparent 70%);
+    opacity: 0.7;
+  }
+`;
+
+const ContactBand = styled(SectionBand)`
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(244, 114, 182, 0.035) 50%, transparent 100%);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Soft pink orb centered behind the contact card */
+  &::before {
+    width: 620px;
+    height: 420px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(244, 114, 182, 0.14) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+    filter: blur(70px);
+    animation: ${subtleFloat} 16s ease-in-out infinite;
+  }
+
+  /* Subtle horizontal scanlines */
+  &::after {
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 6px,
+      rgba(255, 255, 255, 0.018) 6px,
+      rgba(255, 255, 255, 0.018) 7px
+    );
+    mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    opacity: 0.7;
+  }
+`;
+
 const ServicesSection = styled.section`
   max-width: 1200px;
   margin: 0 auto;
   padding: 80px 1.5rem;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
 `;
 
 const ContactSection = styled.section`
@@ -370,19 +480,6 @@ const ContactSection = styled.section`
   margin: 0 auto;
   padding: 80px 1.5rem;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-  }
 `;
 
 const ContactPanel = styled.div`
@@ -575,48 +672,54 @@ function HomePage() {
 
         <SectionDivider />
 
-        <section id="services">
-          <ServicesSection>
-            <SectionLabel><Trans i18nKey="section.services.subtitle" /></SectionLabel>
-            <SectionTitle><Trans i18nKey="section.services" /></SectionTitle>
-            <Row gutter={[16, 16]}>
-              {tileData.map((t, i) => (
-                <Col key={i} {...tileSpanProps}>
-                  <GlassCard $glowColor={t.color}>
-                    <CardIcon $color={t.color}>{t.icon}</CardIcon>
-                    <CardTitle>{t.title}</CardTitle>
-                    {t.tags && t.tags.length > 0 && (
-                      <div style={{ marginBottom: '0.6rem' }}>
-                        {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
-                      </div>
-                    )}
-                    <CardDescription>{t.content}</CardDescription>
-                  </GlassCard>
-                </Col>
-              ))}
-            </Row>
-          </ServicesSection>
-        </section>
+        <ServicesBand>
+          <section id="services">
+            <ServicesSection>
+              <SectionLabel><Trans i18nKey="section.services.subtitle" /></SectionLabel>
+              <SectionTitle><Trans i18nKey="section.services" /></SectionTitle>
+              <Row gutter={[16, 16]}>
+                {tileData.map((t, i) => (
+                  <Col key={i} {...tileSpanProps}>
+                    <GlassCard $glowColor={t.color}>
+                      <CardIcon $color={t.color}>{t.icon}</CardIcon>
+                      <CardTitle>{t.title}</CardTitle>
+                      {t.tags && t.tags.length > 0 && (
+                        <div style={{ marginBottom: '0.6rem' }}>
+                          {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
+                        </div>
+                      )}
+                      <CardDescription>{t.content}</CardDescription>
+                    </GlassCard>
+                  </Col>
+                ))}
+              </Row>
+            </ServicesSection>
+          </section>
+        </ServicesBand>
 
         <SectionDivider />
 
-        <section id="about_us">
-          <HomeFeatureArea />
-        </section>
+        <AboutBand>
+          <section id="about_us">
+            <HomeFeatureArea />
+          </section>
+        </AboutBand>
 
         {shouldShowContact && (
           <>
             <SectionDivider />
-            <section id="contact">
-              <ContactSection>
-                <SectionLabel><Trans i18nKey="header.contact" /></SectionLabel>
-                <SectionTitle><Trans i18nKey="button.contact_us" /></SectionTitle>
-                <ContactPanel>
-                  <ContactPrompt><Trans i18nKey="contact.title" /></ContactPrompt>
-                  <ContactForm ref={contactFormRef} showCancel={false} />
-                </ContactPanel>
-              </ContactSection>
-            </section>
+            <ContactBand>
+              <section id="contact">
+                <ContactSection>
+                  <SectionLabel><Trans i18nKey="header.contact" /></SectionLabel>
+                  <SectionTitle><Trans i18nKey="button.contact_us" /></SectionTitle>
+                  <ContactPanel>
+                    <ContactPrompt><Trans i18nKey="contact.title" /></ContactPrompt>
+                    <ContactForm ref={contactFormRef} showCancel={false} />
+                  </ContactPanel>
+                </ContactSection>
+              </section>
+            </ContactBand>
           </>
         )}
       </ContentStyled>
