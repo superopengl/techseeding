@@ -52,7 +52,7 @@ export function LoginPage() {
         if (cancelled) return;
         if (data.status === "approved") {
           sessionStorage.setItem("kpai_token", data.token);
-          sessionStorage.setItem("kpai_role", "student");
+          sessionStorage.setItem("kpai_role", data.role);
           setStatus("approved");
           navigate("/sandbox");
         } else if (data.status === "rejected") {

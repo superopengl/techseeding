@@ -18,11 +18,11 @@ export function loginStudentStatus(fastify) {
       return error(reply, 404, "NOT_FOUND", "Login request not found");
     }
 
-    const { login_request: req, user: studentUser } = record;
+    const { login_request: req, user } = record;
 
     if (req.status === "approved") {
-      const token = createJwtToken({ userId: studentUser.id, role: studentUser.role });
-      return success({ loginRequestId: req.id, status: req.status, token });
+      const token = createJwtToken({ userId: user.id, role: user.role });
+      return success({ loginRequestId: req.id, status: req.status, token, role: user.role });
     }
 
     return success({ loginRequestId: req.id, status: req.status });
