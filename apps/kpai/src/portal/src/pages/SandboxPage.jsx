@@ -1,16 +1,25 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
+import { getCookie, setCookie } from "../utils/cookie";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal } from "antd";
-import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined } from "@ant-design/icons";
+import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown } from "antd";
+import { AppstoreOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, DownOutlined, UserOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
 import { apiCall, fetchWithAuth } from "../api";
+
+const SandboxTour = lazy(() =>
+  import("../components/SandboxTour").then((m) => ({ default: m.SandboxTour }))
+);
+
+const TOUR_MENU_STEPS = new Set([4, 5, 6, 7]);
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
+
+const TOUR_COOKIE_NAME = "kpai_sandbox_tour_seen";
 
 
 const DIVIDER_WIDTH = 6;
@@ -29,7 +38,14 @@ export function SandboxPage() {
   const [showMyCrafts, setShowMyCrafts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourCurrent, setTourCurrent] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const titleInputRef = useRef(null);
+  const previewRef = useRef(null);
+  const terminalRef = useRef(null);
+  const shareRef = useRef(null);
+  const avatarRef = useRef(null);
 
   useEffect(() => {
     apiCall("/api/me").then((data) => {
@@ -52,6 +68,118 @@ export function SandboxPage() {
   useEffect(() => {
     setPageTitle(title ? `Sandbox: ${title}` : "Sandbox");
   }, [title]);
+
+  useEffect(() => {
+    if (sandboxNotFound) return;
+    if (getCookie(TOUR_COOKIE_NAME)) return;
+    const timer = setTimeout(() => setTourOpen(true), 600);
+    return () => clearTimeout(timer);
+  }, [sandboxNotFound]);
+
+  const markTourSeen = useCallback(() => {
+    setCookie(TOUR_COOKIE_NAME, "1");
+  }, []);
+
+  const handleTourClose = useCallback(() => {
+    setTourOpen(false);
+    setTourCurrent(0);
+    markTourSeen();
+  }, [markTourSeen]);
+
+  const handleTourFinish = useCallback(() => {
+    setTourOpen(false);
+    setTourCurrent(0);
+    markTourSeen();
+  }, [markTourSeen]);
+
+  const openTour = useCallback(() => {
+    setTourCurrent(0);
+    setTourOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (!tourOpen) {
+      setDropdownOpen(false);
+      return;
+    }
+    setDropdownOpen(TOUR_MENU_STEPS.has(tourCurrent));
+  }, [tourOpen, tourCurrent]);
+
+  const handleLogout = useCallback(() => {
+    Modal.confirm({
+      title: "Logout",
+      content: "Are you sure you want to logout?",
+      okText: "Logout",
+      cancelText: "Stay",
+      autoFocusButton: "cancel",
+      okButtonProps: {
+        style: {
+          borderRadius: 12,
+          fontWeight: 600,
+          background: colors.ctaYellow,
+          color: colors.heading,
+          border: "none",
+          boxShadow: shadows.ctaButtonSmall,
+        },
+      },
+      cancelButtonProps: {
+        style: { borderRadius: 12, fontWeight: 600 },
+      },
+      onOk: () => {
+        sessionStorage.removeItem("c4k_token");
+        sessionStorage.removeItem("c4k_role");
+        navigate("/login");
+      },
+    });
+  }, [navigate]);
+
+  const menuItemStyle = {
+    height: 44,
+    lineHeight: "44px",
+    fontSize: 15,
+    fontWeight: 500,
+    padding: "0 18px",
+  };
+
+  const userMenuItems = [
+    {
+      key: "my-crafts",
+      label: "My Crafts",
+      icon: <AppstoreOutlined style={{ fontSize: 16 }} />,
+      style: menuItemStyle,
+      className: "kpai-tour-my-crafts",
+      onClick: () => setShowMyCrafts(true),
+    },
+    {
+      key: "guidance",
+      label: "Show Guidance",
+      icon: <QuestionCircleOutlined style={{ fontSize: 16 }} />,
+      style: menuItemStyle,
+      className: "kpai-tour-guidance",
+      onClick: openTour,
+    },
+    { type: "divider" },
+    {
+      key: "logout",
+      label: "Logout",
+      icon: <LogoutOutlined style={{ fontSize: 16 }} />,
+      danger: true,
+      style: menuItemStyle,
+      className: "kpai-tour-logout",
+      onClick: handleLogout,
+    },
+  ];
+
+  const handleDropdownOpenChange = (next) => {
+    if (tourOpen && TOUR_MENU_STEPS.has(tourCurrent)) {
+      // Tour is driving the menu; ignore close attempts.
+      if (next) setDropdownOpen(true);
+      return;
+    }
+    setDropdownOpen(next);
+  };
+
+  const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
 
   const startEditing = useCallback(() => {
     setTitleDraft(title);
@@ -167,117 +295,130 @@ export function SandboxPage() {
           }}
         >
           <Logo size={36} square />
-          {userName && (
-            <span
+          {editingTitle ? (
+            <Input
+              ref={titleInputRef}
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={saveTitle}
+              onPressEnter={saveTitle}
+              maxLength={50}
               style={{
-                fontFamily: fonts.body,
-                fontSize: 14,
+                width: 260,
+                fontFamily: fonts.heading,
+                fontSize: 16,
                 fontWeight: 600,
+                background: "rgba(255,255,255,0.2)",
+                border: "1px solid rgba(255,255,255,0.3)",
                 color: colors.onDark,
               }}
+            />
+          ) : (
+            <span
+              onClick={startEditing}
+              title="Click to rename"
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: 16,
+                fontWeight: 600,
+                color: colors.onDark,
+                cursor: "pointer",
+                padding: "4px 12px",
+                borderRadius: 8,
+                border: "1px dashed rgba(255,255,255,0.25)",
+                transition: "border-color 0.2s, background 0.2s",
+                textShadow: shadows.textOnGradient,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
+                e.currentTarget.style.background = "transparent";
+              }}
             >
-              {userName}
+              <span>{title || "Untitled Craft"}</span>
+              <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
             </span>
           )}
-          <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-            {editingTitle ? (
-              <Input
-                ref={titleInputRef}
-                value={titleDraft}
-                onChange={(e) => setTitleDraft(e.target.value)}
-                onBlur={saveTitle}
-                onPressEnter={saveTitle}
-                maxLength={50}
+          <div style={{ flex: 1 }} />
+          <Space size={8}>
+            <Button ref={shareRef} icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
+              Share
+            </Button>
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              placement="bottomRight"
+              trigger={["click"]}
+              overlayStyle={{ minWidth: 220 }}
+              open={dropdownOpen}
+              onOpenChange={handleDropdownOpenChange}
+            >
+              <div
+                ref={avatarRef}
+                role="button"
+                tabIndex={0}
+                aria-label="User menu"
                 style={{
-                  width: 260,
-                  textAlign: "center",
-                  fontFamily: fonts.heading,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  background: "rgba(255,255,255,0.2)",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  color: colors.onDark,
-                }}
-              />
-            ) : (
-              <span
-                onClick={startEditing}
-                title="Click to rename"
-                style={{
-                  fontFamily: fonts.heading,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: colors.onDark,
-                  cursor: "pointer",
-                  padding: "4px 12px",
-                  borderRadius: 8,
-                  border: "1px dashed rgba(255,255,255,0.25)",
-                  transition: "border-color 0.2s, background 0.2s",
-                  textShadow: shadows.textOnGradient,
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
+                  padding: "4px 10px 4px 4px",
+                  borderRadius: 999,
+                  cursor: "pointer",
+                  border: "1px solid rgba(255,255,255,0.25)",
+                  background: "rgba(255,255,255,0.08)",
+                  transition: "background 0.2s, border-color 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.18)";
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
                 }}
                 onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
                   e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                  e.currentTarget.style.background = "transparent";
                 }}
               >
-                <span>{title || "Untitled Craft"}</span>
-                <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
-              </span>
-            )}
-          </div>
-          <Space size={8}>
-            <Button type="text" icon={<AppstoreOutlined />} onClick={() => setShowMyCrafts(true)} style={{ color: colors.onDark }}>
-              My Crafts
-            </Button>
-            <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
-              Share
-            </Button>
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              style={{ color: "rgba(255,255,255,0.7)" }}
-              onClick={() => {
-                Modal.confirm({
-                  title: "Logout",
-                  content: "Are you sure you want to logout?",
-                  okText: "Logout",
-                  cancelText: "Stay",
-                  autoFocusButton: "cancel",
-                  okButtonProps: {
-                    style: {
-                      borderRadius: 12,
+                <Avatar
+                  size={32}
+                  style={{
+                    background: colors.ctaYellow,
+                    color: colors.heading,
+                    fontFamily: fonts.heading,
+                    fontWeight: 700,
+                  }}
+                  icon={userName ? null : <UserOutlined />}
+                >
+                  {userName ? avatarInitial : null}
+                </Avatar>
+                {userName && (
+                  <span
+                    style={{
+                      fontFamily: fonts.body,
+                      fontSize: 14,
                       fontWeight: 600,
-                      background: colors.ctaYellow,
-                      color: colors.heading,
-                      border: "none",
-                      boxShadow: shadows.ctaButtonSmall,
-                    },
-                  },
-                  cancelButtonProps: {
-                    style: { borderRadius: 12, fontWeight: 600 },
-                  },
-                  onOk: () => {
-                    sessionStorage.removeItem("c4k_token");
-                    sessionStorage.removeItem("c4k_role");
-                    navigate("/login");
-                  },
-                });
-              }}
-            >
-              Logout
-            </Button>
+                      color: colors.onDark,
+                      maxWidth: 140,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {userName}
+                  </span>
+                )}
+                <DownOutlined style={{ fontSize: 10, color: colors.onDarkSecondary }} />
+              </div>
+            </Dropdown>
           </Space>
         </div>
       </div>
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
-        <div style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
+        <div ref={previewRef} style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
           <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
             <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
             <div
@@ -348,7 +489,7 @@ export function SandboxPage() {
             <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
           </div>
         </div>
-        <div style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
+        <div ref={terminalRef} style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
           <Terminal sandboxId={sandboxId} onFileChanged={handleFileChanged} />
         </div>
       </div>
@@ -377,6 +518,21 @@ export function SandboxPage() {
         zIndex={1002}
         description="📱 Scan the QR code or open the URL below in any browser — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
       />
+      {tourOpen && (
+        <Suspense fallback={null}>
+          <SandboxTour
+            open={tourOpen}
+            current={tourCurrent}
+            onChange={setTourCurrent}
+            onClose={handleTourClose}
+            onFinish={handleTourFinish}
+            previewRef={previewRef}
+            terminalRef={terminalRef}
+            shareRef={shareRef}
+            avatarRef={avatarRef}
+          />
+        </Suspense>
+      )}
     </Layout>
   );
 }
