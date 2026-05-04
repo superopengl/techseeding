@@ -9,10 +9,10 @@ export function loginStudent(fastify) {
   fastify.post("/api/login/student", async (request, reply) => {
     const { userName } = request.body || {};
     if (!userName || typeof userName !== "string" || userName.trim().length === 0) {
-      return error(reply, 400, "VALIDATION_ERROR", "User Name is required");
+      return error(reply, 400, "VALIDATION_ERROR", "Username is required");
     }
     if (!isValidUserName(userName.trim())) {
-      return error(reply, 400, "VALIDATION_ERROR", "User Name may only contain letters, digits, underscore, and slash");
+      return error(reply, 400, "VALIDATION_ERROR", "Username may only contain letters, digits, underscore, and slash");
     }
 
     const loginReq = await db.transaction(async (tx) => {

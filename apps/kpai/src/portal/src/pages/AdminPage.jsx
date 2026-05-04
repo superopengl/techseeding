@@ -196,7 +196,7 @@ export function AdminPage() {
 
   const columns = [
     {
-      title: "User Name",
+      title: "Username",
       dataIndex: "userName",
       key: "userName",
       sorter: (a, b) => (a.userName || "").localeCompare(b.userName || ""),
@@ -208,7 +208,7 @@ export function AdminPage() {
             onClick={(e) => {
               e.stopPropagation();
               navigator.clipboard.writeText(id);
-              message.success("User Name copied");
+              message.success("Username copied");
             }}
           />
         </Space>
@@ -579,16 +579,16 @@ export function AdminPage() {
         <Form form={addForm} layout="horizontal" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} clearOnDestroy style={{ marginTop: 16 }}>
           <Form.Item
             name="accountName"
-            label="User Name"
+            label="Username"
             rules={[
-              { required: true, message: "User Name is required" },
-              { max: 50, message: "User Name must be 50 characters or less" },
+              { required: true, message: "Username is required" },
+              { max: 50, message: "Username must be 50 characters or less" },
               { pattern: /^[a-zA-Z0-9_/]+$/, message: "Only letters, digits, underscore, and slash are allowed" },
               {
                 validator: async (_, value) => {
                   if (!value || !/^[a-zA-Z0-9_/]+$/.test(value)) return;
                   const result = await apiCall("/api/admin/check-user-name", { method: "POST", body: JSON.stringify({ userName: value }), headers: { "Content-Type": "application/json" } });
-                  if (!result.available) throw new Error("User Name is already taken");
+                  if (!result.available) throw new Error("Username is already taken");
                 },
               },
             ]}
