@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import { ConfigProvider, theme } from 'antd';
+import { App as AntApp, ConfigProvider, theme } from 'antd';
 import HomePage from 'pages/HomePage';
 import PrivacyPolicyPage from 'pages/PrivacyPolicyPage';
 
@@ -50,14 +50,16 @@ const appTheme = {
 function App() {
   return (
     <ConfigProvider theme={appTheme}>
-      <BrowserRouter basename="/">
-        <div>
-          <Routes>
-            <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
-            <Route path="/*" element={<HomePage />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
+      <AntApp>
+        <BrowserRouter basename="/">
+          <div>
+            <Routes>
+              <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
+              <Route path="/*" element={<HomePage />} />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </AntApp>
     </ConfigProvider>
   );
 }

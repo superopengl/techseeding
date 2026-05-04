@@ -1,5 +1,5 @@
 import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Form, Input, Button, message } from "antd";
+import { App, Form, Input, Button } from "antd";
 import styled from 'styled-components';
 import emailjs from '@emailjs/browser';
 import { Trans, useTranslation } from 'react-i18next';
@@ -111,6 +111,7 @@ const ContactForm = forwardRef(function ContactForm({ onDone, showCancel = true 
   const [form] = Form.useForm();
   const firstInputRef = useRef(null);
   const { t } = useTranslation();
+  const { message } = App.useApp();
 
   useImperativeHandle(ref, () => ({
     reset() {
@@ -127,14 +128,26 @@ const ContactForm = forwardRef(function ContactForm({ onDone, showCancel = true 
     if (sending) return;
 
     const {
+      VITE_EMAILJS_SERVICEID,
       VITE_EMAILJS_TEMPLATEID,
       VITE_EMAILJS_USERID
     } = import.meta.env;
 
+    const missing = Object.entries({
+      VITE_EMAILJS_SERVICEID,
+      VITE_EMAILJS_TEMPLATEID,
+      VITE_EMAILJS_USERID,
+    }).filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) {
+      console.error(`EmailJS config missing: ${missing.join(', ')}. Restart the dev server after editing .env.`);
+      message.error({ content: t('contact.message.error'), key: 'contact.message.error' });
+      return;
+    }
+
     try {
       setSending(true);
       await emailjs.send(
-        'gmail_service',
+        VITE_EMAILJS_SERVICEID,
         VITE_EMAILJS_TEMPLATEID,
         {
           guest_name: values.name,
