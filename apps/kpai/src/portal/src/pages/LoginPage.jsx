@@ -768,7 +768,10 @@ export function LoginPage() {
             </div>
           )}
         </Space>
-        <div style={{ color: colors.muted, textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
+        <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
+          New here?{" "} For our young learners' safety, accounts are only created offline. Parents or guardians, please <Link onClick={() => navigate("/#contact")}>contact us</Link> directly to register your child.
+        </Paragraph>
+        <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
           By logging in you agree to our{" "}
           <Link href="/terms_of_use" target="_blank" rel="noopener noreferrer">
             Terms of Use
@@ -778,13 +781,6 @@ export function LoginPage() {
             Privacy Policy
           </Link>
           .
-        </div>
-        <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
-          New here?{" "}
-          <Link onClick={() => navigate("/#contact")}>
-            Contact us
-          </Link>{" "}
-          to sign up.
         </Paragraph>
       </Card>
 

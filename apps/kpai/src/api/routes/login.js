@@ -40,7 +40,7 @@ export function login(fastify) {
     const [matchedUser] = await db
       .select()
       .from(user)
-      .where(sql`lower(${user.userName}) = lower(${userName.trim()}) and ${user.role} = 'student'`);
+      .where(sql`lower(${user.userName}) = lower(${userName.trim()})`);
 
     if (!matchedUser) {
       return error(reply, 401, "INVALID_CREDENTIALS", "Wrong username or password");
