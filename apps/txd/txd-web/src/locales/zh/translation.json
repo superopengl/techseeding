@@ -60,5 +60,18 @@
   "contact.placeholder.message": "我们能为您做什么？",
   "copy.done": "已复制 {{value}}",
   "contact.message.done": "消息已发送！我们会尽快与您联系。",
-  "contact.message.error": "发送失败，请稍后重试。"
+  "contact.message.error": "发送失败，请稍后重试。",
+  "footer.privacy_policy": "隐私政策",
+  "privacy.title": "隐私政策",
+  "privacy.last_updated": "最后更新：2026 年 5 月",
+  "privacy.section.overview.title": "概述",
+  "privacy.section.overview.content": "本隐私政策说明了 Techseeding PTY LTD（以下简称\"Techseeding\"、\"我们\"）对本网站访问者及我们的产品与服务用户隐私的态度。我们的原则很简单：将数据收集降至最低。",
+  "privacy.section.no_collection.title": "我们不收集您的信息",
+  "privacy.section.no_collection.content": "Techseeding 不会收集用户的个人信息。我们不会追踪、画像、出售或共享用户数据，也不会运行任何能够识别您个人身份的第三方广告或分析服务。",
+  "privacy.section.product_specific.title": "针对特定产品或服务的隐私政策",
+  "privacy.section.product_specific.content": "唯一的例外情况是：当 Techseeding 提供的某项具体产品或服务有其专属的隐私政策时，该产品或服务的隐私政策将适用于该产品或服务内的信息处理，并就该产品或服务而言优先于本通用声明。详细内容请参阅相关产品或服务所发布的隐私政策。",
+  "privacy.section.changes.title": "本政策的变更",
+  "privacy.section.changes.content": "我们可能会因业务实践调整或法律法规要求而不时更新本隐私政策。更新内容将在本页发布，并附上修订后的\"最后更新\"日期。",
+  "privacy.section.contact.title": "联系我们",
+  "privacy.section.contact.content": "如对本隐私政策有任何疑问，请通过 mr.shaojun@gmail.com 或本网站的联系表单与我们联系。"
 }

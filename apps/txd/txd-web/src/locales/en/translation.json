@@ -60,5 +60,18 @@
   "contact.placeholder.message": "How can we help?",
   "copy.done": "Copied {{value}}",
   "contact.message.done": "Message sent! We'll be in touch soon.",
-  "contact.message.error": "Something went wrong. Please try again."
+  "contact.message.error": "Something went wrong. Please try again.",
+  "footer.privacy_policy": "Privacy Policy",
+  "privacy.title": "Privacy Policy",
+  "privacy.last_updated": "Last updated: May 2026",
+  "privacy.section.overview.title": "Overview",
+  "privacy.section.overview.content": "This Privacy Policy describes how Techseeding PTY LTD (\"Techseeding\", \"we\", \"us\", or \"our\") approaches the privacy of visitors to this website and users of our products and services. Our guiding principle is simple: we keep data collection to an absolute minimum.",
+  "privacy.section.no_collection.title": "We Don't Collect Your Information",
+  "privacy.section.no_collection.content": "Techseeding does not collect personal information from users. We do not track, profile, sell, or share user data, and we do not run third-party advertising or analytics that identify you personally.",
+  "privacy.section.product_specific.title": "Product- and Service-Specific Policies",
+  "privacy.section.product_specific.content": "The only exception is when a specific product or service offered by Techseeding has its own dedicated privacy policy. In that case, that product's or service's privacy policy governs how information is handled within that product or service, and it takes precedence over this general statement for that product or service only. Please refer to the privacy policy published with the relevant product or service for full details.",
+  "privacy.section.changes.title": "Changes to This Policy",
+  "privacy.section.changes.content": "We may update this Privacy Policy from time to time to reflect changes in our practices or for legal and regulatory reasons. Updates will be posted on this page with a revised \"Last updated\" date.",
+  "privacy.section.contact.title": "Contact Us",
+  "privacy.section.contact.content": "If you have any questions about this Privacy Policy, please contact us at mr.shaojun@gmail.com or via the contact form on our website."
 }

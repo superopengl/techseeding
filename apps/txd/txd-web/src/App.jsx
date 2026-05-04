@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { ConfigProvider, theme } from 'antd';
 import HomePage from 'pages/HomePage';
+import PrivacyPolicyPage from 'pages/PrivacyPolicyPage';
 
 const appTheme = {
   algorithm: theme.darkAlgorithm,
@@ -52,6 +53,7 @@ function App() {
       <BrowserRouter basename="/">
         <div>
           <Routes>
+            <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
             <Route path="/*" element={<HomePage />} />
           </Routes>
         </div>
