@@ -140,6 +140,8 @@ export function SandboxTour({
       onClose={onClose}
       onFinish={onFinish}
       steps={steps}
+      mask={{ color: "rgba(15, 23, 42, 0.55)" }}
+      zIndex={1200}
       indicatorsRender={(stepIndex, total) => (
         <span style={{ fontFamily: fonts.body, fontSize: 12, color: colors.body, fontWeight: 600 }}>
           {stepIndex + 1} / {total}
