@@ -56,7 +56,7 @@ export class KidPlayAiStack extends Stack {
       vpc,
       vpcSubnets: { subnetType: SubnetType.PUBLIC },
       engine: DatabaseClusterEngine.auroraPostgres({
-        version: AuroraPostgresEngineVersion.VER_16_6,
+        version: AuroraPostgresEngineVersion.VER_17_9,
       }),
       credentials: Credentials.fromGeneratedSecret("kpai", {
         secretName: `kpai/${stage}/db`,

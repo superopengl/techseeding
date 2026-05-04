@@ -17,7 +17,7 @@ Route53 alias (kidplayai.techseeding.com.au)
             ├─ EFS mount: /var/kpai  ← sandbox folders (TMPDIR override)
             ├─ Secrets:   PG_*, KPAI_JWT_SECRET, KPAI_SANDBOX_DEEPSEEK_API_KEY
             └─ Logs:      /kpai/<stage>
-  └─ Aurora Postgres 16.6 — Serverless v2 (0.5–2 ACU), isolated subnets
+  └─ Aurora Postgres 17.9 — Serverless v2 (0.5–2 ACU), public subnets
 ```
 
 The `/var/kpai` EFS mount + `TMPDIR=/var/kpai` make `os.tmpdir()` resolve to EFS, so sandbox folders persist across container restarts.
