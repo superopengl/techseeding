@@ -22,7 +22,7 @@ import {
   SendOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 
@@ -243,6 +243,7 @@ const parentReasons = [
 export function HomePage() {
   useEffect(() => { setPageTitle("KidPlayAI — AI Craft Maker for Kids"); }, []);
   const navigate = useNavigate();
+  const { hash } = useLocation();
   const goLogin = () => navigate("/login");
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
@@ -250,7 +251,15 @@ export function HomePage() {
 
   const scrollToEnquiry = () => {
     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    // Defer focus until smooth-scroll settles; otherwise focus snap-scrolls
+    // and fights the animation.
+    setTimeout(() => form.getFieldInstance?.("contactName")?.focus?.(), 600);
   };
+
+  useEffect(() => {
+    if (hash !== "#contact") return;
+    scrollToEnquiry();
+  }, [hash]);
 
   const handleEnquirySubmit = async (values) => {
     setSubmitting(true);

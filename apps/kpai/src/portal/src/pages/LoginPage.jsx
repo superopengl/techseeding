@@ -7,7 +7,7 @@ import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { apiCall } from "../api";
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph, Text, Link } = Typography;
 
 const PHONE_NUMBER = "04XX XXX XXX";
 const WECHAT_ID = "your-wechat-id";
@@ -533,15 +533,20 @@ export function LoginPage() {
           </span>
           <Title
             level={3}
-            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 0 }}
+            style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 4 }}
           >
-            Welcome to KidPlayAI!
+            Log in to KidPlayAI
           </Title>
+          <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
+              {isEmail
+                ? "We'll email you a 6-digit code."
+                : "Enter your username or email to log in."}
+            </Paragraph>
         </div>
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
           <Input
             size="large"
-            placeholder="User name or email"
+            placeholder="Username or email"
             allowClear
             maxLength={100}
             value={identifier}
@@ -571,24 +576,31 @@ export function LoginPage() {
             >
               {isEmail ? "Email me a code" : "Ask my teacher"}
             </Button>
-            <div style={{ color: colors.muted, fontSize: 12, textAlign: "center", marginTop: 6 }}>
-              {isEmail
-                ? "We'll send a 6-digit code to your email."
-                : "Type your user name to ask your teacher, or your email for a code."}
-            </div>
+            
           </div>
           {loginError && (
-            <div style={{ color: colors.error || "#ff4d4f", fontSize: 14, textAlign: "center" }}>
+            <div style={{ color: colors.error || "#ff4d4f", textAlign: "center" }}>
               {loginError}
             </div>
           )}
         </Space>
-        <Paragraph style={{ color: colors.muted, fontSize: 13, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
-          Don't have an account?{" "}
-          <a onClick={() => setContactOpen(true)} style={{ color: colors.primary, cursor: "pointer" }}>
+        <div style={{ color: colors.muted, textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
+          By logging in you agree to our{" "}
+          <Link href="/terms_of_use" target="_blank" rel="noopener noreferrer">
+            Terms of Use
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy_policy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </Link>
+          .
+        </div>
+        <Paragraph style={{ color: colors.muted, textAlign: "center", marginTop: 24, marginBottom: 0 }}>
+          New here?{" "}
+          <Link onClick={() => navigate("/#contact")}>
             Contact us
-          </a>{" "}
-          to register.
+          </Link>{" "}
+          to sign up.
         </Paragraph>
       </Card>
 
