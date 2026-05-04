@@ -732,6 +732,7 @@ export function LoginPage() {
             size="large"
             placeholder="Username"
             allowClear
+            autoFocus
             maxLength={100}
             value={identifier}
             onChange={(e) => { setIdentifier(e.target.value); setLoginError(null); }}

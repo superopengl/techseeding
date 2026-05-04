@@ -993,11 +993,10 @@ export function HomePage() {
             Ready to Get Your Child Started?
           </Title>
           <Paragraph
-            style={{ color: colors.onDarkSecondary, fontSize: 18, marginBottom: 48, maxWidth: 520, marginInline: "auto" }}
+            style={{ color: colors.onDarkSecondary, fontSize: 18, maxWidth: 520, marginInline: "auto" }}
           >
-            Tell us a bit about yourself and we'll get back to you with class details, schedule, and fees.
+            For our young learners' safety, accounts are only created offline. Contact us and we'll get back to you with class details, schedule, and fees.
           </Paragraph>
-
           {mountForm ? (
             <Suspense fallback={<div style={{ minHeight: 540 }} aria-hidden="true" />}>
               <EnquiryForm autoFocusOnMount={autoFocusForm} />
