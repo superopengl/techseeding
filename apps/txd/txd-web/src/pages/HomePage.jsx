@@ -37,6 +37,7 @@ const LayoutStyled = styled(Layout)`
   background: transparent;
   overflow-x: hidden;
   min-height: 100vh;
+  position: relative;
 `;
 
 const ContentStyled = styled(Content)`
@@ -55,6 +56,23 @@ const HeroSection = styled.section`
   align-items: center;
   padding: 1.5rem;
   padding-top: 80px;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 30%, rgba(56, 92, 188, 0.32) 0%, rgba(20, 26, 60, 0.18) 45%, transparent 75%),
+    linear-gradient(180deg, rgba(10, 16, 38, 0.7) 0%, rgba(8, 12, 28, 0.4) 60%, transparent 100%);
+
+  /* Soft fade into the next section */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 120px;
+    background: linear-gradient(180deg, transparent 0%, #050510 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
 `;
 
 const AuroraBackground = styled.div`
@@ -67,25 +85,26 @@ const AuroraBackground = styled.div`
     content: '';
     position: absolute;
     border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.35;
+    filter: blur(90px);
     animation: ${auroraShift} 20s ease-in-out infinite;
   }
 
   &::before {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-    top: -20%;
-    left: -10%;
+    width: 720px;
+    height: 720px;
+    background: radial-gradient(circle, #3b82f6 0%, transparent 65%);
+    opacity: 0.55;
+    top: -22%;
+    left: -12%;
   }
 
   &::after {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
-    bottom: -10%;
-    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #a855f7 0%, transparent 65%);
+    opacity: 0.5;
+    bottom: -12%;
+    right: -12%;
     animation-delay: -7s;
     animation-direction: reverse;
   }
@@ -93,28 +112,79 @@ const AuroraBackground = styled.div`
 
 const AuroraOrb = styled.div`
   position: absolute;
-  width: 400px;
-  height: 400px;
+  width: 520px;
+  height: 520px;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.2;
-  background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
-  top: 30%;
+  filter: blur(85px);
+  opacity: 0.32;
+  background: radial-gradient(circle, #22d3ee 0%, transparent 65%);
+  top: 28%;
   left: 50%;
   transform: translateX(-50%);
   animation: ${auroraShift} 25s ease-in-out infinite;
   animation-delay: -12s;
 `;
 
-const GridOverlay = styled.div`
+const Starfield = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.7), transparent 60%),
+    radial-gradient(1px 1px at 78% 22%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 32% 68%, rgba(255, 255, 255, 0.6), transparent 60%),
+    radial-gradient(1px 1px at 88% 72%, rgba(255, 255, 255, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 55% 12%, rgba(255, 255, 255, 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 8% 84%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 65% 52%, rgba(255, 255, 255, 0.4), transparent 60%),
+    radial-gradient(1px 1px at 22% 38%, rgba(255, 255, 255, 0.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 92% 40%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 45% 88%, rgba(255, 255, 255, 0.4), transparent 60%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 30%, transparent 80%);
+`;
+
+const GridOverlay = styled.div`
+  position: absolute;
+  top: -15%;
+  left: -10%;
+  width: 120%;
+  height: 130%;
+  transform: rotate(-6deg);
+  transform-origin: center;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
+  z-index: 0;
+`;
+
+const BottomGridOverlay = styled.div`
+  position: absolute;
+  inset: -10% -8% -10% -8%;
+  transform: rotate(-6deg);
+  transform-origin: center;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(315deg, black 0%, rgba(0, 0, 0, 0.55) 18%, transparent 45%);
+  -webkit-mask-image: linear-gradient(315deg, black 0%, rgba(0, 0, 0, 0.55) 18%, transparent 45%);
+  pointer-events: none;
+  z-index: 0;
+`;
+
+const BottomBackdrop = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 900px;
+  overflow: hidden;
+  pointer-events: none;
   z-index: 0;
 `;
 
@@ -483,12 +553,10 @@ const ContactSection = styled.section`
 `;
 
 const ContactPanel = styled.div`
-  background: linear-gradient(170deg, rgba(20, 20, 45, 0.55) 0%, rgba(10, 10, 25, 0.7) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(170deg, #1a1f3a 0%, #0e1124 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) inset;
   padding: 28px 32px;
 `;
 
@@ -653,6 +721,7 @@ function HomePage() {
         <HeroSection id="home" style={{ minHeight: posterHeight }}>
           <AuroraBackground />
           <AuroraOrb />
+          <Starfield />
           <GridOverlay />
           <HeroContent>
             <HeroBadge><span /> Available for new projects</HeroBadge>
@@ -723,6 +792,9 @@ function HomePage() {
           </>
         )}
       </ContentStyled>
+      <BottomBackdrop>
+        <BottomGridOverlay />
+      </BottomBackdrop>
       <HomeFooter />
       {shouldShowContact && (
         <AffixContactButton shape="default" size="large" onClick={openContactForm}>

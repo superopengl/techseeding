@@ -92,8 +92,6 @@ const ProductMenuItemLink = styled.a`
   align-items: center;
   gap: 14px;
   padding: 10px 6px;
-  font-size: 15px;
-  font-weight: 500;
   line-height: 1.2;
 `;
 
@@ -108,8 +106,30 @@ const ProductLogo = styled.img`
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 `;
 
+const ProductTextBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+`;
+
+const ProductName = styled.span`
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+`;
+
+const ProductTagline = styled.span`
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.65;
+  line-height: 1.35;
+  white-space: normal;
+`;
+
 const productDropdownStyles = {
-  root: { minWidth: 220 },
+  root: { minWidth: 300 },
 };
 
 const productMenuStyle = {
@@ -129,7 +149,10 @@ const productMenuItems = [
     label: (
       <ProductMenuItemLink href="https://kidplayai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
         <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
-        KidPlayAI
+        <ProductTextBlock>
+          <ProductName>KidPlayAI</ProductName>
+          <ProductTagline>Playful AI adventures for curious kids, ages 8–12+</ProductTagline>
+        </ProductTextBlock>
       </ProductMenuItemLink>
     ),
   },
@@ -266,7 +289,10 @@ function HomeHeader({ onClickContact }) {
               onClick={() => setDrawerVisible(false)}
             >
               <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
-              KidPlayAI
+              <ProductTextBlock>
+                <ProductName>KidPlayAI</ProductName>
+                <ProductTagline>Playful AI adventures for curious kids, ages 8–12+</ProductTagline>
+              </ProductTextBlock>
             </ProductMenuItemLink>
           ),
         },
