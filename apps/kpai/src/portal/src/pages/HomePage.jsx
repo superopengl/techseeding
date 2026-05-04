@@ -127,7 +127,7 @@ function NavBar({ onStart }) {
           boxShadow: shadows.cardSubtle,
         }}
       >
-        Student Login
+        Login
       </Button>
     </div>
   );
@@ -241,7 +241,12 @@ const parentReasons = [
 ];
 
 export function HomePage() {
-  useEffect(() => { setPageTitle("KidPlayAI — AI Craft Maker for Kids"); }, []);
+  useEffect(() => {
+    setPageTitle(
+      "KidPlayAI — AI Craft Maker for Kids Ages 8-12",
+      "KidPlayAI is an AI-powered craft maker for kids ages 8-12. Kids describe a craft, watch a real AI agent reason and build it step by step, then play and share the result. Workshops, holiday camps, and online coaching available.",
+    );
+  }, []);
   const navigate = useNavigate();
   const { hash } = useLocation();
   const goLogin = () => navigate("/login");

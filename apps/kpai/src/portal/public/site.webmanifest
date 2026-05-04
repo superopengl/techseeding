@@ -1,0 +1,16 @@
+{
+  "name": "KidPlayAI",
+  "short_name": "KidPlayAI",
+  "description": "AI-powered craft maker for kids ages 8-12. Kids dream up AI crafts, watch AI build them, and learn how it all works along the way.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#43b88c",
+  "icons": [
+    { "src": "/logo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

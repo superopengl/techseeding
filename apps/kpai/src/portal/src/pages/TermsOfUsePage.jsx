@@ -17,7 +17,12 @@ const sectionTitle = {
 };
 
 export function TermsOfUsePage() {
-  useEffect(() => { setPageTitle("Terms of Use"); }, []);
+  useEffect(() => {
+    setPageTitle(
+      "Terms of Use — KidPlayAI",
+      "Terms governing use of KidPlayAI, the AI craft maker platform for kids ages 8-12.",
+    );
+  }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
       <div

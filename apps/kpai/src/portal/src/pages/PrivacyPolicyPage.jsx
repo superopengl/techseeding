@@ -17,7 +17,12 @@ const sectionTitle = {
 };
 
 export function PrivacyPolicyPage() {
-  useEffect(() => { setPageTitle("Privacy Policy"); }, []);
+  useEffect(() => {
+    setPageTitle(
+      "Privacy Policy — KidPlayAI",
+      "How KidPlayAI collects, uses, and protects information about kids and parents who use our AI craft maker platform.",
+    );
+  }, []);
   return (
     <div style={{ minHeight: "100vh", background: "#fff" }}>
       <div

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /sandbox
+Disallow: /sandbox/
+Disallow: /login
+Disallow: /logo
+
+Sitemap: https://kidplayai.techseeding.com.au/sitemap.xml
