@@ -26,6 +26,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 
+// Lazy-load the enquiry form so it stays out of the initial render path. The
+// antd Form / Input / Select components run rc-resize-observer and dom-align
+// geometry reads on mount, which PageSpeed flagged as forced reflow. Mounting
+// only when the user nears the section keeps the heavy work below-the-fold.
+const EnquiryForm = lazy(() =>
+  import("../components/EnquiryForm").then((m) => ({ default: m.EnquiryForm }))
+);
+
 const { Title, Paragraph, Text } = Typography;
 
 const features = [
@@ -132,16 +140,6 @@ function NavBar({ onStart }) {
     </div>
   );
 }
-
-const AGE_OPTIONS = [
-  { value: "<8", label: "Under 8" },
-  { value: "8", label: "8" },
-  { value: "9", label: "9" },
-  { value: "10", label: "10" },
-  { value: "11", label: "11" },
-  { value: "12", label: "12" },
-  { value: "12+", label: "Over 12" },
-];
 
 const programs = [
   {
@@ -250,43 +248,38 @@ export function HomePage() {
   const navigate = useNavigate();
   const { hash } = useLocation();
   const goLogin = () => navigate("/login");
-  const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+
+  const [mountForm, setMountForm] = useState(false);
+  const [autoFocusForm, setAutoFocusForm] = useState(false);
+  const contactRef = useRef(null);
+
+  // Mount the form when the section nears the viewport. Generous rootMargin so
+  // a user scrolling toward it gets the form ready before they arrive.
+  useEffect(() => {
+    if (mountForm || !contactRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setMountForm(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    obs.observe(contactRef.current);
+    return () => obs.disconnect();
+  }, [mountForm]);
 
   const scrollToEnquiry = () => {
+    setMountForm(true);
+    setAutoFocusForm(true);
     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-    // Defer focus until smooth-scroll settles; otherwise focus snap-scrolls
-    // and fights the animation.
-    setTimeout(() => form.getFieldInstance?.("contactName")?.focus?.(), 600);
   };
 
   useEffect(() => {
     if (hash !== "#contact") return;
     scrollToEnquiry();
   }, [hash]);
-
-  const handleEnquirySubmit = async (values) => {
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/enquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSubmitted(true);
-        form.resetFields();
-      } else {
-        antMessage.error(data.error?.message || "Something went wrong. Please try again.");
-      }
-    } catch {
-      antMessage.error("Network error. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <div style={{ minHeight: "100vh", background: colors.surface }}>
@@ -988,121 +981,12 @@ export function HomePage() {
             Tell us a bit about yourself and we'll get back to you with class details, schedule, and fees.
           </Paragraph>
 
-          {submitted ? (
-            <Card
-              style={{
-                maxWidth: 480,
-                margin: "0 auto",
-                borderRadius: 20,
-                border: "none",
-                boxShadow: shadows.cardElevated,
-                textAlign: "center",
-              }}
-              styles={{ body: { padding: "48px 32px" } }}
-            >
-              <CheckCircleOutlined style={{ fontSize: 48, color: colors.primary, marginBottom: 16 }} />
-              <Title level={3} style={{ fontFamily: fonts.heading, color: colors.heading, marginBottom: 8 }}>
-                Thank You!
-              </Title>
-              <Paragraph style={{ color: colors.body, fontSize: 15, marginBottom: 24 }}>
-                We've received your enquiry and will get back to you soon.
-              </Paragraph>
-              <Button
-                onClick={() => setSubmitted(false)}
-                style={{ borderRadius: 20, fontWeight: 600 }}
-              >
-                Send Another Enquiry
-              </Button>
-            </Card>
+          {mountForm ? (
+            <Suspense fallback={<div style={{ minHeight: 540 }} aria-hidden="true" />}>
+              <EnquiryForm autoFocusOnMount={autoFocusForm} />
+            </Suspense>
           ) : (
-            <Card
-              style={{
-                maxWidth: 480,
-                margin: "0 auto",
-                borderRadius: 20,
-                border: "none",
-                boxShadow: shadows.cardElevated,
-                textAlign: "left",
-              }}
-              styles={{ body: { padding: "36px 32px" } }}
-            >
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleEnquirySubmit}
-                requiredMark={false}
-              >
-                <Form.Item
-                  label="Parent / Guardian Name"
-                  name="contactName"
-                  rules={[
-                    { required: true, message: "Please enter your name" },
-                    { max: 50, message: "Name must be 50 characters or less" },
-                  ]}
-                >
-                  <Input placeholder="Your name" maxLength={50} size="large" />
-                </Form.Item>
-
-                <Form.Item
-                  label="Email, Phone, or WeChat"
-                  name="method"
-                  rules={[
-                    { required: true, message: "Please enter how we can reach you" },
-                    { max: 100, message: "Must be 100 characters or less" },
-                  ]}
-                >
-                  <Input placeholder="parent@email.com or 0412 345 678" maxLength={100} size="large" />
-                </Form.Item>
-
-                <Form.Item
-                  label="Child's Age"
-                  name="childAge"
-                >
-                  <Select
-                    placeholder="Select age (optional)"
-                    options={AGE_OPTIONS}
-                    allowClear
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  label="Message"
-                  name="message"
-                  rules={[
-                    { required: true, message: "Please enter your message" },
-                    { max: 2000, message: "Message must be 2000 characters or less" },
-                  ]}
-                >
-                  <Input.TextArea
-                    placeholder="What would you like to know? e.g. class schedule, pricing, what my child will learn..."
-                    rows={4}
-                    maxLength={2000}
-                    showCount
-                  />
-                </Form.Item>
-
-                <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    size="large"
-                    loading={submitting}
-                    icon={<SendOutlined />}
-                    style={{
-                      height: 48,
-                      paddingInline: 40,
-                      fontSize: 18,
-                      fontWeight: 700,
-                      borderRadius: 24,
-                      fontFamily: fonts.heading,
-                    }}
-                  >
-                    Send Enquiry
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
+            <div style={{ minHeight: 540 }} aria-hidden="true" />
           )}
         </div>
       </div>
