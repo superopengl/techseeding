@@ -106,7 +106,7 @@ const CancelButton = styled(Button)`
   }
 `;
 
-const ContactForm = forwardRef(function ContactForm({ onDone }, ref) {
+const ContactForm = forwardRef(function ContactForm({ onDone, showCancel = true }, ref) {
   const [sending, setSending] = useState(false);
   const [form] = Form.useForm();
   const firstInputRef = useRef(null);
@@ -154,14 +154,15 @@ const ContactForm = forwardRef(function ContactForm({ onDone }, ref) {
       });
     } finally {
       setSending(false);
-      onDone();
+      form.resetFields();
+      onDone?.();
     }
   };
 
   return (
     <StyledForm form={form} onFinish={handleSubmit}>
       <Form.Item name="name" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
-        <Input autoFocus={true} ref={firstInputRef} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending} />
+        <Input ref={firstInputRef} placeholder={t('contact.placeholder.name')} allowClear={true} maxLength={100} disabled={sending} />
       </Form.Item>
       <Form.Item name="reply" rules={[{ required: true, message: ' ', whitespace: true, max: 100 }]}>
         <Input placeholder={t('contact.placeholder.reply')} allowClear={true} maxLength={100} disabled={sending} />
@@ -172,9 +173,11 @@ const ContactForm = forwardRef(function ContactForm({ onDone }, ref) {
       <Form.Item style={{ marginBottom: 8 }}>
         <SubmitButton block htmlType="submit" disabled={sending}><Trans i18nKey="button.submit" /></SubmitButton>
       </Form.Item>
-      <Form.Item style={{ marginBottom: 0 }}>
-        <CancelButton block type="link" onClick={onDone} disabled={sending}><Trans i18nKey="button.cancel" /></CancelButton>
-      </Form.Item>
+      {showCancel && (
+        <Form.Item style={{ marginBottom: 0 }}>
+          <CancelButton block type="link" onClick={onDone} disabled={sending}><Trans i18nKey="button.cancel" /></CancelButton>
+        </Form.Item>
+      )}
     </StyledForm>
   );
 });

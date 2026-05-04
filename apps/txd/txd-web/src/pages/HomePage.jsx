@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled, { keyframes, css } from 'styled-components';
-import { Layout, Row, Col, Button, Modal, Tag } from 'antd';
+import { Layout, Row, Col, Button, Tag } from 'antd';
 import HomeHeader from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
 import HomeFeatureArea from 'components/homeAreas/HomeFeatureArea';
@@ -365,6 +365,45 @@ const ServicesSection = styled.section`
   }
 `;
 
+const ContactSection = styled.section`
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 80px 1.5rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+`;
+
+const ContactPanel = styled.div`
+  background: linear-gradient(170deg, rgba(20, 20, 45, 0.55) 0%, rgba(10, 10, 25, 0.7) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  padding: 28px 32px;
+`;
+
+const ContactPrompt = styled.p`
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+`;
+
 const SectionDivider = styled.div`
   width: 100%;
   height: 1px;
@@ -483,30 +522,22 @@ function useWindowSize() {
   return width;
 }
 
+const headerHeight = 56;
+
 function HomePage() {
-  const [modalVisible, setModalVisible] = useState(false);
   const contactFormRef = useRef(null);
   const windowWidth = useWindowSize();
   const [searchParams] = useSearchParams();
 
-  const resetContactForm = useCallback(() => {
-    if (contactFormRef.current) {
-      contactFormRef.current.reset();
-    }
-  }, []);
-
-  const handleContactCancel = useCallback(() => {
-    setModalVisible(false);
-    resetContactForm();
-  }, [resetContactForm]);
-
   const openContactForm = useCallback(() => {
-    setModalVisible(true);
+    const section = document.getElementById('contact');
+    if (section) {
+      const top = section.getBoundingClientRect().top + window.scrollY - headerHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
     setTimeout(() => {
-      if (contactFormRef.current) {
-        contactFormRef.current.focus();
-      }
-    }, 300);
+      contactFormRef.current?.focus();
+    }, 600);
   }, []);
 
   const posterHeight = windowWidth < 576 ? 420 :
@@ -520,40 +551,6 @@ function HomePage() {
 
   return (
     <LayoutStyled>
-      <Modal
-        title={<div style={{ fontSize: '0.85rem', fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
-          <Trans i18nKey="contact.title" />
-        </div>}
-        open={modalVisible}
-        destroyOnHidden={true}
-        onOk={handleContactCancel}
-        onCancel={handleContactCancel}
-        footer={null}
-        centered={true}
-        closeIcon={<span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>&#x2715;</span>}
-        styles={{
-          mask: { backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', background: 'rgba(0, 0, 0, 0.6)' },
-          content: {
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            background: 'linear-gradient(170deg, rgba(20, 20, 45, 0.92) 0%, rgba(10, 10, 25, 0.95) 100%)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 16,
-            boxShadow: '0 32px 80px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255,255,255,0.1) inset',
-            padding: '24px 28px',
-          },
-          header: {
-            background: 'transparent',
-            borderBottom: 'none',
-            paddingBottom: 4,
-          },
-          body: {
-            paddingTop: 8,
-          },
-        }}
-      >
-        <ContactForm ref={contactFormRef} onDone={handleContactCancel} />
-      </Modal>
       <HomeHeader onClickContact={openContactForm} />
       <ContentStyled>
         <HeroSection id="home" style={{ minHeight: posterHeight }}>
@@ -606,6 +603,22 @@ function HomePage() {
         <section id="about_us">
           <HomeFeatureArea />
         </section>
+
+        {shouldShowContact && (
+          <>
+            <SectionDivider />
+            <section id="contact">
+              <ContactSection>
+                <SectionLabel><Trans i18nKey="header.contact" /></SectionLabel>
+                <SectionTitle><Trans i18nKey="button.contact_us" /></SectionTitle>
+                <ContactPanel>
+                  <ContactPrompt><Trans i18nKey="contact.title" /></ContactPrompt>
+                  <ContactForm ref={contactFormRef} showCancel={false} />
+                </ContactPanel>
+              </ContactSection>
+            </section>
+          </>
+        )}
       </ContentStyled>
       <HomeFooter />
       {shouldShowContact && (

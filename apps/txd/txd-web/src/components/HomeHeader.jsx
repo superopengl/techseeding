@@ -10,6 +10,7 @@ import { MdRoomService, MdLanguage, MdApps } from "react-icons/md";
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import LangToggleButton from './LangToggleButton';
+import kidPlayAiLogo from 'images/logo-kidplayai.png';
 
 const { Header } = Layout;
 
@@ -86,13 +87,50 @@ const NavTrigger = styled.span`
   }
 `;
 
+const ProductMenuItemLink = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 6px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+`;
+
+const ProductLogo = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+`;
+
+const productDropdownStyles = {
+  root: { minWidth: 220 },
+};
+
+const productMenuStyle = {
+  padding: 6,
+};
+
+const productMenuItemStyle = {
+  height: 'auto',
+  lineHeight: 1.2,
+  padding: '4px 10px',
+};
+
 const productMenuItems = [
   {
     key: 'kidplayai',
+    style: productMenuItemStyle,
     label: (
-      <a href="https://kidplayai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
+      <ProductMenuItemLink href="https://kidplayai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
+        <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
         KidPlayAI
-      </a>
+      </ProductMenuItemLink>
     ),
   },
 ];
@@ -221,14 +259,15 @@ function HomeHeader({ onClickContact }) {
         {
           key: 'kidplayai',
           label: (
-            <a
+            <ProductMenuItemLink
               href="https://kidplayai.techseeding.com.au/"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setDrawerVisible(false)}
             >
+              <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
               KidPlayAI
-            </a>
+            </ProductMenuItemLink>
           ),
         },
       ],
@@ -262,9 +301,9 @@ function HomeHeader({ onClickContact }) {
           <NavLink href="#home" onClick={scrollTo('home')}><Trans i18nKey="header.home" /></NavLink>
           <NavLink href="#services" onClick={scrollTo('services')}><Trans i18nKey="header.services" /></NavLink>
           <Dropdown
-            menu={{ items: productMenuItems }}
+            menu={{ items: productMenuItems, style: productMenuStyle }}
             placement="bottom"
-            overlayStyle={{ minWidth: 160 }}
+            styles={productDropdownStyles}
           >
             <NavTrigger>
               <Trans i18nKey="header.products" />
