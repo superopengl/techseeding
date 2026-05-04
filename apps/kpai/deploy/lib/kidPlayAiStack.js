@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import { Stack, Duration, RemovalPolicy, CfnOutput } from "aws-cdk-lib";
 import { Vpc, SubnetType, Port } from "aws-cdk-lib/aws-ec2";
 import {
@@ -9,7 +11,7 @@ import {
   LogDrivers,
 } from "aws-cdk-lib/aws-ecs";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
-import { Repository, TagMutability } from "aws-cdk-lib/aws-ecr";
+import { DockerImageAsset, Platform } from "aws-cdk-lib/aws-ecr-assets";
 import { FileSystem, PerformanceMode, ThroughputMode } from "aws-cdk-lib/aws-efs";
 import {
   DatabaseCluster,
@@ -22,6 +24,9 @@ import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { ApplicationProtocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, "..", "..");
 
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
@@ -54,7 +59,7 @@ export class KidPlayAiStack extends Stack {
       storageEncrypted: true,
       backup: { retention: Duration.days(isProd ? 7 : 1) },
       removalPolicy: isProd ? RemovalPolicy.SNAPSHOT : RemovalPolicy.DESTROY,
-      deletionProtection: isProd,
+      deletionProtection: false,
     });
 
     const sandboxFs = new FileSystem(this, "SandboxFs", {
@@ -71,12 +76,10 @@ export class KidPlayAiStack extends Stack {
       posixUser: { uid: "0", gid: "0" },
     });
 
-    const repo = new Repository(this, "Repository", {
-      repositoryName: `kidplayai-${stage}`,
-      imageTagMutability: TagMutability.MUTABLE,
-      lifecycleRules: [{ maxImageCount: 20 }],
-      removalPolicy: RemovalPolicy.RETAIN,
-      emptyOnDelete: false,
+    const appImage = new DockerImageAsset(this, "AppImage", {
+      directory: repoRoot,
+      file: "devops/Dockerfile",
+      platform: Platform.LINUX_AMD64,
     });
 
     const jwtSecret = new Secret(this, "JwtSecret", {
@@ -124,7 +127,7 @@ export class KidPlayAiStack extends Stack {
     sandboxFs.grantRootAccess(taskDef.taskRole);
 
     const container = taskDef.addContainer("App", {
-      image: ContainerImage.fromEcrRepository(repo, "latest"),
+      image: ContainerImage.fromDockerImageAsset(appImage),
       logging: LogDrivers.awsLogs({ logGroup, streamPrefix: "app" }),
       environment: {
         NODE_ENV: "production",
@@ -166,7 +169,7 @@ export class KidPlayAiStack extends Stack {
       redirectHTTP: !!domainName,
       domainName,
       domainZone,
-      healthCheckGracePeriod: Duration.seconds(60),
+      healthCheckGracePeriod: Duration.seconds(300),
       circuitBreaker: { rollback: true },
     });
 
@@ -179,10 +182,9 @@ export class KidPlayAiStack extends Stack {
 
     service.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "3600");
 
-    dbCluster.connections.allowFrom(service.service, Port.tcp(5432), "Fargate -> Aurora");
-    sandboxFs.connections.allowFrom(service.service, Port.tcp(2049), "Fargate -> EFS");
+    dbCluster.connections.allowFrom(service.service, Port.tcp(5432), "Fargate to Aurora");
+    sandboxFs.connections.allowFrom(service.service, Port.tcp(2049), "Fargate to EFS");
 
-    new CfnOutput(this, "EcrRepositoryUri", { value: repo.repositoryUri });
     new CfnOutput(this, "ClusterName", { value: ecsCluster.clusterName });
     new CfnOutput(this, "ServiceName", { value: service.service.serviceName });
     new CfnOutput(this, "LoadBalancerDns", { value: service.loadBalancer.loadBalancerDnsName });

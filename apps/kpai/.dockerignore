@@ -1,7 +1,8 @@
-node_modules
-.env
-.env.*
-!.env.sample
-.git
-*.md
-!src/**/*.md
+# Aggressive deny-list: only `dist/` and `devops/` are needed by the Dockerfile.
+# Everything else (deploy/, src/, node_modules/, cdk.out/, …) is excluded both
+# to keep build context small and to prevent CDK DockerImageAsset hashing from
+# recursing into deploy/cdk.out/ asset folders.
+*
+!dist
+!devops
+!.dockerignore
