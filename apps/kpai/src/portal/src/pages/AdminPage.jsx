@@ -28,6 +28,8 @@ export function AdminPage() {
   const [addForm] = Form.useForm();
   const [addLoading, setAddLoading] = useState(false);
   const [addSubmittable, setAddSubmittable] = useState(false);
+  const [userNameChecking, setUserNameChecking] = useState(false);
+  const [userNameAvailable, setUserNameAvailable] = useState(null);
   const addFormValues = Form.useWatch([], addForm);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerStudent, setDrawerStudent] = useState(null);
@@ -43,11 +45,46 @@ export function AdminPage() {
       setAddSubmittable(false);
       return;
     }
+    if (userNameChecking || userNameAvailable === false) {
+      setAddSubmittable(false);
+      return;
+    }
     addForm.validateFields({ validateOnly: true }).then(
       () => setAddSubmittable(true),
       () => setAddSubmittable(false),
     );
-  }, [addFormValues, addForm]);
+  }, [addFormValues, addForm, userNameChecking, userNameAvailable]);
+
+  useEffect(() => {
+    if (!addModalOpen) {
+      setUserNameChecking(false);
+      setUserNameAvailable(null);
+    }
+  }, [addModalOpen]);
+
+  const checkUserNameAvailability = async (raw) => {
+    const value = raw?.trim();
+    if (!value || !/^[a-zA-Z0-9_/]+$/.test(value)) {
+      setUserNameAvailable(null);
+      return;
+    }
+    setUserNameChecking(true);
+    try {
+      const { available } = await apiCall("/api/admin/check-user-name", {
+        method: "POST",
+        body: JSON.stringify({ userName: value }),
+        headers: { "Content-Type": "application/json" },
+      });
+      setUserNameAvailable(!!available);
+      if (!available) {
+        addForm.setFields([{ name: "accountName", errors: ["Username is already taken"] }]);
+      }
+    } catch {
+      setUserNameAvailable(null);
+    } finally {
+      setUserNameChecking(false);
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -580,21 +617,20 @@ export function AdminPage() {
           <Form.Item
             name="accountName"
             label="Username"
+            hasFeedback
+            validateStatus={userNameChecking ? "validating" : undefined}
             rules={[
               { required: true, message: "Username is required" },
               { max: 50, message: "Username must be 50 characters or less" },
               { pattern: /^[a-zA-Z0-9_/]+$/, message: "Only letters, digits, underscore, and slash are allowed" },
-              {
-                validator: async (_, value) => {
-                  if (!value || !/^[a-zA-Z0-9_/]+$/.test(value)) return;
-                  const result = await apiCall("/api/admin/check-user-name", { method: "POST", body: JSON.stringify({ userName: value }), headers: { "Content-Type": "application/json" } });
-                  if (!result.available) throw new Error("Username is already taken");
-                },
-              },
             ]}
-            validateTrigger="onBlur"
           >
-            <Input />
+            <Input
+              onBlur={(e) => checkUserNameAvailability(e.target.value)}
+              onChange={() => {
+                if (userNameAvailable !== null) setUserNameAvailable(null);
+              }}
+            />
           </Form.Item>
           <Form.Item name="firstName" label="First Name" rules={[{ required: true, message: "First Name is required" }, { max: 50, message: "First Name must be 50 characters or less" }]}>
             <Input maxLength={50} />
