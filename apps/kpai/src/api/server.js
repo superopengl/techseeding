@@ -34,7 +34,9 @@ import { createEnquiry } from "./routes/enquiry.js";
 import { listEnquiries } from "./routes/listEnquiries.js";
 import { markEnquiryRead } from "./routes/markEnquiryRead.js";
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({
+  logger: { level: process.env.NODE_ENV === "production" ? "warn" : "info" },
+});
 
 // --- Plugins ---
 
