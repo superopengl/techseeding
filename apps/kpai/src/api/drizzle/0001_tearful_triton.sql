@@ -1,0 +1,1 @@
+CREATE INDEX "otp_code_code_idx" ON "otp_code" USING btree ("code");
