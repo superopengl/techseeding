@@ -458,8 +458,22 @@ export function SandboxPage() {
                 ref={avatarRef}
                 shape="circle"
                 aria-label="User menu"
-                icon={<UserOutlined style={{ fontSize: 18 }} />}
-              />
+                style={{ padding: 0, border: "none", background: "transparent", boxShadow: "none" }}
+              >
+                <Avatar
+                  size={32}
+                  style={{
+                    background: avatarBg,
+                    color: avatarFg,
+                    fontFamily: fonts.heading,
+                    fontSize: 18,
+                    fontWeight: 700,
+                  }}
+                  icon={userName ? null : <UserOutlined />}
+                >
+                  {userName ? avatarInitial : null}
+                </Avatar>
+              </Button>
             </Dropdown>
           </Space>
         </div>
