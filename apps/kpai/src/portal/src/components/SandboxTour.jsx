@@ -41,7 +41,7 @@ export function SandboxTour({
   const steps = useMemo(
     () => [
       {
-        title: <span style={headingStyle}>👀 Your Magic Window</span>,
+        title: <span style={headingStyle}>👀 Your Magic Preview</span>,
         description: (
           <div style={bodyStyle}>
             This is where your craft comes to life! 🪄 As the AI builds your
@@ -53,7 +53,7 @@ export function SandboxTour({
         placement: "right",
       },
       {
-        title: <span style={headingStyle}>🤖 Chat with your AI Buddy</span>,
+        title: <span style={headingStyle}>🤖 Chat with your AI Buddy in Terminal</span>,
         description: (
           <div style={bodyStyle}>
             Type your idea here and your AI Buddy will build it! 🚀 Try things
