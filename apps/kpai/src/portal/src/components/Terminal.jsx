@@ -4,6 +4,7 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { colors } from "../theme";
+import { stripAnsi } from "../utils/stripAnsi";
 
 const READY_IDLE_MS = 0;
 
@@ -41,12 +42,16 @@ export function Terminal({ sandboxId, onFileChanged }) {
 
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
-      if (msg.type === "output") {
-        term.write(msg.data);
-        if (loading && msg.data.includes('/kpai/')) {
-          setLoading(false);
+      const { type, data } = msg;
+      if (type === "output") {
+        term.write(data);
+        if (loading) {
+          const cleanData = stripAnsi(data);
+          if (cleanData.includes(`${sandboxId}`)) {
+            setLoading(false);
+          }
         }
-      } else if (msg.type === "file-changed") {
+      } else if (type === "file-changed") {
         onFileChanged?.();
       }
     };
@@ -117,7 +122,7 @@ export function Terminal({ sandboxId, onFileChanged }) {
         >
           <Spin
             size="large"
-            tip="Starting AI assistant…"
+            description="Starting AI assistant…"
           />
         </div>
       )}
