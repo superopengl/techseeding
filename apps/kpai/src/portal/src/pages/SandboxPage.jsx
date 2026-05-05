@@ -639,38 +639,47 @@ export function SandboxPage() {
         title="Choose your avatar color"
         open={showColorPicker}
         onCancel={() => setShowColorPicker(false)}
-        onOk={handleColorSave}
-        okText="Save"
-        confirmLoading={savingColor}
+        footer={null}
+        width={380}
         destroyOnHidden
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 24, padding: "8px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "8px 0" }}>
           <Avatar
-            size={64}
+            size={72}
             style={{
               background: colorDraft,
               color: fgForHex(colorDraft),
               fontFamily: fonts.heading,
-              fontSize: 36,
+              fontSize: 40,
               fontWeight: 700,
-              flexShrink: 0,
             }}
             icon={userName ? null : <UserOutlined />}
           >
             {userName ? avatarInitial : null}
           </Avatar>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <ColorPicker
-              value={colorDraft}
-              onChange={(c) => setColorDraft(c.toHexString())}
-              disabledAlpha
-              showText
-              format="hex"
-            />
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              Pick any color you like — it will show on your avatar everywhere.
-            </Typography.Text>
-          </div>
+          <ColorPicker
+            value={colorDraft}
+            onChange={(c) => setColorDraft(c.toHexString())}
+            disabledAlpha
+            showText
+            format="hex"
+            size="large"
+            defaultOpen
+            styles={{ popupOverlayInner: { width: 280 } }}
+            style={{ width: 220, padding: "10px 14px", alignItems: "center" }}
+          />
+          <Typography.Text type="secondary" style={{ fontSize: 12, textAlign: "center" }}>
+            Pick any color you like — it will show on your avatar everywhere.
+          </Typography.Text>
+          <Button
+            type="primary"
+            block
+            loading={savingColor}
+            onClick={handleColorSave}
+            style={{ marginTop: 8 }}
+          >
+            Save
+          </Button>
         </div>
       </Modal>
       {tourOpen && (
