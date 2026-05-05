@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { message, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import { apiCall } from "../api";
 import { PasswordModal } from "../components/PasswordModal";
+import { colors, fonts } from "../theme";
 
 export function SandboxRedirectPage() {
   const navigate = useNavigate();
@@ -39,10 +41,28 @@ export function SandboxRedirectPage() {
   }, [passwordChecked, hasPassword, navigate]);
 
   return (
-    <PasswordModal
-      open={hasPassword === false}
-      mode="set"
-      onSuccess={() => setHasPassword(true)}
-    />
+    <>
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <Spin
+            indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} spin />}
+            size="large"
+          />
+        </div>
+      </div>
+      <PasswordModal
+        open={hasPassword === false}
+        mode="set"
+        onSuccess={() => setHasPassword(true)}
+      />
+    </>
   );
 }
