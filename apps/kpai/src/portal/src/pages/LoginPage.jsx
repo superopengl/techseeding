@@ -51,7 +51,12 @@ export function LoginPage() {
         const data = await apiCall(`/api/login/${loginRequestId}/status`);
         if (cancelled) return;
         if (data.status === "approved") {
-          setStatus("approved");
+          // Don't change status — leave the "Waiting for approval" screen
+          // up until navigation unmounts this page. Switching to any other
+          // status here would briefly flash the username/password screen.
+          cancelled = true;
+          clearInterval(pollId);
+          clearInterval(tickId);
           navigate(data.role === "admin" ? "/admin" : "/sandbox");
         } else if (data.status === "rejected") {
           setStatus("rejected");
