@@ -366,7 +366,7 @@ export function LoginPage() {
       <div style={containerStyle}>
         <Decorations />
         <Card style={{ ...cardStyle, textAlign: "center" }} styles={{ body: { padding: "48px 32px" } }}>
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} />} />
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} spin />} />
           <Title
             level={3}
             style={{ fontFamily: fonts.heading, color: colors.heading, marginTop: 24 }}

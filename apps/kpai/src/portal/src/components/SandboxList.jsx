@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Spin, Modal, Button, message, Typography } from "antd";
-import { PlusOutlined, ThunderboltOutlined, DeleteOutlined, PlayCircleFilled } from "@ant-design/icons";
+import { PlusOutlined, ThunderboltOutlined, DeleteOutlined, PlayCircleFilled, LoadingOutlined } from "@ant-design/icons";
 import { colors, fonts, shadows } from "../theme";
 import { apiCall } from "../api";
 
@@ -75,7 +75,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
   if (loading) {
     return (
       <div style={{ textAlign: "center", paddingTop: 80 }}>
-        <Spin size="large" />
+        <Spin size="large" indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} spin />} />
       </div>
     );
   }

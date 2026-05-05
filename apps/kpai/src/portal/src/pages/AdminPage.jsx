@@ -8,6 +8,7 @@ import {
   CheckOutlined,
   CodeOutlined,
   LogoutOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router-dom";
@@ -581,7 +582,7 @@ export function AdminPage() {
       >
         {sandboxesLoading ? (
           <div style={{ textAlign: "center", padding: 48 }}>
-            <Spin />
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: colors.primary }} spin />} />
           </div>
         ) : sandboxes.length === 0 ? (
           <Typography.Text type="secondary">No sandboxes yet.</Typography.Text>
