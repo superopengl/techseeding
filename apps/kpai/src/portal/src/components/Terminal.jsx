@@ -1,14 +1,20 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Spin, Typography } from "antd";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
+import { colors } from "../theme";
+
+const READY_IDLE_MS = 0;
 
 export function Terminal({ sandboxId, onFileChanged }) {
   const containerRef = useRef(null);
   const termRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!sandboxId || !containerRef.current) return;
+    setLoading(true);
 
     const term = new XTerm({ cursorBlink: true, fontSize: 14 });
     const fitAddon = new FitAddon();
@@ -37,6 +43,9 @@ export function Terminal({ sandboxId, onFileChanged }) {
       const msg = JSON.parse(e.data);
       if (msg.type === "output") {
         term.write(msg.data);
+        if (loading && msg.data.includes('/kpai/')) {
+          setLoading(false);
+        }
       } else if (msg.type === "file-changed") {
         onFileChanged?.();
       }
@@ -88,5 +97,27 @@ export function Terminal({ sandboxId, onFileChanged }) {
     );
   }
 
-  return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
+  return (
+    <div style={{ position: "relative", height: "100%", width: "100%" }}>
+      <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
+      {loading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
+          <Spin size="large" />
+          <Typography.Text style={{ fontSize: 14, color: colors.primary }}>
+            Starting AI assistant…
+          </Typography.Text>
+        </div>
+      )}
+    </div>
+  );
 }
