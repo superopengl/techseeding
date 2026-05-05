@@ -286,7 +286,7 @@ export function AdminPage() {
       key: "loginRequestStatus",
       render: (status) => {
         if (!status) return <Tag>-</Tag>;
-        const colorMap = { requesting: "orange", approved: "green", loggedin: "blue" };
+        const colorMap = { requesting: "orange", approved: "green" };
         return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
       },
     },

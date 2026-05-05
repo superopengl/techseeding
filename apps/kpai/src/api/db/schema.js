@@ -45,7 +45,7 @@ export const sandbox = pgTable("sandbox", {
 export const loginRequest = pgTable("login_request", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().unique().references(() => user.id),
-  status: text("status").notNull(), // requesting | approved | loggedin
+  status: text("status").notNull(), // requesting | approved (row is deleted on consumption)
   resetPassword: boolean("reset_password").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
