@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { db } from "../db/index.js";
 import { user, loginRequest } from "../db/schema.js";
 import { sql } from "drizzle-orm";
@@ -9,28 +8,9 @@ import { createJwtToken } from "../lib/createJwtToken.js";
 import { setAuthCookies } from "../lib/setAuthCookies.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
-async function upsertLoginRequest(userId, resetPassword) {
-  const [req] = await db
-    .insert(loginRequest)
-    .values({ userId, status: "requesting", resetPassword })
-    .onConflictDoUpdate({
-      target: loginRequest.userId,
-      set: { status: "requesting", resetPassword, updatedAt: new Date() },
-    })
-    .returning();
-
-  publishAdminEvent("login_request_changed", {
-    loginRequestId: req.id,
-    userId: req.userId,
-    status: req.status,
-  });
-
-  return req;
-}
-
 export function login(fastify) {
   fastify.post("/api/login", async (request, reply) => {
-    const { userName, password, resetPassword } = request.body || {};
+    const { userName, password } = request.body || {};
 
     if (!userName || typeof userName !== "string" || !userName.trim()) {
       return error(reply, 400, "VALIDATION_ERROR", "Username is required");
@@ -46,26 +26,29 @@ export function login(fastify) {
 
     if (!matchedUser) {
       // Don't reveal whether the username exists. Username-only submissions get
-      // a needsPassword response; password attempts fail with INVALID_CREDENTIALS;
-      // resetPassword requests get a fake loginRequestId so the UI shows
-      // "Waiting for Approval" and eventually times out without revealing the
-      // account doesn't exist.
+      // a needsPassword response; password attempts fail with INVALID_CREDENTIALS.
       if (typeof password === "string" && password.length > 0) {
         return error(reply, 401, "INVALID_CREDENTIALS", "Wrong username or password");
-      }
-      if (resetPassword === true) {
-        return success({ needsApproval: true, loginRequestId: randomUUID(), resetPassword: true });
       }
       return success({ needsPassword: true });
     }
 
-    if (resetPassword === true) {
-      const req = await upsertLoginRequest(matchedUser.id, true);
-      return success({ needsApproval: true, loginRequestId: req.id, resetPassword: true });
-    }
-
     if (!matchedUser.passwordHash) {
-      const req = await upsertLoginRequest(matchedUser.id, false);
+      const [req] = await db
+        .insert(loginRequest)
+        .values({ userId: matchedUser.id, status: "requesting", resetPassword: false })
+        .onConflictDoUpdate({
+          target: loginRequest.userId,
+          set: { status: "requesting", resetPassword: false, updatedAt: new Date() },
+        })
+        .returning();
+
+      publishAdminEvent("login_request_changed", {
+        loginRequestId: req.id,
+        userId: req.userId,
+        status: req.status,
+      });
+
       return success({ needsApproval: true, loginRequestId: req.id });
     }
 

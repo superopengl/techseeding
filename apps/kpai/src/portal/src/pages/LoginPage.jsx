@@ -71,8 +71,8 @@ export function LoginPage() {
   const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
   const trimmedId = identifier.trim();
 
-  const submitLogin = async (body) => {
-    const res = await fetch("/api/login", {
+  const postJson = async (path, body) => {
+    const res = await fetch(path, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ export function LoginPage() {
     });
     const json = await res.json();
     if (!json.success) {
-      const err = new Error(json.error?.message || "Login failed");
+      const err = new Error(json.error?.message || "Request failed");
       err.code = json.error?.code;
       err.status = res.status;
       throw err;
@@ -132,7 +132,7 @@ export function LoginPage() {
     setLoading(true);
     setPasswordError(null);
     try {
-      const data = await submitLogin({ userName: id, password });
+      const data = await postJson("/api/login", { userName: id, password });
       if (data.needsApproval) {
         handleApprovalResponse(data, "first_time");
         return;
@@ -157,7 +157,7 @@ export function LoginPage() {
     setForgotLoading(true);
     setPasswordError(null);
     try {
-      const data = await submitLogin({ userName: id, resetPassword: true });
+      const data = await postJson("/api/login/reset", { userName: id });
       handleApprovalResponse(data, "forgot");
     } catch (e) {
       setPasswordError(e.message || "Could not send request. Try again.");

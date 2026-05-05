@@ -8,6 +8,7 @@ import { verifyToken } from "./lib/verifyToken.js";
 import { error } from "./lib/response.js";
 import { healthcheck } from "./routes/healthcheck.js";
 import { login } from "./routes/login.js";
+import { loginReset } from "./routes/loginReset.js";
 import { loginStatus } from "./routes/loginStatus.js";
 import { logout } from "./routes/logout.js";
 import { adminStudents } from "./routes/adminStudents.js";
@@ -72,6 +73,7 @@ fastify.addHook("onRequest", async (request, reply) => {
 
 healthcheck(fastify);
 login(fastify);
+loginReset(fastify);
 loginStatus(fastify);
 logout(fastify);
 adminStudents(fastify);
