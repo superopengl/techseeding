@@ -23,6 +23,7 @@ export const studentProfile = pgTable("student_profile", {
   homeAddress: text("home_address"),
   contactNumber: text("contact_number"),
   custodianName: text("custodian_name"),
+  avatarColor: text("avatar_color").notNull().default("#7c5cfc"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -42,6 +42,7 @@ Extended profile information for a student user. One-to-one relationship with `u
 | home_address | text | nullable | Home address |
 | contact_number | text | nullable | Contact phone number |
 | custodian_name | text | nullable | Parent/guardian name |
+| avatar_color | text | NOT NULL, default `#7c5cfc` | Hex color used for the student's avatar |
 | joined_at | timestamp | NOT NULL, default `now()` | When the student joined the platform |
 | notes | text | nullable | Free-form notes |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
