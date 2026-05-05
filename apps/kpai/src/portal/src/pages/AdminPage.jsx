@@ -146,6 +146,9 @@ export function AdminPage() {
       if (cancelled) return;
       const proto = location.protocol === "https:" ? "wss:" : "ws:";
       ws = new WebSocket(`${proto}//${location.host}/api/ws/admin`);
+      ws.onopen = () => {
+        if (cancelled) ws.close();
+      };
       ws.onmessage = (e) => {
         try {
           const { type } = JSON.parse(e.data);
@@ -167,7 +170,9 @@ export function AdminPage() {
     return () => {
       cancelled = true;
       clearTimeout(reconnectTimer);
-      try { ws?.close(); } catch { /* already closed */ }
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CLOSING)) {
+        try { ws.close(); } catch { /* already closed */ }
+      }
     };
   }, []);
 

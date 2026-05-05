@@ -21,8 +21,13 @@ export function Terminal({ sandboxId, onFileChanged }) {
     const ws = new WebSocket(
       `${proto}//${location.host}/api/ws?sandboxId=${sandboxId}`
     );
+    let cancelled = false;
 
     ws.onopen = () => {
+      if (cancelled) {
+        ws.close();
+        return;
+      }
       ws.send(
         JSON.stringify({ type: "resize", cols: term.cols, rows: term.rows })
       );
@@ -58,8 +63,11 @@ export function Terminal({ sandboxId, onFileChanged }) {
     resizeObserver.observe(containerRef.current);
 
     return () => {
+      cancelled = true;
       resizeObserver.disconnect();
-      ws.close();
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CLOSING) {
+        ws.close();
+      }
       term.dispose();
     };
   }, [sandboxId]);
