@@ -3,6 +3,7 @@ import { Modal, Form, Input, Typography, message } from "antd";
 import { LockOutlined } from "@ant-design/icons";
 import { fetchWithAuth } from "../api";
 import { colors, fonts } from "../theme";
+import { Logo } from "./Logo";
 
 const { Paragraph } = Typography;
 
@@ -96,9 +97,14 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
       destroyOnHidden
     >
       {isSet && (
-        <Paragraph style={{ color: colors.body, marginTop: 0 }}>
-          Welcome! Set a password so you can log back in next time. Use at least {MIN_LENGTH} characters.
-        </Paragraph>
+        <>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <Logo size={40} />
+          </div>
+          <Paragraph style={{ color: colors.body, marginTop: 0 }}>
+            Welcome! Set a password so you can log back in next time. Use at least {MIN_LENGTH} characters.
+          </Paragraph>
+        </>
       )}
       <Form form={form} layout="vertical" requiredMark={false} onFinish={handleOk}>
         {!isSet && (
