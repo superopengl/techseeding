@@ -32,7 +32,7 @@ const EnquiryForm = lazy(() =>
   import("../components/EnquiryForm").then((m) => ({ default: m.EnquiryForm }))
 );
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph, Text, Link } = Typography;
 
 const features = [
   {
@@ -1019,19 +1019,22 @@ export function HomePage() {
           gap: 4,
         }}
       >
-        <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-          KidPlayAI is a product owned by Techseeding
-        </Text>
         <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           &copy;2019&ndash;2026 Techseeding PTY LTD. All rights reserved.
         </Text>
+        <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
+          KidPlayAI is a product owned by Techseeding
+        </Text>
+        <Link href="https://techseeding.com.au" target="_blank" rel="noopener noreferrer">
+          https://techseeding.com.au/
+        </Link>
         <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
           ABN: 35631597450 / ACN: 631597450
         </Text>
-        <div style={{ marginTop: 12, display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-          <a href="/privacy_policy" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Privacy Policy</a>
-          <a href="/terms_of_use" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Terms of Use</a>
-          <a href="/admin" style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>Admin Portal</a>
+        <div style={{ marginTop: 12, display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+          <Link href="/privacy_policy" target="_blank" rel="noopener noreferrer" >Privacy Policy</Link>
+          <Link href="/terms_of_use" target="_blank" rel="noopener noreferrer">Terms of Use</Link>
+          <Link href="/admin" target="_blank" rel="noopener noreferrer">Admin Portal</Link>
         </div>
       </div>
     </div>
