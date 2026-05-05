@@ -129,7 +129,7 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
-      {loading && (
+      {!sessionEnded && loading && (
         <div style={maskStyle}>
           <Loading
             size="large"
