@@ -82,7 +82,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
       confirmLoading={submitting}
       onCancel={dismissible ? onCancel : undefined}
       closable={dismissible}
-      maskClosable={dismissible}
+      mask={{ closable: dismissible }}
       keyboard={dismissible}
       cancelButtonProps={{ style: { display: dismissible ? undefined : "none" } }}
       okButtonProps={{

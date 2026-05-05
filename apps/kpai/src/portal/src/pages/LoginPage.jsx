@@ -291,7 +291,7 @@ export function LoginPage() {
               Enter your password to log in.
             </Paragraph>
           </div>
-          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+          <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
             <Input.Password
               ref={passwordRef}
               size="large"
@@ -505,7 +505,7 @@ export function LoginPage() {
             Enter your username to log in.
           </Paragraph>
         </div>
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
           <Input
             size="large"
             placeholder="Username"

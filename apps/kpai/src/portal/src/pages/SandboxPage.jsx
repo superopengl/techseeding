@@ -442,7 +442,7 @@ export function SandboxPage() {
               menu={{ items: userMenuItems }}
               placement="bottomRight"
               trigger={["click"]}
-              overlayStyle={{ minWidth: 220 }}
+              styles={{ root: { minWidth: 220 } }}
               open={dropdownOpen}
               onOpenChange={handleDropdownOpenChange}
             >
@@ -537,7 +537,7 @@ export function SandboxPage() {
         open={showMyCrafts}
         onCancel={sandboxNotFound ? undefined : () => setShowMyCrafts(false)}
         closable={!sandboxNotFound}
-        maskClosable={!sandboxNotFound}
+        mask={{ closable: !sandboxNotFound }}
         keyboard={!sandboxNotFound}
         footer={null}
         width={800}

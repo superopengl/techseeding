@@ -200,11 +200,10 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
     <Drawer
       title={[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}
       placement="bottom"
-      height="85vh"
       open={open}
       onClose={onClose}
       destroyOnHidden
-      styles={{ body: { padding: 0 } }}
+      styles={{ body: { padding: 0 }, wrapper: { height: "85vh" } }}
       extra={
         <span style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
           <Button
