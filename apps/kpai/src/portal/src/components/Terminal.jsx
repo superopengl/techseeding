@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Spin, Typography, Alert, Button } from "antd";
-import { ReloadOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Typography, Alert, Button } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import { Loading } from "./Loading";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -130,9 +131,8 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
       {loading && (
         <div style={maskStyle}>
-          <Spin
+          <Loading
             size="large"
-            indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} spin />}
             description={<span style={{ fontSize: 18 }}>Starting AI assistant…</span>}
           />
         </div>

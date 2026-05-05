@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography } from "antd";
-import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Drawer, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography } from "antd";
+import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined } from "@ant-design/icons";
+import { Loading } from "./Loading";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
 import { CraftPreview } from "./CraftPreview";
@@ -309,7 +310,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         }}>
           {loading ? (
             <div style={{ textAlign: "center", padding: 48 }}>
-              <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: colors.primary }} spin />} />
+              <Loading />
             </div>
           ) : (
             <MessageTimeline sessions={sessions} showAi={showAi} />

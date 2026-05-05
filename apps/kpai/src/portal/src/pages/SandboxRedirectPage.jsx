@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { message } from "antd";
 import { apiCall } from "../api";
 import { useUser } from "../context/UserContext";
 import { PasswordModal } from "../components/PasswordModal";
-import { colors } from "../theme";
+import { Loading } from "../components/Loading";
 
 export function SandboxRedirectPage() {
   const navigate = useNavigate();
@@ -47,10 +46,7 @@ export function SandboxRedirectPage() {
         }}
       >
         <div style={{ textAlign: "center" }}>
-          <Spin
-            indicator={<LoadingOutlined style={{ fontSize: 48, color: colors.primary }} spin />}
-            size="large"
-          />
+          <Loading size="large" />
         </div>
       </div>
       <PasswordModal

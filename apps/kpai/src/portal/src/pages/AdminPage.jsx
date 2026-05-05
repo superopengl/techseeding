@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Spin, Tabs, Badge } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Tabs, Badge } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
@@ -8,8 +8,8 @@ import {
   CheckOutlined,
   CodeOutlined,
   LogoutOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
+import { Loading } from "../components/Loading";
 import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router-dom";
 import { colors, shadows, fonts } from "../theme";
@@ -582,7 +582,7 @@ export function AdminPage() {
       >
         {sandboxesLoading ? (
           <div style={{ textAlign: "center", padding: 48 }}>
-            <Spin indicator={<LoadingOutlined style={{ fontSize: 32, color: colors.primary }} spin />} />
+            <Loading />
           </div>
         ) : sandboxes.length === 0 ? (
           <Typography.Text type="secondary">No sandboxes yet.</Typography.Text>
