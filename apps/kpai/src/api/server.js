@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket";
+import fastifyRateLimit from "@fastify/rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
 import { ROOT_DIR } from "./lib/sandboxManager.js";
@@ -36,11 +37,23 @@ import { markEnquiryRead } from "./routes/markEnquiryRead.js";
 
 const fastify = Fastify({
   logger: { level: process.env.NODE_ENV === "production" ? "warn" : "info" },
+  // ECS task is only reachable via the ALB, which sets X-Forwarded-For. Trust
+  // it so request.ip is the real client (needed for rate limiting by IP).
+  trustProxy: true,
 });
 
 // --- Plugins ---
 
 await fastify.register(fastifyWebsocket);
+
+await fastify.register(fastifyRateLimit, {
+  global: true,
+  max: 200,
+  timeWindow: "1 minute",
+  // Skip the ALB health check so it can't get throttled.
+  skipOnError: false,
+  allowList: (request) => request.url === "/healthcheck",
+});
 
 await fastify.register(fastifyStatic, {
   root: path.join(ROOT_DIR, "public"),

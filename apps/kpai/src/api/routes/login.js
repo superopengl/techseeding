@@ -9,7 +9,9 @@ import { setAuthCookies } from "../lib/setAuthCookies.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
 export function login(fastify) {
-  fastify.post("/api/login", async (request, reply) => {
+  fastify.post("/api/login", {
+    config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
+  }, async (request, reply) => {
     const { userName, password } = request.body || {};
 
     if (!userName || typeof userName !== "string" || !userName.trim()) {

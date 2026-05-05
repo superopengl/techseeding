@@ -7,7 +7,9 @@ import { isValidUserName } from "../lib/isValidUserName.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
 export function loginReset(fastify) {
-  fastify.post("/api/login/reset", async (request, reply) => {
+  fastify.post("/api/login/reset", {
+    config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
+  }, async (request, reply) => {
     const { userName } = request.body || {};
 
     if (!userName || typeof userName !== "string" || !userName.trim()) {

@@ -6,7 +6,9 @@ import { publishAdminEvent } from "../lib/adminEvents.js";
 const VALID_AGES = ["<8", "8", "9", "10", "11", "12", "12+"];
 
 export function createEnquiry(fastify) {
-  fastify.post("/api/enquiry", async (request, reply) => {
+  fastify.post("/api/enquiry", {
+    config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
+  }, async (request, reply) => {
     const { contactName, method, childAge, message } = request.body || {};
 
     if (!contactName || !contactName.trim()) {
