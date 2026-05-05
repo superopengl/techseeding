@@ -4,7 +4,7 @@ import { db } from "../db/index.js";
 import { sandbox, sandboxSession, sessionMessage } from "../db/schema.js";
 import fs from "fs";
 import path from "path";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 import { stripAnsi } from "../lib/stripAnsi.js";
 
@@ -24,11 +24,11 @@ function authenticateToken(token) {
   }
 }
 
-async function lookupSandbox(sandboxId) {
+async function lookupSandbox(sandboxId, userId) {
   const [record] = await db
     .select({ workDir: sandbox.workDir, indexHtmlContent: sandbox.indexHtmlContent })
     .from(sandbox)
-    .where(eq(sandbox.id, sandboxId));
+    .where(and(eq(sandbox.id, sandboxId), eq(sandbox.userId, userId)));
   return record || null;
 }
 
@@ -99,7 +99,7 @@ export function wsTerminal(fastify) {
         return;
       }
 
-      const record = await lookupSandbox(sandboxId);
+      const record = await lookupSandbox(sandboxId, payload.userId);
       if (!record?.workDir) {
         sendError(socket, "Sandbox not found.");
         return;
