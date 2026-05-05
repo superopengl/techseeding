@@ -380,7 +380,15 @@ export function SandboxPage() {
             height: "100%",
           }}
         >
-          <Logo size={36} square />
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open KidPlayAI homepage in a new tab"
+            style={{ display: "inline-flex", alignItems: "center", lineHeight: 0 }}
+          >
+            <Logo size={36} square />
+          </a>
           <div ref={titleRef} style={{ display: "inline-flex", alignItems: "center" }}>
             {editingTitle ? (
               <Input
