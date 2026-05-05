@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "../db/index.js";
 import { user, loginRequest } from "../db/schema.js";
 import { sql } from "drizzle-orm";
@@ -44,7 +45,18 @@ export function login(fastify) {
       .where(sql`lower(${user.userName}) = lower(${userName.trim()})`);
 
     if (!matchedUser) {
-      return error(reply, 401, "INVALID_CREDENTIALS", "Wrong username or password");
+      // Don't reveal whether the username exists. Username-only submissions get
+      // a needsPassword response; password attempts fail with INVALID_CREDENTIALS;
+      // resetPassword requests get a fake loginRequestId so the UI shows
+      // "Waiting for Approval" and eventually times out without revealing the
+      // account doesn't exist.
+      if (typeof password === "string" && password.length > 0) {
+        return error(reply, 401, "INVALID_CREDENTIALS", "Wrong username or password");
+      }
+      if (resetPassword === true) {
+        return success({ needsApproval: true, loginRequestId: randomUUID(), resetPassword: true });
+      }
+      return success({ needsPassword: true });
     }
 
     if (resetPassword === true) {

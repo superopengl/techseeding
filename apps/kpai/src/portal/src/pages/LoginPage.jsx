@@ -100,38 +100,18 @@ export function LoginPage() {
     navigate(data.role === "admin" ? "/admin" : "/sandbox");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const id = identifier.trim();
     if (!id) return;
     if (!USER_NAME_RE.test(id)) {
       setLoginError("Your name can only have letters, numbers, _ or /");
       return;
     }
-    setLoading(true);
     setLoginError(null);
     setPasswordError(null);
-    try {
-      const data = await submitLogin({ userName: id });
-      if (data.needsApproval) {
-        handleApprovalResponse(data, "first_time");
-        return;
-      }
-      if (data.needsPassword) {
-        setPassword("");
-        setStatus("password");
-        setTimeout(() => passwordRef.current?.focus(), 0);
-        return;
-      }
-      if (data.role) {
-        handleAuthenticated(data);
-        return;
-      }
-      setLoginError("Unexpected response. Please try again.");
-    } catch (e) {
-      setLoginError(e.message || "Wrong username or password");
-    } finally {
-      setLoading(false);
-    }
+    setPassword("");
+    setStatus("password");
+    setTimeout(() => passwordRef.current?.focus(), 0);
   };
 
   const handlePasswordSubmit = async () => {
@@ -374,9 +354,9 @@ export function LoginPage() {
           </Title>
           <Paragraph style={{ color: colors.body, fontSize: 16, marginBottom: 8 }}>
             {pendingReason === "forgot" ? (
-              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher will reset your password and approve your login shortly.</>
+              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! We will approve your login and help you reset your password shortly.</>
             ) : (
-              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! Your teacher will approve your login shortly. Hang tight!</>
+              <>Hi <strong style={{ color: colors.heading }}>{identifier}</strong>! We will approve your login shortly. Hang tight!</>
             )}
           </Paragraph>
           <div
