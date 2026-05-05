@@ -197,6 +197,8 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
     document.addEventListener("mouseup", onMouseUp);
   }, []);
 
+  const previewUrl = `${window.location.origin}/api/sandbox/${sandboxId}/preview`;
+  
   return (
     <Drawer
       title={
@@ -205,13 +207,13 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
           {sandboxId && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <Typography.Text
-                copyable={{ text: sandboxWorkDir, tooltips: ["Copy work dir", "Copied"] }}
+                copyable={{ text: previewUrl, tooltips: ["Copy work dir", "Copied"] }}
                 style={{ fontSize: 10, fontWeight: 400, color: colors.muted, fontFamily: "monospace" }}
               >
-                {`${window.location.origin}/api/admin/sandbox/${sandboxId}/preview`}
+                {previewUrl}
               </Typography.Text>
               <a
-                href={`/api/admin/sandbox/${sandboxId}/preview`}
+                href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open preview in new tab"
