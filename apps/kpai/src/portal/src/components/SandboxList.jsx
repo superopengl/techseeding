@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Spin, Modal, Button, message } from "antd";
+import { Card, Spin, Modal, Button, message, Typography } from "antd";
 import { PlusOutlined, ThunderboltOutlined, DeleteOutlined, PlayCircleFilled } from "@ant-design/icons";
 import { colors, fonts, shadows } from "../theme";
 import { apiCall } from "../api";
+
+const { Text } = Typography;
 
 export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
   const navigate = useNavigate();
@@ -80,6 +82,13 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <style>{`
+        @keyframes kpai-pulse {
+          0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(97, 206, 112, 0.6); }
+          70% { transform: scale(1.05); opacity: 0.85; box-shadow: 0 0 0 6px rgba(97, 206, 112, 0); }
+          100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(97, 206, 112, 0); }
+        }
+      `}</style>
       <Card
         hoverable
         onClick={handleCreate}
@@ -146,7 +155,20 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
                 {new Date(s.createdAt).toLocaleString()}
               </div>
             </div>
-            <Button
+            {isCurrent ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: colors.primary,
+                    animation: "kpai-pulse 1.4s ease-in-out infinite",
+                  }}
+                />
+                <Text style={{ color: colors.primary, fontWeight: 600, fontSize: 13 }}>CURRENT</Text>
+              </div>
+            ) : <Button
               type="text"
               danger
               size="small"
@@ -154,7 +176,7 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
               onClick={(e) => handleDelete(e, s)}
             >
               Delete
-            </Button>
+            </Button>}
           </Card>
         );
       })}
