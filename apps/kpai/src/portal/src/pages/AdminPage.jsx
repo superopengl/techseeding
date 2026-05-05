@@ -133,9 +133,9 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    if (activeTab === "students") fetchStudents();
-    else if (activeTab === "enquiries") fetchEnquiries();
-  }, [activeTab]);
+    fetchStudents();
+    fetchEnquiries();
+  }, []);
 
   useEffect(() => {
     let ws = null;
