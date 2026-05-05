@@ -398,17 +398,17 @@ export function HomePage() {
           <picture>
             <source
               type="image/avif"
-              srcSet="/img/car-racer-600.avif 600w, /img/car-racer-1200.avif 1200w, /img/car-racer-1465.avif 1465w"
+              srcSet="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
               sizes="(max-width: 932px) 100vw, 900px"
             />
             <source
               type="image/webp"
-              srcSet="/img/car-racer-600.webp 600w, /img/car-racer-1200.webp 1200w, /img/car-racer-1465.webp 1465w"
+              srcSet="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w"
               sizes="(max-width: 932px) 100vw, 900px"
             />
             <img
-              src="/img/car-racer-1200.jpg"
-              srcSet="/img/car-racer-600.jpg 600w, /img/car-racer-1200.jpg 1200w, /img/car-racer-1465.jpg 1465w"
+              src="/img/road-racer-1200.jpg"
+              srcSet="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w"
               sizes="(max-width: 932px) 100vw, 900px"
               width="1465"
               height="993"

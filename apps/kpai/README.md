@@ -10,6 +10,10 @@
 
 An AI-powered craft maker platform for kids aged 8–12 who love games, science, engineering, and AI. Kids describe the craft they imagine, then watch a real AI agent think, design, and build it step by step. Rather than hiding AI behind a polished UI, KidPlayAI surfaces the raw interaction so kids see exactly how AI reasons, creates, and solves problems.
 
+<p align="center">
+  <img src="docs/screenshots/road-racer.png" alt="Road Racer craft built on KidPlayAI" />
+</p>
+
 ## How It Works
 
 1. A kid visits the homepage and clicks **Start Making Crafts**
