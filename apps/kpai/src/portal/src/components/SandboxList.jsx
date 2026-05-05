@@ -80,6 +80,8 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
     );
   }
 
+  const atLimit = sandboxes.length >= 10;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <style>{`
@@ -90,31 +92,35 @@ export function SandboxList({ currentSandboxId, onSelect, onDeleteCurrent }) {
         }
       `}</style>
       <Card
-        hoverable
-        onClick={handleCreate}
+        hoverable={!atLimit}
+        onClick={atLimit ? undefined : handleCreate}
         loading={creating}
         style={{
           borderRadius: 12,
-          border: `2px dashed ${colors.primary}`,
-          background: colors.mintBg,
+          border: `2px dashed ${atLimit ? colors.muted : colors.primary}`,
+          background: atLimit ? colors.canvas : colors.mintBg,
           boxShadow: "none",
+          cursor: atLimit ? "not-allowed" : "pointer",
+          opacity: atLimit ? 0.75 : 1,
         }}
         styles={{ body: { display: "flex", alignItems: "center", gap: 12, padding: "12px 20px" } }}
       >
-        <PlusOutlined style={{ fontSize: 20, color: colors.primary }} />
+        <PlusOutlined style={{ fontSize: 20, color: atLimit ? colors.muted : colors.primary }} />
         <div>
           <div
             style={{
               fontFamily: fonts.heading,
               fontSize: 15,
               fontWeight: 700,
-              color: colors.primary,
+              color: atLimit ? colors.muted : colors.primary,
             }}
           >
-            New Craft
+            {atLimit ? "Craft Shelf Full" : "New Craft"}
           </div>
           <div style={{ color: colors.muted, fontSize: 12 }}>
-            Start a new project
+            {atLimit
+              ? "You can keep up to 10 crafts. Delete one to make room for a new one."
+              : "Start a new project"}
           </div>
         </div>
       </Card>
