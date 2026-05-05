@@ -18,6 +18,7 @@ export function me(fastify) {
         passwordHash: user.passwordHash,
         firstName: studentProfile.firstName,
         lastName: studentProfile.lastName,
+        avatarColor: studentProfile.avatarColor,
       })
       .from(user)
       .leftJoin(studentProfile, eq(studentProfile.userId, user.id))

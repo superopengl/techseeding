@@ -1,22 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { message, Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { apiCall } from "../api";
+import { useUser } from "../context/UserContext";
 import { PasswordModal } from "../components/PasswordModal";
-import { colors, fonts } from "../theme";
+import { colors } from "../theme";
 
 export function SandboxRedirectPage() {
   const navigate = useNavigate();
-  const [passwordChecked, setPasswordChecked] = useState(false);
-  const [hasPassword, setHasPassword] = useState(null);
-
-  useEffect(() => {
-    apiCall("/api/me")
-      .then((data) => setHasPassword(Boolean(data.hasPassword)))
-      .catch(() => setHasPassword(true))
-      .finally(() => setPasswordChecked(true));
-  }, []);
+  const { user, loaded, refresh } = useUser();
+  const passwordChecked = loaded;
+  const hasPassword = user ? Boolean(user.hasPassword) : (loaded ? true : null);
 
   useEffect(() => {
     if (!passwordChecked) return;
@@ -61,7 +56,7 @@ export function SandboxRedirectPage() {
       <PasswordModal
         open={hasPassword === false}
         mode="set"
-        onSuccess={() => setHasPassword(true)}
+        onSuccess={() => refresh()}
       />
     </>
   );

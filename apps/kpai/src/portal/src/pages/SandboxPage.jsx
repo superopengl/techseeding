@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
 import { getCookie, setCookie } from "../utils/cookie";
-import { colorForName } from "../utils/colorForName";
+import { fgForHex } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography } from "antd";
+import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography, ColorPicker } from "antd";
 import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined } from "@ant-design/icons";
+import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
 import { Logo } from "../components/Logo";
@@ -30,12 +31,15 @@ const MIN_PANEL_PCT = 15;
 export function SandboxPage() {
   const { sandboxId } = useParams();
   const navigate = useNavigate();
+  const { user, updateAvatarColor } = useUser();
+  const userName = user?.userName || "";
+  const firstName = user?.firstName || "";
+  const lastName = user?.lastName || "";
+  const hasPassword = user ? Boolean(user.hasPassword) : null;
+  const avatarColor = user?.avatarColor || "#7c5cfc";
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
-  const [userName, setDisplayName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [title, setTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -45,23 +49,16 @@ export function SandboxPage() {
   const [tourOpen, setTourOpen] = useState(false);
   const [tourCurrent, setTourCurrent] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [hasPassword, setHasPassword] = useState(null);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [colorDraft, setColorDraft] = useState(avatarColor);
+  const [savingColor, setSavingColor] = useState(false);
   const titleInputRef = useRef(null);
   const previewRef = useRef(null);
   const terminalRef = useRef(null);
   const titleRef = useRef(null);
   const shareRef = useRef(null);
   const avatarRef = useRef(null);
-
-  useEffect(() => {
-    apiCall("/api/me").then((data) => {
-      setDisplayName(data.userName);
-      setFirstName(data.firstName || "");
-      setLastName(data.lastName || "");
-      setHasPassword(Boolean(data.hasPassword));
-    }).catch(() => { });
-  }, []);
 
   useEffect(() => {
     if (!sandboxId) return;
@@ -180,7 +177,29 @@ export function SandboxPage() {
 
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
   const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
-  const { bg: avatarBg, fg: avatarFg } = colorForName(userName);
+  const avatarBg = avatarColor;
+  const avatarFg = fgForHex(avatarColor);
+
+  const openColorPicker = useCallback(() => {
+    setColorDraft(avatarColor);
+    setShowColorPicker(true);
+  }, [avatarColor]);
+
+  const handleColorSave = useCallback(async () => {
+    if (!colorDraft || colorDraft.toLowerCase() === avatarColor.toLowerCase()) {
+      setShowColorPicker(false);
+      return;
+    }
+    try {
+      setSavingColor(true);
+      await updateAvatarColor(colorDraft);
+      setShowColorPicker(false);
+    } catch (err) {
+      message.error(err?.message || "Failed to update avatar color");
+    } finally {
+      setSavingColor(false);
+    }
+  }, [colorDraft, avatarColor, updateAvatarColor]);
 
   const userMenuItems = [
     {
@@ -188,20 +207,51 @@ export function SandboxPage() {
       type: "group",
       label: (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 2px", lineHeight: 1.3, minWidth: 0 }}>
-          <Avatar
-            size={42}
-            style={{
-              background: avatarBg,
-              color: avatarFg,
-              fontFamily: fonts.heading,
-              fontSize: 26,
-              fontWeight: 700,
-              flexShrink: 0,
-            }}
-            icon={userName ? null : <UserOutlined />}
-          >
-            {userName ? avatarInitial : null}
-          </Avatar>
+          <div style={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
+            <Avatar
+              size={42}
+              style={{
+                background: avatarBg,
+                color: avatarFg,
+                fontFamily: fonts.heading,
+                fontSize: 26,
+                fontWeight: 700,
+              }}
+              icon={userName ? null : <UserOutlined />}
+            >
+              {userName ? avatarInitial : null}
+            </Avatar>
+            <Tooltip title="Change avatar color">
+              <button
+                type="button"
+                aria-label="Change avatar color"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen(false);
+                  openColorPicker();
+                }}
+                style={{
+                  position: "absolute",
+                  bottom: -2,
+                  right: -2,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  border: `1.5px solid ${colors.surface}`,
+                  background: colors.surface,
+                  color: colors.bodyStrong,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  padding: 0,
+                  boxShadow: shadows.cardSubtle,
+                }}
+              >
+                <EditOutlined style={{ fontSize: 10 }} />
+              </button>
+            </Tooltip>
+          </div>
           <div style={{ minWidth: 0, overflow: "hidden" }}>
             <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               <Typography.Text strong>{userName}</Typography.Text>
@@ -585,6 +635,44 @@ export function SandboxPage() {
         onSuccess={() => setShowChangePassword(false)}
         onCancel={() => setShowChangePassword(false)}
       />
+      <Modal
+        title="Choose your avatar color"
+        open={showColorPicker}
+        onCancel={() => setShowColorPicker(false)}
+        onOk={handleColorSave}
+        okText="Save"
+        confirmLoading={savingColor}
+        destroyOnHidden
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 24, padding: "8px 0" }}>
+          <Avatar
+            size={64}
+            style={{
+              background: colorDraft,
+              color: fgForHex(colorDraft),
+              fontFamily: fonts.heading,
+              fontSize: 36,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+            icon={userName ? null : <UserOutlined />}
+          >
+            {userName ? avatarInitial : null}
+          </Avatar>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <ColorPicker
+              value={colorDraft}
+              onChange={(c) => setColorDraft(c.toHexString())}
+              disabledAlpha
+              showText
+              format="hex"
+            />
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Pick any color you like — it will show on your avatar everywhere.
+            </Typography.Text>
+          </div>
+        </div>
+      </Modal>
       {tourOpen && (
         <Suspense fallback={null}>
           <SandboxTour

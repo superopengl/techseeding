@@ -5,6 +5,7 @@ import { StyleProvider } from "@ant-design/cssinjs";
 import { antTheme, antModalConfig } from "./theme";
 import { HomePage } from "./pages/HomePage";
 import { getRole } from "./api";
+import { UserProvider } from "./context/UserContext";
 
 const LoginPage = lazy(() =>
   import("./pages/LoginPage").then((m) => ({ default: m.LoginPage }))
@@ -39,20 +40,22 @@ export function App() {
   return (
     <StyleProvider hashPriority="high">
       <ConfigProvider theme={antTheme} modal={antModalConfig}>
-        <BrowserRouter>
-          <Suspense fallback={null}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
-              <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
-              <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
-              <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
-              <Route path="/terms_of_use" element={<TermsOfUsePage />} />
-              <Route path="/logo" element={<LogoPage />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
+        <UserProvider>
+          <BrowserRouter>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
+                <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
+                <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
+                <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms_of_use" element={<TermsOfUsePage />} />
+                <Route path="/logo" element={<LogoPage />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </UserProvider>
       </ConfigProvider>
     </StyleProvider>
   );
