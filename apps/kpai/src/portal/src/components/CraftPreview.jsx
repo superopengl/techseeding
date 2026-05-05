@@ -24,6 +24,7 @@ export function CraftPreview({ sandboxId, refreshKey }) {
       key={refreshKey}
       src={`/api/sandbox/${sandboxId}/preview`}
       title="KidPlayAI - Sandbox Preview"
+      sandbox="allow-scripts"
       style={{
         width: "100%",
         height: "100%",

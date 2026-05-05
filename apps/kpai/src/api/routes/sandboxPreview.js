@@ -29,6 +29,11 @@ export function sandboxPreview(fastify) {
       .header("Cache-Control", "no-store, no-cache, must-revalidate")
       .header("Pragma", "no-cache")
       .header("Expires", "0")
+      .header(
+        "Content-Security-Policy",
+        "sandbox allow-scripts; frame-ancestors 'self'; script-src 'unsafe-inline'",
+      )
+      .header("X-Content-Type-Options", "nosniff")
       .type("text/html");
 
     if (fileExists) {
