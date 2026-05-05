@@ -198,12 +198,12 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
   }, []);
 
   const previewUrl = `${window.location.origin}/api/sandbox/${sandboxId}/preview`;
-  
+
   return (
     <Drawer
       title={
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-          <span>{[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}</span>
+          <span>{[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" - ")}</span>
           {sandboxId && (
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <Typography.Text
@@ -217,10 +217,16 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open preview in new tab"
-                title="Open preview in new tab"
-                style={{ fontSize: 12, color: colors.muted, display: "inline-flex" }}
+                title={[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" - ")}
               >
                 <ExportOutlined />
+              </a>
+              <a
+                rel="noopener noreferrer"
+                aria-label="Open share QR code modal"
+                onClick={() => setShowShare(true)}
+              >
+                <QrcodeOutlined />
               </a>
             </span>
           )}
@@ -246,13 +252,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
           >
             Hard Refresh
           </Button>
-          <Button
-            icon={<QrcodeOutlined />}
-            onClick={() => setShowShare(true)}
-            style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}
-          >
-            Share
-          </Button>
+
           <Button
             type={showAi ? "primary" : "default"}
             icon={<RobotOutlined />}
