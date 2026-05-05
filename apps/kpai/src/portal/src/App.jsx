@@ -4,6 +4,7 @@ import { ConfigProvider } from "antd";
 import { StyleProvider } from "@ant-design/cssinjs";
 import { antTheme, antModalConfig } from "./theme";
 import { HomePage } from "./pages/HomePage";
+import { getRole } from "./api";
 
 const LoginPage = lazy(() =>
   import("./pages/LoginPage").then((m) => ({ default: m.LoginPage }))
@@ -28,9 +29,7 @@ const LogoPage = lazy(() =>
 );
 
 function RoleGuard({ role, children }) {
-  const token = sessionStorage.getItem("kpai_token");
-  const currentRole = sessionStorage.getItem("kpai_role");
-  if (!token || currentRole !== role) {
+  if (getRole() !== role) {
     return <Navigate to="/login" replace />;
   }
   return children;

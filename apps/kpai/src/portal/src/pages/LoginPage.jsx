@@ -51,10 +51,8 @@ export function LoginPage() {
         const data = await apiCall(`/api/login/${loginRequestId}/status`);
         if (cancelled) return;
         if (data.status === "approved") {
-          sessionStorage.setItem("kpai_token", data.token);
-          sessionStorage.setItem("kpai_role", data.role);
           setStatus("approved");
-          navigate("/sandbox");
+          navigate(data.role === "admin" ? "/admin" : "/sandbox");
         } else if (data.status === "rejected") {
           setStatus("rejected");
         }
@@ -76,6 +74,7 @@ export function LoginPage() {
   const submitLogin = async (body) => {
     const res = await fetch("/api/login", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
@@ -98,8 +97,6 @@ export function LoginPage() {
   };
 
   const handleAuthenticated = (data) => {
-    sessionStorage.setItem("kpai_token", data.token);
-    sessionStorage.setItem("kpai_role", data.role || "student");
     navigate(data.role === "admin" ? "/admin" : "/sandbox");
   };
 
@@ -125,7 +122,7 @@ export function LoginPage() {
         setTimeout(() => passwordRef.current?.focus(), 0);
         return;
       }
-      if (data.token) {
+      if (data.role) {
         handleAuthenticated(data);
         return;
       }
@@ -160,7 +157,7 @@ export function LoginPage() {
         handleApprovalResponse(data, "first_time");
         return;
       }
-      if (data.token) {
+      if (data.role) {
         handleAuthenticated(data);
         return;
       }

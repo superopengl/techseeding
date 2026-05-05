@@ -5,6 +5,7 @@ import { success, error } from "../lib/response.js";
 import { isValidUserName } from "../lib/isValidUserName.js";
 import { verifyPasswordHash } from "../lib/passwordHash.js";
 import { createJwtToken } from "../lib/createJwtToken.js";
+import { setAuthCookies } from "../lib/setAuthCookies.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
 async function upsertLoginRequest(userId, resetPassword) {
@@ -66,6 +67,7 @@ export function login(fastify) {
     }
 
     const token = createJwtToken({ userId: matchedUser.id, role: matchedUser.role });
-    return success({ token, role: matchedUser.role });
+    setAuthCookies(reply, { token, role: matchedUser.role });
+    return success({ role: matchedUser.role });
   });
 }

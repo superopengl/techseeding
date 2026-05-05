@@ -1,21 +1,29 @@
+import { getCookie, setCookie } from "./utils/cookie";
+
 const DEFAULT_TIMEOUT_MS = 30_000;
 
+export function getRole() {
+  return getCookie("kpai_role");
+}
+
+export function isAuthenticated() {
+  return Boolean(getRole());
+}
+
+function clearRoleCookie() {
+  setCookie("kpai_role", "", 0);
+}
+
 export function fetchWithAuth(url, options = {}) {
-  const token = sessionStorage.getItem("kpai_token");
-  const headers = { ...options.headers };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
   const signal = options.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS);
-  return fetch(url, { ...options, headers, signal });
+  return fetch(url, { ...options, credentials: "include", signal });
 }
 
 export async function apiCall(url, options = {}) {
   const res = await fetchWithAuth(url, options);
 
   if (res.status === 401 || res.status === 403) {
-    sessionStorage.removeItem("kpai_token");
-    sessionStorage.removeItem("kpai_role");
+    clearRoleCookie();
     window.location.href = "/login";
     throw new Error("Unauthorized");
   }
@@ -30,4 +38,11 @@ export async function apiCall(url, options = {}) {
   }
 
   return body.data;
+}
+
+export async function logout() {
+  try {
+    await fetch("/api/logout", { method: "POST", credentials: "include" });
+  } catch { /* network failure — clear locally regardless */ }
+  clearRoleCookie();
 }

@@ -1,5 +1,4 @@
 import pty from "node-pty";
-import jwt from "jsonwebtoken";
 import { db } from "../db/index.js";
 import { sandbox, sandboxSession, sessionMessage } from "../db/schema.js";
 import fs from "fs";
@@ -7,21 +6,11 @@ import path from "path";
 import { eq, and } from "drizzle-orm";
 import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 import { stripAnsi } from "../lib/stripAnsi.js";
-
-const JWT_SECRET = process.env.KPAI_JWT_SECRET;
+import { verifyToken } from "../lib/verifyToken.js";
 
 function sendError(socket, message) {
   socket.send(JSON.stringify({ type: "output", data: `\x1b[31mError: ${message}\x1b[0m\r\n` }));
   socket.close();
-}
-
-function authenticateToken(token) {
-  if (!token) return null;
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch {
-    return null;
-  }
 }
 
 async function lookupSandbox(sandboxId, userId) {
@@ -86,11 +75,11 @@ function watchIndexHtml(sandboxWorkDirPath, sandboxId, socket, fastify) {
 export function wsTerminal(fastify) {
   fastify.register(async function (fastify) {
     fastify.get("/api/ws", { websocket: true }, async (socket, req) => {
-      const { sandboxId, token } = req.query;
+      const { sandboxId } = req.query;
 
-      const payload = authenticateToken(token);
+      const payload = verifyToken(req);
       if (!payload) {
-        sendError(socket, token ? "Invalid or expired token." : "Authentication required.");
+        sendError(socket, "Authentication required.");
         return;
       }
 

@@ -11,7 +11,7 @@ import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
 import { PasswordModal } from "../components/PasswordModal";
-import { apiCall, fetchWithAuth } from "../api";
+import { apiCall, fetchWithAuth, logout } from "../api";
 
 const SandboxTour = lazy(() =>
   import("../components/SandboxTour").then((m) => ({ default: m.SandboxTour }))
@@ -163,9 +163,8 @@ export function SandboxPage() {
       cancelButtonProps: {
         style: { borderRadius: 12, fontWeight: 600 },
       },
-      onOk: () => {
-        sessionStorage.removeItem("kpai_token");
-        sessionStorage.removeItem("kpai_role");
+      onOk: async () => {
+        await logout();
         navigate("/");
       },
     });

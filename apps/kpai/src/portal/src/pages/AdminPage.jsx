@@ -7,18 +7,20 @@ import {
   CopyOutlined,
   CheckOutlined,
   CodeOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { colors, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { SandboxReviewDrawer } from "../components/SandboxReviewDrawer";
-import { apiCall } from "../api";
+import { apiCall, logout } from "../api";
 
 const { Header, Content } = Layout;
 
 export function AdminPage() {
   useEffect(() => { setPageTitle("Admin Dashboard"); }, []);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("students");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -142,10 +144,8 @@ export function AdminPage() {
 
     const connect = () => {
       if (cancelled) return;
-      const token = sessionStorage.getItem("kpai_token");
-      if (!token) return;
       const proto = location.protocol === "https:" ? "wss:" : "ws:";
-      ws = new WebSocket(`${proto}//${location.host}/api/ws/admin?token=${token}`);
+      ws = new WebSocket(`${proto}//${location.host}/api/ws/admin`);
       ws.onmessage = (e) => {
         try {
           const { type } = JSON.parse(e.data);
@@ -200,6 +200,21 @@ export function AdminPage() {
     } finally {
       setAddLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Logout",
+      content: "Are you sure you want to logout?",
+      okText: "Logout",
+      okType: "danger",
+      cancelText: "Stay",
+      autoFocusButton: "cancel",
+      onOk: async () => {
+        await logout();
+        navigate("/");
+      },
+    });
   };
 
   const handleApproveLogin = async (loginRequestId) => {
@@ -444,6 +459,13 @@ export function AdminPage() {
             Admin Dashboard
           </span>
         </div>
+        <Button
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+          style={{ borderRadius: 8 }}
+        >
+          Logout
+        </Button>
       </Header>
       <Content style={{ padding: 24 }}>
         <Tabs

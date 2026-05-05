@@ -1,6 +1,6 @@
 # API Schema
 
-All endpoints are prefixed with `/api` except the health check. Authenticated endpoints require a JWT token in the `Authorization: Bearer <token>` header.
+All endpoints are prefixed with `/api` except the health check. Authentication is cookie-based: a successful login sets `kpai_token` (HttpOnly, SameSite=Lax, 7-day expiry) and `kpai_role` (JS-readable, same lifetime). Authenticated requests must include these cookies (use `credentials: "include"` from `fetch`). WebSocket handshakes inherit the same cookies automatically. Call `POST /api/logout` to clear them.
 
 ## Standard Response Format
 
@@ -201,7 +201,7 @@ Send a message from this sandbox to the AI agent.
 
 Bidirectional WebSocket connection for real-time communication within a sandbox (terminal I/O, live updates).
 
-- **Auth:** Required (JWT, passed as query param `token` or in the first message)
+- **Auth:** Required (`kpai_token` cookie, sent automatically by browser on the upgrade handshake)
 - **Params:** `id` — sandbox UUID
 - **Client → Server messages:**
   ```json

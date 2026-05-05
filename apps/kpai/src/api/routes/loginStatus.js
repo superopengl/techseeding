@@ -2,6 +2,7 @@ import { db } from "../db/index.js";
 import { loginRequest, user } from "../db/schema.js";
 import { eq, sql } from "drizzle-orm";
 import { createJwtToken } from "../lib/createJwtToken.js";
+import { setAuthCookies } from "../lib/setAuthCookies.js";
 import { success, error } from "../lib/response.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
@@ -23,8 +24,9 @@ export function loginStatus(fastify) {
     if (consumed.length > 0) {
       const { id: userId, role } = consumed[0];
       const token = createJwtToken({ userId, role });
+      setAuthCookies(reply, { token, role });
       publishAdminEvent("login_request_changed", { loginRequestId, userId });
-      return success({ loginRequestId, status: "approved", token, role });
+      return success({ loginRequestId, status: "approved", role });
     }
 
     const [record] = await db
