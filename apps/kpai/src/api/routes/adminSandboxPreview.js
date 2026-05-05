@@ -11,7 +11,7 @@ export function adminSandboxPreview(fastify) {
     const { sandboxId } = request.params;
 
     const [record] = await db
-      .select({ indexHtmlContent: sandbox.indexHtmlContent })
+      .select({ indexHtmlContent: sandbox.indexHtmlContent, workDir: sandbox.workDir })
       .from(sandbox)
       .where(eq(sandbox.id, sandboxId));
 
@@ -22,7 +22,7 @@ export function adminSandboxPreview(fastify) {
     const indexHtmlContent = record.indexHtmlContent || "";
 
     try {
-      const { workDir } = await ensureSandboxWorkDir(sandboxId);
+      const { workDir } = await ensureSandboxWorkDir(sandboxId, record.workDir);
       await fs.writeFile(path.join(workDir, "index.html"), indexHtmlContent);
     } catch (err) {
       fastify.log.error({ err, sandboxId }, "failed to sync index.html to sandbox work dir");

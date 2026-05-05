@@ -8,8 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, "..", "..", "..");
 const SANDBOX_SAMPLE_DIR = path.join(__dirname, "..", "resources", "sandbox_sample");
 
-export async function ensureSandboxWorkDir(sandboxId) {
-  const workDir = path.join(os.tmpdir(), "kpai", "sandbox", sandboxId);
+export async function ensureSandboxWorkDir(sandboxId, existingWorkDir) {
+  const workDir = existingWorkDir || path.join(os.tmpdir(), "kpai", "sandbox", sandboxId);
   let existed = true;
   try {
     await fs.access(workDir);

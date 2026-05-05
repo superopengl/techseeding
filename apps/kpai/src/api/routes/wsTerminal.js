@@ -89,12 +89,12 @@ export function wsTerminal(fastify) {
       }
 
       const record = await lookupSandbox(sandboxId, payload.userId);
-      if (!record?.workDir) {
+      if (!record) {
         sendError(socket, "Sandbox not found.");
         return;
       }
 
-      const { workDir: sandboxWorkDir, isNew } = await ensureSandboxWorkDir(sandboxId);
+      const { workDir: sandboxWorkDir, isNew } = await ensureSandboxWorkDir(sandboxId, record.workDir);
       if (isNew && record.indexHtmlContent) {
         fs.writeFileSync(path.join(sandboxWorkDir, "index.html"), record.indexHtmlContent);
       }
