@@ -31,7 +31,7 @@ const MIN_PANEL_PCT = 15;
 export function SandboxPage() {
   const { sandboxId } = useParams();
   const navigate = useNavigate();
-  const { user, updateAvatarColor } = useUser();
+  const { user, updateAvatarColor, clear: clearUser } = useUser();
   const userName = user?.userName || "";
   const firstName = user?.firstName || "";
   const lastName = user?.lastName || "";
@@ -162,10 +162,11 @@ export function SandboxPage() {
       },
       onOk: async () => {
         await logout();
+        clearUser();
         navigate("/");
       },
     });
-  }, [navigate]);
+  }, [navigate, clearUser]);
 
   const menuItemStyle = {
     height: 44,

@@ -39,8 +39,13 @@ export function UserProvider({ children }) {
     return data.avatarColor;
   }, []);
 
+  const clear = useCallback(() => {
+    setUser(null);
+    setLoaded(true);
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, loaded, refresh, setUser, updateAvatarColor }}>
+    <UserContext.Provider value={{ user, loaded, refresh, setUser, updateAvatarColor, clear }}>
       {children}
     </UserContext.Provider>
   );

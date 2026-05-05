@@ -24,7 +24,9 @@ export async function apiCall(url, options = {}) {
 
   if (res.status === 401 || res.status === 403) {
     clearRoleCookie();
-    window.location.href = "/login";
+    // Full reload to "/" — unmounts React tree so UserProvider re-initializes
+    // empty (cookie is gone, so refresh() short-circuits to user=null).
+    window.location.href = "/";
     throw new Error("Unauthorized");
   }
 

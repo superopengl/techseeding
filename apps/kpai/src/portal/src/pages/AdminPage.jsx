@@ -15,12 +15,14 @@ import { colors, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { SandboxReviewDrawer } from "../components/SandboxReviewDrawer";
 import { apiCall, logout } from "../api";
+import { useUser } from "../context/UserContext";
 
 const { Header, Content } = Layout;
 
 export function AdminPage() {
   useEffect(() => { setPageTitle("Admin Dashboard"); }, []);
   const navigate = useNavigate();
+  const { clear: clearUser } = useUser();
   const [activeTab, setActiveTab] = useState("students");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -217,6 +219,7 @@ export function AdminPage() {
       autoFocusButton: "cancel",
       onOk: async () => {
         await logout();
+        clearUser();
         navigate("/");
       },
     });

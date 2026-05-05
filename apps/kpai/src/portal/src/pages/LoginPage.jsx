@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { apiCall } from "../api";
+import { useUser } from "../context/UserContext";
 
 const { Title, Paragraph, Text, Link } = Typography;
 
@@ -17,6 +18,7 @@ const PASSWORD_MAX_LENGTH = 50;
 export function LoginPage() {
   useEffect(() => { setPageTitle("Login"); }, []);
   const navigate = useNavigate();
+  const { refresh: refreshUser } = useUser();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,7 @@ export function LoginPage() {
           cancelled = true;
           clearInterval(pollId);
           clearInterval(tickId);
+          await refreshUser();
           navigate(data.role === "admin" ? "/admin" : "/sandbox");
         } else if (data.status === "rejected") {
           setStatus("rejected");
@@ -71,7 +74,7 @@ export function LoginPage() {
       clearInterval(tickId);
       clearInterval(pollId);
     };
-  }, [loginRequestId, status, navigate]);
+  }, [loginRequestId, status, navigate, refreshUser]);
 
   const USER_NAME_RE = /^[a-zA-Z0-9_/]+$/;
   const trimmedId = identifier.trim();
@@ -101,7 +104,8 @@ export function LoginPage() {
     setPassword("");
   };
 
-  const handleAuthenticated = (data) => {
+  const handleAuthenticated = async (data) => {
+    await refreshUser();
     navigate(data.role === "admin" ? "/admin" : "/sandbox");
   };
 
