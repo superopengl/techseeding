@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme } from "antd";
-import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined } from "@ant-design/icons";
+import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message } from "antd";
+import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
 import { CraftPreview } from "./CraftPreview";
@@ -149,7 +149,7 @@ const MessageTimeline = React.memo(function MessageTimeline({ sessions, showAi }
   );
 });
 
-export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName, onClose }) {
+export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWorkDir, studentName, onClose }) {
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -157,6 +157,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
   const [showAi, setShowAi] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [showShare, setShowShare] = useState(false);
+  const [sweeping, setSweeping] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -198,7 +199,29 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
 
   return (
     <Drawer
-      title={[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}
+      title={
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+          <span>{[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}</span>
+          {sandboxId && (
+            <a
+              href={`/api/admin/sandbox/${sandboxId}/preview`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 12, fontWeight: 400, color: colors.muted, marginTop: 2 }}
+            >
+              {`${window.location.origin}/api/admin/sandbox/${sandboxId}/preview`}
+            </a>
+          )}
+          {sandboxWorkDir && (
+            <span
+              style={{ fontSize: 12, fontWeight: 400, color: colors.muted, fontFamily: "monospace" }}
+              title={sandboxWorkDir}
+            >
+              {sandboxWorkDir}
+            </span>
+          )}
+        </div>
+      }
       placement="bottom"
       open={open}
       onClose={onClose}
@@ -211,7 +234,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
             icon={<ReloadOutlined />}
             onClick={() => setPreviewKey((k) => k + 1)}
           >
-            Refresh Preview
+            Hard Refresh
           </Button>
           <Button
             icon={<QrcodeOutlined />}
@@ -253,7 +276,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, studentName
             border: `2px solid ${colors.border}`,
             boxShadow: shadows.cardSubtle,
           }}>
-            <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
+            <CraftPreview src={`/api/admin/sandbox/${sandboxId}/preview`} refreshKey={previewKey} />
           </div>
         </div>
         <div

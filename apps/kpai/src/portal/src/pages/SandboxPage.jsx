@@ -459,7 +459,7 @@ export function SandboxPage() {
       <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
         <div ref={previewRef} style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
           <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
-            <CraftPreview sandboxId={sandboxId} refreshKey={previewKey} />
+            <CraftPreview src={`/api/sandbox/${sandboxId}/preview`} refreshKey={previewKey} />
             <div
               title="Preview updates automatically as the AI builds"
               style={{

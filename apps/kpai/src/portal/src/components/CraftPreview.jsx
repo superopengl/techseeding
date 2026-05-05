@@ -2,8 +2,8 @@ import React from "react";
 import { Empty } from "antd";
 import { colors } from "../theme";
 
-export function CraftPreview({ sandboxId, refreshKey }) {
-  if (!sandboxId) {
+export function CraftPreview({ refreshKey, src }) {
+  if (!src) {
     return (
       <div
         style={{
@@ -22,7 +22,7 @@ export function CraftPreview({ sandboxId, refreshKey }) {
   return (
     <iframe
       key={refreshKey}
-      src={`/api/sandbox/${sandboxId}/preview`}
+      src={src}
       title="KidPlayAI - Sandbox Preview"
       sandbox="allow-scripts"
       style={{
