@@ -100,7 +100,7 @@ export function LoginPage() {
     navigate(data.role === "admin" ? "/admin" : "/sandbox");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const id = identifier.trim();
     if (!id) return;
     if (!USER_NAME_RE.test(id)) {
@@ -109,9 +109,21 @@ export function LoginPage() {
     }
     setLoginError(null);
     setPasswordError(null);
-    setPassword("");
-    setStatus("password");
-    setTimeout(() => passwordRef.current?.focus(), 0);
+    setLoading(true);
+    try {
+      const data = await postJson("/api/login", { userName: id });
+      if (data.needsApproval) {
+        handleApprovalResponse(data, "forgot");
+        return;
+      }
+      setPassword("");
+      setStatus("password");
+      setTimeout(() => passwordRef.current?.focus(), 0);
+    } catch (e) {
+      setLoginError(e.message || "Could not continue. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordSubmit = async () => {
