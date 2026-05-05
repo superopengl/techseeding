@@ -104,7 +104,9 @@
   <style>
     /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Montserrat', sans-serif; }
+    /* Background mirrors theme.js colors.canvas — paints before React mounts so
+       there's no white flash on pages that use a non-white surface. */
+    body { font-family: 'Montserrat', sans-serif; background: #f7fafc; }
 
     /* Fonts (inlined to avoid an extra render-blocking stylesheet request). */
     @font-face {
