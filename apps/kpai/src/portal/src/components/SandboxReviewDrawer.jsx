@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message } from "antd";
-import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined } from "@ant-design/icons";
+import { Drawer, Spin, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography } from "antd";
+import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined } from "@ant-design/icons";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
 import { CraftPreview } from "./CraftPreview";
@@ -203,23 +203,31 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
           <span>{[studentName, sandboxTitle || "Sandbox Review"].filter(Boolean).join(" — ")}</span>
           {sandboxId && (
-            <a
-              href={`/api/admin/sandbox/${sandboxId}/preview`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 12, fontWeight: 400, color: colors.muted, marginTop: 2 }}
-            >
-              {`${window.location.origin}/api/admin/sandbox/${sandboxId}/preview`}
-            </a>
-          )}
-          {sandboxWorkDir && (
-            <span
-              style={{ fontSize: 12, fontWeight: 400, color: colors.muted, fontFamily: "monospace" }}
-              title={sandboxWorkDir}
-            >
-              {sandboxWorkDir}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+              <Typography.Text
+                copyable={{ text: sandboxWorkDir, tooltips: ["Copy work dir", "Copied"] }}
+                style={{ fontSize: 10, fontWeight: 400, color: colors.muted, fontFamily: "monospace" }}
+              >
+                {`${window.location.origin}/api/admin/sandbox/${sandboxId}/preview`}
+              </Typography.Text>
+              <a
+                href={`/api/admin/sandbox/${sandboxId}/preview`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open preview in new tab"
+                title="Open preview in new tab"
+                style={{ fontSize: 12, color: colors.muted, display: "inline-flex" }}
+              >
+                <ExportOutlined />
+              </a>
             </span>
           )}
+          <Typography.Text
+            copyable={{ text: sandboxWorkDir, tooltips: ["Copy work dir", "Copied"] }}
+            style={{ fontSize: 10, fontWeight: 400, color: colors.muted, fontFamily: "monospace" }}
+          >
+            {sandboxWorkDir || 'sandbox work dir broken'}
+          </Typography.Text>
         </div>
       }
       placement="bottom"
