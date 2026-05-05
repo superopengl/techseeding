@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Spin, Typography, Alert } from "antd";
+import { Spin, Typography, Alert, Button } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -8,14 +9,32 @@ import { stripAnsi } from "../utils/stripAnsi";
 
 const READY_IDLE_MS = 0;
 
-export function Terminal({ sandboxId, onFileChanged }) {
+const maskStyle = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 16,
+  background: "rgba(0, 0, 0, 0.55)",
+  backdropFilter: "blur(2px)",
+  padding: 24,
+  textAlign: "center",
+};
+
+export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
   const containerRef = useRef(null);
   const termRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   useEffect(() => {
     if (!sandboxId || !containerRef.current) return;
     setLoading(true);
+    setSessionEnded(false);
 
     const term = new XTerm({ cursorBlink: true, fontSize: 14 });
     const fitAddon = new FitAddon();
@@ -45,7 +64,7 @@ export function Terminal({ sandboxId, onFileChanged }) {
       const { type, data } = msg;
       if (type === "output") {
         term.write(data);
-        if (loading) {
+        if (loading) { 
           const cleanData = stripAnsi(data);
           if (cleanData.includes(`${sandboxId}`)) {
             setLoading(false);
@@ -56,8 +75,12 @@ export function Terminal({ sandboxId, onFileChanged }) {
       }
     };
 
-    ws.onclose = () => {
-      term.write("\r\n\x1b[31m[Session ended]\x1b[0m\r\n");
+    ws.onclose = (e) => {
+      // term.write("\r\n\x1b[31m[Session ended]\x1b[0m\r\n");
+      if (!cancelled) {
+        setSessionEnded(true);
+        onSessionEnd?.(e);
+      }
     };
 
     term.onData((data) => {
@@ -106,24 +129,26 @@ export function Terminal({ sandboxId, onFileChanged }) {
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
       {loading && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-            background: "rgba(0, 0, 0, 0.85)",
-          }}
-        >
-          <Spin
+        <div style={maskStyle}>
+          <Spin size="large" description={<span style={{ fontSize: 18 }}>Starting AI assistant…</span>} />
+        </div>
+      )}
+      {sessionEnded && (
+        <div style={maskStyle}>
+          <Typography.Text style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}>
+            AI assistant session ended
+          </Typography.Text>
+          <Typography.Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 14 }}>
+            Refresh the page to start a new session.
+          </Typography.Text>
+          <Button
+            type="primary"
             size="large"
-            description="Starting AI assistant…"
-          />
+            icon={<ReloadOutlined />}
+            onClick={() => window.location.reload()}
+          >
+            Refresh
+          </Button>
         </div>
       )}
     </div>
