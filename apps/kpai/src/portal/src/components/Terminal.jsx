@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Spin, Typography } from "antd";
+import { Spin, Typography, Alert } from "antd";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -105,17 +105,20 @@ export function Terminal({ sandboxId, onFileChanged }) {
           style={{
             position: "absolute",
             inset: 0,
+            width: "100%",
+            height: "100%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             gap: 12,
+            background: "rgba(0, 0, 0, 0.85)",
           }}
         >
-          <Spin size="large" />
-          <Typography.Text style={{ fontSize: 14, color: colors.primary }}>
-            Starting AI assistant…
-          </Typography.Text>
+          <Spin
+            size="large"
+            tip="Starting AI assistant…"
+          />
         </div>
       )}
     </div>
