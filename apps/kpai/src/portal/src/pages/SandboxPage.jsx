@@ -3,7 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { getCookie, setCookie } from "../utils/cookie";
 import { fgForHex } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography, ColorPicker, Segmented } from "antd";
+import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
 import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
@@ -53,7 +53,7 @@ export function SandboxPage() {
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourCurrent, setTourCurrent] = useState(0);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorDraft, setColorDraft] = useState(avatarColor);
@@ -117,23 +117,23 @@ export function SandboxPage() {
 
   useEffect(() => {
     if (!tourOpen) {
-      setDropdownOpen(false);
+      setDrawerOpen(false);
     }
   }, [tourOpen]);
 
   const handleTourChange = useCallback((next) => {
     const shouldOpenMenu = TOUR_MENU_STEPS.has(next);
-    if (shouldOpenMenu && !dropdownOpen) {
+    if (shouldOpenMenu && !drawerOpen) {
       // Open the menu first so its DOM is mounted before Tour re-targets.
-      setDropdownOpen(true);
+      setDrawerOpen(true);
       requestAnimationFrame(() => setTourCurrent(next));
       return;
     }
-    if (!shouldOpenMenu && dropdownOpen) {
-      setDropdownOpen(false);
+    if (!shouldOpenMenu && drawerOpen) {
+      setDrawerOpen(false);
     }
     setTourCurrent(next);
-  }, [dropdownOpen]);
+  }, [drawerOpen]);
 
   const handleNewCraft = useCallback(async () => {
     try {
@@ -179,14 +179,6 @@ export function SandboxPage() {
     });
   }, [navigate, clearUser]);
 
-  const menuItemStyle = {
-    height: 44,
-    lineHeight: "44px",
-    fontSize: 15,
-    fontWeight: 500,
-    padding: "0 18px",
-  };
-
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
   const avatarInitial = (userName || "?").trim().charAt(0).toUpperCase();
   const avatarBg = avatarColor;
@@ -213,120 +205,52 @@ export function SandboxPage() {
     }
   }, [colorDraft, avatarColor, updateAvatarColor]);
 
-  const userMenuItems = [
-    {
-      key: "profile",
-      type: "group",
-      label: (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 2px", lineHeight: 1.3, minWidth: 0 }}>
-          <div style={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
-            <Avatar
-              size={42}
-              style={{
-                background: avatarBg,
-                color: avatarFg,
-                fontFamily: fonts.heading,
-                fontSize: 26,
-                fontWeight: 700,
-              }}
-              icon={userName ? null : <UserOutlined />}
-            >
-              {userName ? avatarInitial : null}
-            </Avatar>
-            <Tooltip title="Change avatar color">
-              <button
-                type="button"
-                aria-label="Change avatar color"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDropdownOpen(false);
-                  openColorPicker();
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: -2,
-                  right: -2,
-                  width: 18,
-                  height: 18,
-                  borderRadius: "50%",
-                  border: `1.5px solid ${colors.surface}`,
-                  background: colors.surface,
-                  color: colors.bodyStrong,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  padding: 0,
-                  boxShadow: shadows.cardSubtle,
-                }}
-              >
-                <EditOutlined style={{ fontSize: 10 }} />
-              </button>
-            </Tooltip>
-          </div>
-          <div style={{ minWidth: 0, overflow: "hidden" }}>
-            <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              <Typography.Text strong>{userName}</Typography.Text>
-            </div>
-            {userName && (
-              <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                <Typography.Text type="secondary">
-                  {fullName || userName || "—"}
-                </Typography.Text>
-              </div>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    { type: "divider" },
+  const drawerItems = [
     {
       key: "new-craft",
-      label: <span className="kpai-tour-new-craft">New Craft</span>,
-      icon: <PlusOutlined style={{ fontSize: 16 }} />,
-      style: menuItemStyle,
+      tourClass: "kpai-tour-new-craft",
+      label: "New Craft",
+      icon: <PlusOutlined />,
       onClick: handleNewCraft,
     },
     {
       key: "my-crafts",
-      label: <span className="kpai-tour-my-crafts">All Crafts</span>,
-      icon: <UnorderedListOutlined style={{ fontSize: 16 }} />,
-      style: menuItemStyle,
+      tourClass: "kpai-tour-my-crafts",
+      label: "All Crafts",
+      icon: <UnorderedListOutlined />,
       onClick: () => setShowMyCrafts(true),
     },
     {
       key: "guidance",
-      label: <span className="kpai-tour-guidance">Show Guidance</span>,
-      icon: <QuestionCircleOutlined style={{ fontSize: 16 }} />,
-      style: menuItemStyle,
+      tourClass: "kpai-tour-guidance",
+      label: "Show Guidance",
+      icon: <QuestionCircleOutlined />,
       onClick: openTour,
     },
     {
       key: "change-password",
       label: "Change Password",
-      icon: <LockOutlined style={{ fontSize: 16 }} />,
-      style: menuItemStyle,
+      icon: <LockOutlined />,
       disabled: hasPassword === false,
       onClick: () => setShowChangePassword(true),
     },
-    { type: "divider" },
     {
       key: "logout",
-      label: <span className="kpai-tour-logout">Logout</span>,
-      icon: <LogoutOutlined style={{ fontSize: 16 }} />,
+      tourClass: "kpai-tour-logout",
+      label: "Logout",
+      icon: <LogoutOutlined />,
       danger: true,
-      style: menuItemStyle,
+      dividerAbove: true,
       onClick: handleLogout,
     },
   ];
 
-  const handleDropdownOpenChange = (next) => {
+  const handleDrawerClose = () => {
     if (tourOpen && TOUR_MENU_STEPS.has(tourCurrent)) {
-      // Tour is driving the menu; ignore close attempts.
-      if (next) setDropdownOpen(true);
+      // Tour is driving the drawer; ignore close attempts.
       return;
     }
-    setDropdownOpen(next);
+    setDrawerOpen(false);
   };
 
   const openRenameModal = useCallback(() => {
@@ -492,35 +416,27 @@ export function SandboxPage() {
             <Button ref={shareRef} icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
               Share
             </Button>
-            <Dropdown
-              menu={{ items: userMenuItems }}
-              placement="bottomRight"
-              trigger={["click"]}
-              styles={{ root: { minWidth: 220 } }}
-              open={dropdownOpen}
-              onOpenChange={handleDropdownOpenChange}
+            <Button
+              ref={avatarRef}
+              shape="circle"
+              aria-label="Open user menu"
+              onClick={() => setDrawerOpen(true)}
+              style={{ padding: 0, border: "none", background: "transparent", boxShadow: "none" }}
             >
-              <Button
-                ref={avatarRef}
-                shape="circle"
-                aria-label="User menu"
-                style={{ padding: 0, border: "none", background: "transparent", boxShadow: "none" }}
+              <Avatar
+                size={32}
+                style={{
+                  background: avatarBg,
+                  color: avatarFg,
+                  fontFamily: fonts.heading,
+                  fontSize: 18,
+                  fontWeight: 700,
+                }}
+                icon={userName ? null : <UserOutlined />}
               >
-                <Avatar
-                  size={32}
-                  style={{
-                    background: avatarBg,
-                    color: avatarFg,
-                    fontFamily: fonts.heading,
-                    fontSize: 18,
-                    fontWeight: 700,
-                  }}
-                  icon={userName ? null : <UserOutlined />}
-                >
-                  {userName ? avatarInitial : null}
-                </Avatar>
-              </Button>
-            </Dropdown>
+                {userName ? avatarInitial : null}
+              </Avatar>
+            </Button>
           </Space>
         </div>
       </div>
@@ -696,6 +612,122 @@ export function SandboxPage() {
         onSuccess={() => setShowChangePassword(false)}
         onCancel={() => setShowChangePassword(false)}
       />
+      <Drawer
+        placement="right"
+        width={260}
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        closable={false}
+        styles={{ body: { padding: 0 }, header: { display: "none" } }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 20px 16px" }}>
+            <div style={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
+              <Avatar
+                size={56}
+                style={{
+                  background: avatarBg,
+                  color: avatarFg,
+                  fontFamily: fonts.heading,
+                  fontSize: 32,
+                  fontWeight: 700,
+                }}
+                icon={userName ? null : <UserOutlined />}
+              >
+                {userName ? avatarInitial : null}
+              </Avatar>
+              <Tooltip title="Change avatar color">
+                <button
+                  type="button"
+                  aria-label="Change avatar color"
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    openColorPicker();
+                  }}
+                  style={{
+                    position: "absolute",
+                    bottom: -2,
+                    right: -2,
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    border: `1.5px solid ${colors.surface}`,
+                    background: colors.surface,
+                    color: colors.bodyStrong,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    padding: 0,
+                    boxShadow: shadows.cardSubtle,
+                  }}
+                >
+                  <EditOutlined style={{ fontSize: 12 }} />
+                </button>
+              </Tooltip>
+            </div>
+            <div style={{ minWidth: 0, overflow: "hidden", lineHeight: 1.3 }}>
+              <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Typography.Text strong style={{ fontSize: 16 }}>{userName}</Typography.Text>
+              </div>
+              {userName && (
+                <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <Typography.Text type="secondary">
+                    {fullName || userName || "—"}
+                  </Typography.Text>
+                </div>
+              )}
+            </div>
+          </div>
+          <div style={{ height: 1, background: colors.border }} />
+          <div style={{ display: "flex", flexDirection: "column", padding: "8px 0", flex: 1, overflowY: "auto" }}>
+            {drawerItems.map((item) => (
+              <React.Fragment key={item.key}>
+                {item.dividerAbove && (
+                  <div style={{ height: 1, background: colors.border, margin: "8px 20px" }} />
+                )}
+              <button
+                type="button"
+                className={item.tourClass}
+                disabled={item.disabled}
+                onClick={() => {
+                  setDrawerOpen(false);
+                  item.onClick?.();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: "12px 20px",
+                  background: "transparent",
+                  border: "none",
+                  width: "100%",
+                  textAlign: "left",
+                  fontSize: 15,
+                  fontWeight: 500,
+                  fontFamily: "inherit",
+                  cursor: item.disabled ? "not-allowed" : "pointer",
+                  color: item.danger ? "#ff4d4f" : colors.bodyStrong,
+                  opacity: item.disabled ? 0.4 : 1,
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!item.disabled) e.currentTarget.style.background = colors.canvas;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
+                  {item.icon}
+                </span>
+                <span>{item.label}</span>
+              </button>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </Drawer>
       <Modal
         title="Choose your avatar color"
         open={showColorPicker}
