@@ -354,7 +354,10 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
       <Modal
         title="Upload index.html"
         open={showUpload}
-        onCancel={() => setShowUpload(false)}
+        onCancel={() => {
+          setShowUpload(false);
+          setUploadValue("");
+        }}
         confirmLoading={uploading}
         okText="Upload"
         okButtonProps={{ icon: <UploadOutlined /> }}
