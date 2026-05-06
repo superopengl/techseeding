@@ -6,16 +6,70 @@ import { colors, fonts, shadows } from "../theme";
 const { Title, Paragraph } = Typography;
 
 const ENQUIRY_TYPE_OPTIONS = [
-  { value: "student", label: "Keen to enrol my kid" },
-  { value: "teacher", label: "Keen to teach or coach" },
-  { value: "partner", label: "We're an education org keen to partner up" },
+  { value: "student", label: "Enrol my child" },
+  { value: "teacher", label: "Teach or coach kids" },
+  { value: "partner", label: "Partner as a school or organisation" },
   { value: "other", label: "Something else" },
 ];
+
+function useIsCoarsePointer() {
+  const [coarse, setCoarse] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)")?.matches === true
+  );
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mql = window.matchMedia("(pointer: coarse)");
+    const onChange = (e) => setCoarse(e.matches);
+    mql.addEventListener?.("change", onChange);
+    return () => mql.removeEventListener?.("change", onChange);
+  }, []);
+  return coarse;
+}
+
+function NativeSelect({ options, value, onChange, id, placeholder }) {
+  return (
+    <select
+      id={id}
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      style={{
+        width: "100%",
+        height: 40,
+        padding: "0 32px 0 11px",
+        fontSize: 16,
+        fontFamily: "inherit",
+        color: value ? colors.heading : colors.muted,
+        background: "#fff",
+        border: "1px solid #d9d9d9",
+        borderRadius: 16,
+        appearance: "none",
+        WebkitAppearance: "none",
+        MozAppearance: "none",
+        backgroundImage:
+          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path fill='%23999' d='M2 4 l4 4 4 -4z'/></svg>\")",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "right 11px center",
+        backgroundSize: "12px",
+        outline: "none",
+      }}
+    >
+      <option value="" disabled hidden>
+        {placeholder || ""}
+      </option>
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 export function EnquiryForm({ autoFocusOnMount = false }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const useNativeSelect = useIsCoarsePointer();
 
   useEffect(() => {
     if (!autoFocusOnMount) return;
@@ -124,7 +178,11 @@ export function EnquiryForm({ autoFocusOnMount = false }) {
           name="type"
           rules={[{ required: true, message: "Please pick what your enquiry is about" }]}
         >
-          <Select options={ENQUIRY_TYPE_OPTIONS} size="large" />
+          {useNativeSelect ? (
+            <NativeSelect options={ENQUIRY_TYPE_OPTIONS} placeholder="Select one" />
+          ) : (
+            <Select options={ENQUIRY_TYPE_OPTIONS} size="large" />
+          )}
         </Form.Item>
 
         <Form.Item
