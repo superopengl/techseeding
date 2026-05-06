@@ -130,7 +130,6 @@ export function SandboxPage() {
   const drawerItems = [
     {
       key: "my-crafts",
-      tourClass: "kpai-tour-my-crafts",
       label: "My Crafts",
       icon: <UnorderedListOutlined />,
       onClick: () => setShowMyCrafts(true),
@@ -143,30 +142,16 @@ export function SandboxPage() {
       onClick: () => setShowChangePassword(true),
     },
     {
-      key: "guidance",
-      tourClass: "kpai-tour-guidance",
-      label: "Show Guidance",
-      icon: <QuestionCircleOutlined />,
-      dividerAbove: true,
-      onClick: openTour,
-    },
-
-    {
       key: "logout",
       label: "Logout",
       icon: <LogoutOutlined />,
       danger: true,
+      dividerAbove: true,
       onClick: handleLogout,
     },
   ];
 
-  const handleDrawerClose = () => {
-    if (tourOpen && TOUR_MENU_STEPS.has(tourCurrent)) {
-      // Tour is driving the drawer; ignore close attempts.
-      return;
-    }
-    setDrawerOpen(false);
-  };
+  const handleDrawerClose = () => setDrawerOpen(false);
 
   const openRenameModal = useCallback(() => {
     setRenameDraft(title);
@@ -291,7 +276,7 @@ export function SandboxPage() {
           >
             <Logo size={36} square />
           </a>
-          <div ref={titleRef} style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center" }}>
             <span
               onClick={openRenameModal}
               title="Click to rename"
@@ -328,11 +313,10 @@ export function SandboxPage() {
             </span>
           </div>
           <Space size={8}>
-            <Button ref={shareRef} icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
+            <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
               Share
             </Button>
             <Button
-              ref={avatarRef}
               shape="circle"
               aria-label="Open user menu"
               onClick={() => setDrawerOpen(true)}
@@ -357,7 +341,6 @@ export function SandboxPage() {
       </div>
       <div ref={containerRef} style={{ display: "flex", flexDirection: narrow ? "column" : "row", flex: 1, overflow: "hidden", position: "relative" }}>
         <div
-          ref={previewRef}
           style={{
             ...(narrow
               ? { width: "100%", flex: 1, minHeight: 0, display: activePanel === "preview" ? "block" : "none" }
@@ -441,7 +424,6 @@ export function SandboxPage() {
           </div>
         )}
         <div
-          ref={terminalRef}
           style={{
             ...(narrow
               ? { width: "100%", flex: 1, minHeight: 0, display: activePanel === "terminal" ? "block" : "none" }
@@ -603,7 +585,6 @@ export function SandboxPage() {
                 )}
                 <button
                   type="button"
-                  className={item.tourClass}
                   disabled={item.disabled}
                   onClick={() => {
                     setDrawerOpen(false);
@@ -690,22 +671,6 @@ export function SandboxPage() {
           </Button>
         </div>
       </Modal>
-      {tourOpen && (
-        <Suspense fallback={null}>
-          <SandboxTour
-            open={tourOpen}
-            current={tourCurrent}
-            onChange={handleTourChange}
-            onClose={handleTourClose}
-            onFinish={handleTourFinish}
-            previewRef={previewRef}
-            terminalRef={terminalRef}
-            titleRef={titleRef}
-            shareRef={shareRef}
-            avatarRef={avatarRef}
-          />
-        </Suspense>
-      )}
     </Layout>
   );
 }
