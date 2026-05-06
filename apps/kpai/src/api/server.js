@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyCompress from "@fastify/compress";
 import path from "path";
 import { fileURLToPath } from "url";
 import { ROOT_DIR } from "./lib/sandboxManager.js";
@@ -50,6 +51,15 @@ const fastify = Fastify({
 
 await fastify.register(fastifyWebsocket);
 
+// Brotli/gzip-compress text responses (HTML, JS, CSS, JSON, SVG). CloudFront's
+// CACHING_DISABLED policy disables its own auto-compression, so origin-side
+// compression is the only thing keeping text payloads small over slow networks.
+await fastify.register(fastifyCompress, {
+  global: true,
+  threshold: 1024,
+  encodings: ["br", "gzip"],
+});
+
 await fastify.register(fastifyRateLimit, {
   global: true,
   max: 200,
@@ -62,11 +72,22 @@ await fastify.register(fastifyRateLimit, {
 await fastify.register(fastifyStatic, {
   root: path.join(ROOT_DIR, "public"),
   prefix: "/",
+  // Suppress @fastify/send's default `Cache-Control: public, max-age=0` so
+  // our setHeaders callback below is the single source of truth — otherwise
+  // it overwrites whatever we set.
+  cacheControl: false,
   setHeaders: (res, filePath) => {
     // Vite emits content-hashed filenames under /assets/, so they're safe to
-    // cache forever. Everything else (index.html, favicons) gets revalidated
-    // on each request so deploys land instantly.
-    if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+    // cache forever. /img/ and /fonts/ hold versioned static media (woff2
+    // subsets, road-racer-1200.avif, etc.) that we treat as immutable too —
+    // any update gets a new filename. Everything else (index.html, favicons,
+    // manifest, sitemap, robots) revalidates each request so deploys land
+    // instantly.
+    const isHashed = filePath.includes(`${path.sep}assets${path.sep}`);
+    const isStaticMedia =
+      filePath.includes(`${path.sep}img${path.sep}`) ||
+      filePath.includes(`${path.sep}fonts${path.sep}`);
+    if (isHashed || isStaticMedia) {
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
     } else {
       res.setHeader("Cache-Control", "no-cache");
