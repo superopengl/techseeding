@@ -1,0 +1,14 @@
+RED='\033[0;31m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${ORANGE}KPAI${NC}"
+
+alias thome='cd /Users/jshao/github/kpai'
+
+export AWS_PROFILE=kpai
+
+ssh-add -K ~/.ssh/superopengl_id_rsa
+
+thome
