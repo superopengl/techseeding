@@ -3,7 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
@@ -355,9 +355,7 @@ export function SandboxPage() {
             </span>
           </div>
           <Space size={8}>
-            <Button icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
-              Share
-            </Button>
+            <Button icon={<ShareAltOutlined />} onClick={() => setShowShare(true)} aria-label="Share" />
             <Button
               shape="circle"
               aria-label="Open user menu"
