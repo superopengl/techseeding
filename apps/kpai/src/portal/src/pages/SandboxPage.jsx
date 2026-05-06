@@ -3,8 +3,8 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { getCookie, setCookie } from "../utils/cookie";
 import { fgForHex } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
-import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography, ColorPicker } from "antd";
-import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined } from "@ant-design/icons";
+import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Dropdown, message, Typography, ColorPicker, Segmented } from "antd";
+import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
@@ -27,6 +27,7 @@ const TOUR_COOKIE_NAME = "kpai_sandbox_tour_seen";
 
 const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
+const NARROW_BREAKPOINT = 768;
 
 export function SandboxPage() {
   const { sandboxId } = useParams();
@@ -39,6 +40,10 @@ export function SandboxPage() {
   const avatarColor = user?.avatarColor || "#7c5cfc";
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [narrow, setNarrow] = useState(() =>
+    typeof window !== "undefined" && window.innerWidth < NARROW_BREAKPOINT
+  );
+  const [activePanel, setActivePanel] = useState("preview");
   const [previewKey, setPreviewKey] = useState(0);
   const [title, setTitle] = useState("");
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -75,6 +80,12 @@ export function SandboxPage() {
   useEffect(() => {
     setPageTitle(title ? `Sandbox: ${title}` : "Sandbox");
   }, [title]);
+
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < NARROW_BREAKPOINT);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (sandboxNotFound) return;
@@ -381,6 +392,7 @@ export function SandboxPage() {
   const containerRef = useRef(null);
 
   const onMouseDown = useCallback((e) => {
+    if (narrow) return;
     e.preventDefault();
     setIsDragging(true);
 
@@ -403,7 +415,7 @@ export function SandboxPage() {
     document.body.style.userSelect = "none";
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-  }, []);
+  }, [narrow]);
 
   return (
     <Layout style={{ height: "100vh" }}>
@@ -512,8 +524,19 @@ export function SandboxPage() {
           </Space>
         </div>
       </div>
-      <div ref={containerRef} style={{ display: "flex", flex: 1, overflow: "hidden", position: "relative" }}>
-        <div ref={previewRef} style={{ width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)`, overflow: "hidden", pointerEvents: isDragging ? "none" : "auto", background: colors.canvas, padding: 8 }}>
+      <div ref={containerRef} style={{ display: "flex", flexDirection: narrow ? "column" : "row", flex: 1, overflow: "hidden", position: "relative" }}>
+        <div
+          ref={previewRef}
+          style={{
+            ...(narrow
+              ? { width: "100%", flex: 1, minHeight: 0, display: activePanel === "preview" ? "block" : "none" }
+              : { width: `calc(${leftPct}% - ${DIVIDER_WIDTH / 2}px)` }),
+            overflow: "hidden",
+            pointerEvents: isDragging ? "none" : "auto",
+            background: colors.canvas,
+            padding: 8,
+          }}
+        >
           <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 12, overflow: "hidden", border: `2px solid ${colors.border}`, boxShadow: shadows.cardSubtle }}>
             <CraftPreview src={`/api/sandbox/${sandboxId}/preview`} refreshKey={previewKey} />
             <div
@@ -551,42 +574,76 @@ export function SandboxPage() {
             </div>
           </div>
         </div>
-        <div
-          onMouseDown={onMouseDown}
-          title="Drag to resize"
-          style={{
-            width: DIVIDER_WIDTH,
-            cursor: "col-resize",
-            background: colors.border,
-            flexShrink: 0,
-            transition: "background 0.15s",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = colors.primary)}
-          onMouseLeave={(e) => (e.currentTarget.style.background = colors.border)}
-        >
+        {!narrow && (
           <div
+            onMouseDown={onMouseDown}
+            title="Drag to resize"
             style={{
+              width: DIVIDER_WIDTH,
+              cursor: "col-resize",
+              background: colors.border,
+              flexShrink: 0,
+              transition: "background 0.15s",
               display: "flex",
-              flexDirection: "column",
-              gap: 3,
-              pointerEvents: "none",
-              opacity: 0.55,
+              alignItems: "center",
+              justifyContent: "center",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = colors.primary)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = colors.border)}
           >
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
-            <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+                pointerEvents: "none",
+                opacity: 0.55,
+              }}
+            >
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: colors.muted }} />
+            </div>
           </div>
-        </div>
-        <div ref={terminalRef} style={{ flex: 1, overflow: "hidden", background: colors.terminal, pointerEvents: isDragging ? "none" : "auto" }}>
+        )}
+        <div
+          ref={terminalRef}
+          style={{
+            ...(narrow
+              ? { width: "100%", flex: 1, minHeight: 0, display: activePanel === "terminal" ? "block" : "none" }
+              : { flex: 1 }),
+            overflow: "hidden",
+            background: colors.terminal,
+            pointerEvents: isDragging ? "none" : "auto",
+          }}
+        >
           <Terminal sandboxId={sandboxId} onFileChanged={handleFileChanged} />
         </div>
+        {narrow && (
+          <div
+            style={{
+              flexShrink: 0,
+              borderTop: `1px solid ${colors.border}`,
+              background: colors.surface,
+              padding: "10px 12px",
+            }}
+          >
+            <Segmented
+              block
+              size="large"
+              value={activePanel}
+              onChange={setActivePanel}
+              className={`kpai-panel-toggle kpai-panel-toggle-${activePanel}`}
+              options={[
+                { label: "Preview", value: "preview", icon: <EyeOutlined /> },
+                { label: "Terminal", value: "terminal", icon: <CodeOutlined /> },
+              ]}
+            />
+          </div>
+        )}
       </div>
       <Modal
         title="All Crafts"

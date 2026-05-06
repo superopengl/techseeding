@@ -149,6 +149,24 @@
       100% { box-shadow: 0 0 0 0   rgba(97,206,112,0);   }
     }
 
+    /* Per-segment selected colors for the narrow-screen Preview/Terminal toggle. */
+    .kpai-panel-toggle-preview .ant-segmented-thumb,
+    .kpai-panel-toggle-preview .ant-segmented-item-selected {
+      background: #43b88c !important;
+      color: #fff !important;
+    }
+    .kpai-panel-toggle-terminal .ant-segmented-thumb,
+    .kpai-panel-toggle-terminal .ant-segmented-item-selected {
+      background: #1a1a2e !important;
+      color: #fff !important;
+    }
+    .kpai-panel-toggle .ant-segmented-item-selected .ant-segmented-item-label,
+    .kpai-panel-toggle .ant-segmented-item-selected .ant-segmented-item-icon,
+    .kpai-panel-toggle .ant-segmented-thumb .ant-segmented-item-label,
+    .kpai-panel-toggle .ant-segmented-thumb .ant-segmented-item-icon {
+      color: #fff !important;
+    }
+
     /* Override Chrome/Safari autofill background so inputs don't tint yellow/blue. */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
