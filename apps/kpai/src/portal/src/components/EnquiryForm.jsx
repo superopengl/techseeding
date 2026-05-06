@@ -5,14 +5,11 @@ import { colors, fonts, shadows } from "../theme";
 
 const { Title, Paragraph } = Typography;
 
-const AGE_OPTIONS = [
-  { value: "<8", label: "Under 8" },
-  { value: "8", label: "8" },
-  { value: "9", label: "9" },
-  { value: "10", label: "10" },
-  { value: "11", label: "11" },
-  { value: "12", label: "12" },
-  { value: "12+", label: "Over 12" },
+const ENQUIRY_TYPE_OPTIONS = [
+  { value: "student", label: "Keen to enrol my kid" },
+  { value: "teacher", label: "Keen to teach or coach" },
+  { value: "partner", label: "We're an education org keen to partner up" },
+  { value: "other", label: "Something else" },
 ];
 
 export function EnquiryForm({ autoFocusOnMount = false }) {
@@ -93,9 +90,15 @@ export function EnquiryForm({ autoFocusOnMount = false }) {
       }}
       styles={{ body: { padding: "36px 32px" } }}
     >
-      <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        requiredMark={false}
+        initialValues={{ type: "student" }}
+      >
         <Form.Item
-          label="Parent / Guardian Name"
+          label="Contact Name"
           name="contactName"
           rules={[
             { required: true, message: "Please enter your name" },
@@ -116,13 +119,12 @@ export function EnquiryForm({ autoFocusOnMount = false }) {
           <Input placeholder="parent@email.com or 0412 345 678" maxLength={100} size="large" />
         </Form.Item>
 
-        <Form.Item label="Child's Age" name="childAge">
-          <Select
-            placeholder="Select age (optional)"
-            options={AGE_OPTIONS}
-            allowClear
-            size="large"
-          />
+        <Form.Item
+          label="Enquiry Type"
+          name="type"
+          rules={[{ required: true, message: "Please pick what your enquiry is about" }]}
+        >
+          <Select options={ENQUIRY_TYPE_OPTIONS} size="large" />
         </Form.Item>
 
         <Form.Item

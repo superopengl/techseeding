@@ -1,0 +1,1 @@
+ALTER TABLE "enquiry" ADD COLUMN "type" text;

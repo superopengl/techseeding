@@ -36,6 +36,13 @@
       "when": 1777964406073,
       "tag": "0004_melodic_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778026037010,
+      "tag": "0005_foamy_spectrum",
+      "breakpoints": true
     }
   ]
 }

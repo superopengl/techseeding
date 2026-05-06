@@ -4,12 +4,13 @@ import { success, error } from "../lib/response.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
 
 const VALID_AGES = ["<8", "8", "9", "10", "11", "12", "12+"];
+const VALID_TYPES = ["partner", "student", "teacher", "other"];
 
 export function createEnquiry(fastify) {
   fastify.post("/api/enquiry", {
     config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
   }, async (request, reply) => {
-    const { contactName, method, childAge, message } = request.body || {};
+    const { contactName, method, childAge, type, message } = request.body || {};
 
     if (!contactName || !contactName.trim()) {
       return error(reply, 400, "VALIDATION_ERROR", "Contact name is required");
@@ -32,6 +33,9 @@ export function createEnquiry(fastify) {
     if (childAge && !VALID_AGES.includes(childAge)) {
       return error(reply, 400, "VALIDATION_ERROR", "Invalid child age value");
     }
+    if (type && !VALID_TYPES.includes(type)) {
+      return error(reply, 400, "VALIDATION_ERROR", "Invalid type value");
+    }
 
     const [row] = await db
       .insert(enquiry)
@@ -39,6 +43,7 @@ export function createEnquiry(fastify) {
         contactName: contactName.trim(),
         method: method.trim(),
         childAge: childAge || null,
+        type: type || null,
         message: message.trim(),
       })
       .returning();

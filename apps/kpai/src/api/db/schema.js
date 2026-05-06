@@ -79,6 +79,7 @@ export const enquiry = pgTable("enquiry", {
   contactName: varchar("contact_name", { length: 50 }).notNull(),
   method: varchar("method", { length: 100 }).notNull(), // email | phone | wechat
   childAge: text("child_age"), // <8 | 8 | 9 | 10 | 11 | 12 | 12+
+  type: text("type"), // partner | student | teacher | other
   message: varchar("message", { length: 2000 }).notNull(),
   readAt: timestamp("read_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

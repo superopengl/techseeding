@@ -341,6 +341,19 @@ export function AdminPage() {
       dataIndex: "contactName",
       key: "contactName",
       sorter: (a, b) => a.contactName.localeCompare(b.contactName),
+      render: (v) => (
+        <Space size={4}>
+          <span>{v}</span>
+          <CopyOutlined
+            style={{ color: colors.muted, cursor: "pointer", fontSize: 13 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(v);
+              message.success("Name copied");
+            }}
+          />
+        </Space>
+      ),
     },
     {
       title: "Method",
@@ -362,25 +375,28 @@ export function AdminPage() {
       ),
     },
     {
-      title: "Child Age",
-      dataIndex: "childAge",
-      key: "childAge",
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
       sorter: (a, b) => {
-        const order = { "<8": 0, "8": 1, "9": 2, "10": 3, "11": 4, "12": 5, "12+": 6 };
-        const av = a.childAge in order ? order[a.childAge] : -1;
-        const bv = b.childAge in order ? order[b.childAge] : -1;
+        const order = { student: 0, teacher: 1, partner: 2, other: 3 };
+        const av = a.type in order ? order[a.type] : -1;
+        const bv = b.type in order ? order[b.type] : -1;
         return av - bv;
       },
       render: (v) => {
         if (!v) return "-";
+        const labelMap = {
+          student: "Enrolment",
+          teacher: "Teach/Coach",
+          partner: "Partner",
+          other: "Other",
+        };
         const colorMap = {
-          "<8": "#e53e3e",
-          "8": "#f56565",
-          "9": "#f59e0b",
-          "10": "#ecc94b",
-          "11": "#84cc16",
-          "12": "#43b88c",
-          "12+": "#15803d",
+          student: colors.primary,
+          teacher: colors.accentPurple,
+          partner: colors.accentBlue,
+          other: colors.muted,
         };
         return (
           <Tag
@@ -393,7 +409,7 @@ export function AdminPage() {
               padding: "2px 10px",
             }}
           >
-            {v}
+            {labelMap[v] || v}
           </Tag>
         );
       },
@@ -403,12 +419,22 @@ export function AdminPage() {
       dataIndex: "message",
       key: "message",
       render: (v) => (
-        <Typography.Paragraph
-          style={{ marginBottom: 0, maxWidth: 480, whiteSpace: "pre-wrap", color: "inherit" }}
-          ellipsis={{ rows: 2, expandable: true, symbol: "more" }}
-        >
-          {v}
-        </Typography.Paragraph>
+        <Space size={4} align="start" style={{ maxWidth: 480 }}>
+          <Input.TextArea
+            value={v}
+            readOnly
+            autoSize={{ minRows: 2, maxRows: 6 }}
+            style={{ width: 440, resize: "none", color: "inherit" }}
+          />
+          <CopyOutlined
+            style={{ color: colors.muted, cursor: "pointer", fontSize: 13, marginTop: 8 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(v);
+              message.success("Message copied");
+            }}
+          />
+        </Space>
       ),
     },
     {
