@@ -3,6 +3,7 @@ import { loginRequest, user } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 import { publishAdminEvent } from "../lib/adminEvents.js";
+import { publishLoginEvent } from "../lib/loginEvents.js";
 
 export function adminLoginApprove(fastify) {
   fastify.post("/api/admin/login/student/approve", async (request, reply) => {
@@ -39,6 +40,8 @@ export function adminLoginApprove(fastify) {
       userId: record.userId,
       status: record.status,
     });
+
+    publishLoginEvent(record.id, "status", { status: record.status });
 
     return success({ loginRequestId: record.id, status: record.status });
   });

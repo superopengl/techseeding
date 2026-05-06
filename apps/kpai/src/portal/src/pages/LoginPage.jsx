@@ -37,11 +37,12 @@ export function LoginPage() {
     if (!loginRequestId || status !== "pending") return;
 
     const TIMEOUT_MS = 10 * 60 * 1000;
-    const POLL_INTERVAL_MS = 5000;
     const deadline = Date.now() + TIMEOUT_MS;
     setRemaining(Math.ceil(TIMEOUT_MS / 1000));
 
     let cancelled = false;
+    let ws = null;
+    let reconnectTimer = null;
 
     const tickId = setInterval(() => {
       const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
@@ -49,31 +50,50 @@ export function LoginPage() {
       if (left <= 0) setStatus("timedout");
     }, 1000);
 
-    const pollId = setInterval(async () => {
+    const consumeApproval = async () => {
+      if (cancelled) return;
       try {
         const data = await apiCall(`/api/login/${loginRequestId}/status`);
-        if (cancelled) return;
-        if (data.status === "approved") {
-          // Don't change status — leave the "Waiting for approval" screen
-          // up until navigation unmounts this page. Switching to any other
-          // status here would briefly flash the username/password screen.
-          cancelled = true;
-          clearInterval(pollId);
-          clearInterval(tickId);
-          await refreshUser();
-          navigate(data.role === "admin" ? "/admin" : "/sandbox");
-        } else if (data.status === "rejected") {
-          setStatus("rejected");
-        }
+        if (cancelled || data.status !== "approved") return;
+        // Don't change status — leave the "Waiting for approval" screen
+        // up until navigation unmounts this page. Switching to any other
+        // status here would briefly flash the username/password screen.
+        cancelled = true;
+        await refreshUser();
+        navigate(data.role === "admin" ? "/admin" : "/sandbox");
       } catch {
-        // ignore
+        // Approval consumption failed; the WS will retry on next status push.
       }
-    }, POLL_INTERVAL_MS);
+    };
+
+    const connect = () => {
+      if (cancelled) return;
+      const proto = location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(`${proto}//${location.host}/api/ws/login/${loginRequestId}`);
+      ws.onmessage = (e) => {
+        try {
+          const { type, payload } = JSON.parse(e.data);
+          if (type === "status" && payload?.status === "approved") consumeApproval();
+        } catch { /* ignore malformed frames */ }
+      };
+      ws.onclose = () => {
+        if (cancelled) return;
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+      ws.onerror = () => {
+        try { ws.close(); } catch { /* already closing */ }
+      };
+    };
+
+    connect();
 
     return () => {
       cancelled = true;
       clearInterval(tickId);
-      clearInterval(pollId);
+      clearTimeout(reconnectTimer);
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CLOSING)) {
+        try { ws.close(); } catch { /* already closed */ }
+      }
     };
   }, [loginRequestId, status, navigate, refreshUser]);
 
