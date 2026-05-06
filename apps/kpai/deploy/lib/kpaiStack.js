@@ -28,6 +28,9 @@ import {
   Distribution,
   ViewerProtocolPolicy,
   CachePolicy,
+  CacheCookieBehavior,
+  CacheHeaderBehavior,
+  CacheQueryStringBehavior,
   OriginRequestPolicy,
   AllowedMethods,
   CachedMethods,
@@ -234,10 +237,29 @@ export class KidPlayAiStack extends Stack {
         keepaliveTimeout: Duration.seconds(60),
       });
 
+      // Predefined `CACHING_DISABLED` turns off CloudFront's automatic gzip/br
+      // compression (it strips Accept-Encoding from the cache key, so the
+      // edge has nothing to negotiate). Use a TTL=0 policy that still
+      // varies on Accept-Encoding so non-cached responses (HTML, /api/*,
+      // /healthcheck) still get compressed at the edge as a fallback when
+      // origin compression isn't applied.
+      const passThroughCachePolicy = new CachePolicy(this, "PassThroughCompressPolicy", {
+        cachePolicyName: `kpai-${stage}-passthrough-compress`,
+        comment: "TTL=0 with compression negotiation",
+        defaultTtl: Duration.seconds(0),
+        minTtl: Duration.seconds(0),
+        maxTtl: Duration.seconds(1),
+        cookieBehavior: CacheCookieBehavior.none(),
+        headerBehavior: CacheHeaderBehavior.none(),
+        queryStringBehavior: CacheQueryStringBehavior.none(),
+        enableAcceptEncodingGzip: true,
+        enableAcceptEncodingBrotli: true,
+      });
+
       const passThrough = {
         origin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: CachePolicy.CACHING_DISABLED,
+        cachePolicy: passThroughCachePolicy,
         originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
         allowedMethods: AllowedMethods.ALLOW_ALL,
         cachedMethods: CachedMethods.CACHE_GET_HEAD,
