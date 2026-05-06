@@ -6,3 +6,4 @@ dist/
 .env.*
 !.env.sample
 .DS_Store
+.deepseek
