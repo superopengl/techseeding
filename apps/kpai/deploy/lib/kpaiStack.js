@@ -39,7 +39,15 @@ import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 export class KidPlayAiStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
-    const { stage, domainName, hostedZoneName, appRepoName, imageTag, cdnCertificateArn } = props;
+    const {
+      stage,
+      domainName,
+      hostedZoneName,
+      appRepoName,
+      imageTag,
+      cdnCertificateArn,
+      dbPubliclyAccessible = false,
+    } = props;
     const appRepo = Repository.fromRepositoryName(this, "AppRepo", appRepoName);
     const isProd = stage === "prod";
     const cdnCertificate = cdnCertificateArn
@@ -71,7 +79,7 @@ export class KidPlayAiStack extends Stack {
         secretName: `kpai/${stage}/db`,
       }),
       defaultDatabaseName: "kpai",
-      writer: ClusterInstance.serverlessV2("Writer", { publiclyAccessible: true }),
+      writer: ClusterInstance.serverlessV2("Writer", { publiclyAccessible: dbPubliclyAccessible }),
       serverlessV2MinCapacity: 0,
       serverlessV2MaxCapacity: 2,
       storageEncrypted: true,
@@ -179,10 +187,13 @@ export class KidPlayAiStack extends Stack {
     });
 
     dbCluster.connections.allowFrom(serviceSg, Port.tcp(5432), "Fargate to Aurora");
-    // Open 5432 to the internet so the DB can be reached from a local psql
-    // client with username/password. Lock this down to a specific CIDR (e.g.
-    // your office IP) before treating prod data as sensitive.
-    dbCluster.connections.allowFrom(Peer.anyIpv4(), Port.tcp(5432), "Public psql access");
+    if (dbPubliclyAccessible) {
+      // Open 5432 to the internet so the DB can be reached from a local psql
+      // client with username/password. Toggled off by default; enable via
+      // `-c dbPubliclyAccessible=true` for occasional admin access. Lock down
+      // to a specific CIDR before treating prod data as sensitive.
+      dbCluster.connections.allowFrom(Peer.anyIpv4(), Port.tcp(5432), "Public psql access");
+    }
     sandboxFs.connections.allowFrom(serviceSg, Port.tcp(2049), "Fargate to EFS");
 
     const service = new ApplicationLoadBalancedFargateService(this, "Service", {

@@ -23,6 +23,13 @@ const appRepoName =
 // (console or admin CLI) and pass the ARN here. CloudFront is skipped if unset.
 const cdnCertificateArn =
   app.node.tryGetContext("cdnCertificateArn") ?? process.env.KPAI_CDN_CERT_ARN;
+// Off by default — the DB is reachable only from inside the VPC. Flip on when
+// you need to run `pnpm db:connect:prod` / `pnpm db:jdbc:prod` from a laptop:
+//   pnpm -F @techseeding/kidplayai-deploy deploy -c dbPubliclyAccessible=true
+const dbPubliclyAccessibleRaw =
+  app.node.tryGetContext("dbPubliclyAccessible") ?? process.env.KPAI_DB_PUBLICLY_ACCESSIBLE ?? false;
+const dbPubliclyAccessible =
+  dbPubliclyAccessibleRaw === true || dbPubliclyAccessibleRaw === "true";
 
 new KidPlayAiStack(app, `kpai-${stage}`, {
   env: { account, region },
@@ -32,6 +39,7 @@ new KidPlayAiStack(app, `kpai-${stage}`, {
   appRepoName,
   imageTag,
   cdnCertificateArn,
+  dbPubliclyAccessible,
 });
 
 Tags.of(app).add("Project", "kpai");

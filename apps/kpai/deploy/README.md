@@ -81,8 +81,24 @@ AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy migrate   # run drizzle-k
 
 # Wrappers that bake AWS_PROFILE=kpai in:
 pnpm release                                                     # build image + push + deploy stack
-pnpm db:connect:prod                                             # psql shell into prod DB
-pnpm db:jdbc:prod                                                # print JDBC URL for DBeaver
+pnpm db:connect:prod                                             # psql shell into prod DB (needs DB public access on)
+pnpm db:jdbc:prod                                                # print JDBC URL for DBeaver (needs DB public access on)
+```
+
+## Public DB access (off by default)
+
+The Aurora cluster is private by default — it has no public IP and the SG has
+no `0.0.0.0/0` ingress on 5432. Flip it on temporarily when you need to run
+`pnpm db:connect:prod` or `pnpm db:jdbc:prod` from a laptop:
+
+```bash
+# Open it
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy deploy -c dbPubliclyAccessible=true
+
+# ... run psql / DBeaver ...
+
+# Close it again (default)
+AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy deploy
 ```
 
 Tail logs:

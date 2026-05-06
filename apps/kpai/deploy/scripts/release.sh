@@ -42,6 +42,7 @@ pnpm exec cdk deploy "$APP_STACK_NAME" \
   -c stage="$STAGE" \
   -c imageTag="$TAG" \
   -c appRepoName="$REPO_NAME" \
+  -c dbPubliclyAccessible=false \
   ${KPAI_CDN_CERT_ARN:+-c cdnCertificateArn="$KPAI_CDN_CERT_ARN"}
 
 echo ""
