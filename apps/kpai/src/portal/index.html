@@ -45,11 +45,14 @@
   <link rel="preload" href="/fonts/baloo-2-latin.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Preload the LCP image (the hero screenshot). Non-AVIF browsers ignore
-       this via the type filter and pick WebP/JPEG from the picture element. -->
+       this via the type filter and pick WebP/JPEG from the picture element.
+       The href fallback is required by the spec when imagesrcset is set, and
+       some preload scanners skip the preload entirely without it. -->
   <link
     rel="preload"
     as="image"
     type="image/avif"
+    href="/img/road-racer-1200.avif"
     imagesrcset="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
     imagesizes="(max-width: 932px) 100vw, 900px"
     fetchpriority="high"
