@@ -41,8 +41,8 @@ export function SandboxPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [title, setTitle] = useState("");
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft] = useState("");
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameDraft, setRenameDraft] = useState("");
   const [showMyCrafts, setShowMyCrafts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
@@ -53,7 +53,7 @@ export function SandboxPage() {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorDraft, setColorDraft] = useState(avatarColor);
   const [savingColor, setSavingColor] = useState(false);
-  const titleInputRef = useRef(null);
+  const renameInputRef = useRef(null);
   const previewRef = useRef(null);
   const terminalRef = useRef(null);
   const titleRef = useRef(null);
@@ -318,16 +318,16 @@ export function SandboxPage() {
     setDropdownOpen(next);
   };
 
-  const startEditing = useCallback(() => {
-    setTitleDraft(title);
-    setEditingTitle(true);
-    setTimeout(() => titleInputRef.current?.focus({ cursor: "all" }), 0);
+  const openRenameModal = useCallback(() => {
+    setRenameDraft(title);
+    setShowRenameModal(true);
+    setTimeout(() => renameInputRef.current?.focus({ cursor: "all" }), 0);
   }, [title]);
 
-  const saveTitle = useCallback(() => {
-    const trimmed = titleDraft.trim();
+  const saveRename = useCallback(() => {
+    const trimmed = renameDraft.trim();
     if (!trimmed) return;
-    setEditingTitle(false);
+    setShowRenameModal(false);
     if (trimmed === title) return;
     setTitle(trimmed);
     fetchWithAuth(`/api/sandbox/${sandboxId}`, {
@@ -335,7 +335,7 @@ export function SandboxPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
     }).catch(() => { });
-  }, [titleDraft, title, sandboxId]);
+  }, [renameDraft, title, sandboxId]);
 
   const handleFileChanged = useCallback(() => {
     setPreviewKey((k) => k + 1);
@@ -440,59 +440,42 @@ export function SandboxPage() {
           >
             <Logo size={36} square />
           </a>
-          <div ref={titleRef} style={{ display: "inline-flex", alignItems: "center" }}>
-            {editingTitle ? (
-              <Input
-                ref={titleInputRef}
-                value={titleDraft}
-                onChange={(e) => setTitleDraft(e.target.value)}
-                onBlur={saveTitle}
-                onPressEnter={saveTitle}
-                maxLength={50}
-                style={{
-                  width: 260,
-                  fontFamily: fonts.heading,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  background: "rgba(255,255,255,0.2)",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  color: colors.onDark,
-                }}
-              />
-            ) : (
-              <span
-                onClick={startEditing}
-                title="Click to rename"
-                style={{
-                  fontFamily: fonts.heading,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: colors.onDark,
-                  cursor: "pointer",
-                  padding: "4px 12px",
-                  borderRadius: 8,
-                  border: "1px dashed rgba(255,255,255,0.25)",
-                  transition: "border-color 0.2s, background 0.2s",
-                  textShadow: shadows.textOnGradient,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <span>{title || "Untitled Craft"}</span>
-                <EditOutlined style={{ fontSize: 13, opacity: 0.75 }} />
+          <div ref={titleRef} style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center" }}>
+            <span
+              onClick={openRenameModal}
+              title="Click to rename"
+              style={{
+                maxWidth: "100%",
+                fontFamily: fonts.heading,
+                fontSize: 16,
+                fontWeight: 600,
+                color: colors.onDark,
+                cursor: "pointer",
+                padding: "4px 12px",
+                borderRadius: 8,
+                border: "1px dashed rgba(255,255,255,0.25)",
+                transition: "border-color 0.2s, background 0.2s",
+                textShadow: shadows.textOnGradient,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                minWidth: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)";
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+                {title || "Untitled Craft"}
               </span>
-            )}
+              <EditOutlined style={{ fontSize: 13, opacity: 0.75, flexShrink: 0 }} />
+            </span>
           </div>
-          <div style={{ flex: 1 }} />
           <Space size={8}>
             <Button ref={shareRef} icon={<QrcodeOutlined />} onClick={() => setShowShare(true)} style={{ background: colors.ctaYellow, color: colors.heading, border: "none", fontWeight: 600, boxShadow: shadows.ctaButtonSmall }}>
               Share
@@ -630,6 +613,26 @@ export function SandboxPage() {
         zIndex={1002}
         description="📱 Scan the QR code or open the URL below in any browser — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
       />
+      <Modal
+        title="Rename craft"
+        open={showRenameModal}
+        onCancel={() => setShowRenameModal(false)}
+        onOk={saveRename}
+        okText="Save"
+        okButtonProps={{ disabled: !renameDraft.trim() }}
+        destroyOnHidden
+        width={420}
+      >
+        <Input
+          ref={renameInputRef}
+          value={renameDraft}
+          onChange={(e) => setRenameDraft(e.target.value)}
+          onPressEnter={saveRename}
+          maxLength={50}
+          placeholder="Enter a name for your craft"
+          showCount
+        />
+      </Modal>
       <PasswordModal
         open={showChangePassword}
         mode="change"
