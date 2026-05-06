@@ -639,7 +639,7 @@ export function SandboxPage() {
               className={`kpai-panel-toggle kpai-panel-toggle-${activePanel}`}
               options={[
                 { label: "Preview", value: "preview", icon: <EyeOutlined /> },
-                { label: "Terminal", value: "terminal", icon: <CodeOutlined /> },
+                { label: "AI Assistant", value: "terminal", icon: <CodeOutlined /> },
               ]}
             />
           </div>
