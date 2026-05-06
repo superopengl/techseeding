@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useRef, useEffect, lazy, Suspense } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { getCookie, setCookie } from "../utils/cookie";
 import { fgForHex } from "../utils/colorForName";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, QuestionCircleOutlined, UserOutlined, PlusOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, QrcodeOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Terminal } from "../components/Terminal";
@@ -13,17 +12,8 @@ import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
 import { PasswordModal } from "../components/PasswordModal";
 import { apiCall, fetchWithAuth, logout } from "../api";
-
-const SandboxTour = lazy(() =>
-  import("../components/SandboxTour").then((m) => ({ default: m.SandboxTour }))
-);
-
-const TOUR_MENU_STEPS = new Set([4, 5, 6, 7]);
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
-
-const TOUR_COOKIE_NAME = "kpai_sandbox_tour_seen";
-
 
 const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
@@ -51,19 +41,12 @@ export function SandboxPage() {
   const [showMyCrafts, setShowMyCrafts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
-  const [tourCurrent, setTourCurrent] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorDraft, setColorDraft] = useState(avatarColor);
   const [savingColor, setSavingColor] = useState(false);
   const renameInputRef = useRef(null);
-  const previewRef = useRef(null);
-  const terminalRef = useRef(null);
-  const titleRef = useRef(null);
-  const shareRef = useRef(null);
-  const avatarRef = useRef(null);
 
   useEffect(() => {
     if (!sandboxId) return;
@@ -86,67 +69,6 @@ export function SandboxPage() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  useEffect(() => {
-    if (sandboxNotFound) return;
-    if (getCookie(TOUR_COOKIE_NAME)) return;
-    const timer = setTimeout(() => setTourOpen(true), 600);
-    return () => clearTimeout(timer);
-  }, [sandboxNotFound]);
-
-  const markTourSeen = useCallback(() => {
-    setCookie(TOUR_COOKIE_NAME, "1");
-  }, []);
-
-  const handleTourClose = useCallback(() => {
-    setTourOpen(false);
-    setTourCurrent(0);
-    markTourSeen();
-  }, [markTourSeen]);
-
-  const handleTourFinish = useCallback(() => {
-    setTourOpen(false);
-    setTourCurrent(0);
-    markTourSeen();
-  }, [markTourSeen]);
-
-  const openTour = useCallback(() => {
-    setTourCurrent(0);
-    setTourOpen(true);
-  }, []);
-
-  useEffect(() => {
-    if (!tourOpen) {
-      setDrawerOpen(false);
-    }
-  }, [tourOpen]);
-
-  const handleTourChange = useCallback((next) => {
-    const shouldOpenMenu = TOUR_MENU_STEPS.has(next);
-    if (shouldOpenMenu && !drawerOpen) {
-      // Open the menu first so its DOM is mounted before Tour re-targets.
-      setDrawerOpen(true);
-      requestAnimationFrame(() => setTourCurrent(next));
-      return;
-    }
-    if (!shouldOpenMenu && drawerOpen) {
-      setDrawerOpen(false);
-    }
-    setTourCurrent(next);
-  }, [drawerOpen]);
-
-  const handleNewCraft = useCallback(async () => {
-    try {
-      const data = await apiCall("/api/sandbox", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      navigate(`/sandbox/${data.id}`);
-    } catch {
-      message.error("Failed to create craft");
-    }
-  }, [navigate]);
 
   const handleLogout = useCallback(() => {
     Modal.confirm({
@@ -207,25 +129,11 @@ export function SandboxPage() {
 
   const drawerItems = [
     {
-      key: "new-craft",
-      tourClass: "kpai-tour-new-craft",
-      label: "New Craft",
-      icon: <PlusOutlined />,
-      onClick: handleNewCraft,
-    },
-    {
       key: "my-crafts",
       tourClass: "kpai-tour-my-crafts",
-      label: "All Crafts",
+      label: "My Crafts",
       icon: <UnorderedListOutlined />,
       onClick: () => setShowMyCrafts(true),
-    },
-    {
-      key: "guidance",
-      tourClass: "kpai-tour-guidance",
-      label: "Show Guidance",
-      icon: <QuestionCircleOutlined />,
-      onClick: openTour,
     },
     {
       key: "change-password",
@@ -235,12 +143,19 @@ export function SandboxPage() {
       onClick: () => setShowChangePassword(true),
     },
     {
+      key: "guidance",
+      tourClass: "kpai-tour-guidance",
+      label: "Show Guidance",
+      icon: <QuestionCircleOutlined />,
+      dividerAbove: true,
+      onClick: openTour,
+    },
+
+    {
       key: "logout",
-      tourClass: "kpai-tour-logout",
       label: "Logout",
       icon: <LogoutOutlined />,
       danger: true,
-      dividerAbove: true,
       onClick: handleLogout,
     },
   ];
@@ -562,7 +477,7 @@ export function SandboxPage() {
         )}
       </div>
       <Modal
-        title="All Crafts"
+        title="My Crafts"
         open={showMyCrafts}
         onCancel={sandboxNotFound ? undefined : () => setShowMyCrafts(false)}
         closable={!sandboxNotFound}
@@ -686,43 +601,43 @@ export function SandboxPage() {
                 {item.dividerAbove && (
                   <div style={{ height: 1, background: colors.border, margin: "8px 20px" }} />
                 )}
-              <button
-                type="button"
-                className={item.tourClass}
-                disabled={item.disabled}
-                onClick={() => {
-                  setDrawerOpen(false);
-                  item.onClick?.();
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "12px 20px",
-                  background: "transparent",
-                  border: "none",
-                  width: "100%",
-                  textAlign: "left",
-                  fontSize: 15,
-                  fontWeight: 500,
-                  fontFamily: "inherit",
-                  cursor: item.disabled ? "not-allowed" : "pointer",
-                  color: item.danger ? "#ff4d4f" : colors.bodyStrong,
-                  opacity: item.disabled ? 0.4 : 1,
-                  transition: "background 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!item.disabled) e.currentTarget.style.background = colors.canvas;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
-              </button>
+                <button
+                  type="button"
+                  className={item.tourClass}
+                  disabled={item.disabled}
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    item.onClick?.();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "12px 20px",
+                    background: "transparent",
+                    border: "none",
+                    width: "100%",
+                    textAlign: "left",
+                    fontSize: 15,
+                    fontWeight: 500,
+                    fontFamily: "inherit",
+                    cursor: item.disabled ? "not-allowed" : "pointer",
+                    color: item.danger ? "#ff4d4f" : colors.bodyStrong,
+                    opacity: item.disabled ? 0.4 : 1,
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!item.disabled) e.currentTarget.style.background = colors.canvas;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                </button>
               </React.Fragment>
             ))}
           </div>
