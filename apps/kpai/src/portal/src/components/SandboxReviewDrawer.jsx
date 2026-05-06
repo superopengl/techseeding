@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography } from "antd";
-import { RightOutlined, DownOutlined, ReloadOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined } from "@ant-design/icons";
+import { Drawer, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography, Input } from "antd";
+import { RightOutlined, DownOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
 import { Loading } from "./Loading";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
@@ -159,7 +159,35 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
   const [previewKey, setPreviewKey] = useState(0);
   const [showShare, setShowShare] = useState(false);
   const [sweeping, setSweeping] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadValue, setUploadValue] = useState("");
+  const [uploading, setUploading] = useState(false);
   const containerRef = useRef(null);
+
+  const UPLOAD_MAX_LENGTH = 2_000_000;
+
+  const handleUpload = useCallback(async () => {
+    if (uploadValue.length > UPLOAD_MAX_LENGTH) {
+      message.error(`Content must be ${UPLOAD_MAX_LENGTH.toLocaleString()} characters or less.`);
+      return;
+    }
+    setUploading(true);
+    try {
+      await apiCall(`/api/admin/sandbox/${sandboxId}/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: uploadValue }),
+      });
+      message.success("Uploaded.");
+      setShowUpload(false);
+      setUploadValue("");
+      setPreviewKey((k) => k + 1);
+    } catch (err) {
+      message.error(err.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }, [sandboxId, uploadValue]);
 
   useEffect(() => {
     if (!open || !sandboxId) return;
@@ -248,10 +276,10 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         <span style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
           <Button
             type="primary"
-            icon={<ReloadOutlined />}
-            onClick={() => setPreviewKey((k) => k + 1)}
+            icon={<UploadOutlined />}
+            onClick={() => setShowUpload(true)}
           >
-            Hard Refresh
+            Upload
           </Button>
 
           <Button
@@ -323,6 +351,29 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         sandboxId={sandboxId}
         description="Scan the QR code or copy the URL below to share this craft."
       />
+      <Modal
+        title="Upload index.html"
+        open={showUpload}
+        onCancel={() => setShowUpload(false)}
+        confirmLoading={uploading}
+        okText="Upload"
+        okButtonProps={{ icon: <UploadOutlined /> }}
+        onOk={handleUpload}
+        width={720}
+        destroyOnHidden
+      >
+        <Input.TextArea
+          value={uploadValue}
+          onChange={(e) => setUploadValue(e.target.value)}
+          maxLength={UPLOAD_MAX_LENGTH}
+          rows={16}
+          placeholder="Paste the full index.html content here..."
+          style={{ fontFamily: "monospace", fontSize: 12 }}
+        />
+        <div style={{ marginTop: 8, color: colors.muted, fontSize: 12, textAlign: "right" }}>
+          {uploadValue.length.toLocaleString()} / {UPLOAD_MAX_LENGTH.toLocaleString()} characters
+        </div>
+      </Modal>
     </Drawer>
   );
 }
