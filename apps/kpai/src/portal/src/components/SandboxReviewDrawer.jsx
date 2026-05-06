@@ -193,7 +193,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
     if (!open || !sandboxId) return;
     setLoading(true);
     apiCall(`/api/admin/sandbox/${sandboxId}/messages`)
-      .then((data) => setSessions(data.map((s) => ({
+      .then((data) => setSessions(data.sessions.map((s) => ({
         ...s,
         messages: s.messages.map((m) => ({ ...m, text: stripAnsi(m.content?.text || "") })),
       }))))
