@@ -12,3 +12,5 @@ export AWS_PROFILE=kpai
 ssh-add -K ~/.ssh/superopengl_id_rsa
 
 thome
+
+nvm use
