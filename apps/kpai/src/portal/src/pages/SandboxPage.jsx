@@ -519,28 +519,40 @@ export function SandboxPage() {
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 20px 16px" }}>
-            <div style={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
-              <Avatar
-                size={56}
-                style={{
-                  background: avatarBg,
-                  color: avatarFg,
-                  fontFamily: fonts.heading,
-                  fontSize: 32,
-                  fontWeight: 700,
+            <Tooltip title="Change avatar color">
+              <button
+                type="button"
+                aria-label="Change avatar color"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  openColorPicker();
                 }}
-                icon={userName ? null : <UserOutlined />}
+                style={{
+                  position: "relative",
+                  flexShrink: 0,
+                  lineHeight: 0,
+                  padding: 0,
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  borderRadius: "50%",
+                }}
               >
-                {userName ? avatarInitial : null}
-              </Avatar>
-              <Tooltip title="Change avatar color">
-                <button
-                  type="button"
-                  aria-label="Change avatar color"
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    openColorPicker();
+                <Avatar
+                  size={56}
+                  style={{
+                    background: avatarBg,
+                    color: avatarFg,
+                    fontFamily: fonts.heading,
+                    fontSize: 32,
+                    fontWeight: 700,
                   }}
+                  icon={userName ? null : <UserOutlined />}
+                >
+                  {userName ? avatarInitial : null}
+                </Avatar>
+                <span
+                  aria-hidden
                   style={{
                     position: "absolute",
                     bottom: -2,
@@ -554,15 +566,13 @@ export function SandboxPage() {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    cursor: "pointer",
-                    padding: 0,
                     boxShadow: shadows.cardSubtle,
                   }}
                 >
                   <EditOutlined style={{ fontSize: 12 }} />
-                </button>
-              </Tooltip>
-            </div>
+                </span>
+              </button>
+            </Tooltip>
             <div style={{ minWidth: 0, overflow: "hidden", lineHeight: 1.3 }}>
               <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 <Typography.Text strong style={{ fontSize: 16 }}>{userName}</Typography.Text>
