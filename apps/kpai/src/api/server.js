@@ -107,6 +107,17 @@ fastify.addHook("onRequest", async (request, reply) => {
   request.user = payload;
 });
 
+// API responses must never be cached — browsers and intermediaries can
+// heuristically cache GET responses without an explicit header (using
+// Last-Modified / Date), which would serve stale auth/session/sandbox state.
+// Routes that already set their own Cache-Control (e.g. sandboxPreview's
+// `no-store, no-cache, must-revalidate`) keep theirs untouched.
+fastify.addHook("onSend", async (request, reply) => {
+  if (!request.url.startsWith("/api/") && request.url !== "/healthcheck") return;
+  if (reply.getHeader("cache-control")) return;
+  reply.header("Cache-Control", "no-store");
+});
+
 // --- Routes ---
 
 healthcheck(fastify);
