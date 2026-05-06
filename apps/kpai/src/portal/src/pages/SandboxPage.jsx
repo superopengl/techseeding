@@ -19,6 +19,48 @@ const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
 const NARROW_BREAKPOINT = 768;
 
+function renderDrawerItem(item, setDrawerOpen) {
+  return (
+    <button
+      key={item.key}
+      type="button"
+      disabled={item.disabled}
+      onClick={() => {
+        setDrawerOpen(false);
+        item.onClick?.();
+      }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: "12px 20px",
+        background: "transparent",
+        border: "none",
+        width: "100%",
+        textAlign: "left",
+        fontSize: 15,
+        fontWeight: 500,
+        fontFamily: "inherit",
+        cursor: item.disabled ? "not-allowed" : "pointer",
+        color: item.danger ? "#ff4d4f" : colors.bodyStrong,
+        opacity: item.disabled ? 0.4 : 1,
+        transition: "background 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        if (!item.disabled) e.currentTarget.style.background = colors.canvas;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+      }}
+    >
+      <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
+        {item.icon}
+      </span>
+      <span>{item.label}</span>
+    </button>
+  );
+}
+
 export function SandboxPage() {
   const { sandboxId } = useParams();
   const navigate = useNavigate();
@@ -141,15 +183,15 @@ export function SandboxPage() {
       disabled: hasPassword === false,
       onClick: () => setShowChangePassword(true),
     },
-    {
-      key: "logout",
-      label: "Logout",
-      icon: <LogoutOutlined />,
-      danger: true,
-      dividerAbove: true,
-      onClick: handleLogout,
-    },
   ];
+
+  const logoutItem = {
+    key: "logout",
+    label: "Logout",
+    icon: <LogoutOutlined />,
+    danger: true,
+    onClick: handleLogout,
+  };
 
   const handleDrawerClose = () => setDrawerOpen(false);
 
@@ -588,49 +630,10 @@ export function SandboxPage() {
           </div>
           <div style={{ height: 1, background: colors.border }} />
           <div style={{ display: "flex", flexDirection: "column", padding: "8px 0", flex: 1, overflowY: "auto" }}>
-            {drawerItems.map((item) => (
-              <React.Fragment key={item.key}>
-                {item.dividerAbove && (
-                  <div style={{ height: 1, background: colors.border, margin: "8px 20px" }} />
-                )}
-                <button
-                  type="button"
-                  disabled={item.disabled}
-                  onClick={() => {
-                    setDrawerOpen(false);
-                    item.onClick?.();
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    padding: "12px 20px",
-                    background: "transparent",
-                    border: "none",
-                    width: "100%",
-                    textAlign: "left",
-                    fontSize: 15,
-                    fontWeight: 500,
-                    fontFamily: "inherit",
-                    cursor: item.disabled ? "not-allowed" : "pointer",
-                    color: item.danger ? "#ff4d4f" : colors.bodyStrong,
-                    opacity: item.disabled ? 0.4 : 1,
-                    transition: "background 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!item.disabled) e.currentTarget.style.background = colors.canvas;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                  }}
-                >
-                  <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                </button>
-              </React.Fragment>
-            ))}
+            {drawerItems.map((item) => renderDrawerItem(item, setDrawerOpen))}
+          </div>
+          <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}`, padding: "4px 0" }}>
+            {renderDrawerItem(logoutItem, setDrawerOpen)}
           </div>
         </div>
       </Drawer>
