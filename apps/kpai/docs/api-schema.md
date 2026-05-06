@@ -282,20 +282,6 @@ Approve a pending student login request. If the request is a password reset, the
 - **Side effects:** Broadcasts `login_request_changed` over the admin WebSocket and `status` over the per-request login WebSocket.
 - **Errors:** `400 VALIDATION_ERROR`, `404 NOT_FOUND`
 
-### `POST /api/admin/approve/:sessionId`
-
-Activate a `sandbox_session` (sets `status=active`, `loggedInAt=now`).
-
-- **Response:** `200 { status: "active" }`
-- **Errors:** `404 NOT_FOUND`
-
-### `POST /api/admin/reject/:sessionId`
-
-Delete a `sandbox_session` row.
-
-- **Response:** `200 { status: "rejected" }`
-- **Errors:** `404 NOT_FOUND`
-
 ### `GET /api/admin/students/:userId/sandboxes`
 
 List a student's sandboxes with aggregated request/response token counts.

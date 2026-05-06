@@ -71,13 +71,11 @@ src/
     server.js             # Fastify server setup, plugin registration, route wiring
     routes/               # One route controller per file (filename = exported function name)
       healthcheck.js      # GET /healthcheck
-      loginStudent.js     # POST /api/login/student
-      loginStatus.js # GET /api/login/:loginRequestId/status
+      login.js            # POST /api/login
+      loginStatus.js      # GET /api/login/:loginRequestId/status
       adminStudents.js    # GET /api/admin/students
-      adminApprove.js     # POST /api/admin/approve/:studentId
-      adminReject.js      # POST /api/admin/reject/:studentId
       adminCreateStudent.js # POST /api/admin/student
-      wsTerminal.js       # WS /api/ws
+      wsTerminal.js       # WS /api/ws (sandboxId in query)
     resources/
       sandbox_sample/     # Sandbox template — each new sandbox is a copy of this folder with API key injection
     lib/                  # Shared utilities
