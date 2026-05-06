@@ -158,7 +158,7 @@ export function EnquiryForm({ autoFocusOnMount = false }) {
               fontFamily: fonts.heading,
             }}
           >
-            Register My Interest
+            Send Enquiry
           </Button>
         </Form.Item>
       </Form>
