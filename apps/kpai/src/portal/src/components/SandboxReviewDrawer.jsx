@@ -360,7 +360,10 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         }}
         confirmLoading={uploading}
         okText="Upload"
-        okButtonProps={{ icon: <UploadOutlined /> }}
+        okButtonProps={{
+          icon: <UploadOutlined />,
+          disabled: uploadValue.length >= UPLOAD_MAX_LENGTH,
+        }}
         onOk={handleUpload}
         width={720}
         destroyOnHidden
@@ -373,7 +376,15 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
           placeholder="Paste the full index.html content here..."
           style={{ fontFamily: "monospace", fontSize: 12 }}
         />
-        <div style={{ marginTop: 8, color: colors.muted, fontSize: 12, textAlign: "right" }}>
+        <div
+          style={{
+            marginTop: 8,
+            color: uploadValue.length >= UPLOAD_MAX_LENGTH ? "#ff4d4f" : colors.muted,
+            fontSize: 12,
+            textAlign: "right",
+          }}
+        >
+          {uploadValue.length >= UPLOAD_MAX_LENGTH && "Maximum length reached. "}
           {uploadValue.length.toLocaleString()} / {UPLOAD_MAX_LENGTH.toLocaleString()} characters
         </div>
       </Modal>
