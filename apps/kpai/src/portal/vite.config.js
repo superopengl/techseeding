@@ -20,6 +20,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
+          antd: ["antd", "@ant-design/icons"],
         },
       },
     },
