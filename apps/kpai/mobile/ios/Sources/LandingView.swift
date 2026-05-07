@@ -16,6 +16,7 @@ struct LandingView: View {
     }
 
     var body: some View {
+        GeometryReader { proxy in
         ZStack {
             Brand.loginGradient.ignoresSafeArea()
             Image("LoginPattern")
@@ -24,7 +25,11 @@ struct LandingView: View {
                 .allowsHitTesting(false)
 
             VStack(spacing: compact ? 18 : 28) {
-                if !compact { Spacer(minLength: 40) }
+                // Background extends behind the status bar via .ignoresSafeArea(),
+                // so push the content down by the top inset to clear the notch /
+                // Dynamic Island. Non-compact also gets a small extra breathing
+                // room before the logo.
+                Spacer().frame(height: proxy.safeAreaInsets.top + (compact ? 4 : 40))
                 BrandLogo(size: compact ? 40 : 60, inverted: false)
                 if !compact {
                     Text("Scan a craft QR code\nto play")
@@ -115,6 +120,7 @@ struct LandingView: View {
                     }
                 }
             }
+        }
         }
     }
 
