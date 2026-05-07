@@ -46,7 +46,7 @@ struct PreviewView: View {
                     .allowsHitTesting(landingShown)
                     .onTapGesture { close() }
 
-                LandingView(compact: true) { scanned in
+                LandingView { scanned in
                     close()
                     if scanned != displayedURL {
                         displayedURL = scanned
