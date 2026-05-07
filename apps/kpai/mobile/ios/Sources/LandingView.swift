@@ -30,7 +30,7 @@ struct LandingView: View {
                 // Dynamic Island. Non-compact also gets a small extra breathing
                 // room before the logo.
                 Spacer().frame(height: proxy.safeAreaInsets.top + (compact ? 4 : 40))
-                BrandLogo(size: compact ? 40 : 60, inverted: false)
+                BrandLogo(size: compact ? 40 : 60)
                 if !compact {
                     Text("Scan a craft QR code\nto play")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
