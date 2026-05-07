@@ -1,4 +1,4 @@
-name: KidPlayAI
+name: Runner
 options:
   bundleIdPrefix: com.techseeding
   deploymentTarget:
@@ -13,7 +13,7 @@ settings:
     TARGETED_DEVICE_FAMILY: "1,2"
     GENERATE_INFOPLIST_FILE: NO
 targets:
-  KidPlayAI:
+  Runner:
     type: application
     platform: iOS
     sources:

@@ -17,8 +17,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 BUNDLE_ID="com.techseeding.kidplayai"
-SCHEME="KidPlayAI"
-PROJECT="KidPlayAI.xcodeproj"
+SCHEME="Runner"
+PROJECT="Runner.xcodeproj"
 DEFAULT_URL="https://kidplayai.techseeding.com.au"
 
 # --- device ---------------------------------------------------------------
