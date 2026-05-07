@@ -48,6 +48,20 @@
     <false/>
   </dict>
   <key>KPAIPublicURL</key>
-  <string>https://kidplayai.techseeding.com.au</string>
+  <string>$(KPAI_PUBLIC_URL)</string>
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <!-- Allow plain http to localhost so Debug builds can reach the dev API
+         (KPAI_PUBLIC_URL=http://localhost:9512). Production / Release builds
+         use https://kidplayai.techseeding.com.au and don't depend on this. -->
+    <key>NSExceptionDomains</key>
+    <dict>
+      <key>localhost</key>
+      <dict>
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+      </dict>
+    </dict>
+  </dict>
 </dict>
 </plist>

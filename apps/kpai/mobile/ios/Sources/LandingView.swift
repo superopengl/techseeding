@@ -125,7 +125,7 @@ struct LandingView: View {
                 errorMessage = nil
                 onScanned(url)
             } else {
-                errorMessage = "The scanned code doesn't point to a valid craft. Please try a different QR code.\n\nScanned: \(payload)"
+                errorMessage = "The URL doesn't point to a valid craft. Please try a different one.\n\n\(payload)"
             }
         case .failure(let err):
             switch err {
