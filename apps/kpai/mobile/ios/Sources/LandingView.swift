@@ -22,7 +22,7 @@ struct LandingView: View {
 
             VStack(spacing: compact ? 18 : 28) {
                 if !compact { Spacer(minLength: 40) }
-                BrandLogo(size: compact ? 40 : 60)
+                BrandLogo(size: compact ? 40 : 60, inverted: false)
                 if !compact {
                     Text("Scan a craft QR code\nto play")
                         .font(.system(size: 22, weight: .semibold, design: .rounded))
