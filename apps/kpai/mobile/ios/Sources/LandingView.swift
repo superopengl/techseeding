@@ -71,7 +71,7 @@ struct LandingView: View {
                 Spacer()
 
                 if !compact {
-                    Text("Use this app to play crafts made on KidPlayAI. To build your own craft with AI, visit [kidplayai.techseeding.com.au](https://kidplayai.techseeding.com.au).")
+                    Text(publicSiteFooter)
                         .font(.system(size: 12, weight: .regular, design: .rounded))
                         .foregroundColor(Brand.body)
                         .tint(Brand.primary)
@@ -122,6 +122,13 @@ struct LandingView: View {
             }
         }
         }
+    }
+
+    private var publicSiteFooter: LocalizedStringKey {
+        let site = URLValidator.publicURL.absoluteString
+        return LocalizedStringKey(
+            "Use this app to play crafts made on KidPlayAI. To build your own craft with AI, visit [\(site)](\(site))."
+        )
     }
 
     private func handle(result: Result<String, ScanError>) {
