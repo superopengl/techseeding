@@ -187,7 +187,24 @@
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Static LCP placeholder. The road-racer hero is the LCP element on the
+         homepage, so we render it inline here — it paints as soon as the HTML
+         and image arrive, completely independent of the React bundle. React's
+         createRoot wipes #root on mount and renders the full app over the top.
+         Visual styling mirrors the hero in HomePage.jsx so the swap is
+         imperceptible (same gradient, same image frame). -->
+    <div style="background:linear-gradient(135deg,#43b88c 0%,#6ec1e4 100%);padding:clamp(60px,12vw,90px) 20px 180px;text-align:center;">
+      <div style="position:relative;max-width:900px;margin:200px auto 0;border-radius:20px;overflow:hidden;border:6px solid rgba(255,255,255,0.85);box-shadow:0 24px 64px rgba(0,0,0,0.4),0 8px 24px rgba(0,0,0,0.25);">
+        <picture>
+          <source type="image/avif" srcset="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w" sizes="(max-width: 932px) 100vw, 900px">
+          <source type="image/webp" srcset="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w" sizes="(max-width: 932px) 100vw, 900px">
+          <img src="/img/road-racer-1200.jpg" srcset="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w" sizes="(max-width: 932px) 100vw, 900px" width="1465" height="993" alt="A kid building a Road Racer craft with AI in KidPlayAI" fetchpriority="high" decoding="async" style="width:100%;height:auto;display:block;">
+        </picture>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
+
