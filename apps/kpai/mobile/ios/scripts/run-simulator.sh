@@ -28,24 +28,29 @@ import json, os, subprocess, sys
 
 data = json.loads(subprocess.check_output(
     ["xcrun", "simctl", "list", "devices", "available", "--json"]))
-sims = [d for runtime, devs in data["devices"].items()
-        for d in devs
-        if "iOS" in runtime and d.get("isAvailable") and "iPhone" in d.get("name", "")]
-if not sims:
-    sys.stderr.write("No available iPhone simulators. Open Xcode → Settings → Platforms.\n")
+all_sims = [d for runtime, devs in data["devices"].items()
+            for d in devs
+            if "iOS" in runtime and d.get("isAvailable")]
+if not all_sims:
+    sys.stderr.write("No available iOS simulators. Open Xcode → Settings → Platforms.\n")
     sys.exit(1)
 
 override = os.environ.get("KPAI_SIM_OVERRIDE", "").strip()
 if override:
-    match = next((d for d in sims if d["udid"] == override or d["name"] == override), None)
+    match = next((d for d in all_sims if d["udid"] == override or d["name"] == override), None)
     if not match:
-        sys.stderr.write(f"IOS_SIMULATOR={override!r} did not match any available iPhone simulator.\n")
+        sys.stderr.write(f"IOS_SIMULATOR={override!r} did not match any available iOS simulator.\n")
         sys.exit(1)
     print(match["udid"], match["name"], sep="\t")
     sys.exit(0)
 
-booted = next((d for d in sims if d["state"] == "Booted"), None)
-chosen = booted or sorted(sims, key=lambda d: d["name"])[-1]
+# Auto-pick: prefer a booted iPhone, then newest available iPhone.
+iphones = [d for d in all_sims if "iPhone" in d.get("name", "")]
+if not iphones:
+    sys.stderr.write("No available iPhone simulators. Set IOS_SIMULATOR to pick a non-iPhone device.\n")
+    sys.exit(1)
+booted = next((d for d in iphones if d["state"] == "Booted"), None)
+chosen = booted or sorted(iphones, key=lambda d: d["name"])[-1]
 print(chosen["udid"], chosen["name"], sep="\t")
 PY
 }

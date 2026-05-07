@@ -21,6 +21,8 @@
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config src/api/drizzle.config.js",
     "mobile:ios": "mobile/ios/scripts/run-simulator.sh",
+    "mobile:ios:6.5": "IOS_SIMULATOR='iPhone 11 Pro Max' mobile/ios/scripts/run-simulator.sh",
+    "mobile:ios:13": "IOS_SIMULATOR='iPad Pro 13-inch (M4)' mobile/ios/scripts/run-simulator.sh",
     "mobile:physical": "mobile/ios/scripts/run-device.sh",
     "mobile:release:ipa": "mobile/ios/scripts/build-release.sh",
     "test": "echo \"Error: no test specified\" && exit 1"

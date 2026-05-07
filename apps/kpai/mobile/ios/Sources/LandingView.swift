@@ -29,7 +29,7 @@ struct LandingView: View {
                 // so push the content down by the top inset to clear the notch /
                 // Dynamic Island. Non-compact also gets a small extra breathing
                 // room before the logo.
-                Spacer().frame(height: proxy.safeAreaInsets.top + (compact ? 4 : 40))
+                Spacer().frame(height: compact ? proxy.safeAreaInsets.top + 4 : 200)
                 BrandLogo(size: compact ? 40 : 60)
                 if !compact {
                     Text("Scan a craft QR code\nand enjoy playing")
@@ -66,6 +66,7 @@ struct LandingView: View {
                     }
                     .disabled(processingPhoto)
                 }
+                .frame(maxWidth: 400)
                 .padding(.horizontal, 28)
 
                 Spacer()
@@ -129,7 +130,7 @@ struct LandingView: View {
     private var publicSiteFooter: LocalizedStringKey {
         let site = URLValidator.publicURL.absoluteString
         return LocalizedStringKey(
-            "Use this app to play crafts made on KidPlayAI. To build your own craft with AI, visit [\(site)](\(site))."
+            "Use this app to play crafts made on KidPlayAI.\nTo build your own craft with AI, visit [\(site)](\(site))."
         )
     }
 
