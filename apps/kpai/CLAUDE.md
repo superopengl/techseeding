@@ -95,6 +95,7 @@ src/
     package.json          # Frontend dependencies
 devops/                   # Docker image build (Dockerfile, entrypoint, opencode config)
 deploy/                   # AWS CDK app — provisions all infra and ships the image (see Deployment section)
+mobile/ios/               # Native SwiftUI companion app (QR scan → fullscreen craft webview); see mobile/ios/README.md
 dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
 ```
 

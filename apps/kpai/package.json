@@ -20,6 +20,11 @@
     "db:generate": "dotenv -e .env -- drizzle-kit generate --config src/api/drizzle.config.js",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config src/api/drizzle.config.js",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config src/api/drizzle.config.js",
+    "mobile:dev": "pnpm -F @techseeding/kidplayai-mobile dev",
+    "mobile:build:ios": "pnpm -F @techseeding/kidplayai-mobile build:ios",
+    "mobile:build:android": "pnpm -F @techseeding/kidplayai-mobile build:android",
+    "mobile:test": "pnpm -F @techseeding/kidplayai-mobile test",
+    "mobile:analyze": "pnpm -F @techseeding/kidplayai-mobile analyze",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,6 +1,7 @@
 packages:
   - src/portal
   - deploy
+  - mobile
 
 ignoredBuiltDependencies:
   - esbuild
