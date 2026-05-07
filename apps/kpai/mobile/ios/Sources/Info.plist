@@ -20,6 +20,11 @@
   <string>1.0</string>
   <key>CFBundleVersion</key>
   <string>1</string>
+  <!-- App only uses standard HTTPS via WKWebView; this declares exemption from
+       U.S. export-compliance review so App Store Connect stops asking on every
+       upload. -->
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>NSCameraUsageDescription</key>
