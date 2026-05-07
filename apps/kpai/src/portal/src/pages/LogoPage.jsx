@@ -17,7 +17,7 @@ function Section({ title, bg, children }) {
           fontSize: 13,
           textTransform: "uppercase",
           letterSpacing: 1.5,
-          color: bg === colors.surface || bg === colors.canvas ? colors.body : "rgba(255,255,255,0.7)",
+          color: [colors.surface, colors.canvas, colors.mintBg, colors.skyBg].includes(bg) ? colors.body : "rgba(255,255,255,0.7)",
         }}
       >
         {title}
@@ -98,6 +98,46 @@ export function LogoPage() {
 
       {/* Inline logo — light background */}
       <Section title="Inline Logo — Light Background" bg={colors.surface}>
+        <div>
+          <Logo size={48} />
+          <Label>size=48</Label>
+        </div>
+        <div>
+          <Logo size={32} />
+          <Label>size=32 (default)</Label>
+        </div>
+        <div>
+          <Logo size={24} />
+          <Label>size=24</Label>
+        </div>
+        <div>
+          <Logo size={16} />
+          <Label>size=16</Label>
+        </div>
+      </Section>
+
+      {/* Inline logo — mint pastel background */}
+      <Section title="Inline Logo — Mint Bg (#e8f8f0)" bg={colors.mintBg}>
+        <div>
+          <Logo size={48} />
+          <Label>size=48</Label>
+        </div>
+        <div>
+          <Logo size={32} />
+          <Label>size=32 (default)</Label>
+        </div>
+        <div>
+          <Logo size={24} />
+          <Label>size=24</Label>
+        </div>
+        <div>
+          <Logo size={16} />
+          <Label>size=16</Label>
+        </div>
+      </Section>
+
+      {/* Inline logo — sky pastel background */}
+      <Section title="Inline Logo — Sky Bg (#e8f4fa)" bg={colors.skyBg}>
         <div>
           <Logo size={48} />
           <Label>size=48</Label>
