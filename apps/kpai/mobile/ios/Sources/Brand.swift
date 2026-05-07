@@ -8,11 +8,23 @@ enum Brand {
     static let ctaYellow    = Color(red: 0xfc/255, green: 0xd6/255, blue: 0x3c/255)
     static let ctaShadow    = Color(red: 0xe5/255, green: 0xbe/255, blue: 0x2a/255)
     static let heading      = Color(red: 0x2d/255, green: 0x37/255, blue: 0x48/255)
+    static let bodyStrong   = Color(red: 0x4a/255, green: 0x55/255, blue: 0x68/255)
+    static let body         = Color(red: 0x71/255, green: 0x80/255, blue: 0x96/255)
     static let canvas       = Color(red: 0xf7/255, green: 0xfa/255, blue: 0xfc/255)
     static let surface      = Color.white
 
+    // Mirrors theme.js gradients.login — soft pastel base for the landing screen.
+    static let loginGradientStart = Color(red: 0xe8/255, green: 0xf8/255, blue: 0xf0/255)
+    static let loginGradientEnd   = Color(red: 0xe8/255, green: 0xf4/255, blue: 0xfa/255)
+
     static let heroGradient = LinearGradient(
         colors: [primary, accentBlue],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    static let loginGradient = LinearGradient(
+        colors: [loginGradientStart, loginGradientEnd],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )

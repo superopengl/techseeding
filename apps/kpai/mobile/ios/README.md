@@ -5,7 +5,7 @@ Native SwiftUI companion app. Two screens:
 1. **Landing** — logo + buttons to scan a craft QR via camera or pick from
    the photo library. Decoded payloads must match
    `<KPAIPublicURL>/api/sandbox/<id>/preview`; anything else surfaces an
-   "Invalid URL" pill.
+   "Invalid craft URL" pill.
 2. **Preview** — full-screen `WKWebView` of the validated URL. Tapping or
    pulling down the top drag handle opens a half-height drawer that hosts
    the scanner again, so you can jump from craft to craft without leaving

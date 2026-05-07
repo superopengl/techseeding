@@ -17,23 +17,25 @@ struct LandingView: View {
 
     var body: some View {
         ZStack {
-            Brand.heroGradient.ignoresSafeArea()
-            decorations.ignoresSafeArea()
+            Brand.loginGradient.ignoresSafeArea()
+            Image("LoginPattern")
+                .resizable(resizingMode: .tile)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
             VStack(spacing: compact ? 18 : 28) {
                 if !compact { Spacer(minLength: 40) }
                 BrandLogo(size: compact ? 40 : 60, inverted: false)
                 if !compact {
                     Text("Scan a craft QR code\nto play")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .foregroundColor(Brand.heading)
                         .multilineTextAlignment(.center)
-                        .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
                 }
 
                 VStack(spacing: 14) {
                     Button(action: { presentScanner = true }) {
-                        Label("Scan with Camera", systemImage: "qrcode.viewfinder")
+                        Label("Scan QR Code", systemImage: "qrcode.viewfinder")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(Brand.heading)
                             .frame(maxWidth: .infinity)
@@ -44,36 +46,47 @@ struct LandingView: View {
                     }
 
                     PhotosPicker(selection: $photoItem, matching: .images, photoLibrary: .shared()) {
-                        Label(processingPhoto ? "Reading…" : "Choose from Photos",
+                        Label(processingPhoto ? "Reading…" : "QR Code from Photos",
                               systemImage: "photo.on.rectangle")
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(Brand.primary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
+                            .background(Brand.surface.opacity(0.7))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 24)
-                                    .stroke(Color.white.opacity(0.85), lineWidth: 1.5)
+                                    .stroke(Brand.primary.opacity(0.7), lineWidth: 1.5)
                             )
+                            .clipShape(RoundedRectangle(cornerRadius: 24))
                     }
                     .disabled(processingPhoto)
                 }
                 .padding(.horizontal, 28)
 
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
-                        .background(Color.red.opacity(0.9))
-                        .clipShape(Capsule())
-                        .shadow(color: .black.opacity(0.15), radius: 6, y: 2)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
-
                 Spacer()
+
+                if !compact {
+                    Text("Use this app to play crafts made on KidPlayAI. To build your own craft with AI, visit [kidplayai.techseeding.com.au](https://kidplayai.techseeding.com.au).")
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .foregroundColor(Brand.body)
+                        .tint(Brand.primary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                        .padding(.horizontal, 28)
+                        .padding(.bottom, 16)
+                }
             }
             .padding(.top, compact ? 8 : 0)
+        }
+        .alert("Invalid craft URL", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("Close", role: .cancel) { errorMessage = nil }
+        } message: {
+            if let errorMessage {
+                Text(errorMessage)
+            }
         }
         .fullScreenCover(isPresented: $presentScanner) {
             QRScannerView { result in
@@ -103,7 +116,6 @@ struct LandingView: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: errorMessage)
     }
 
     private func handle(result: Result<String, ScanError>) {
@@ -113,32 +125,15 @@ struct LandingView: View {
                 errorMessage = nil
                 onScanned(url)
             } else {
-                errorMessage = "Invalid URL"
+                errorMessage = "The scanned code doesn't point to a valid craft. Please try a different QR code.\n\nScanned: \(payload)"
             }
         case .failure(let err):
             switch err {
             case .cancelled: break
-            case .noQRFound, .cameraUnavailable: errorMessage = "Invalid URL"
-            }
-        }
-    }
-
-    // Soft, semi-transparent circles to echo the web hero's playful background.
-    private var decorations: some View {
-        GeometryReader { geo in
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.08))
-                    .frame(width: geo.size.width * 0.7)
-                    .offset(x: -geo.size.width * 0.3, y: -geo.size.height * 0.25)
-                Circle()
-                    .fill(Color.white.opacity(0.06))
-                    .frame(width: geo.size.width * 0.5)
-                    .offset(x: geo.size.width * 0.25, y: geo.size.height * 0.3)
-                Circle()
-                    .fill(Color.white.opacity(0.10))
-                    .frame(width: geo.size.width * 0.3)
-                    .offset(x: geo.size.width * 0.2, y: -geo.size.height * 0.2)
+            case .noQRFound:
+                errorMessage = "We couldn't find a QR code in that image. Please try again."
+            case .cameraUnavailable:
+                errorMessage = "Camera is unavailable. Please try scanning from a photo instead."
             }
         }
     }
