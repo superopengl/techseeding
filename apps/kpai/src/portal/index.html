@@ -54,7 +54,7 @@
     type="image/avif"
     href="/img/road-racer-1200.avif"
     imagesrcset="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
-    imagesizes="(max-width: 932px) 100vw, 900px"
+    imagesizes="(max-width: 932px) 88vw, 720px"
     fetchpriority="high"
   >
 
@@ -195,11 +195,17 @@
          Visual styling mirrors the hero in HomePage.jsx so the swap is
          imperceptible (same gradient, same image frame). -->
     <div style="background:linear-gradient(135deg,#43b88c 0%,#6ec1e4 100%);padding:clamp(60px,12vw,90px) 20px 180px;text-align:center;">
-      <div style="position:relative;max-width:900px;margin:200px auto 0;border-radius:20px;overflow:hidden;border:6px solid rgba(255,255,255,0.85);box-shadow:0 24px 64px rgba(0,0,0,0.4),0 8px 24px rgba(0,0,0,0.25);">
+      <div style="position:relative;max-width:720px;margin:200px auto 0;background:rgba(255,255,255,0.96);border-radius:clamp(8px,1.4vw,14px);overflow:hidden;border:1px solid rgba(0,0,0,0.08);box-shadow:0 24px 64px rgba(0,0,0,0.4),0 8px 24px rgba(0,0,0,0.25);">
+        <div style="display:flex;align-items:center;gap:clamp(6px,1.2vw,11px);padding:clamp(7px,1.1vw,10px) clamp(10px,1.6vw,14px);background:linear-gradient(#f6f7f9,#e9ebef);border-bottom:1px solid rgba(0,0,0,0.06);">
+          <span style="width:clamp(8px,1vw,11px);height:clamp(8px,1vw,11px);border-radius:50%;background:#ff5f57;flex-shrink:0;"></span>
+          <span style="width:clamp(8px,1vw,11px);height:clamp(8px,1vw,11px);border-radius:50%;background:#febc2e;flex-shrink:0;"></span>
+          <span style="width:clamp(8px,1vw,11px);height:clamp(8px,1vw,11px);border-radius:50%;background:#28c840;flex-shrink:0;"></span>
+          <div style="flex-grow:1;max-width:60%;margin:0 auto;padding:clamp(2px,0.5vw,4px) clamp(8px,1.4vw,14px);background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:clamp(4px,0.7vw,7px);font-size:clamp(9px,1.2vw,13px);color:#5f6368;font-family:system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;">kidplayai.techseeding.com.au</div>
+        </div>
         <picture>
-          <source type="image/avif" srcset="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w" sizes="(max-width: 932px) 100vw, 900px">
-          <source type="image/webp" srcset="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w" sizes="(max-width: 932px) 100vw, 900px">
-          <img src="/img/road-racer-1200.jpg" srcset="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w" sizes="(max-width: 932px) 100vw, 900px" width="1465" height="993" alt="A kid building a Road Racer craft with AI in KidPlayAI" fetchpriority="high" decoding="async" style="width:100%;height:auto;display:block;">
+          <source type="image/avif" srcset="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w" sizes="(max-width: 932px) 88vw, 720px">
+          <source type="image/webp" srcset="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w" sizes="(max-width: 932px) 88vw, 720px">
+          <img src="/img/road-racer-1200.jpg" srcset="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w" sizes="(max-width: 932px) 88vw, 720px" width="1465" height="993" alt="A kid building a Road Racer craft with AI in KidPlayAI" fetchpriority="high" decoding="async" style="width:100%;height:auto;display:block;">
         </picture>
       </div>
     </div>

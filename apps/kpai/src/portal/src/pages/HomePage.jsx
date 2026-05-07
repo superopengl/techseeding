@@ -375,59 +375,248 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Floating screenshot showcase — overlaps hero and features */}
+      {/* Multi-device showcase — overlaps hero, demonstrates browser/tablet/phone reach */}
       <div
         style={{
           position: "relative",
           zIndex: 2,
           marginTop: -140,
-          padding: "0 24px",
+          padding: "0 max(20px, 6vw)",
           textAlign: "center",
         }}
       >
         <div
           style={{
-            borderRadius: 20,
-            overflow: "hidden",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)",
-            border: "6px solid rgba(255,255,255,0.85)",
-            maxWidth: 900,
-            marginInline: "auto",
+            position: "relative",
+            maxWidth: 720,
+            // Pad top/bottom so the absolutely-positioned tablet and phones don't
+            // overflow outside the section into the features grid below.
+            // paddingTop: "clamp(80px, 14vw, 200px)",
+            paddingBottom: "clamp(60px, 11vw, 120px)",
+            margin: "0 auto",
           }}
         >
-          <picture>
-            <source
-              type="image/avif"
-              srcSet="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
-              sizes="(max-width: 932px) 100vw, 900px"
-            />
-            <source
-              type="image/webp"
-              srcSet="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w"
-              sizes="(max-width: 932px) 100vw, 900px"
-            />
-            <img
-              src="/img/road-racer-1200.jpg"
-              srcSet="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w"
-              sizes="(max-width: 932px) 100vw, 900px"
-              width="1465"
-              height="993"
-              alt="A kid building a Road Racer craft with AI in KidPlayAI"
-              fetchPriority="high"
-              decoding="async"
-              style={{ width: "100%", height: "auto", display: "block" }}
-            />
-          </picture>
+          {/* iPad — bottom right, peeking up behind the desktop */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: 30,
+              right: "clamp(-40px, -4vw, -10px)",
+              width: "clamp(190px, 46%, 460px)",
+              transform: "rotate(4deg)",
+              transformOrigin: "100% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(12px, 2.6vw, 26px)",
+              padding: "clamp(6px, 1.2vw, 12px)",
+              boxShadow: "0 18px 44px rgba(0,0,0,0.34)",
+              zIndex: 10,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-ipad-400.avif 400w, /img/road-racer-ipad-800.avif 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-ipad-400.webp 400w, /img/road-racer-ipad-800.webp 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+              />
+              <img
+                src="/img/road-racer-ipad-800.jpg"
+                srcSet="/img/road-racer-ipad-400.jpg 400w, /img/road-racer-ipad-800.jpg 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+                width="800"
+                height="600"
+                alt="KidPlayAI Road Racer on iPad"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(5px, 1.4vw, 13px)",
+                }}
+              />
+            </picture>
+          </div>
+
+          {/* Desktop browser — center, foreground; this is the LCP element */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 2,
+              background: "rgba(255,255,255,0.96)",
+              borderRadius: "clamp(8px, 1.4vw, 14px)",
+              overflow: "hidden",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25)",
+              border: "1px solid rgba(0,0,0,0.08)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "clamp(6px, 1.2vw, 11px)",
+                padding: "clamp(7px, 1.1vw, 10px) clamp(10px, 1.6vw, 14px)",
+                background: "linear-gradient(#f6f7f9, #e9ebef)",
+                borderBottom: "1px solid rgba(0,0,0,0.06)",
+              }}
+            >
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#ff5f57", flexShrink: 0 }} />
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#febc2e", flexShrink: 0 }} />
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#28c840", flexShrink: 0 }} />
+              <div
+                style={{
+                  flexGrow: 1,
+                  maxWidth: "60%",
+                  margin: "0 auto",
+                  padding: "clamp(2px, 0.5vw, 4px) clamp(8px, 1.4vw, 14px)",
+                  background: "#fff",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  borderRadius: "clamp(4px, 0.7vw, 7px)",
+                  fontSize: "clamp(9px, 1.2vw, 13px)",
+                  color: "#5f6368",
+                  fontFamily: "system-ui, sans-serif",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  textAlign: "center",
+                }}
+              >
+                kidplayai.techseeding.com.au
+              </div>
+            </div>
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+              />
+              <img
+                src="/img/road-racer-1200.jpg"
+                srcSet="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+                width="1465"
+                height="993"
+                alt="A kid building a Road Racer craft with AI in KidPlayAI"
+                fetchPriority="high"
+                decoding="async"
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </picture>
+          </div>
+
+          {/* iPhone (Preview tab) — bottom left, foreground, tilted */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(10px, 2vw, 30px)",
+              left: "clamp(-8px, -0.6vw, 0px)",
+              width: "clamp(62px, 13%, 115px)",
+              transform: "rotate(-9deg)",
+              transformOrigin: "0% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(10px, 2vw, 20px)",
+              padding: "clamp(2px, 0.4vw, 4px)",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.42)",
+              zIndex: 4,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-iphone-preview-240.avif 240w, /img/road-racer-iphone-preview-400.avif 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-iphone-preview-240.webp 240w, /img/road-racer-iphone-preview-400.webp 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <img
+                src="/img/road-racer-iphone-preview-240.jpg"
+                srcSet="/img/road-racer-iphone-preview-240.jpg 240w, /img/road-racer-iphone-preview-400.jpg 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+                width="400"
+                height="870"
+                alt="KidPlayAI Preview tab on iPhone"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(7px, 1.5vw, 16px)",
+                }}
+              />
+            </picture>
+          </div>
+
+          {/* iPhone (AI Assistant tab) — sits next to the preview iPhone, slightly raised */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(34px, 5.5vw, 72px)",
+              left: "clamp(54px, 11%, 100px)",
+              width: "clamp(62px, 13%, 115px)",
+              transform: "rotate(-2deg)",
+              transformOrigin: "0% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(10px, 2vw, 20px)",
+              padding: "clamp(2px, 0.4vw, 4px)",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.40)",
+              zIndex: 3,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-iphone-terminal-240.avif 240w, /img/road-racer-iphone-terminal-400.avif 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-iphone-terminal-240.webp 240w, /img/road-racer-iphone-terminal-400.webp 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <img
+                src="/img/road-racer-iphone-terminal-240.jpg"
+                srcSet="/img/road-racer-iphone-terminal-240.jpg 240w, /img/road-racer-iphone-terminal-400.jpg 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+                width="400"
+                height="870"
+                alt="KidPlayAI AI Assistant tab on iPhone"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(9px, 2vw, 20px)",
+                }}
+              />
+            </picture>
+          </div>
         </div>
         <Paragraph
           style={{
             color: colors.body,
             fontSize: 14,
-            marginTop: 16,
+            marginTop: 4,
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real AI craft built by a kid using KidPlayAI. Your turn next!
+          Road Racer — a real AI craft built by a kid using KidPlayAI. Plays on browser, tablet, and phone.
         </Paragraph>
       </div>
 
