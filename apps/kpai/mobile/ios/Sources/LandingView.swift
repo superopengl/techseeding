@@ -32,7 +32,7 @@ struct LandingView: View {
                 Spacer().frame(height: proxy.safeAreaInsets.top + (compact ? 4 : 40))
                 BrandLogo(size: compact ? 40 : 60)
                 if !compact {
-                    Text("Scan a craft QR code\nto play")
+                    Text("Scan a craft QR code\nand enjoy playing")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .foregroundColor(Brand.heading)
                         .multilineTextAlignment(.center)
