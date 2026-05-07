@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { fgForHex } from "../utils/colorForName";
+import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
 import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
