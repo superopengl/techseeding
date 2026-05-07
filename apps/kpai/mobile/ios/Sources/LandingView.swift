@@ -103,7 +103,9 @@ struct LandingView: View {
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             processingPhoto = true
-            Task {
+            // Detached so the synchronous CIDetector pass doesn't run on the
+            // MainActor and freeze the UI on multi-megapixel photos.
+            Task.detached(priority: .userInitiated) {
                 let payload: String? = await {
                     if let data = try? await item.loadTransferable(type: Data.self) {
                         return ImageQRScanner.scan(data: data)
