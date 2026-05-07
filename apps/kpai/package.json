@@ -22,7 +22,7 @@
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config src/api/drizzle.config.js",
     "mobile:ios": "mobile/ios/scripts/run-simulator.sh",
     "mobile:physical": "mobile/ios/scripts/run-device.sh",
-    "mobile:release:ios": "mobile/ios/scripts/build-release.sh",
+    "mobile:release:ipa": "mobile/ios/scripts/build-release.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

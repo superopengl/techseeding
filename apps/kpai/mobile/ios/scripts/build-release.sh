@@ -3,7 +3,7 @@
 #
 # Output:
 #   mobile/ios/build/release/KidPlayAI.xcarchive
-#   mobile/ios/build/release/KidPlayAI.ipa
+#   mobile/ios/build/release/KidPlayAIViewer.ipa
 #
 # Auto-detects the team id from the Apple Distribution cert in the
 # keychain. Override with DEVELOPMENT_TEAM=… if you have multiple teams.
@@ -44,7 +44,7 @@ xcodebuild \
   archive
 
 # --- export to .ipa for App Store Connect --------------------------------
-EXPORT_OPTS=$(mktemp -t kpai-export).plist
+EXPORT_OPTS="$(mktemp -d)/kpai-export.plist"
 cat > "$EXPORT_OPTS" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -74,6 +74,13 @@ xcodebuild \
   -exportOptionsPlist "$EXPORT_OPTS" \
   -allowProvisioningUpdates
 
-rm -f "$EXPORT_OPTS"
+rm -rf "$(dirname "$EXPORT_OPTS")"
+
+# xcodebuild names the .ipa from PRODUCT_NAME (KidPlayAI). Rename so the
+# distributable matches the app's marketing name without renaming the
+# .app bundle / executable inside.
+IPA_PATH="$EXPORT_DIR/KidPlayAIViewer.ipa"
+mv -f "$EXPORT_DIR/KidPlayAI.ipa" "$IPA_PATH"
+
 echo "→ archive $ARCHIVE_PATH"
-echo "→ ipa     $EXPORT_DIR/KidPlayAI.ipa"
+echo "→ ipa     $IPA_PATH"
