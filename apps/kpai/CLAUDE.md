@@ -63,6 +63,18 @@ Summary:
 - Color palette documentation: [docs/color-palette.md](docs/color-palette.md)
 - During development, Vite dev server proxies API/WebSocket to the Fastify backend
 
+### Mobile — Craft Viewer (iOS, SwiftUI)
+
+A native iOS companion app whose sole job is to **view** crafts on a phone — kids don't author crafts on mobile, they scan a QR from the web sandbox and play the craft full-screen.
+
+- Two screens:
+  1. **Landing** — logo + buttons to scan a craft QR via the camera or pick a QR image from the photo library
+  2. **Preview** — full-screen `WKWebView` of the validated craft URL, with a top drag handle that opens a half-height drawer to scan the next craft without leaving the app
+- Only payloads that match `<KPAIPublicURL>/api/sandbox/<id>/preview` are accepted; anything else surfaces an "Invalid craft URL" pill
+- Base URL is the `KPAIPublicURL` value in `Sources/Info.plist` (default: `https://kidplayai.techseeding.com.au`)
+- Brand tokens (colors, gradient, text logo) in `Sources/Brand.swift` mirror the web `theme.js`
+- See [mobile/ios/README.md](mobile/ios/README.md) for build/run instructions (XcodeGen + Xcode 17+)
+
 ### Key Files
 
 ```
@@ -95,7 +107,7 @@ src/
     package.json          # Frontend dependencies
 devops/                   # Docker image build (Dockerfile, entrypoint, opencode config)
 deploy/                   # AWS CDK app — provisions all infra and ships the image (see Deployment section)
-mobile/ios/               # Native SwiftUI companion app (QR scan → fullscreen craft webview); see mobile/ios/README.md
+mobile/ios/               # Native SwiftUI craft viewer — scan a craft QR and play it full-screen in WKWebView; see mobile/ios/README.md
 dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
 ```
 
@@ -139,6 +151,7 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 - **Database**: PostgreSQL with Drizzle ORM
 - **PTY**: `node-pty` for server-side pseudo-terminal
 - **AI Agent**: OpenCode CLI backed by DeepSeek (spawned per student)
+- **Mobile (iOS craft viewer)**: SwiftUI, WKWebView for craft preview, AVFoundation + CIDetector for QR scanning, XcodeGen for project generation (Xcode 17+, iOS target)
 - **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
 - **Cloud / IaC**: AWS, CDK v2 (JavaScript)
 
