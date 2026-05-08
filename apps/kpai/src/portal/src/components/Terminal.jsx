@@ -44,7 +44,7 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
     fitAddon.fit();
     termRef.current = term;
 
-    const loadingTimeout = setTimeout(() => setLoading(false), 10000);
+    const loadingTimeout = setTimeout(() => setLoading(false), 30000);
 
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(
@@ -69,7 +69,8 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
         term.write(data);
         if (loading) { 
           const cleanData = stripAnsi(data);
-          if (cleanData.includes(`${sandboxId}`)) {
+          const keywords = ['kpai', 'sandbox', 'DeepSeek', 'master', '/status', 'anything']
+          if (keywords.some(s => cleanData.includes(s))) {
             setLoading(false);
           }
         }
