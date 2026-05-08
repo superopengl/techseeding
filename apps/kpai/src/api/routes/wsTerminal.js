@@ -229,7 +229,14 @@ export function wsTerminal(fastify) {
       });
 
       socket.on("message", (msg) => {
-        const { type, data, cols, rows } = JSON.parse(msg);
+        let parsed;
+        try {
+          parsed = JSON.parse(msg);
+        } catch (err) {
+          fastify.log.warn({ sandboxId, err }, "Discarded malformed terminal message");
+          return;
+        }
+        const { type, data, cols, rows } = parsed;
         if (type === "input") {
           if (data === "\r" || data === "\n") {
             if (printableSinceEnter > 0) {
@@ -258,21 +265,25 @@ export function wsTerminal(fastify) {
       });
 
       socket.on("close", async () => {
-        cleanupIndexFileWatch();
-        ptyProcess.kill();
-        // Drain any token-usage records the plugin wrote before the process exited,
-        // and wait for the resulting session_message inserts to land.
-        await tokenUsageWatch.drain();
-        tokenUsageWatch.cleanup();
-        // Drop the per-session usage log now that records are in the DB; a fresh
-        // file is created on the next connection.
-        await fs.promises.unlink(path.join(sandboxWorkDir, USAGE_REL_PATH)).catch(() => {});
-        await db.update(sandboxSession)
-          .set({ closedAt: new Date() })
-          .where(eq(sandboxSession.id, session.id))
-          .catch((err) => {
-            fastify.log.error({ sessionId: session.id, err }, "Failed to close sandbox session");
-          });
+        try {
+          cleanupIndexFileWatch();
+          try { ptyProcess.kill(); } catch { /* already exited */ }
+          // Drain any token-usage records the plugin wrote before the process exited,
+          // and wait for the resulting session_message inserts to land.
+          await tokenUsageWatch.drain();
+          tokenUsageWatch.cleanup();
+          // Drop the per-session usage log now that records are in the DB; a fresh
+          // file is created on the next connection.
+          await fs.promises.unlink(path.join(sandboxWorkDir, USAGE_REL_PATH)).catch(() => {});
+          await db.update(sandboxSession)
+            .set({ closedAt: new Date() })
+            .where(eq(sandboxSession.id, session.id))
+            .catch((err) => {
+              fastify.log.error({ sessionId: session.id, err }, "Failed to close sandbox session");
+            });
+        } catch (err) {
+          fastify.log.error({ sandboxId, err }, "Error during terminal session cleanup");
+        }
       });
     });
   });

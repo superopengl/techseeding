@@ -165,6 +165,17 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
   });
 }
 
+// One Fastify process serves every concurrent WebSocket terminal session, so a
+// throw inside a per-user pty/socket/fs.watch callback would otherwise tear
+// down everyone's session. Log and keep running — at worst the offending
+// session breaks, the rest survive.
+process.on("uncaughtException", (err) => {
+  fastify.log.error({ err }, "uncaughtException — keeping process alive");
+});
+process.on("unhandledRejection", (reason) => {
+  fastify.log.error({ err: reason }, "unhandledRejection — keeping process alive");
+});
+
 // --- Start ---
 
 function redactEnvValue(name, value) {
