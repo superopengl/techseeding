@@ -130,9 +130,10 @@ export class KidPlayAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    const scaleLevel = 1;
     const taskDef = new FargateTaskDefinition(this, "Task", {
-      cpu: 1024,
-      memoryLimitMiB: 2048,
+      cpu: 1024 * scaleLevel,
+      memoryLimitMiB: 2048 * scaleLevel,
       volumes: [
         {
           name: "sandbox",
