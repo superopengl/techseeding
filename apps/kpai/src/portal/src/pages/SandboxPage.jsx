@@ -539,6 +539,7 @@ export function SandboxPage() {
           onChange={(e) => setRenameDraft(e.target.value)}
           onPressEnter={saveRename}
           maxLength={50}
+          autoFocus
           placeholder="Enter a name for your craft"
           showCount
         />
