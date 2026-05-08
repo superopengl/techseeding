@@ -264,6 +264,9 @@ export function wsTerminal(fastify) {
         // and wait for the resulting session_message inserts to land.
         await tokenUsageWatch.drain();
         tokenUsageWatch.cleanup();
+        // Drop the per-session usage log now that records are in the DB; a fresh
+        // file is created on the next connection.
+        await fs.promises.unlink(path.join(sandboxWorkDir, USAGE_REL_PATH)).catch(() => {});
         await db.update(sandboxSession)
           .set({ closedAt: new Date() })
           .where(eq(sandboxSession.id, session.id))
