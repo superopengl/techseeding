@@ -5,7 +5,6 @@ import fs from "fs";
 import path from "path";
 import { eq, and } from "drizzle-orm";
 import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
-import { stripAnsi } from "../lib/stripAnsi.js";
 import { verifyToken } from "../lib/verifyToken.js";
 
 function sendError(socket, message) {
@@ -21,17 +20,27 @@ async function lookupSandbox(sandboxId, userId) {
   return record || null;
 }
 
+const KPAI_DIR = ".kpai";
+const USAGE_REL_PATH = `${KPAI_DIR}/usage.jsonl`;
+
 function configureOpenCode(sandboxWorkDirPath) {
-  fs.mkdirSync(sandboxWorkDirPath, { recursive: true });
+  fs.mkdirSync(path.join(sandboxWorkDirPath, KPAI_DIR), { recursive: true });
+  // Pre-create the usage log so nono's --write-file rule attaches to a real path
+  // and the parent watcher can fs.watch it without races.
+  fs.writeFileSync(path.join(sandboxWorkDirPath, USAGE_REL_PATH), "", { flag: "a" });
 }
 
 function spawnTerminal(sandboxWorkDirPath) {
+  // Use `nono run` (keeps nono as parent and forwards stdio) instead of `nono wrap`
+  // (exec into command). On Linux/Landlock with nono v0.49, `wrap` swallows the
+  // child's stdout under a PTY, so opencode's TUI never reaches the websocket.
   return pty.spawn("nono", [
-    "wrap",
+    "run",
     "--silent",
     "--allow-cwd",
     "--profile", "opencode",
     "--write-file", path.join(sandboxWorkDirPath, "index.html"),
+    "--write-file", path.join(sandboxWorkDirPath, USAGE_REL_PATH),
     "--", "opencode", ".",
   ], {
     name: "xterm-256color",
@@ -41,8 +50,91 @@ function spawnTerminal(sandboxWorkDirPath) {
     env: {
       ...process.env,
       DEEPSEEK_API_KEY: process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY,
+      // Activates the global kpai-usage opencode plugin (devops/opencode-config/plugins/),
+      // which appends per-message token usage records to this file in cwd.
+      KPAI_OPENCODE_TOKEN_USAGE_FILENAME: USAGE_REL_PATH,
     },
   });
+}
+
+function watchOpenCodeTokenUsage(sandboxWorkDirPath, sandboxId, sandboxSessionId, socket, fastify) {
+  const usagePath = path.join(sandboxWorkDirPath, USAGE_REL_PATH);
+  let offset = 0;
+  let leftover = "";
+  let reading = false;
+  const pendingDbWrites = new Set();
+
+  function persistRecord(record) {
+    const tokens = record.tokens || {};
+    const cache = tokens.cache || {};
+    const text = record.text ?? "";
+    const insert = db
+      .insert(sessionMessage)
+      .values({
+        sandboxSessionId,
+        opencodeMessageId: record.messageID,
+        opencodeSessionId: record.sessionID,
+        type: record.role,
+        content: { text },
+        contentLength: text.length,
+        providerId: record.providerID ?? null,
+        modelId: record.modelID ?? null,
+        inputTokens: tokens.input ?? 0,
+        outputTokens: tokens.output ?? 0,
+        reasoningTokens: tokens.reasoning ?? 0,
+        cacheReadTokens: cache.read ?? 0,
+        cacheWriteTokens: cache.write ?? 0,
+        cost: record.cost != null ? String(record.cost) : "0",
+      })
+      .onConflictDoNothing({ target: sessionMessage.opencodeMessageId })
+      .catch((err) => {
+        fastify.log.error({ sandboxId, messageId: record.messageID, err }, "Failed to persist session message");
+      })
+      .finally(() => pendingDbWrites.delete(insert));
+    pendingDbWrites.add(insert);
+  }
+
+  async function readNewLines() {
+    if (reading) return;
+    reading = true;
+    try {
+      const stat = await fs.promises.stat(usagePath);
+      if (stat.size <= offset) return;
+      const length = stat.size - offset;
+      const fd = await fs.promises.open(usagePath, "r");
+      try {
+        const { buffer } = await fd.read(Buffer.alloc(length), 0, length, offset);
+        offset = stat.size;
+        const text = leftover + buffer.toString("utf8");
+        const lines = text.split("\n");
+        leftover = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line) continue;
+          let record;
+          try { record = JSON.parse(line); } catch { continue; }
+          try {
+            socket.send(JSON.stringify({ type: "token-usage", ...record }));
+          } catch { /* client disconnected */ }
+          persistRecord(record);
+        }
+      } finally {
+        await fd.close();
+      }
+    } catch (err) {
+      fastify.log.error({ sandboxId, err }, "Failed to read usage file");
+    } finally {
+      reading = false;
+    }
+  }
+
+  const watcher = fs.watch(usagePath, () => { readNewLines(); });
+  return {
+    cleanup: () => watcher.close(),
+    drain: async () => {
+      await readNewLines();
+      await Promise.allSettled(pendingDbWrites);
+    },
+  };
 }
 
 function watchIndexHtml(sandboxWorkDirPath, sandboxId, socket, fastify) {
@@ -106,36 +198,14 @@ export function wsTerminal(fastify) {
 
       configureOpenCode(sandboxWorkDir);
       const ptyProcess = spawnTerminal(sandboxWorkDir);
-      const { cleanup } = watchIndexHtml(sandboxWorkDir, sandboxId, socket, fastify);
+      const { cleanup: cleanupIndexFileWatch } = watchIndexHtml(sandboxWorkDir, sandboxId, socket, fastify);
+      const tokenUsageWatch = watchOpenCodeTokenUsage(sandboxWorkDir, sandboxId, session.id, socket, fastify);
 
-      // Rate limiting: max 30 requests per minute per session
+      // Rate limiting: max 30 requests per minute per session.
+      // Counted on terminal Enter presses; conversation content is captured by the opencode plugin.
       const MAX_REQUESTS_PER_MINUTE = 30;
       const requestTimestamps = [];
-
-      // Message capture buffers
-      let inputBuffer = "";
-      let outputBuffer = "";
-      let outputDebounceTimer = null;
-      const pendingWrites = new Set();
-
-      function saveMessage(type, text) {
-        const cleaned = stripAnsi(text);
-        if (!cleaned) return;
-        const p = db.insert(sessionMessage)
-          .values({ sandboxSessionId: session.id, content: { text: cleaned }, contentLength: cleaned.length, type })
-          .catch((err) => {
-            fastify.log.error({ sessionId: session.id, type, err }, "Failed to save session message");
-          })
-          .finally(() => pendingWrites.delete(p));
-        pendingWrites.add(p);
-      }
-
-      function flushOutput() {
-        if (outputBuffer.length > 0) {
-          saveMessage("response", outputBuffer);
-          outputBuffer = "";
-        }
-      }
+      let printableSinceEnter = 0;
 
       ptyProcess.onData((data) => {
         try {
@@ -149,9 +219,6 @@ export function wsTerminal(fastify) {
         } catch {
           // client disconnected
         }
-        outputBuffer += data;
-        clearTimeout(outputDebounceTimer);
-        outputDebounceTimer = setTimeout(flushOutput, 1000);
       });
 
       ptyProcess.onExit(({ exitCode, signal }) => {
@@ -164,10 +231,8 @@ export function wsTerminal(fastify) {
       socket.on("message", (msg) => {
         const { type, data, cols, rows } = JSON.parse(msg);
         if (type === "input") {
-          ptyProcess.write(data);
           if (data === "\r" || data === "\n") {
-            if (inputBuffer.length > 0) {
-              // Rate limit check
+            if (printableSinceEnter > 0) {
               const now = Date.now();
               while (requestTimestamps.length > 0 && now - requestTimestamps[0] > 60_000) {
                 requestTimestamps.shift();
@@ -176,34 +241,29 @@ export function wsTerminal(fastify) {
                 try {
                   socket.send(JSON.stringify({ type: "output", data: "\x1b[33mRate limit reached. Please wait a moment before sending more messages.\x1b[0m\r\n" }));
                 } catch { /* client disconnected */ }
-                inputBuffer = "";
+                printableSinceEnter = 0;
                 return;
               }
               requestTimestamps.push(now);
-              // Flush any pending output before saving the new input
-              clearTimeout(outputDebounceTimer);
-              flushOutput();
-              saveMessage("request", inputBuffer);
-              inputBuffer = "";
+              printableSinceEnter = 0;
             }
           } else if (data === "\x7f" || data === "\b") {
-            // Backspace — remove last character
-            inputBuffer = inputBuffer.slice(0, -1);
+            if (printableSinceEnter > 0) printableSinceEnter -= 1;
           } else if (data.length === 1 && data >= " ") {
-            // Printable character
-            inputBuffer += data;
+            printableSinceEnter += 1;
           }
+          ptyProcess.write(data);
         }
         if (type === "resize") ptyProcess.resize(cols, rows);
       });
 
       socket.on("close", async () => {
-        clearTimeout(outputDebounceTimer);
-        flushOutput();
-        cleanup();
+        cleanupIndexFileWatch();
         ptyProcess.kill();
-        // Wait for any in-flight message inserts to land before marking the session closed
-        await Promise.allSettled(pendingWrites);
+        // Drain any token-usage records the plugin wrote before the process exited,
+        // and wait for the resulting session_message inserts to land.
+        await tokenUsageWatch.drain();
+        tokenUsageWatch.cleanup();
         await db.update(sandboxSession)
           .set({ closedAt: new Date() })
           .where(eq(sandboxSession.id, session.id))
