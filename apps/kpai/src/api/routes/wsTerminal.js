@@ -207,6 +207,21 @@ export function wsTerminal(fastify) {
       const requestTimestamps = [];
       let printableSinceEnter = 0;
 
+      // Heartbeat: half-open TCP / NAT timeouts can leave the socket in a state
+      // where 'close' never fires, so the pty + watchers would leak. Ping every
+      // 30s and terminate if the client misses two consecutive pongs (~60s).
+      let alive = true;
+      socket.on("pong", () => { alive = true; });
+      const heartbeat = setInterval(() => {
+        if (!alive) {
+          fastify.log.warn({ sandboxId }, "Terminal WS heartbeat lost; terminating");
+          try { socket.terminate(); } catch { /* already gone */ }
+          return;
+        }
+        alive = false;
+        try { socket.ping(); } catch { /* socket closed between checks */ }
+      }, 30_000);
+
       ptyProcess.onData((data) => {
         try {
           // Strip sequences that cause xterm.js issues:
@@ -266,6 +281,7 @@ export function wsTerminal(fastify) {
 
       socket.on("close", async () => {
         try {
+          clearInterval(heartbeat);
           cleanupIndexFileWatch();
           try { ptyProcess.kill(); } catch { /* already exited */ }
           // Drain any token-usage records the plugin wrote before the process exited,
