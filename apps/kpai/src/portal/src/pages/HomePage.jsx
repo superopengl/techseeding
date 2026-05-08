@@ -3,6 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { Button, Typography, Card, Row, Col } from "antd";
 import {
   RocketOutlined,
+  RobotOutlined,
   ThunderboltOutlined,
   SmileOutlined,
   BulbOutlined,
@@ -10,6 +11,7 @@ import {
   TeamOutlined,
   LoginOutlined,
   SafetyCertificateOutlined,
+  LockOutlined,
   BookOutlined,
   CalendarOutlined,
   LaptopOutlined,
@@ -217,7 +219,7 @@ const beyondCrafts = [
 
 const parentReasons = [
   {
-    icon: <BulbOutlined />,
+    icon: <RobotOutlined />,
     color: colors.accentAmber,
     title: "AI-Ready for the Future",
     description: "AI is reshaping every field. Give your child a head start — they'll learn to use AI as a creative tool, turning their own ideas into real projects and building confidence with technology that will define their generation.",
@@ -227,6 +229,12 @@ const parentReasons = [
     color: colors.accentPurple,
     title: "Sparks Curiosity & Creativity",
     description: "When kids see AI bring their ideas to life, it lights a fire. They start asking \"what if?\" and \"how does that work?\" — building genuine interest in games, science, engineering, and problem-solving through play.",
+  },
+  {
+    icon: <LockOutlined />,
+    color: colors.accentBlue,
+    title: "Kid-Safe by Design",
+    description: "Unlike general-purpose AI assistants, the KidPlayAI agent is purpose-built for young creators. It steers away from content and actions that aren't appropriate for their age — so kids can explore freely, and parents can relax.",
   },
   {
     icon: <SafetyCertificateOutlined />,
@@ -1026,9 +1034,9 @@ export function HomePage() {
         >
           AI is the most powerful creative tool of their lifetime — let them start using it now
         </Paragraph>
-        <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <Row gutter={[32, 32]} style={{ maxWidth: 1100, margin: "0 auto" }}>
           {parentReasons.map((r, i) => (
-            <Col xs={24} sm={8} key={i}>
+            <Col xs={24} sm={12} md={6} key={i}>
               <div
                 style={{
                   width: 64,
