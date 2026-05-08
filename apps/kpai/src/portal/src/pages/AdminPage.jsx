@@ -619,14 +619,22 @@ export function AdminPage() {
                 key={item.id}
                 style={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "stretch",
                   justifyContent: "space-between",
-                  padding: "12px 0",
                   borderBottom: `1px solid ${colors.borderLight}`,
+                  transition: "background 0.15s",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = colors.mintBg)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "")}
               >
-                <div>
+                <div style={{ padding: "12px", flex: 1 }}>
                   <div style={{ fontWeight: 500, color: colors.heading }}>{item.title || "Untitled Sandbox"}</div>
+                  <Typography.Text
+                    copyable={{ text: item.id, tooltips: ["Copy sandbox id", "Copied"] }}
+                    style={{ fontSize: 11, color: colors.muted, fontFamily: "monospace" }}
+                  >
+                    {item.id}
+                  </Typography.Text>
                   <div style={{ fontSize: 12, color: colors.muted }}>
                     Created {new Date(item.createdAt).toLocaleString()}
                   </div>
@@ -646,7 +654,9 @@ export function AdminPage() {
                 </div>
                 <Button
                   type="primary"
+                  size="large"
                   icon={<CodeOutlined />}
+                  style={{ height: "auto", borderRadius: 0 }}
                   onClick={() => {
                     setReviewSandbox(item);
                     setReviewOpen(true);
