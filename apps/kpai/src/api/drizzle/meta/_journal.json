@@ -43,6 +43,13 @@
       "when": 1778026037010,
       "tag": "0005_foamy_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778201414961,
+      "tag": "0006_mixed_spiral",
+      "breakpoints": true
     }
   ]
 }

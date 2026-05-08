@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, date, index, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, date, index, uniqueIndex, varchar, numeric } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
@@ -88,10 +88,21 @@ export const enquiry = pgTable("enquiry", {
 export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
   sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => sandboxSession.id),
+  opencodeMessageId: text("opencode_message_id"),
+  opencodeSessionId: text("opencode_session_id"),
+  type: text("type").notNull(), // user | assistant
   content: jsonb("content").notNull(),
   contentLength: integer("content_length").notNull().default(0),
-  type: text("type").notNull(), // request | response
+  providerId: text("provider_id"),
+  modelId: text("model_id"),
+  inputTokens: integer("input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
+  reasoningTokens: integer("reasoning_tokens").notNull().default(0),
+  cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+  cacheWriteTokens: integer("cache_write_tokens").notNull().default(0),
+  cost: numeric("cost", { precision: 12, scale: 6 }).notNull().default("0"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => [
   index("session_message_sandbox_session_id_idx").on(table.sandboxSessionId),
+  uniqueIndex("session_message_opencode_message_id_idx").on(table.opencodeMessageId),
 ]);
