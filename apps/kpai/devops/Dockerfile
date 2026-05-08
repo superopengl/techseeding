@@ -17,7 +17,7 @@ RUN corepack enable
 
 # Install opencode CLI globally via pnpm, locked to a known-good version
 ENV PNPM_HOME="/root/.local/share/pnpm" \
-    PATH="/root/.local/share/pnpm:${PATH}"
+    PATH="/root/.local/share/pnpm/bin:/root/.local/share/pnpm:${PATH}"
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm add -g opencode-ai@1.14.41
 
