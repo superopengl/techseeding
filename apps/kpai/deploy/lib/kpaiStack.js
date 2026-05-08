@@ -121,7 +121,7 @@ export class KidPlayAiStack extends Stack {
 
     const ecsCluster = new Cluster(this, "Cluster", {
       vpc,
-      containerInsightsV2: ContainerInsights.DISABLED,
+      containerInsightsV2: ContainerInsights.ENHANCED,
     });
 
     const logGroup = new LogGroup(this, "LogGroup", {
