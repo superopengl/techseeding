@@ -15,11 +15,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Enable pnpm (version is pinned via the "packageManager" field in package.json)
 RUN corepack enable
 
-# Install opencode CLI globally via pnpm, locked to a known-good version
+# Install opencode CLI globally via pnpm, locked to a known-good version.
+# No store cache mount here: pnpm hard-links global package files from the
+# store, and a cache mount would discard those files after the layer is built.
 ENV PNPM_HOME="/root/.local/share/pnpm" \
     PATH="/root/.local/share/pnpm/bin:/root/.local/share/pnpm:${PATH}"
-RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
-    pnpm add -g opencode-ai@1.14.41
+RUN pnpm add -g opencode-ai@1.14.41
 
 # Install nono (kernel-enforced sandbox for AI agent processes)
 RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/latest | grep -i location | grep -oP 'v\K[0-9.]+') && \
