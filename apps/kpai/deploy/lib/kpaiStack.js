@@ -50,6 +50,7 @@ export class KidPlayAiStack extends Stack {
       imageTag,
       cdnCertificateArn,
       dbPubliclyAccessible = false,
+      scaleLevel = 1,
     } = props;
     const appRepo = Repository.fromRepositoryName(this, "AppRepo", appRepoName);
     const isProd = stage === "prod";
@@ -130,7 +131,6 @@ export class KidPlayAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    const scaleLevel = 1;
     const taskDef = new FargateTaskDefinition(this, "Task", {
       cpu: 1024 * scaleLevel,
       memoryLimitMiB: 2048 * scaleLevel,
