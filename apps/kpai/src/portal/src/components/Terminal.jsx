@@ -44,6 +44,8 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
     fitAddon.fit();
     termRef.current = term;
 
+    const loadingTimeout = setTimeout(() => setLoading(false), 10000);
+
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(
       `${proto}//${location.host}/api/ws?sandboxId=${sandboxId}`
@@ -102,6 +104,7 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
 
     return () => {
       cancelled = true;
+      clearTimeout(loadingTimeout);
       resizeObserver.disconnect();
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CLOSING) {
         ws.close();
