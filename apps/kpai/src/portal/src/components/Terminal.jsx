@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Typography, Alert, Button } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined, CloseOutlined } from "@ant-design/icons";
 import { Loading } from "./Loading";
 import { Terminal as XTerm } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
@@ -134,6 +134,19 @@ export function Terminal({ sandboxId, onFileChanged, onSessionEnd }) {
       <div ref={containerRef} style={{ height: "100%", width: "100%" }} />
       {!sessionEnded && loading && (
         <div style={maskStyle}>
+          <Button
+            type="text"
+            shape="circle"
+            icon={<CloseOutlined />}
+            onClick={() => setLoading(false)}
+            aria-label="Dismiss loading"
+            style={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              color: colors.primary,
+            }}
+          />
           <Loading
             size="large"
             description={<span style={{ fontSize: 18 }}>Starting AI assistant…</span>}
