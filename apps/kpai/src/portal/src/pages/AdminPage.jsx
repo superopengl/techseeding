@@ -631,11 +631,17 @@ export function AdminPage() {
                     Created {new Date(item.createdAt).toLocaleString()}
                   </div>
                   <div style={{ fontSize: 12 }}>
-                    <span style={{ color: colors.accentBlue }}>Request: <b>{Number(item.totalRequestLength || 0).toLocaleString()}</b></span>
+                    <span style={{ color: colors.accentBlue }}>Input: <b>{Number(item.inputTokens || 0).toLocaleString()}</b></span>
                     {" · "}
-                    <span style={{ color: colors.accentPurple }}>Response: <b>{Number(item.totalResponseLength || 0).toLocaleString()}</b></span>
+                    <span style={{ color: colors.accentPurple }}>Output: <b>{Number(item.outputTokens || 0).toLocaleString()}</b></span>
                     {" · "}
-                    <span style={{ color: colors.accentAmber }}>Total: <b>{(Number(item.totalRequestLength || 0) + Number(item.totalResponseLength || 0)).toLocaleString()}</b></span>
+                    <span style={{ color: colors.muted }}>Reasoning: <b>{Number(item.reasoningTokens || 0).toLocaleString()}</b></span>
+                    {" · "}
+                    <span style={{ color: colors.muted }}>Cache R: <b>{Number(item.cacheReadTokens || 0).toLocaleString()}</b></span>
+                    {" · "}
+                    <span style={{ color: colors.muted }}>Cache W: <b>{Number(item.cacheWriteTokens || 0).toLocaleString()}</b></span>
+                    {" · "}
+                    <span style={{ color: colors.accentAmber }}>Cost: <b>${Number(item.cost || 0).toFixed(4)}</b></span>
                   </div>
                 </div>
                 <Button

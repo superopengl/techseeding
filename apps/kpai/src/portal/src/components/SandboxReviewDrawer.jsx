@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Timeline, Tag, Button, ConfigProvider, theme as antTheme, Modal, message, Typography, Input } from "antd";
-import { RightOutlined, DownOutlined, RobotOutlined, QrcodeOutlined, ClearOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
+import { Drawer, Tag, Button, Checkbox, ConfigProvider, theme as antTheme, Modal, message, Typography, Input } from "antd";
+import { QrcodeOutlined, ClearOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
 import { Loading } from "./Loading";
 import { ShareCraftModal } from "./ShareCraftModal";
 import { colors, shadows } from "../theme";
@@ -21,55 +21,68 @@ const dark = {
   outputBg: "rgba(255, 255, 255, 0.05)",
 };
 
-const OutputMessage = React.memo(function OutputMessage({ msg }) {
-  const [expanded, setExpanded] = useState(false);
+function isUserMessage(type) {
+  return type === "user" || type === "request";
+}
+
+const ChatMessage = React.memo(function ChatMessage({ msg }) {
+  const right = isUserMessage(msg.type);
   const text = msg.text;
-  const preview = text.slice(0, 80).split("\n")[0];
+  const time = new Date(msg.createdAt).toLocaleTimeString();
+  const lengthLabel = `${Number(msg.contentLength ?? text.length).toLocaleString()} chars`;
+
+  const tokensLine = !right && (
+    msg.inputTokens || msg.outputTokens || msg.reasoningTokens ||
+    msg.cacheReadTokens || msg.cacheWriteTokens || msg.cost
+  ) ? (
+    <>
+      in {Number(msg.inputTokens || 0).toLocaleString()}
+      {" · "}out {Number(msg.outputTokens || 0).toLocaleString()}
+      {" · "}reason {Number(msg.reasoningTokens || 0).toLocaleString()}
+      {" · "}cache R/W {Number(msg.cacheReadTokens || 0).toLocaleString()}/{Number(msg.cacheWriteTokens || 0).toLocaleString()}
+      {" · "}${Number(msg.cost || 0).toFixed(4)}
+    </>
+  ) : null;
 
   return (
-    <div>
-      <div
-        onClick={() => setExpanded(!expanded)}
-        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-      >
-        {expanded
-          ? <DownOutlined style={{ fontSize: 10, color: dark.textMuted }} />
-          : <RightOutlined style={{ fontSize: 10, color: dark.textMuted }} />
-        }
-        <Tag style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>AI</Tag>
-        <span style={{ color: dark.textMuted, fontSize: 11 }}>
-          {new Date(msg.createdAt).toLocaleTimeString()}
-        </span>
-        {!expanded && (
-          <span style={{ color: dark.textMuted, fontSize: 12, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-            {preview}{text.length > 80 ? "…" : ""}
-          </span>
-        )}
-      </div>
-      {expanded && (
+    <div style={{
+      display: "flex",
+      justifyContent: right ? "flex-end" : "flex-start",
+      marginBottom: 12,
+    }}>
+      <div style={{ maxWidth: "75%", display: "flex", flexDirection: "column", alignItems: right ? "flex-end" : "flex-start" }}>
         <pre style={{
-          margin: "6px 0 0 16px",
-          fontSize: 12,
+          margin: 0,
+          padding: "10px 14px",
+          borderRadius: 12,
+          background: right ? "rgba(67, 184, 140, 0.35)" : "rgba(255, 255, 255, 0.06)",
+          border: `1px solid ${right ? "rgba(67, 184, 140, 0.4)" : dark.border}`,
+          color: right ? "#fff" : dark.text,
+          fontSize: 13,
           lineHeight: 1.5,
+          fontFamily: "monospace",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",
-          color: dark.text,
-          fontFamily: "monospace",
-          maxHeight: 300,
+          maxHeight: 360,
           overflow: "auto",
-          padding: "8px 12px",
-          borderRadius: 8,
-          background: dark.outputBg,
-          border: `1px solid ${dark.border}`,
         }}>
-          {text}
+          {text || <span style={{ color: dark.textMuted, fontStyle: "italic" }}>(empty)</span>}
         </pre>
-      )}
+        <div style={{
+          marginTop: 4,
+          fontSize: 10,
+          color: dark.textMuted,
+          textAlign: right ? "right" : "left",
+        }}>
+          <span>{time} · {lengthLabel}</span>
+          {tokensLine && <div>{tokensLine}</div>}
+        </div>
+      </div>
     </div>
   );
 });
 
-const MessageTimeline = React.memo(function MessageTimeline({ sessions, showAi }) {
+const ChatList = React.memo(function ChatList({ sessions, showAi }) {
   if (sessions.length === 0) {
     return (
       <div style={{ padding: 24, color: dark.textMuted, textAlign: "center" }}>
@@ -78,73 +91,26 @@ const MessageTimeline = React.memo(function MessageTimeline({ sessions, showAi }
     );
   }
 
-  const items = [];
-  sessions.forEach((session, si) => {
-    items.push({
-      color: "blue",
-      content: (
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
-          <span style={{ color: dark.textMuted, fontSize: 12 }}>
-            {new Date(session.createdAt).toLocaleString()}
-            {session.closedAt && ` — ${new Date(session.closedAt).toLocaleString()}`}
-          </span>
-        </div>
-      ),
-    });
-
-    session.messages.forEach((msg) => {
-      if (msg.type === "request") {
-        items.push({
-          color: "green",
-          content: (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <Tag color="green" style={{ fontSize: 10, lineHeight: "16px", margin: 0 }}>Student</Tag>
-                <span style={{ color: dark.textMuted, fontSize: 11 }}>
-                  {new Date(msg.createdAt).toLocaleTimeString()}
-                </span>
-              </div>
-              <pre style={{
-                margin: 0,
-                fontSize: 13,
-                lineHeight: 1.5,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                color: "#fff",
-                fontWeight: 600,
-                fontFamily: "monospace",
-                padding: "10px 14px",
-                borderRadius: 8,
-                background: "rgba(67, 184, 140, 0.35)",
-                border: "1px solid rgba(67, 184, 140, 0.4)",
-              }}>
-                {msg.text}
-              </pre>
-            </div>
-          ),
-        });
-      } else if (showAi) {
-        if (!msg.text) return;
-        items.push({
-          color: "gray",
-          content: <OutputMessage msg={msg} />,
-        });
-      }
-    });
-
-    if (session.messages.length === 0) {
-      items.push({
-        color: "gray",
-        content: <span style={{ color: dark.textMuted, fontSize: 13 }}>No messages in this session.</span>,
-      });
-    }
-  });
-
   return (
     <ConfigProvider theme={{ algorithm: antTheme.darkAlgorithm }}>
       <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
-        <Timeline items={items} />
+        {sessions.map((session, si) => {
+          const visibleMessages = showAi
+            ? session.messages
+            : session.messages.filter((m) => isUserMessage(m.type));
+          return (
+            <div key={session.sessionId} style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "8px 0 16px" }}>
+                <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
+                <span style={{ color: dark.textMuted, fontSize: 11 }}>
+                  {new Date(session.createdAt).toLocaleString()}
+                  {session.closedAt && ` — ${new Date(session.closedAt).toLocaleString()}`}
+                </span>
+              </div>
+              {visibleMessages.map((msg) => <ChatMessage key={msg.id} msg={msg} />)}
+            </div>
+          );
+        })}
       </div>
     </ConfigProvider>
   );
@@ -155,7 +121,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
   const [isDragging, setIsDragging] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showAi, setShowAi] = useState(false);
+  const [showAi, setShowAi] = useState(true);
   const [previewKey, setPreviewKey] = useState(0);
   const [showShare, setShowShare] = useState(false);
   const [sweeping, setSweeping] = useState(false);
@@ -282,13 +248,9 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
             Upload
           </Button>
 
-          <Button
-            type={showAi ? "primary" : "default"}
-            icon={<RobotOutlined />}
-            onClick={() => setShowAi((v) => !v)}
-          >
-            {showAi ? "Hide AI" : "Show AI"}
-          </Button>
+          <Checkbox checked={showAi} onChange={(e) => setShowAi(e.target.checked)}>
+            Show AI
+          </Checkbox>
         </span>
       }
     >
@@ -341,7 +303,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
               <Loading />
             </div>
           ) : (
-            <MessageTimeline sessions={sessions} showAi={showAi} />
+            <ChatList sessions={sessions} showAi={showAi} />
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { db } from "../db/index.js";
 import { sandboxSession, sessionMessage } from "../db/schema.js";
-import { eq, asc, desc, inArray } from "drizzle-orm";
+import { and, eq, exists, asc, desc, inArray } from "drizzle-orm";
 import { success } from "../lib/response.js";
 
 const DEFAULT_SESSION_LIMIT = 20;
@@ -22,7 +22,17 @@ export function adminSandboxMessages(fastify) {
         closedAt: sandboxSession.closedAt,
       })
       .from(sandboxSession)
-      .where(eq(sandboxSession.sandboxId, sandboxId))
+      .where(
+        and(
+          eq(sandboxSession.sandboxId, sandboxId),
+          exists(
+            db
+              .select({ one: sessionMessage.id })
+              .from(sessionMessage)
+              .where(eq(sessionMessage.sandboxSessionId, sandboxSession.id))
+          )
+        )
+      )
       .orderBy(desc(sandboxSession.createdAt))
       .limit(limit)
       .offset(offset);
@@ -38,6 +48,15 @@ export function adminSandboxMessages(fastify) {
         sessionId: sessionMessage.sandboxSessionId,
         type: sessionMessage.type,
         content: sessionMessage.content,
+        contentLength: sessionMessage.contentLength,
+        providerId: sessionMessage.providerId,
+        modelId: sessionMessage.modelId,
+        inputTokens: sessionMessage.inputTokens,
+        outputTokens: sessionMessage.outputTokens,
+        reasoningTokens: sessionMessage.reasoningTokens,
+        cacheReadTokens: sessionMessage.cacheReadTokens,
+        cacheWriteTokens: sessionMessage.cacheWriteTokens,
+        cost: sessionMessage.cost,
         createdAt: sessionMessage.createdAt,
       })
       .from(sessionMessage)
@@ -47,7 +66,21 @@ export function adminSandboxMessages(fastify) {
     const messagesBySession = new Map();
     for (const m of messages) {
       const arr = messagesBySession.get(m.sessionId) || [];
-      arr.push({ id: m.id, type: m.type, content: m.content, createdAt: m.createdAt });
+      arr.push({
+        id: m.id,
+        type: m.type,
+        content: m.content,
+        contentLength: m.contentLength,
+        providerId: m.providerId,
+        modelId: m.modelId,
+        inputTokens: m.inputTokens,
+        outputTokens: m.outputTokens,
+        reasoningTokens: m.reasoningTokens,
+        cacheReadTokens: m.cacheReadTokens,
+        cacheWriteTokens: m.cacheWriteTokens,
+        cost: Number(m.cost ?? 0),
+        createdAt: m.createdAt,
+      });
       messagesBySession.set(m.sessionId, arr);
     }
 

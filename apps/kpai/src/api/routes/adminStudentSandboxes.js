@@ -19,12 +19,12 @@ export function adminStudentSandboxes(fastify) {
           description: sandbox.description,
           createdAt: sandbox.createdAt,
           updatedAt: sandbox.updatedAt,
-          totalRequestLength: sum(
-            sql`CASE WHEN ${sessionMessage.type} = 'request' THEN ${sessionMessage.contentLength} ELSE 0 END`
-          ).as("total_request_length"),
-          totalResponseLength: sum(
-            sql`CASE WHEN ${sessionMessage.type} = 'response' THEN ${sessionMessage.contentLength} ELSE 0 END`
-          ).as("total_response_length"),
+          inputTokens: sum(sessionMessage.inputTokens).mapWith(Number).as("input_tokens"),
+          outputTokens: sum(sessionMessage.outputTokens).mapWith(Number).as("output_tokens"),
+          reasoningTokens: sum(sessionMessage.reasoningTokens).mapWith(Number).as("reasoning_tokens"),
+          cacheReadTokens: sum(sessionMessage.cacheReadTokens).mapWith(Number).as("cache_read_tokens"),
+          cacheWriteTokens: sum(sessionMessage.cacheWriteTokens).mapWith(Number).as("cache_write_tokens"),
+          cost: sum(sessionMessage.cost).mapWith(Number).as("cost"),
         })
         .from(sandbox)
         .leftJoin(sandboxSession, eq(sandboxSession.sandboxId, sandbox.id))
