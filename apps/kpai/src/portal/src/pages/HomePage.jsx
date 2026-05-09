@@ -282,7 +282,7 @@ const faqs = [
   },
   {
     q: "How is it safe for kids to use AI?",
-    a: "Our AI agent is purpose-built for kids — it runs with a restricted tool allowlist, all activity happens inside a sandboxed environment, and instructors supervise every session. Group sizes are capped at 6 students.",
+    a: "Our AI agent is purpose-built for kids — it runs with a restricted tool allowlist, all activity happens inside a sandboxed environment, and instructors supervise every session.",
   },
   {
     q: "What if my child gets stuck?",
