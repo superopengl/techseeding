@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Button, Typography, Card, Row, Col } from "antd";
+import { Button, Typography, Card, Row, Col, Collapse } from "antd";
 import {
   RocketOutlined,
   RobotOutlined,
@@ -22,7 +22,9 @@ import {
   FormatPainterOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import { colors, gradients, shadows, fonts } from "../theme";
+import { APP_STORE_URL } from "../constants";
 import { Logo } from "../components/Logo";
 
 // Lazy-load the enquiry form so it stays out of the initial render path. The
@@ -67,14 +69,14 @@ const steps = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     num: "1",
-    title: "Imagine an AI Craft",
+    title: "Imagine a Craft",
     description: 'Type what you want — "a racing craft with power-ups" or "a puzzle where gravity flips."',
   },
   {
     icon: <RocketOutlined />,
     color: colors.primary,
     num: "2",
-    title: "Command AI to Built It",
+    title: "Command AI to Build It",
     description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working craft.",
   },
   {
@@ -122,23 +124,46 @@ function NavBar({ onStart }) {
       }}
     >
       <Logo size={60} square />
-      <Button
-        size="large"
-        icon={<LoginOutlined />}
-        onClick={onStart}
-        style={{
-          borderRadius: 24,
-          paddingInline: 20,
-          fontWeight: 600,
-          height: 44,
-          background: colors.surface,
-          color: colors.primary,
-          border: `1.5px solid ${colors.primary}`,
-          boxShadow: shadows.cardSubtle,
-        }}
-      >
-        Login
-      </Button>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {import.meta.env.DEV && (
+          <Button
+            size="large"
+            type="primary"
+            href="/admin"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              borderRadius: 24,
+              paddingInline: 20,
+              fontWeight: 600,
+              height: 44,
+              background: colors.body,
+              color: colors.onDark,
+              border: "none",
+              boxShadow: shadows.cardSubtle,
+            }}
+          >
+            Admin Portal
+          </Button>
+        )}
+        <Button
+          size="large"
+          icon={<LoginOutlined />}
+          onClick={onStart}
+          style={{
+            borderRadius: 24,
+            paddingInline: 20,
+            fontWeight: 600,
+            height: 44,
+            background: colors.surface,
+            color: colors.primary,
+            border: `1.5px solid ${colors.primary}`,
+            boxShadow: shadows.cardSubtle,
+          }}
+        >
+          Login
+        </Button>
+      </div>
     </div>
   );
 }
@@ -236,13 +261,40 @@ const parentReasons = [
     icon: <SafetyCertificateOutlined />,
     color: colors.accentBlue,
     title: "Safe & Supervised",
-    description: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools, max 6 per group.",
+    description: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools.",
   },
   {
     icon: <ThunderboltOutlined />,
     color: colors.primary,
     title: "Real Working Crafts",
     description: "Not exercises — kids walk away with a real game they can play, share, and keep improving.",
+  },
+];
+
+const faqs = [
+  {
+    q: "Does my child need any coding experience?",
+    a: "No. KidPlayAI is built for ages 8–12 with zero experience required. Kids describe their idea in plain English and the AI agent does the building.",
+  },
+  {
+    q: "What do kids need at home?",
+    a: "A laptop or desktop with a modern browser (Chrome, Safari, or Edge). Tablets and phones work great for playing and sharing finished crafts via the KidPlayAI Viewer app.",
+  },
+  {
+    q: "How is it safe for kids to use AI?",
+    a: "Our AI agent is purpose-built for kids — it runs with a restricted tool allowlist, all activity happens inside a sandboxed environment, and instructors supervise every session. Group sizes are capped at 6 students.",
+  },
+  {
+    q: "What if my child gets stuck?",
+    a: "Instructors are present in every session to guide kids through challenges. The AI agent itself also helps explain and debug — kids build problem-solving skills alongside their crafts.",
+  },
+  {
+    q: "Can my child keep the crafts they build?",
+    a: "Yes. Finished crafts can be played anytime via QR code or the free KidPlayAI Viewer app for iPhone and iPad. Kids can keep iterating and share with friends.",
+  },
+  {
+    q: "How do I sign my child up?",
+    a: "To keep our young learners safe, we set up accounts offline. Fill out the enquiry form below and we'll follow up with schedule, pricing, and program details.",
   },
 ];
 
@@ -349,7 +401,7 @@ export function HomePage() {
               textShadow: shadows.textOnGradient,
             }}
           >
-            Unleash Kids' Ideas<br />Tell <span style={{ color: colors.ctaYellow }}>AI</span> to Build It
+            Build It. Master It.<br />For the <span style={{ color: colors.ctaYellow }}>AI</span> Generation.
           </Title>
           <Paragraph
             style={{
@@ -369,10 +421,10 @@ export function HomePage() {
             icon={<RocketOutlined />}
             style={ctaButtonStyle}
           >
-            Enquire Now
+            Enquire About Classes
           </Button>
           <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 12, marginBottom: 0 }}>
-            Parents & guardians — reach out to learn about classes, schedule & fees
+            For parents & guardians — we'll send back schedule, pricing, and class details
           </Paragraph>
           <div style={{ marginTop: 16 }}>
             <Text
@@ -626,7 +678,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real AI craft built by a kid using KidPlayAI. Plays on browser, tablet, and phone.
+          Road Racer — a real AI craft built by Leo, age 10 using KidPlayAI. Plays on browser, tablet, and phone.
         </Paragraph>
       </div>
 
@@ -770,10 +822,71 @@ export function HomePage() {
         </Row>
       </div>
 
-      {/* Programs Section */}
+      {/* For Parents Section */}
       <div
         style={{
           background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          For Parents & Guardians
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+        >
+          AI is the most powerful creative tool of their lifetime — let them start using it now
+        </Paragraph>
+        <Row gutter={[32, 32]} style={{ maxWidth: 1100, margin: "0 auto" }}>
+          {parentReasons.map((r, i) => (
+            <Col xs={24} sm={12} md={6} key={i}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: `${r.color}15`,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                  fontSize: 28,
+                  color: r.color,
+                }}
+              >
+                {r.icon}
+              </div>
+              <Title
+                level={4}
+                style={{
+                  fontFamily: fonts.heading,
+                  color: r.color,
+                  marginBottom: 8,
+                }}
+              >
+                {r.title}
+              </Title>
+              <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                {r.description}
+              </Text>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* Programs Section */}
+      <div
+        style={{
+          background: colors.canvas,
           padding: "80px 24px",
           textAlign: "center",
           position: "relative",
@@ -939,6 +1052,59 @@ export function HomePage() {
         </div>
       </div>
 
+      {/* FAQ Section */}
+      <div
+        style={{
+          background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Frequently Asked Questions
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 40, maxWidth: 500, marginInline: "auto" }}
+        >
+          Everything parents typically ask before signing up
+        </Paragraph>
+        <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "left" }}>
+          <Collapse
+            bordered={false}
+            expandIconPosition="end"
+            style={{ background: "transparent" }}
+            items={faqs.map((f, i) => ({
+              key: String(i),
+              label: (
+                <Text style={{ fontFamily: fonts.heading, fontSize: 16, color: colors.heading, fontWeight: 600 }}>
+                  {f.q}
+                </Text>
+              ),
+              children: (
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                  {f.a}
+                </Text>
+              ),
+              style: {
+                background: colors.canvas,
+                marginBottom: 12,
+                borderRadius: 16,
+                border: "none",
+                boxShadow: shadows.cardSubtle,
+              },
+            }))}
+          />
+        </div>
+      </div>
+
       {/* Beyond Crafts Section */}
       <div
         style={{
@@ -1012,65 +1178,280 @@ export function HomePage() {
         </Row>
       </div>
 
-      {/* For Parents Section */}
+      {/* Play & Share Section */}
       <div
         style={{
-          background: colors.canvas,
+          background: `linear-gradient(135deg, ${colors.terminal} 0%, ${colors.footer} 100%)`,
           padding: "80px 24px",
           textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
+        {/* Decorative circles */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background: "rgba(110,193,228,0.12)",
+            top: -80,
+            left: -90,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.14)",
+            bottom: -60,
+            right: -40,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 90,
+            height: 90,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.20)",
+            top: 60,
+            right: "12%",
+          }}
+        />
         <Title
           level={2}
           style={{
+            position: "relative",
+            zIndex: 1,
             fontFamily: fonts.heading,
             fontSize: 38,
-            color: colors.heading,
+            color: colors.onDark,
             marginBottom: 12,
           }}
         >
-          For Parents & Guardians
+          Play & Share Anywhere
         </Title>
         <Paragraph
-          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+          style={{ position: "relative", zIndex: 1, color: colors.onDarkSecondary, fontSize: 17, marginBottom: 48, maxWidth: 640, marginInline: "auto" }}
         >
-          AI is the most powerful creative tool of their lifetime — let them start using it now
+          Built crafts can be played and shared via QR code or the{" "}
+          <Link
+            href={APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: colors.ctaYellow,
+              fontWeight: 700,
+              textDecoration: "underline",
+            }}
+          >
+            KidPlayAI Viewer
+          </Link>{" "}
+          mobile app
         </Paragraph>
-        <Row gutter={[32, 32]} style={{ maxWidth: 1100, margin: "0 auto" }}>
-          {parentReasons.map((r, i) => (
-            <Col xs={24} sm={12} md={6} key={i}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            maxWidth: 520,
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "stretch",
+            gap: 28,
+          }}
+        >
+          {/* App Store QR — bare, no panel */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: 12,
+                borderRadius: 16,
+                boxShadow: "0 8px 28px rgba(0,0,0,0.35)",
+              }}
+            >
+              <QRCodeSVG
+                value={APP_STORE_URL}
+                size={148}
+                level="H"
+                bgColor="#ffffff"
+                fgColor={colors.heading}
+                imageSettings={{
+                  src: "/img/kidplayai-app-icon.png",
+                  height: 36,
+                  width: 36,
+                  excavate: true,
+                }}
+              />
+            </div>
+            <div>
               <div
                 style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 18,
-                  background: `${r.color}15`,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 16,
-                  fontSize: 28,
-                  color: r.color,
-                }}
-              >
-                {r.icon}
-              </div>
-              <Title
-                level={4}
-                style={{
                   fontFamily: fonts.heading,
-                  color: r.color,
-                  marginBottom: 8,
+                  color: colors.onDark,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  lineHeight: 1.2,
+                  marginBottom: 2,
                 }}
               >
-                {r.title}
-              </Title>
-              <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
-                {r.description}
+                App Store
+              </div>
+              <Text style={{ color: colors.onDarkSecondary, fontSize: 12, lineHeight: 1.5 }}>
+                Scan to download for iPhone & iPad
               </Text>
-            </Col>
-          ))}
-        </Row>
+            </div>
+          </div>
+
+          {/* App Store-style card */}
+          <div
+            style={{
+              background: colors.surface,
+              border: `1px solid ${colors.border}`,
+              borderRadius: 24,
+              padding: "24px 22px",
+              boxShadow: shadows.card,
+              textAlign: "left",
+            }}
+          >
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
+                <img
+                  src="/img/kidplayai-app-icon.png"
+                  alt="KidPlayAI Viewer app icon"
+                  width="84"
+                  height="84"
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    width: 84,
+                    height: 84,
+                    borderRadius: 20,
+                    boxShadow: shadows.cardSubtle,
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{
+                      fontFamily: fonts.heading,
+                      color: colors.heading,
+                      fontWeight: 700,
+                      fontSize: 18,
+                      lineHeight: 1.2,
+                      marginBottom: 2,
+                    }}
+                  >
+                    KidPlayAI Viewer
+                  </div>
+                  <Text style={{ color: colors.body, fontSize: 13 }}>
+                    Education
+                  </Text>
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: colors.accentAmber, fontSize: 13, letterSpacing: 1 }}>
+                      ★★★★★
+                    </span>
+                    <Text style={{ color: colors.body, fontSize: 12 }}>Ages 9+</Text>
+                  </div>
+                </div>
+                <Link
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: colors.primary,
+                    color: colors.onDark,
+                    border: "none",
+                    borderRadius: 999,
+                    padding: "6px 18px",
+                    fontFamily: fonts.heading,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  GET
+                </Link>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  overflow: "hidden",
+                  borderRadius: 14,
+                }}
+              >
+                <picture style={{ flex: 1 }}>
+                  <source
+                    type="image/avif"
+                    srcSet="/img/kidplayai-viewer-appstore-2-240.avif 240w, /img/kidplayai-viewer-appstore-2-400.avif 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet="/img/kidplayai-viewer-appstore-2-240.webp 240w, /img/kidplayai-viewer-appstore-2-400.webp 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <img
+                    src="/img/kidplayai-viewer-appstore-2-400.jpg"
+                    alt="KidPlayAI Viewer craft preview"
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: 14,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  />
+                </picture>
+                <picture style={{ flex: 1 }}>
+                  <source
+                    type="image/avif"
+                    srcSet="/img/kidplayai-viewer-appstore-1-240.avif 240w, /img/kidplayai-viewer-appstore-1-400.avif 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet="/img/kidplayai-viewer-appstore-1-240.webp 240w, /img/kidplayai-viewer-appstore-1-400.webp 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <img
+                    src="/img/kidplayai-viewer-appstore-1-400.jpg"
+                    alt="KidPlayAI Viewer landing screen"
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: 14,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  />
+                </picture>
+              </div>
+          </div>
+        </div>
       </div>
 
       {/* Contact / Enquiry Section */}
@@ -1233,7 +1614,6 @@ export function HomePage() {
         <div style={{ marginTop: 12, display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
           <Link href="/privacy_policy" target="_blank" rel="noopener noreferrer" >Privacy Policy</Link>
           <Link href="/terms_of_use" target="_blank" rel="noopener noreferrer">Terms of Use</Link>
-          <Link href="/admin" target="_blank" rel="noopener noreferrer">Admin Portal</Link>
         </div>
       </div>
     </div>

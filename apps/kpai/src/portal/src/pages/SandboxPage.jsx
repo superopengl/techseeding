@@ -521,7 +521,8 @@ export function SandboxPage() {
         onCancel={() => setShowShare(false)}
         sandboxId={sandboxId}
         zIndex={1002}
-        description="📱 Scan the QR code or open the URL below in any browser — show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
+        studentMode
+        description="📱 Show it off to your family and friends 🎉, stun them with what you built 🤩, and tell them how fun KidPlayAI is! 🚀"
       />
       <Modal
         title="Rename craft"

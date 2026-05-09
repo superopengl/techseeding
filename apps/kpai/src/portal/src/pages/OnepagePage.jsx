@@ -167,7 +167,7 @@ export function OnepagePage() {
                 lineHeight: 1.2,
               }}
             >
-              Unleash <span style={{ color: colors.ctaYellow }}>Kids'</span> Ideas, Tell <span style={{ color: colors.ctaYellow }}>AI</span> to Build It
+              Build It. Master It. For the <span style={{ color: colors.ctaYellow }}>AI</span> Generation.
             </Title>
             <Text style={{ color: colors.onDarkSecondary, fontSize: 13, fontWeight: 600 }}>
               AI craft maker for kids ages 8–12 — they describe a craft, AI builds it, they learn how AI thinks.
