@@ -59,10 +59,31 @@ function InlineLogo({ size, style, inverted }) {
 }
 
 function SquareLogo({ size = 128, style }) {
-  const r = size * 0.2;
-  const topFontSize = size * 0.25;
-  const aiFontSize = size * 0.5;
-  const bracketFontSize = size * 0.35;
+  const r = size * 0.22;
+  const topFontSize = size * 0.22;
+  const aiFontSize = size * 0.36;
+  const bracketFontSize = size * 0.30;
+
+  const kidPlayRef = useRef(null);
+  const aiRef = useRef(null);
+  const [matchedLen, setMatchedLen] = useState(null);
+
+  // Measure both texts and lock them to a single shared length so KidPlay
+  // and <AI> render at the same width. Re-measure once Baloo 2 finishes
+  // loading since fallback fonts have different metrics.
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (!kidPlayRef.current || !aiRef.current) return;
+      const kw = kidPlayRef.current.getComputedTextLength();
+      const aw = aiRef.current.getComputedTextLength();
+      const next = Math.max(kw, aw);
+      if (next > 0) setMatchedLen(next);
+    };
+    measure();
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+  }, [topFontSize, aiFontSize, bracketFontSize]);
 
   return (
     <svg
@@ -75,9 +96,12 @@ function SquareLogo({ size = 128, style }) {
     >
       <rect width={size} height={size} rx={r} ry={r} fill={colors.surface} />
       <text
+        ref={kidPlayRef}
         x={size / 2}
-        y={size * 0.36}
+        y={size * 0.40}
         textAnchor="middle"
+        textLength={matchedLen ?? undefined}
+        lengthAdjust="spacingAndGlyphs"
         style={{
           fontFamily: "'Baloo 2', cursive",
           fontWeight: 800,
@@ -88,10 +112,12 @@ function SquareLogo({ size = 128, style }) {
         <tspan fill={colors.primary}>Play</tspan>
       </text>
       <text
+        ref={aiRef}
         x={size / 2}
-        y={size * 0.64}
+        y={size * 0.78}
         textAnchor="middle"
-        dominantBaseline="central"
+        textLength={matchedLen ?? undefined}
+        lengthAdjust="spacingAndGlyphs"
         style={{
           fontFamily: "'Baloo 2', cursive",
           fontWeight: 700,
