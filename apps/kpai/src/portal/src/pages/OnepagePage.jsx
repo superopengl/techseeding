@@ -32,7 +32,7 @@ const reasons = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     title: "Sparks Curiosity",
-    text: "Watching AI bring ideas to life builds real interest in science, engineering, and play.",
+    text: "Driving AI to bring ideas to life builds real interest in science, engineering, and play.",
   },
   {
     icon: <SafetyCertificateOutlined />,
@@ -44,7 +44,7 @@ const reasons = [
     icon: <ThunderboltOutlined />,
     color: colors.primary,
     title: "Real Working Crafts",
-    text: "Not exercises — kids walk away with a real game they can play, share, and keep improving.",
+    text: "Not exercises — kids walk away with a real craft they can play, share, and keep improving.",
   },
 ];
 
@@ -59,7 +59,7 @@ const steps = [
     num: "2",
     color: colors.primary,
     title: "Command AI to Build It",
-    text: "They watch a real AI agent reason, plan, and create — right in front of them.",
+    text: "They harness a real AI agent to reason, plan, and create — right in front of them.",
   },
   {
     num: "3",

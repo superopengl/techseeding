@@ -52,7 +52,7 @@ const features = [
     bg: colors.amberBg,
     title: "See How AI Thinks",
     description:
-      "Watch a real AI agent reason, design, and solve problems — not hidden behind a button, but right in front of you.",
+      "Drive a real AI agent to reason, design, and solve problems — not hidden behind a button, but right in front of you.",
   },
   {
     icon: <BulbOutlined />,
@@ -255,7 +255,7 @@ const parentReasons = [
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     title: "Sparks Curiosity & Creativity",
-    description: "Watching AI bring ideas to life builds real interest in science, engineering, and play.",
+    description: "Driving AI to bring ideas to life builds real interest in science, engineering, and play.",
   },
   {
     icon: <SafetyCertificateOutlined />,
@@ -302,7 +302,7 @@ export function HomePage() {
   useEffect(() => {
     setPageTitle(
       "KidPlayAI — AI Craft Maker for Kids Ages 8-12",
-      "KidPlayAI is an AI-powered craft maker for kids ages 8-12. Kids describe a craft, watch a real AI agent reason and build it step by step, then play and share the result. Workshops, holiday camps, and online coaching available.",
+      "KidPlayAI is an AI-powered craft maker for kids ages 8-12. Kids describe a craft, harness a real AI agent to reason and build it step by step, then play and share the result. Workshops, holiday camps, and online coaching available.",
     );
   }, []);
   const navigate = useNavigate();
@@ -413,7 +413,7 @@ export function HomePage() {
               lineHeight: 1.6,
             }}
           >
-            Kids dream up AI crafts, watch AI build them — and learn how it all works along the way.
+            Kids dream up crafts, command AI to build them — and learn how it all works along the way.
           </Paragraph>
           <Button
             size="large"
@@ -678,7 +678,7 @@ export function HomePage() {
             fontStyle: "italic",
           }}
         >
-          Road Racer — a real AI craft built by Leo, age 10 using KidPlayAI. Plays on browser, tablet, and phone.
+          Road Racer — a real AI craft built by Leo, age 10, using KidPlayAI. Plays on browser, tablet, and phone.
         </Paragraph>
       </div>
 
@@ -705,7 +705,7 @@ export function HomePage() {
         <Paragraph
           style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
         >
-          Where young creators imagine AI crafts and watch AI build them — learning to think, create, and understand AI along the way
+          Where young creators imagine crafts and harness AI to build them — learning to think, create, and understand AI along the way
         </Paragraph>
         <Row gutter={[32, 32]}>
           {features.map((f, i) => (
