@@ -52,7 +52,7 @@ const steps = [
   {
     num: "1",
     color: colors.accentPurple,
-    title: "Imagine an AI Craft",
+    title: "Imagine an Craft",
     text: "Your child types what they want — \"a racing craft with power-ups\" or \"a puzzle where gravity flips.\"",
   },
   {
