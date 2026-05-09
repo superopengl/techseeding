@@ -28,6 +28,9 @@ const TermsOfUsePage = lazy(() =>
 const LogoPage = lazy(() =>
   import("./pages/LogoPage").then((m) => ({ default: m.LogoPage }))
 );
+const OnepagePage = lazy(() =>
+  import("./pages/OnepagePage").then((m) => ({ default: m.OnepagePage }))
+);
 
 function RoleGuard({ role, children }) {
   if (getRole() !== role) {
@@ -52,6 +55,7 @@ export function App() {
                 <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms_of_use" element={<TermsOfUsePage />} />
                 <Route path="/logo" element={<LogoPage />} />
+                <Route path="/onepage" element={<OnepagePage />} />
               </Routes>
             </Suspense>
           </BrowserRouter>
