@@ -11,7 +11,6 @@ import {
   TeamOutlined,
   LoginOutlined,
   SafetyCertificateOutlined,
-  LockOutlined,
   BookOutlined,
   CalendarOutlined,
   LaptopOutlined,
@@ -75,7 +74,7 @@ const steps = [
     icon: <RocketOutlined />,
     color: colors.primary,
     num: "2",
-    title: "Watch AI Build It",
+    title: "Command AI to Built It",
     description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working craft.",
   },
   {
@@ -109,17 +108,20 @@ function NavBar({ onStart }) {
         justifyContent: "space-between",
         gap: 12,
         padding: "14px clamp(16px, 4vw, 48px)",
-        position: "sticky",
+        position: "fixed",
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 100,
-        background: "linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)",
+        // background: "linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)",
+        background: 'transparent',
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(226,232,240,0.6)",
-        boxShadow: shadows.cardSubtle,
+        // borderBottom: "1px solid rgba(226,232,240,0.6)",
+        // boxShadow: shadows.cardSubtle,
       }}
     >
-      <Logo size={36} />
+      <Logo size={60} square />
       <Button
         size="large"
         icon={<LoginOutlined />}
@@ -222,25 +224,25 @@ const parentReasons = [
     icon: <RobotOutlined />,
     color: colors.accentAmber,
     title: "AI-Ready for the Future",
-    description: "AI is reshaping every field. Give your child a head start — they'll learn to use AI as a creative tool, turning their own ideas into real projects and building confidence with technology that will define their generation.",
+    description: "Your child learns to use AI as a creative tool — turning their own ideas into real projects.",
   },
   {
     icon: <ExperimentOutlined />,
     color: colors.accentPurple,
     title: "Sparks Curiosity & Creativity",
-    description: "When kids see AI bring their ideas to life, it lights a fire. They start asking \"what if?\" and \"how does that work?\" — building genuine interest in games, science, engineering, and problem-solving through play.",
-  },
-  {
-    icon: <LockOutlined />,
-    color: colors.accentBlue,
-    title: "Kid-Safe by Design",
-    description: "Unlike general-purpose AI assistants, the KidPlayAI agent is purpose-built for young creators. It steers away from content and actions that aren't appropriate for their age — so kids can explore freely, and parents can relax.",
+    description: "Watching AI bring ideas to life builds real interest in science, engineering, and play.",
   },
   {
     icon: <SafetyCertificateOutlined />,
-    color: colors.primary,
+    color: colors.accentBlue,
     title: "Safe & Supervised",
-    description: "Every session is guided by an instructor. AI tools are sandboxed with strict safety controls — no open internet, no unsafe content. Small groups so every child gets personal attention.",
+    description: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools, max 6 per group.",
+  },
+  {
+    icon: <ThunderboltOutlined />,
+    color: colors.primary,
+    title: "Real Working Crafts",
+    description: "Not exercises — kids walk away with a real game they can play, share, and keep improving.",
   },
 ];
 
@@ -288,14 +290,14 @@ export function HomePage() {
   }, [hash]);
 
   return (
-    <div style={{ minHeight: "100vh", background: colors.surface }}>
+    <div style={{ minHeight: "100vh", background: colors.surface, position: "relative" }}>
       <NavBar onStart={goLogin} />
 
       {/* Hero Section */}
       <div
         style={{
           background: gradients.hero,
-          padding: "clamp(60px, 12vw, 90px) 20px 180px",
+          padding: "clamp(120px, 18vw, 180px) 20px 220px",
           textAlign: "center",
           position: "relative",
           overflow: "hidden",
@@ -1176,7 +1178,7 @@ export function HomePage() {
         />
 
         <div style={{ position: "relative", zIndex: 1 }}>
-          <Logo size={48} style={{ display: "inline-block", marginBottom: 20 }} />
+          <Logo size={80} square style={{ display: "inline-block", marginBottom: 20 }} />
           <Title
             level={2}
             style={{
