@@ -38,7 +38,7 @@ const reasons = [
     icon: <SafetyCertificateOutlined />,
     color: colors.accentBlue,
     title: "Safe & Supervised",
-    text: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools, max 6 per group.",
+    text: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools.",
   },
   {
     icon: <ThunderboltOutlined />,
