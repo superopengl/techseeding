@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Input, Button, Alert, Typography } from "antd";
-import { SendOutlined, ReloadOutlined, BulbOutlined, EditOutlined, FileTextOutlined, CheckCircleFilled, LoadingOutlined, WarningFilled, DownOutlined, RightOutlined } from "@ant-design/icons";
+import { SendOutlined, BulbOutlined, EditOutlined, FileTextOutlined, CheckCircleFilled, LoadingOutlined, WarningFilled, DownOutlined, RightOutlined } from "@ant-design/icons";
 import { Loading } from "./Loading";
 import { apiCall } from "../api";
 import { colors, fonts, shadows } from "../theme";
@@ -143,6 +143,20 @@ function partIsRenderable(p) {
   return false;
 }
 
+function formatMessageTime(ms) {
+  if (!ms || !Number.isFinite(ms)) return "";
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return "";
+  const now = new Date();
+  const sameDay = d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+  const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  if (sameDay) return time;
+  const date = d.toLocaleDateString([], { month: "short", day: "numeric" });
+  return `${date} · ${time}`;
+}
+
 function MessageBubble({ entry }) {
   const role = entry.info?.role;
   const isUser = role === "user";
@@ -150,6 +164,8 @@ function MessageBubble({ entry }) {
   const visibleParts = parts.filter(partIsRenderable);
 
   if (visibleParts.length === 0) return null;
+
+  const time = formatMessageTime(entry.info?.time?.created);
 
   return (
     <div
@@ -161,22 +177,43 @@ function MessageBubble({ entry }) {
     >
       <div
         style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: isUser ? "flex-end" : "flex-start",
           maxWidth: "85%",
-          background: isUser ? colors.primary : colors.surface,
-          color: isUser ? colors.onDark : colors.heading,
-          borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-          padding: "10px 14px",
-          boxShadow: shadows.cardSubtle,
-          border: isUser ? "none" : `1px solid ${colors.border}`,
         }}
       >
-        {visibleParts.map((p, i) => {
-          const key = p.id || `${p.type}-${i}`;
-          if (p.type === "text") return <TextPart key={key} text={p.text} />;
-          if (p.type === "reasoning") return <ReasoningPart key={key} text={p.text} />;
-          if (p.type === "tool") return <ToolPart key={key} part={p} />;
-          return null;
-        })}
+        <div
+          style={{
+            background: isUser ? colors.primary : colors.surface,
+            color: isUser ? colors.onDark : colors.heading,
+            borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+            padding: "10px 14px",
+            boxShadow: shadows.cardSubtle,
+            border: isUser ? "none" : `1px solid ${colors.border}`,
+          }}
+        >
+          {visibleParts.map((p, i) => {
+            const key = p.id || `${p.type}-${i}`;
+            if (p.type === "text") return <TextPart key={key} text={p.text} />;
+            if (p.type === "reasoning") return <ReasoningPart key={key} text={p.text} />;
+            if (p.type === "tool") return <ToolPart key={key} part={p} />;
+            return null;
+          })}
+        </div>
+        {time && (
+          <div
+            style={{
+              fontSize: 11,
+              color: colors.muted,
+              marginTop: 3,
+              padding: isUser ? "0 6px 0 0" : "0 0 0 6px",
+              userSelect: "none",
+            }}
+          >
+            {time}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -225,30 +262,32 @@ function EmptyHint() {
   );
 }
 
-export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
-  const [phase, setPhase] = useState("starting"); // starting | ready | ended
+export function Conversation({ sandboxId, onFileChanged }) {
+  const [phase, setPhase] = useState("starting"); // starting | ready | disconnected
   const [messages, setMessages] = useState(() => new Map());
   const [order, setOrder] = useState([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [reconnectKey, setReconnectKey] = useState(0);
   const wsRef = useRef(null);
   const scrollRef = useRef(null);
+  // Texts the user submitted while we weren't connected; flushed in order on
+  // the next "ready" event so a click during a transient disconnect doesn't
+  // get lost.
+  const pendingSendsRef = useRef([]);
 
+  // History fetch — runs on sandbox change only, independently of the WS
+  // lifecycle. Keeping it in its own effect means a reconnect (which only
+  // bumps reconnectKey) doesn't refetch, and React's dev-mode double-mount
+  // doesn't accidentally skip it the way a sandbox-id ref would.
   useEffect(() => {
     if (!sandboxId) return;
-    setPhase("starting");
+    let cancelled = false;
     setMessages(new Map());
     setOrder([]);
-    setBusy(false);
-    setError(null);
+    pendingSendsRef.current = [];
 
-    let cancelled = false;
-    let ws = null;
-
-    // Load persisted history first so the user sees prior turns immediately;
-    // each row becomes a synthetic single-text-part bubble. We don't persist
-    // tool calls or reasoning, so historical messages are plain text only.
     apiCall(`/api/sandbox/${sandboxId}/messages`)
       .then((data) => {
         if (cancelled) return;
@@ -304,8 +343,19 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
         }
       });
 
+    return () => { cancelled = true; };
+  }, [sandboxId]);
+
+  useEffect(() => {
+    if (!sandboxId) return;
+
+    setPhase("starting");
+    setBusy(false);
+    setError(null);
+
+    let cancelled = false;
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
-    ws = new WebSocket(`${proto}//${location.host}/api/ws?sandboxId=${sandboxId}`);
+    const ws = new WebSocket(`${proto}//${location.host}/api/ws?sandboxId=${sandboxId}`);
     wsRef.current = ws;
 
     ws.onmessage = (e) => {
@@ -316,6 +366,13 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
         setPhase("starting");
       } else if (msg.type === "ready") {
         setPhase("ready");
+        // Flush anything queued while disconnected/reconnecting.
+        while (pendingSendsRef.current.length > 0) {
+          const queued = pendingSendsRef.current.shift();
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "send", text: queued }));
+          }
+        }
       } else if (msg.type === "idle") {
         setBusy(false);
       } else if (msg.type === "message") {
@@ -367,11 +424,10 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
       }
     };
 
-    ws.onclose = (e) => {
+    ws.onclose = () => {
       if (!cancelled) {
-        setPhase("ended");
+        setPhase("disconnected");
         setBusy(false);
-        onSessionEnd?.(e);
       }
     };
 
@@ -381,7 +437,7 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
         try { ws.close(); } catch { /* already closed */ }
       }
     };
-  }, [sandboxId, onFileChanged, onSessionEnd]);
+  }, [sandboxId, reconnectKey, onFileChanged]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -391,11 +447,20 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
   const sendMessage = useCallback(() => {
     const text = input.trim();
     if (!text) return;
-    if (phase !== "ready") return;
-    if (wsRef.current?.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ type: "send", text }));
     setInput("");
     setError(null);
+
+    const ready = phase === "ready" && wsRef.current?.readyState === WebSocket.OPEN;
+    if (ready) {
+      wsRef.current.send(JSON.stringify({ type: "send", text }));
+      return;
+    }
+    // Not connected: queue and (re)kick the WS effect so it opens a new
+    // connection. The "ready" handler flushes the queue.
+    pendingSendsRef.current.push(text);
+    if (phase === "disconnected") {
+      setReconnectKey((k) => k + 1);
+    }
   }, [input, phase]);
 
   const handleKeyDown = (e) => {
@@ -436,8 +501,10 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
     );
   }
 
-  const sessionEnded = phase === "ended";
-  const inputDisabled = phase !== "ready" || sessionEnded;
+  // Input is always usable — sends made while disconnected/starting are queued
+  // and flushed on the next "ready". Only disable while the assistant is
+  // actively producing this turn so the kid doesn't accidentally interleave.
+  const connecting = phase !== "ready";
 
   return (
     <div
@@ -502,33 +569,30 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
         />
       )}
 
-      {sessionEnded ? (
+      {connecting && (
         <div
           style={{
-            padding: 16,
-            background: colors.surface,
-            borderTop: `1px solid ${colors.border}`,
-            display: "flex",
-            flexDirection: "column",
+            display: "inline-flex",
+            alignSelf: "flex-start",
             alignItems: "center",
-            gap: 8,
+            gap: 6,
+            margin: "0 12px 6px",
+            padding: "4px 10px",
+            background: colors.canvas,
+            borderRadius: 999,
+            fontSize: 11,
+            color: colors.body,
           }}
         >
-          <Typography.Text style={{ fontSize: 14, fontWeight: 600, color: colors.bodyStrong }}>
-            AI assistant session ended
-          </Typography.Text>
-          <Typography.Text style={{ fontSize: 12, color: colors.body }}>
-            Refresh the page to start a new session.
-          </Typography.Text>
-          <Button
-            type="primary"
-            icon={<ReloadOutlined />}
-            onClick={() => window.location.reload()}
-          >
-            Refresh
-          </Button>
+          <LoadingOutlined style={{ color: colors.accentBlue }} />
+          <span>{phase === "disconnected" ? "Reconnecting…" : "Connecting…"}</span>
+          {pendingSendsRef.current.length > 0 && (
+            <span style={{ color: colors.muted }}>
+              · {pendingSendsRef.current.length} queued
+            </span>
+          )}
         </div>
-      ) : (
+      )}
         <div
           style={{
             padding: 12,
@@ -536,18 +600,19 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
             borderTop: `1px solid ${colors.border}`,
             display: "flex",
             gap: 8,
-            alignItems: "flex-end",
+            alignItems: "flex-start",
           }}
         >
           <TextArea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={inputDisabled}
             placeholder={
-              phase === "starting"
-                ? "Starting AI assistant…"
-                : "Tell the AI what to make or change"
+              phase === "ready"
+                ? "Tell the AI what to make or change"
+                : phase === "disconnected"
+                ? "Disconnected — type to reconnect and send"
+                : "Connecting…"
             }
             autoSize={{ minRows: 1, maxRows: 4 }}
             style={{ flex: 1, borderRadius: 12, fontSize: 14 }}
@@ -557,13 +622,12 @@ export function Conversation({ sandboxId, onFileChanged, onSessionEnd }) {
             type="primary"
             icon={<SendOutlined />}
             onClick={sendMessage}
-            disabled={inputDisabled || !input.trim() || showThinking}
-            style={{ height: 40, borderRadius: 12 }}
+            disabled={!input.trim() || showThinking}
+            style={{ borderRadius: 12 }}
           >
             Send
           </Button>
         </div>
-      )}
     </div>
   );
 }
