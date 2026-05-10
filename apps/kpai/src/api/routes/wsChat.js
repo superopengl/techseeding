@@ -48,7 +48,49 @@ function spawnOpencodeServer(workDir) {
       DEEPSEEK_API_KEY: process.env.KPAI_SANDBOX_DEEPSEEK_API_KEY,
     },
     stdio: ["ignore", "pipe", "pipe"],
+    // Detached so the child becomes its own process group leader. We can then
+    // kill the whole tree (`-pid`) on cleanup — a plain kill on `nono` alone
+    // can leave grandchildren (the opencode server, any tools it forked)
+    // running and slowly bleeding RSS across reconnects.
+    detached: true,
   });
+}
+
+// Kill `child` and everything in its process group, then wait until exit fires
+// (or the timeout elapses, in which case escalate to SIGKILL). Returns when the
+// process is reaped or when we've given up. Resolving on confirmed exit is the
+// only thing that lets us guarantee we aren't accumulating zombie opencode
+// servers across auto-reconnects.
+async function killChildAndWait(child, fastify, sandboxId) {
+  if (!child || child.exitCode !== null || child.signalCode) return;
+  const exited = new Promise((resolve) => {
+    if (child.exitCode !== null || child.signalCode) { resolve(); return; }
+    child.once("exit", () => resolve());
+  });
+  // Negative pid = signal the entire process group. With detached:true above,
+  // child.pid IS the pgid, so this catches nono + opencode + any descendants.
+  const killGroup = (signal) => {
+    try { process.kill(-child.pid, signal); }
+    catch (err) {
+      if (err.code !== "ESRCH") {
+        fastify.log.warn({ sandboxId, signal, err: err.message }, "Process group kill failed; falling back to direct child kill");
+        try { child.kill(signal); } catch { /* gone */ }
+      }
+    }
+  };
+  killGroup("SIGTERM");
+  const termed = await Promise.race([
+    exited.then(() => true),
+    new Promise((r) => setTimeout(() => r(false), 3000)),
+  ]);
+  if (!termed) {
+    fastify.log.warn({ sandboxId, pid: child.pid }, "opencode server ignored SIGTERM; sending SIGKILL");
+    killGroup("SIGKILL");
+    await Promise.race([
+      exited,
+      new Promise((r) => setTimeout(r, 2000)),
+    ]);
+  }
 }
 
 // opencode prints its bound URL on startup; we read whichever stream it lands on
@@ -183,7 +225,7 @@ export function wsChat(fastify) {
       } catch (err) {
         fastify.log.error({ sandboxId, err: err.message }, "Failed to start opencode server");
         sendFatal(socket, "Failed to start AI assistant.");
-        try { child?.kill("SIGTERM"); } catch { /* gone */ }
+        if (child) await killChildAndWait(child, fastify, sandboxId);
         return;
       }
 
@@ -200,7 +242,7 @@ export function wsChat(fastify) {
       } catch (err) {
         fastify.log.error({ sandboxId, err: err.message }, "Failed to create opencode session");
         sendFatal(socket, "Failed to start AI assistant session.");
-        try { child.kill("SIGTERM"); } catch { /* gone */ }
+        await killChildAndWait(child, fastify, sandboxId);
         return;
       }
 
@@ -328,7 +370,7 @@ export function wsChat(fastify) {
       } catch (err) {
         fastify.log.error({ sandboxId, err: err.message }, "Failed to open event stream");
         sendFatal(socket, "Failed to subscribe to AI events.");
-        try { child.kill("SIGTERM"); } catch { /* gone */ }
+        await killChildAndWait(child, fastify, sandboxId);
         return;
       }
 
@@ -450,9 +492,11 @@ export function wsChat(fastify) {
         try {
           clearInterval(heartbeat);
           cleanupIndexFileWatch();
-          // Kill the server first so its HTTP socket closes, which ends the SSE
-          // read on our side regardless of whether the SDK honors the signal.
-          try { child.kill("SIGTERM"); } catch { /* gone */ }
+          // Kill the server (and its whole process group) and WAIT for it to
+          // actually exit before we consider this session cleaned up. Without
+          // the await, an auto-reconnect spawns a new opencode while the
+          // previous one is still draining — RSS climbs across reconnects.
+          await killChildAndWait(child, fastify, sandboxId);
           eventAbort.abort();
           if (eventLoopDone) {
             await Promise.race([
@@ -460,7 +504,14 @@ export function wsChat(fastify) {
               new Promise((r) => setTimeout(r, 2000)),
             ]);
           }
+          // Drop our own per-session in-memory caches so the closure becomes
+          // garbage-collectable promptly even if some external reference (e.g.
+          // a still-resolving DB promise) outlives us.
+          messagePartsById.clear();
+          persistedMessageIds.clear();
+          opencodeUserMessageIds.clear();
           await Promise.allSettled(pendingDbWrites);
+          pendingDbWrites.clear();
           await db.update(sandboxSession)
             .set({ closedAt: new Date() })
             .where(eq(sandboxSession.id, session.id))
