@@ -13,7 +13,7 @@
     "start:prod": "node --env-file=.env.production dist/src/api/server.js",
     "start:local:docker": "docker rm -f kidplayai 2>/dev/null; pnpm build:docker && docker run -d --name kidplayai -p 9515:80 --env-file .env.localdocker techseeding/kidplayai",
     "release": "git push && pnpm build:docker && AWS_PROFILE=kpai KPAI_SCALE_LEVEL=1 pnpm -F @techseeding/kidplayai-deploy release",
-    "release4": "git push && pnpm build:docker && AWS_PROFILE=kpai KPAI_SCALE_LEVEL=4 pnpm -F @techseeding/kidplayai-deploy release",
+    "release8": "git push && pnpm build:docker && AWS_PROFILE=kpai KPAI_SCALE_LEVEL=8 pnpm -F @techseeding/kidplayai-deploy release",
     "release:public-db": "pnpm build:docker && AWS_PROFILE=kpai KPAI_SCALE_LEVEL=1 KPAI_DB_PUBLICLY_ACCESSIBLE=true pnpm -F @techseeding/kidplayai-deploy release",
     "db:connect:prod": "AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy db:connect",
     "db:jdbc:prod": "AWS_PROFILE=kpai pnpm -F @techseeding/kidplayai-deploy db:jdbc",
