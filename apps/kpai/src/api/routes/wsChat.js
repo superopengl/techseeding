@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { randomUUID } from "crypto";
 import { createOpencodeClient } from "@opencode-ai/sdk";
 import { db } from "../db/index.js";
 import { sandbox, sandboxSession, sessionMessage } from "../db/schema.js";
@@ -209,6 +210,11 @@ export function wsChat(fastify) {
       const messagePartsById = new Map(); // messageID -> Map<partID, part>
       const persistedMessageIds = new Set();
       const pendingDbWrites = new Set();
+      // Opencode's own user message ids — we synthesize and persist user
+      // messages ourselves on send (so reload always has them), then suppress
+      // opencode's parallel user.updated / user-text part.updated events to
+      // avoid double-rendered user bubbles or duplicate inserts.
+      const opencodeUserMessageIds = new Set();
 
       function persistMessage(info) {
         if (!info?.id || persistedMessageIds.has(info.id)) return;
@@ -268,11 +274,19 @@ export function wsChat(fastify) {
                 const info = ev.properties?.info;
                 if (!info) continue;
                 if (info.sessionID && info.sessionID !== openSessionId) continue;
+                // We synthesize and persist user messages ourselves on send;
+                // remember the opencode-side id so we can suppress its
+                // associated part events too.
+                if (info.role === "user") {
+                  opencodeUserMessageIds.add(info.id);
+                  continue;
+                }
                 safeSend(socket, { type: "message", info });
                 persistMessage(info);
               } else if (ev.type === "message.part.updated") {
                 const part = ev.properties?.part;
                 if (!part?.messageID) continue;
+                if (opencodeUserMessageIds.has(part.messageID)) continue;
                 let parts = messagePartsById.get(part.messageID);
                 if (!parts) {
                   parts = new Map();
@@ -282,6 +296,7 @@ export function wsChat(fastify) {
                 safeSend(socket, { type: "part", part });
               } else if (ev.type === "message.part.removed") {
                 const { messageID, partID } = ev.properties ?? {};
+                if (opencodeUserMessageIds.has(messageID)) continue;
                 messagePartsById.get(messageID)?.delete(partID);
                 safeSend(socket, { type: "part-removed", messageID, partID });
               } else if (ev.type === "session.idle") {
@@ -317,8 +332,6 @@ export function wsChat(fastify) {
         return;
       }
 
-      safeSend(socket, { type: "ready" });
-
       // ---- rate limiting ----
       const requestTimestamps = [];
       function checkRateLimit() {
@@ -345,6 +358,9 @@ export function wsChat(fastify) {
       }, 30_000);
 
       // ---- inbound user messages ----
+      // Register the handler BEFORE sending "ready" so a user-side click that
+      // races the ready event isn't silently dropped (Node EventEmitter has no
+      // queueing for events fired before any listener is attached).
       socket.on("message", async (raw) => {
         let parsed;
         try { parsed = JSON.parse(raw); } catch (err) {
@@ -358,6 +374,44 @@ export function wsChat(fastify) {
           safeSend(socket, { type: "rate-limit" });
           return;
         }
+        // Synthesize and persist the user message immediately. Opencode's own
+        // user message events sometimes arrive without text (the prompt body
+        // carries it, but no message.part.updated follows), so we own the
+        // user-side rendering and persistence end to end.
+        const userMessageId = randomUUID();
+        const partId = `${userMessageId}-text`;
+        const userInfo = {
+          id: userMessageId,
+          role: "user",
+          sessionID: openSessionId,
+          time: { created: Date.now() },
+        };
+        const userPart = { id: partId, messageID: userMessageId, type: "text", text };
+        safeSend(socket, { type: "message", info: userInfo });
+        safeSend(socket, { type: "part", part: userPart });
+
+        persistedMessageIds.add(userMessageId);
+        // Await the insert directly so the DB row is guaranteed to exist
+        // before we hand off to opencode. Drizzle builders are thenable but
+        // chaining `.catch()` was leaving us uncertain whether the SQL was
+        // actually fired in every code path; awaiting removes the ambiguity.
+        try {
+          await db
+            .insert(sessionMessage)
+            .values({
+              sandboxSessionId: session.id,
+              opencodeMessageId: userMessageId,
+              opencodeSessionId: openSessionId,
+              type: "user",
+              content: { text, parts: [{ id: partId, type: "text", text }] },
+              contentLength: text.length,
+            })
+            .onConflictDoNothing({ target: sessionMessage.opencodeMessageId });
+          fastify.log.info({ sandboxId, messageId: userMessageId, len: text.length }, "Persisted user message");
+        } catch (err) {
+          fastify.log.error({ sandboxId, messageId: userMessageId, err: err.message }, "Failed to persist user message");
+        }
+
         try {
           // Async variant returns immediately; the assistant response streams
           // back via the event subscription, so we don't tie up the WS handler
@@ -383,6 +437,10 @@ export function wsChat(fastify) {
         }
         try { socket.close(); } catch { /* already closed */ }
       });
+
+      // Handler is now registered above — safe to tell the client the session
+      // is live. The frontend gates input on this signal.
+      safeSend(socket, { type: "ready" });
 
       // ---- cleanup on close ----
       let cleanedUp = false;
