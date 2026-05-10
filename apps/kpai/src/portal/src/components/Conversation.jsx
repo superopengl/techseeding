@@ -554,14 +554,25 @@ export function Conversation({ sandboxId, onFileChanged }) {
     };
 
     ws.onclose = () => {
-      if (!cancelled) {
-        setPhase("disconnected");
-        setBusy(false);
-      }
+      if (cancelled) return;
+      setPhase("disconnected");
+      setBusy(false);
+      // Schedule a silent reconnect. Bumping reconnectKey re-runs this effect
+      // which opens a fresh WS; the cleanup below clears any pending timer if
+      // the component unmounts or sandboxId changes first.
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
+        if (!cancelled) setReconnectKey((k) => k + 1);
+      }, RECONNECT_DELAY_MS);
     };
 
     return () => {
       cancelled = true;
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
         try { ws.close(); } catch { /* already closed */ }
       }
@@ -584,10 +595,15 @@ export function Conversation({ sandboxId, onFileChanged }) {
       wsRef.current.send(JSON.stringify({ type: "send", text }));
       return;
     }
-    // Not connected: queue and (re)kick the WS effect so it opens a new
-    // connection. The "ready" handler flushes the queue.
+    // Not connected: queue, and short-circuit the auto-reconnect backoff so
+    // the user doesn't wait through the timer when they've explicitly acted.
+    // The "ready" handler flushes the queue.
     pendingSendsRef.current.push(text);
     if (phase === "disconnected") {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
       setReconnectKey((k) => k + 1);
     }
   }, [input, phase]);
@@ -631,9 +647,9 @@ export function Conversation({ sandboxId, onFileChanged }) {
   }
 
   // Input is always usable — sends made while disconnected/starting are queued
-  // and flushed on the next "ready". Only disable while the assistant is
-  // actively producing this turn so the kid doesn't accidentally interleave.
-  const connecting = phase !== "ready";
+  // and flushed on the next "ready". The reconnect itself is silent, no
+  // visible "Reconnecting…" indicator: the kid just keeps typing and their
+  // next message lands when the socket comes back.
 
   return (
     <div
@@ -698,65 +714,35 @@ export function Conversation({ sandboxId, onFileChanged }) {
         />
       )}
 
-      {connecting && (
-        <div
-          style={{
-            display: "inline-flex",
-            alignSelf: "flex-start",
-            alignItems: "center",
-            gap: 6,
-            margin: "0 12px 6px",
-            padding: "4px 10px",
-            background: colors.canvas,
-            borderRadius: 999,
-            fontSize: 11,
-            color: colors.body,
-          }}
+      <div
+        style={{
+          padding: 12,
+          background: colors.surface,
+          borderTop: `1px solid ${colors.border}`,
+          display: "flex",
+          gap: 8,
+          alignItems: "flex-start",
+        }}
+      >
+        <TextArea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Tell the AI what to make or change"
+          autoSize={{ minRows: 1, maxRows: 4 }}
+          style={{ flex: 1, borderRadius: 12, fontSize: 14 }}
+          maxLength={2000}
+        />
+        <Button
+          type="primary"
+          icon={<SendOutlined />}
+          onClick={sendMessage}
+          disabled={!input.trim() || showThinking}
+          style={{ borderRadius: 12 }}
         >
-          <LoadingOutlined style={{ color: colors.accentBlue }} />
-          <span>{phase === "disconnected" ? "Reconnecting…" : "Connecting…"}</span>
-          {pendingSendsRef.current.length > 0 && (
-            <span style={{ color: colors.muted }}>
-              · {pendingSendsRef.current.length} queued
-            </span>
-          )}
-        </div>
-      )}
-        <div
-          style={{
-            padding: 12,
-            background: colors.surface,
-            borderTop: `1px solid ${colors.border}`,
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-start",
-          }}
-        >
-          <TextArea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              phase === "ready"
-                ? "Tell the AI what to make or change"
-                : phase === "disconnected"
-                ? "Disconnected — type to reconnect and send"
-                : "Connecting…"
-            }
-            autoSize={{ minRows: 1, maxRows: 4 }}
-            style={{ flex: 1, borderRadius: 12, fontSize: 14 }}
-            maxLength={2000}
-          />
-          <Button
-            type="primary"
-            icon={<SendOutlined />}
-            onClick={sendMessage}
-            disabled={!input.trim() || showThinking}
-            style={{ borderRadius: 12 }}
-          >
-            Send
-          </Button>
-        </div>
+          Send
+        </Button>
+      </div>
     </div>
   );
 }
