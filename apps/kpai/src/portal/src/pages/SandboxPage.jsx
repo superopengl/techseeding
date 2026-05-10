@@ -6,7 +6,7 @@ import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, 
 import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
-import { Terminal } from "../components/Terminal";
+import { Conversation } from "../components/Conversation";
 import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
@@ -469,11 +469,11 @@ export function SandboxPage() {
               ? { width: "100%", flex: 1, minHeight: 0, display: activePanel === "terminal" ? "block" : "none" }
               : { flex: 1 }),
             overflow: "hidden",
-            background: colors.terminal,
+            background: colors.canvas,
             pointerEvents: isDragging ? "none" : "auto",
           }}
         >
-          <Terminal sandboxId={sandboxId} onFileChanged={handleFileChanged} />
+          <Conversation sandboxId={sandboxId} onFileChanged={handleFileChanged} />
         </div>
         {narrow && (
           <div

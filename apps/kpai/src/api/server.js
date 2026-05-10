@@ -31,7 +31,8 @@ import { sandboxGet } from "./routes/sandboxGet.js";
 import { sandboxUpdate } from "./routes/sandboxUpdate.js";
 import { sandboxDelete } from "./routes/sandboxDelete.js";
 import { sandboxPreview } from "./routes/sandboxPreview.js";
-import { wsTerminal } from "./routes/wsTerminal.js";
+import { sandboxMessages } from "./routes/sandboxMessages.js";
+import { wsChat } from "./routes/wsChat.js";
 import { wsAdmin } from "./routes/wsAdmin.js";
 import { wsLogin } from "./routes/wsLogin.js";
 import { createEnquiry } from "./routes/enquiry.js";
@@ -141,7 +142,8 @@ sandboxGet(fastify);
 sandboxUpdate(fastify);
 sandboxDelete(fastify);
 sandboxPreview(fastify);
-wsTerminal(fastify);
+sandboxMessages(fastify);
+wsChat(fastify);
 wsAdmin(fastify);
 wsLogin(fastify);
 createEnquiry(fastify);
@@ -165,10 +167,10 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
   });
 }
 
-// One Fastify process serves every concurrent WebSocket terminal session, so a
-// throw inside a per-user pty/socket/fs.watch callback would otherwise tear
-// down everyone's session. Log and keep running — at worst the offending
-// session breaks, the rest survive.
+// One Fastify process serves every concurrent chat session, so a throw inside
+// a per-user opencode/socket/fs.watch callback would otherwise tear down
+// everyone's session. Log and keep running — at worst the offending session
+// breaks, the rest survive.
 process.on("uncaughtException", (err) => {
   fastify.log.error({ err }, "uncaughtException — keeping process alive");
 });
