@@ -1,118 +1,98 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Drawer, Tag, Button, Checkbox, ConfigProvider, theme as antTheme, Modal, message, Typography, Input } from "antd";
-import { QrcodeOutlined, ClearOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { Drawer, Tag, Button, Checkbox, Modal, message, Typography, Input } from "antd";
+import { QrcodeOutlined, ExportOutlined, UploadOutlined } from "@ant-design/icons";
 import { Loading } from "./Loading";
 import { ShareCraftModal } from "./ShareCraftModal";
+import { MessageBubble, entryFromPersistedMessage } from "./MessageList";
 import { colors, shadows } from "../theme";
 import { CraftPreview } from "./CraftPreview";
 import { apiCall } from "../api";
-import { stripAnsi } from "../utils/stripAnsi";
 
 const DIVIDER_WIDTH = 6;
 const MIN_PANEL_PCT = 15;
-
-const dark = {
-  bg: "#1a1a2e",
-  surface: "#232340",
-  border: "#2d2d4a",
-  text: "#e2e8f0",
-  textMuted: "#8892a8",
-  inputBg: "rgba(67, 184, 140, 0.15)",
-  outputBg: "rgba(255, 255, 255, 0.05)",
-};
 
 function isUserMessage(type) {
   return type === "user" || type === "request";
 }
 
-const ChatMessage = React.memo(function ChatMessage({ msg }) {
-  const right = isUserMessage(msg.type);
-  const text = msg.text;
-  const time = new Date(msg.createdAt).toLocaleTimeString();
-  const lengthLabel = `${Number(msg.contentLength ?? text.length).toLocaleString()} chars`;
+// Convert an admin sessionMessage row into the entry shape MessageBubble
+// expects. Admin rows live under `content.{text,parts}` and have role in
+// `type`, so we normalise to the shared helper's expected fields.
+function entryFromAdminMessage(msg) {
+  return entryFromPersistedMessage({
+    id: msg.id,
+    role: msg.type,
+    text: msg.content?.text || "",
+    parts: msg.content?.parts,
+    createdAt: msg.createdAt,
+  });
+}
 
-  const tokensLine = !right && (
-    msg.inputTokens || msg.outputTokens || msg.reasoningTokens ||
-    msg.cacheReadTokens || msg.cacheWriteTokens || msg.cost
-  ) ? (
-    <>
+// Admin-only metadata under each assistant bubble: token counts and cost.
+// Renders nothing for user bubbles or assistant rows that have no usage data.
+function AdminTokenFooter({ msg }) {
+  if (isUserMessage(msg.type)) return null;
+  const hasUsage = msg.inputTokens || msg.outputTokens || msg.reasoningTokens
+    || msg.cacheReadTokens || msg.cacheWriteTokens || msg.cost;
+  if (!hasUsage) return null;
+  return (
+    <div
+      style={{
+        marginTop: 4,
+        fontSize: 10,
+        color: colors.muted,
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+        padding: "0 0 0 6px",
+      }}
+    >
       in {Number(msg.inputTokens || 0).toLocaleString()}
       {" · "}out {Number(msg.outputTokens || 0).toLocaleString()}
       {" · "}reason {Number(msg.reasoningTokens || 0).toLocaleString()}
       {" · "}cache R/W {Number(msg.cacheReadTokens || 0).toLocaleString()}/{Number(msg.cacheWriteTokens || 0).toLocaleString()}
       {" · "}${Number(msg.cost || 0).toFixed(4)}
-    </>
-  ) : null;
-
-  return (
-    <div style={{
-      display: "flex",
-      justifyContent: right ? "flex-end" : "flex-start",
-      marginBottom: 12,
-    }}>
-      <div style={{ maxWidth: "75%", display: "flex", flexDirection: "column", alignItems: right ? "flex-end" : "flex-start" }}>
-        <pre style={{
-          margin: 0,
-          padding: "10px 14px",
-          borderRadius: 12,
-          background: right ? "rgba(67, 184, 140, 0.35)" : "rgba(255, 255, 255, 0.06)",
-          border: `1px solid ${right ? "rgba(67, 184, 140, 0.4)" : dark.border}`,
-          color: right ? "#fff" : dark.text,
-          fontSize: 13,
-          lineHeight: 1.5,
-          fontFamily: "monospace",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-          maxHeight: 360,
-          overflow: "auto",
-        }}>
-          {text || <span style={{ color: dark.textMuted, fontStyle: "italic" }}>(empty)</span>}
-        </pre>
-        <div style={{
-          marginTop: 4,
-          fontSize: 10,
-          color: dark.textMuted,
-          textAlign: right ? "right" : "left",
-        }}>
-          <span>{time} · {lengthLabel}</span>
-          {tokensLine && <div>{tokensLine}</div>}
-        </div>
-      </div>
     </div>
   );
-});
+}
 
 const ChatList = React.memo(function ChatList({ sessions, showAi }) {
   if (sessions.length === 0) {
     return (
-      <div style={{ padding: 24, color: dark.textMuted, textAlign: "center" }}>
+      <div style={{ padding: 24, color: colors.muted, textAlign: "center" }}>
         No messages yet.
       </div>
     );
   }
 
   return (
-    <ConfigProvider theme={{ algorithm: antTheme.darkAlgorithm }}>
-      <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
-        {sessions.map((session, si) => {
-          const visibleMessages = showAi
-            ? session.messages
-            : session.messages.filter((m) => isUserMessage(m.type));
-          return (
-            <div key={session.sessionId} style={{ marginBottom: 16 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "8px 0 16px" }}>
-                <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
-                <span style={{ color: dark.textMuted, fontSize: 11 }}>
-                  {new Date(session.createdAt).toLocaleString()}
-                  {session.closedAt && ` — ${new Date(session.closedAt).toLocaleString()}`}
-                </span>
-              </div>
-              {visibleMessages.map((msg) => <ChatMessage key={msg.id} msg={msg} />)}
+    <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
+      {sessions.map((session, si) => {
+        const visibleMessages = showAi
+          ? session.messages
+          : session.messages.filter((m) => isUserMessage(m.type));
+        return (
+          <div key={session.sessionId} style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "8px 0 16px" }}>
+              <Tag color="blue" style={{ margin: 0 }}>Session {si + 1}</Tag>
+              <span style={{ color: colors.muted, fontSize: 11 }}>
+                {new Date(session.createdAt).toLocaleString()}
+                {session.closedAt && ` — ${new Date(session.closedAt).toLocaleString()}`}
+              </span>
             </div>
-          );
-        })}
-      </div>
-    </ConfigProvider>
+            {visibleMessages.map((msg) => {
+              const entry = entryFromAdminMessage(msg);
+              if (!entry) return null;
+              return (
+                <MessageBubble
+                  key={msg.id}
+                  entry={entry}
+                  footer={<AdminTokenFooter msg={msg} />}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
   );
 });
 
@@ -159,10 +139,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
     if (!open || !sandboxId) return;
     setLoading(true);
     apiCall(`/api/admin/sandbox/${sandboxId}/messages`)
-      .then((data) => setSessions(data.sessions.map((s) => ({
-        ...s,
-        messages: s.messages.map((m) => ({ ...m, text: stripAnsi(m.content?.text || "") })),
-      }))))
+      .then((data) => setSessions(data.sessions || []))
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
   }, [open, sandboxId]);
@@ -295,7 +272,7 @@ export function SandboxReviewDrawer({ open, sandboxId, sandboxTitle, sandboxWork
         <div style={{
           flex: 1,
           overflow: "hidden",
-          background: dark.bg,
+          background: colors.canvas,
           pointerEvents: isDragging ? "none" : "auto",
         }}>
           {loading ? (
