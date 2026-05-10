@@ -259,11 +259,12 @@ export function Conversation({ sandboxId, onFileChanged }) {
   // Derive "show Thinking…" purely from message state so it can never get
   // stuck on a missing session.idle / time.completed signal: show it whenever
   // the most recent message is the user's or an assistant message that hasn't
-  // streamed any *renderable* content yet (matching the bubble's own filter,
-  // so the spinner stays up until the bubble actually has something to draw).
+  // streamed any *visible* content yet. Reasoning parts are hidden in the
+  // student view, so they don't count as content — otherwise the spinner
+  // would vanish during reasoning-only streaming and the bubble would be empty.
   const lastMessage = orderedMessages[orderedMessages.length - 1];
   const lastIsAssistantWithContent = lastMessage?.info?.role === "assistant" &&
-    partsInOrder(lastMessage.parts).some(partIsRenderable);
+    partsInOrder(lastMessage.parts).some((p) => p.type !== "reasoning" && partIsRenderable(p));
   const showThinking = !!lastMessage && !lastIsAssistantWithContent;
 
   if (!sandboxId) {
@@ -308,7 +309,7 @@ export function Conversation({ sandboxId, onFileChanged }) {
           <MessageList
             entries={orderedMessages}
             showThinking={showThinking}
-            reasoningAlwaysOpen
+            hideReasoning
           />
         )}
       </div>

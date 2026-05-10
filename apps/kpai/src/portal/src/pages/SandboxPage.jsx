@@ -3,7 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Conversation } from "../components/Conversation";
@@ -88,6 +88,7 @@ export function SandboxPage() {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorDraft, setColorDraft] = useState(avatarColor);
   const [savingColor, setSavingColor] = useState(false);
+  const [creatingCraft, setCreatingCraft] = useState(false);
   const renameInputRef = useRef(null);
 
   useEffect(() => {
@@ -111,6 +112,23 @@ export function SandboxPage() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  const handleCreateCraft = useCallback(async () => {
+    if (creatingCraft) return;
+    setCreatingCraft(true);
+    try {
+      const data = await apiCall("/api/sandbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      navigate(`/sandbox/${data.id}`);
+    } catch (err) {
+      message.error(err?.message || "Failed to create craft");
+    } finally {
+      setCreatingCraft(false);
+    }
+  }, [creatingCraft, navigate]);
 
   const handleLogout = useCallback(() => {
     Modal.confirm({
@@ -170,6 +188,13 @@ export function SandboxPage() {
   }, [colorDraft, avatarColor, updateAvatarColor]);
 
   const drawerItems = [
+    {
+      key: "new-craft",
+      label: "New Craft",
+      icon: <PlusOutlined />,
+      disabled: creatingCraft,
+      onClick: handleCreateCraft,
+    },
     {
       key: "my-crafts",
       label: "My Crafts",
@@ -355,6 +380,14 @@ export function SandboxPage() {
             </span>
           </div>
           <Space size={8}>
+            <Tooltip title="Start a new craft">
+              <Button
+                icon={<PlusOutlined />}
+                onClick={handleCreateCraft}
+                loading={creatingCraft}
+                aria-label="Create new craft"
+              />
+            </Tooltip>
             <Button icon={<ShareAltOutlined />} onClick={() => setShowShare(true)} aria-label="Share" />
             <Button
               shape="circle"
