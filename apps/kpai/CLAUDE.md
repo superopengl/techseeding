@@ -14,7 +14,7 @@ Multi-page app with four views:
 
 1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Crafts" CTA
 2. **Login** (`/login`) — Student enters their name and clicks "Request Login"; waits for admin approval
-3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is xterm.js terminal running OpenCode (backed by DeepSeek)
+3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is a chat-bubble UI streaming the OpenCode agent (backed by DeepSeek) over a WebSocket
 4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students (name, status, session active, sandbox link, message count, token info) with approve/reject actions
 
 ## How It Works
@@ -24,9 +24,9 @@ Multi-page app with four views:
 3. A record is created in PostgreSQL with status `pending`; the student sees a "Waiting for Approval" screen
 4. An admin visits `/admin`, sees pending students, and clicks "Approve"
 5. The login page polls `/api/login/status/:studentId` and navigates to `/sandbox/:studentId` once approved
-6. A WebSocket connection spawns OpenCode (configured to use DeepSeek as the LLM) scoped to the student's craft folder
-7. Kids type natural language requests in the terminal (e.g., "make a craft where I catch falling stars")
-8. OpenCode edits HTML/JS/CSS files inside the sandbox
+6. A WebSocket connection spawns a per-sandbox `opencode serve` HTTP server (jailed with `nono`, scoped to the student's craft folder) and the backend talks to it via the `@opencode-ai/sdk` client; SSE events stream live to the browser
+7. Kids type natural language requests in the chat input (e.g., "make a craft where I catch falling stars") and see the AI's reasoning, tool calls, and reply as message bubbles
+8. OpenCode edits the `index.html` file inside the sandbox
 9. The left panel iframe shows the updated craft
 
 ## Architecture
@@ -58,7 +58,7 @@ Summary:
 - Routing via react-router-dom v7
 - Source lives in `src/portal/src/`, builds to `dist/public/` (served by Fastify in production)
 - Pages: `HomePage`, `LoginPage`, `SandboxPage`, `AdminPage`
-- Components: `Terminal` (xterm.js wrapper), `CraftPreview` (iframe)
+- Components: `Conversation` (chat-bubble UI driving the WS), `MessageList` / `MessageBubble` (reusable bubble renderer used by both the student sandbox and the admin sandbox-review drawer), `CraftPreview` (iframe)
 - Design tokens centralized in `src/portal/src/theme.js` — all pages import colors, gradients, shadows, fonts from there
 - Color palette documentation: [docs/color-palette.md](docs/color-palette.md)
 - During development, Vite dev server proxies API/WebSocket to the Fastify backend
@@ -87,7 +87,7 @@ src/
       loginStatus.js      # GET /api/login/:loginRequestId/status
       adminStudents.js    # GET /api/admin/students
       adminCreateStudent.js # POST /api/admin/student
-      wsTerminal.js       # WS /api/ws (sandboxId in query)
+      wsChat.js           # WS /api/ws — spawns per-sandbox `opencode serve`, bridges SDK events to the client
     resources/
       sandbox_sample/     # Sandbox template — each new sandbox is a copy of this folder with API key injection
     lib/                  # Shared utilities
@@ -102,7 +102,7 @@ src/
       App.jsx             # Root component with routing
       theme.js            # Shared design tokens (colors, gradients, shadows, fonts)
       pages/              # Page components (Home, Login, Sandbox, Admin, ...)
-      components/         # UI components (Terminal, CraftPreview)
+      components/         # UI components (Conversation, MessageList, CraftPreview, ...)
     vite.config.js        # Vite config with dev proxy and build output to dist/public/
     package.json          # Frontend dependencies
 devops/                   # Docker image build (Dockerfile, entrypoint, opencode config)
@@ -145,12 +145,10 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 
 ## Tech Stack
 
-- **Frontend**: React 19, Ant Design 6, Vite, react-router-dom v7
-- **Terminal**: xterm.js (`@xterm/xterm`) + fit addon
+- **Frontend**: React 19, Ant Design 6, Vite, react-router-dom v7, react-markdown + remark-gfm for assistant message rendering
 - **Backend**: Node.js, Fastify
 - **Database**: PostgreSQL with Drizzle ORM
-- **PTY**: `node-pty` for server-side pseudo-terminal
-- **AI Agent**: OpenCode CLI backed by DeepSeek (spawned per student)
+- **AI Agent**: per-sandbox `opencode serve` HTTP server (jailed with `nono` Landlock) backed by DeepSeek; backend talks to it via `@opencode-ai/sdk`, streams SSE events to the browser over a WebSocket
 - **Mobile (iOS craft viewer)**: SwiftUI, WKWebView for craft preview, AVFoundation + CIDetector for QR scanning, XcodeGen for project generation (Xcode 17+, iOS target)
 - **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
 - **Cloud / IaC**: AWS, CDK v2 (JavaScript)
