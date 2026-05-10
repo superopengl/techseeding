@@ -2,8 +2,15 @@
     "$schema": "https://opencode.ai/config.json",
     "model": "deepseek/deepseek-v4-flash",
     "autoupdate": false,
-    "enabled_providers": ["deepseek"],
-    "disabled_providers": ["openai", "anthropic", "gemini", "openrouter"],
+    "enabled_providers": [
+        "deepseek"
+    ],
+    "disabled_providers": [
+        "openai",
+        "anthropic",
+        "gemini",
+        "openrouter"
+    ],
     "permission": {
         "read": {
             "index.html": "allow"
@@ -23,6 +30,16 @@
         "deepseek": {
             "options": {
                 "apiKey": "{env:DEEPSEEK_API_KEY}"
+            },
+            "models": {
+                "deep-seek-v4-flash": {
+                    "name": "deepseek-v4-flash",
+                    "extra_body": {
+                        "thinking": {
+                            "type": "disabled"
+                        }
+                    }
+                }
             }
         }
     }
