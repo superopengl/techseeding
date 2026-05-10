@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Input, Button, Alert, Typography } from "antd";
 import { SendOutlined, BulbOutlined, EditOutlined, FileTextOutlined, CheckCircleFilled, LoadingOutlined, WarningFilled, DownOutlined, RightOutlined } from "@ant-design/icons";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Loading } from "./Loading";
 import { apiCall } from "../api";
 import { colors, fonts, shadows } from "../theme";
@@ -62,10 +64,9 @@ function ReasoningPart({ text }) {
         <span>Thinking</span>
       </button>
       {open && (
-        <pre
+        <div
           style={{
             margin: "6px 0 0",
-            whiteSpace: "pre-wrap",
             wordBreak: "break-word",
             fontFamily: fonts.body,
             fontSize: 12,
@@ -73,8 +74,10 @@ function ReasoningPart({ text }) {
             lineHeight: 1.5,
           }}
         >
-          {text}
-        </pre>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={REASONING_MD_COMPONENTS}>
+            {text}
+          </ReactMarkdown>
+        </div>
       )}
     </div>
   );
@@ -108,7 +111,121 @@ function ToolPart({ part }) {
   );
 }
 
-function TextPart({ text }) {
+// Markdown components scoped to a chat bubble: tight paragraph margins, our
+// brand color for links, monospace+tinted background for inline and block code.
+// onDark switches code-block colors so they read against the user-bubble's
+// primary background — though we currently only call MarkdownText for assistant
+// messages, this keeps it composable.
+function makeMarkdownComponents({ onDark }) {
+  const codeText = onDark ? "rgba(255,255,255,0.95)" : colors.heading;
+  const codeBg = onDark ? "rgba(255,255,255,0.18)" : "#f1f5f9";
+  const codeBlockBg = onDark ? "rgba(0,0,0,0.25)" : "#1f2937";
+  const codeBlockText = onDark ? "#fff" : "#e2e8f0";
+  return {
+    p: ({ node, ...props }) => <p style={{ margin: "4px 0", lineHeight: 1.55 }} {...props} />,
+    ul: ({ node, ...props }) => <ul style={{ margin: "4px 0", paddingInlineStart: 22 }} {...props} />,
+    ol: ({ node, ...props }) => <ol style={{ margin: "4px 0", paddingInlineStart: 22 }} {...props} />,
+    li: ({ node, ...props }) => <li style={{ margin: "2px 0", lineHeight: 1.5 }} {...props} />,
+    h1: ({ node, ...props }) => <h3 style={{ margin: "8px 0 4px", fontSize: 16 }} {...props} />,
+    h2: ({ node, ...props }) => <h3 style={{ margin: "8px 0 4px", fontSize: 15 }} {...props} />,
+    h3: ({ node, ...props }) => <h4 style={{ margin: "6px 0 4px", fontSize: 14 }} {...props} />,
+    a: ({ node, ...props }) => (
+      <a
+        style={{ color: onDark ? "#fff" : colors.primary, textDecoration: "underline" }}
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      />
+    ),
+    blockquote: ({ node, ...props }) => (
+      <blockquote
+        style={{
+          margin: "6px 0",
+          padding: "4px 10px",
+          borderLeft: `3px solid ${onDark ? "rgba(255,255,255,0.5)" : colors.border}`,
+          color: onDark ? "rgba(255,255,255,0.85)" : colors.body,
+        }}
+        {...props}
+      />
+    ),
+    pre: ({ node, ...props }) => (
+      <pre
+        style={{
+          margin: "6px 0",
+          padding: "10px 12px",
+          background: codeBlockBg,
+          color: codeBlockText,
+          borderRadius: 8,
+          overflowX: "auto",
+          fontSize: 12.5,
+          lineHeight: 1.5,
+        }}
+        {...props}
+      />
+    ),
+    code: ({ node, inline, className, children, ...props }) => {
+      // react-markdown 9 passes inline implicitly; detect by absence of language class
+      const isInline = inline ?? !/^language-/.test(className || "");
+      if (isInline) {
+        return (
+          <code
+            style={{
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              fontSize: "0.92em",
+              padding: "1px 5px",
+              borderRadius: 4,
+              background: codeBg,
+              color: codeText,
+            }}
+            {...props}
+          >
+            {children}
+          </code>
+        );
+      }
+      return (
+        <code
+          className={className}
+          style={{
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+            fontSize: "0.92em",
+            background: "transparent",
+            color: "inherit",
+          }}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    hr: ({ node, ...props }) => (
+      <hr style={{ margin: "10px 0", border: 0, borderTop: `1px solid ${onDark ? "rgba(255,255,255,0.25)" : colors.border}` }} {...props} />
+    ),
+  };
+}
+
+const ASSISTANT_MD_COMPONENTS = makeMarkdownComponents({ onDark: false });
+const REASONING_MD_COMPONENTS = makeMarkdownComponents({ onDark: false });
+
+function MarkdownText({ text, components }) {
+  if (!text) return null;
+  return (
+    <div
+      style={{
+        wordBreak: "break-word",
+        margin: "2px 0",
+        fontSize: 14,
+        lineHeight: 1.55,
+      }}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {text}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function PlainText({ text }) {
   if (!text) return null;
   return (
     <div
@@ -195,7 +312,14 @@ function MessageBubble({ entry }) {
         >
           {visibleParts.map((p, i) => {
             const key = p.id || `${p.type}-${i}`;
-            if (p.type === "text") return <TextPart key={key} text={p.text} />;
+            if (p.type === "text") {
+              // User text is what the kid typed — render verbatim. Assistant
+              // text is markdown (code fences, lists, bold, etc.) and gets the
+              // full renderer.
+              return isUser
+                ? <PlainText key={key} text={p.text} />
+                : <MarkdownText key={key} text={p.text} components={ASSISTANT_MD_COMPONENTS} />;
+            }
             if (p.type === "reasoning") return <ReasoningPart key={key} text={p.text} />;
             if (p.type === "tool") return <ToolPart key={key} part={p} />;
             return null;
@@ -276,6 +400,11 @@ export function Conversation({ sandboxId, onFileChanged }) {
   // the next "ready" event so a click during a transient disconnect doesn't
   // get lost.
   const pendingSendsRef = useRef([]);
+  // Auto-reconnect timer. The reconnect itself is silent (no UI state shown);
+  // the only signal the kid sees is that their next message lands once the
+  // socket comes back.
+  const reconnectTimerRef = useRef(null);
+  const RECONNECT_DELAY_MS = 1500;
 
   // History fetch — runs on sandbox change only, independently of the WS
   // lifecycle. Keeping it in its own effect means a reconnect (which only
