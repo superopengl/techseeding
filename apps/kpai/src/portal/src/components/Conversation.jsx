@@ -302,12 +302,13 @@ function MessageBubble({ entry }) {
       >
         <div
           style={{
-            background: isUser ? colors.primary : colors.surface,
-            color: isUser ? colors.onDark : colors.heading,
+            background: isUser ? colors.ctaYellow : colors.surface,
+            // Yellow background needs dark text for readable contrast.
+            color: colors.heading,
             borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
             padding: "10px 14px",
             boxShadow: shadows.cardSubtle,
-            border: isUser ? "none" : `1px solid ${colors.border}`,
+            border: isUser ? `1px solid ${colors.ctaYellowShadow}` : `1px solid ${colors.border}`,
           }}
         >
           {visibleParts.map((p, i) => {
