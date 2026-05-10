@@ -296,7 +296,7 @@ export function Conversation({ sandboxId, onFileChanged }) {
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: 16,
+          padding: "16px 16px 16px 12px",
           minHeight: 0,
         }}
       >
@@ -305,7 +305,11 @@ export function Conversation({ sandboxId, onFileChanged }) {
         ) : orderedMessages.length === 0 ? (
           <EmptyHint />
         ) : (
-          <MessageList entries={orderedMessages} showThinking={showThinking} />
+          <MessageList
+            entries={orderedMessages}
+            showThinking={showThinking}
+            reasoningAlwaysOpen
+          />
         )}
       </div>
 

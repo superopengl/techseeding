@@ -64,7 +64,7 @@ const ChatList = React.memo(function ChatList({ sessions, showAi }) {
   }
 
   return (
-    <div style={{ padding: 16, overflowY: "auto", height: "100%" }}>
+    <div style={{ padding: "16px 16px 16px 12px", overflowY: "auto", height: "100%" }}>
       {sessions.map((session, si) => {
         const visibleMessages = showAi
           ? session.messages

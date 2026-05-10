@@ -120,9 +120,21 @@ function makeMarkdownComponents({ onDark }) {
 const ASSISTANT_MD_COMPONENTS = makeMarkdownComponents({ onDark: false });
 const REASONING_MD_COMPONENTS = makeMarkdownComponents({ onDark: false });
 
-function ReasoningPart({ text }) {
+// `forceOpen` makes the panel always render its content with no toggle —
+// student sandbox uses this so kids see the reasoning unfold in real time.
+// Without it, the panel is collapsible and starts closed (admin debug view).
+function ReasoningPart({ text, forceOpen }) {
   const [open, setOpen] = useState(false);
   if (!text) return null;
+  const shown = forceOpen || open;
+  const headerCommon = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    color: colors.accentBlue,
+    fontWeight: 600,
+    fontSize: 13,
+  };
   return (
     <div
       style={{
@@ -133,27 +145,33 @@ function ReasoningPart({ text }) {
         padding: "8px 10px",
       }}
     >
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          background: "transparent",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          color: colors.accentBlue,
-          fontWeight: 600,
-          fontSize: 13,
-        }}
-      >
-        {open ? <DownOutlined style={{ fontSize: 10 }} /> : <RightOutlined style={{ fontSize: 10 }} />}
-        <BulbOutlined />
-        <span>Thinking</span>
-      </button>
-      {open && (
+      {forceOpen ? (
+        <div style={headerCommon}>
+          <small>
+            <BulbOutlined />
+          </small>
+          <small>
+            <span>Thinking</span>
+          </small>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          style={{
+            ...headerCommon,
+            background: "transparent",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+          }}
+        >
+          {open ? <DownOutlined style={{ fontSize: 10 }} /> : <RightOutlined style={{ fontSize: 10 }} />}
+          <BulbOutlined />
+          <span>Thinking</span>
+        </button>
+      )}
+      {shown && (
         <div
           style={{
             margin: "6px 0 0",
@@ -294,11 +312,36 @@ export function entryFromPersistedMessage(m) {
   return { info: { id, role, time: { created } }, parts: partsMap };
 }
 
-export function MessageBubble({ entry, footer }) {
+// Walk visible parts and coalesce runs of consecutive `reasoning` parts into
+// a single synthetic reasoning part with concatenated text. Without this the
+// merged-bubble path renders one "Thinking" panel per original message; the
+// kid sees a stack of identical-looking panels instead of a single growing
+// stream of thoughts.
+function coalesceReasoningParts(visibleParts) {
+  const out = [];
+  let buffer = null;
+  for (const p of visibleParts) {
+    if (p.type === "reasoning") {
+      if (!buffer) {
+        buffer = { ...p };
+      } else {
+        const sep = buffer.text.endsWith("\n") ? "" : "\n\n";
+        buffer = { ...buffer, text: buffer.text + sep + (p.text || "") };
+      }
+    } else {
+      if (buffer) { out.push(buffer); buffer = null; }
+      out.push(p);
+    }
+  }
+  if (buffer) out.push(buffer);
+  return out;
+}
+
+export function MessageBubble({ entry, footer, reasoningAlwaysOpen }) {
   const role = entry.info?.role;
   const isUser = role === "user";
   const parts = partsInOrder(entry.parts);
-  const visibleParts = parts.filter(partIsRenderable);
+  const visibleParts = coalesceReasoningParts(parts.filter(partIsRenderable));
 
   if (visibleParts.length === 0) return null;
 
@@ -337,7 +380,7 @@ export function MessageBubble({ entry, footer }) {
                 ? <PlainText key={key} text={p.text} />
                 : <MarkdownText key={key} text={p.text} />;
             }
-            if (p.type === "reasoning") return <ReasoningPart key={key} text={p.text} />;
+            if (p.type === "reasoning") return <ReasoningPart key={key} text={p.text} forceOpen={reasoningAlwaysOpen} />;
             if (p.type === "tool") return <ToolPart key={key} part={p} />;
             return null;
           })}
@@ -380,19 +423,72 @@ function ThinkingBubble() {
   );
 }
 
+// Opencode's agent loop emits one assistant message per turn-of-the-loop,
+// which means a single "make me a stars game" prompt produces a sequence of
+// short thinking-only bubbles (reasoning + tool call, reasoning + tool call,
+// …) before the final bubble with prose. Each was rendering as its own
+// bubble, which clutters the conversation. We collapse consecutive
+// "thinking only" assistant entries — those with no visible text part —
+// into a single merged bubble whose parts are the union of the originals.
+// Once a bubble contains text, it stands alone.
+function entryHasText(entry) {
+  for (const part of entry.parts?.values?.() ?? []) {
+    if (part?.type === "text" && typeof part.text === "string" && part.text.length > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function mergeAdjacentThinking(entries) {
+  const out = [];
+  let group = null;
+  const flush = () => {
+    if (group) { out.push(group); group = null; }
+  };
+  for (const entry of entries) {
+    const role = entry.info?.role;
+    if (role !== "assistant") {
+      flush();
+      out.push(entry);
+      continue;
+    }
+    if (entryHasText(entry)) {
+      flush();
+      out.push(entry);
+      continue;
+    }
+    if (!group) {
+      group = { info: entry.info, parts: new Map(entry.parts) };
+    } else {
+      const mergedParts = new Map(group.parts);
+      for (const [pid, p] of entry.parts.entries()) {
+        mergedParts.set(pid, p);
+      }
+      group = { info: group.info, parts: mergedParts };
+    }
+  }
+  flush();
+  return out;
+}
+
 // MessageList renders a series of bubble entries. Optionally:
 //  - showThinking: append a "Thinking…" bubble at the end (for live chat)
 //  - footerForEntry: render-prop for caller to attach metadata under each
 //    bubble (e.g. token/cost info in the admin debug view).
-export function MessageList({ entries, showThinking, footerForEntry }) {
+//  - reasoningAlwaysOpen: skip the collapsible toggle so reasoning is always
+//    visible. Student sandbox passes true (kids should see thinking unfold);
+//    admin debug view leaves it false so each panel starts collapsed.
+export function MessageList({ entries, showThinking, footerForEntry, reasoningAlwaysOpen }) {
+  const merged = mergeAdjacentThinking(entries);
   return (
     <>
-      {entries.map((entry) => {
+      {merged.map((entry) => {
         const id = entry.info?.id;
         const footer = footerForEntry ? footerForEntry(entry) : null;
         return (
           <Fragment key={id || Math.random()}>
-            <MessageBubble entry={entry} footer={footer} />
+            <MessageBubble entry={entry} footer={footer} reasoningAlwaysOpen={reasoningAlwaysOpen} />
           </Fragment>
         );
       })}
