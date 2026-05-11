@@ -140,6 +140,10 @@ function createAssistantTurn({ socket, sessionId, modelId, persist }) {
   // `{text,reasoning}-delta` events with the delta in `.delta` (sometimes
   // `.text`) and a stable `.id` linking back to a `{text,reasoning}-start`.
   const textBufs = new Map(); // eventId -> { type, text }
+  // We track which tool a given input-stream id belongs to so we can re-emit
+  // the right pill on each `tool-input-delta` (keeps the WS chatty during the
+  // long write-input stream and pre-empts heartbeat termination).
+  const toolNamesById = new Map(); // toolCallId -> toolName
   let streamError = null;
 
   function emitPart(id, type, fields) {
@@ -194,6 +198,28 @@ function createAssistantTurn({ socket, sessionId, modelId, persist }) {
       case "reasoning-delta":
         appendDelta(event.id, "reasoning", event);
         break;
+      case "tool-input-start":
+        // Fires as soon as the model commits to a tool — well before the
+        // input args have finished streaming. For `write` (which carries a
+        // whole HTML doc), waiting for `tool-call` would delay the pill by
+        // many seconds. The `id` here is the same value that arrives as
+        // `toolCallId` on the later `tool-call` / `tool-result`, so upserting
+        // by that id keeps every subsequent event hitting the same part.
+        toolNamesById.set(event.id, event.toolName);
+        upsertTool(event.id, event.toolName, "pending");
+        break;
+      case "tool-input-delta": {
+        const toolName = toolNamesById.get(event.id);
+        if (!toolName) break;
+        // Re-emit the pending pill so the WS stays chatty during long input
+        // streams — a 30-second silence trips heartbeat termination, and a
+        // silent socket also gives the kid a "did it crash?" feeling. The
+        // canonical iframe refresh comes from the tool's `execute` writing
+        // the final content (which fires `file-changed` exactly once per
+        // call).
+        upsertTool(event.id, toolName, "pending");
+        break;
+      }
       case "tool-call":
         upsertTool(event.toolCallId, event.toolName, "pending");
         break;
@@ -211,11 +237,25 @@ function createAssistantTurn({ socket, sessionId, modelId, persist }) {
         streamError = event.error;
         break;
       // text-end, reasoning-end, start, start-step, finish-step, finish,
-      // source, file, tool-input-* — not needed for the bubble UI.
+      // source, file, tool-input-end — not needed for the bubble UI.
     }
   }
 
   function complete(usage = {}) {
+    // Defensive fallback: if the turn produced no text and no tool parts,
+    // the student-side bubble would be empty (reasoning is hidden) and the
+    // turn would look like "no reply". Inject a short completion text so the
+    // kid sees an acknowledgement. Reaching here means the stream drained
+    // cleanly — errors bail out via the catch path before complete() runs.
+    const hasVisibleOutput = Array.from(parts.values()).some(
+      (p) => p.type === "text" || p.type === "tool"
+    );
+    if (!hasVisibleOutput) {
+      const id = `text-${messageId}-fallback`;
+      const part = { id, messageID: messageId, type: "text", text: "Done!" };
+      parts.set(id, part);
+      safeSend(socket, { type: "part", part });
+    }
     const { text, parts: persistedParts } = serializeParts(parts);
     const tokens = {
       input: usage.inputTokens ?? 0,

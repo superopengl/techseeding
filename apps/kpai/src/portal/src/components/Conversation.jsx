@@ -237,16 +237,18 @@ export function Conversation({ sandboxId, onFileChanged }) {
     [order, messages]
   );
 
-  // Derive "show Thinking…" purely from message state so it can never get
-  // stuck on a missing session.idle / time.completed signal: show it whenever
-  // the most recent message is the user's or an assistant message that hasn't
-  // streamed any *visible* content yet. Reasoning parts are hidden in the
-  // student view, so they don't count as content — otherwise the spinner
-  // would vanish during reasoning-only streaming and the bubble would be empty.
+  // Show "Thinking…" only while a turn is in flight (busy) and there's nothing
+  // visible to look at yet. Reasoning parts are hidden in the student view, so
+  // they don't count as content — otherwise the spinner would vanish during
+  // reasoning-only streaming and the bubble would be empty. Tying the spinner
+  // to `busy` (cleared on assistant completion or idle) prevents it from
+  // sticking forever on long turns that finish with only reasoning, or on
+  // turns that error out before any visible part lands.
   const lastMessage = orderedMessages[orderedMessages.length - 1];
-  const lastIsAssistantWithContent = lastMessage?.info?.role === "assistant" &&
+  const lastIsAssistant = lastMessage?.info?.role === "assistant";
+  const lastAssistantHasVisibleContent = lastIsAssistant &&
     partsInOrder(lastMessage.parts).some((p) => p.type !== "reasoning" && partIsRenderable(p));
-  const showThinking = !!lastMessage && !lastIsAssistantWithContent;
+  const showThinking = busy && (!lastIsAssistant || !lastAssistantHasVisibleContent);
 
   if (!sandboxId) {
     return (
