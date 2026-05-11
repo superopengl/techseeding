@@ -2,39 +2,8 @@ FROM node:24-slim
 
 LABEL com.docker.compose.project="techseeding"
 
-# System dependencies:
-#   curl, ca-certificates — nono release download
-#   git — opencode runtime (version control operations)
-#   libdbus-1-3 — runtime lib expected by opencode tooling
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    rm -f /etc/apt/apt.conf.d/docker-clean && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates git libdbus-1-3
-
 # Enable pnpm (version is pinned via the "packageManager" field in package.json)
 RUN corepack enable
-
-# Install opencode CLI globally via pnpm, locked to a known-good version.
-# No store cache mount here: pnpm hard-links global package files from the
-# store, and a cache mount would discard those files after the layer is built.
-ENV PNPM_HOME="/root/.local/share/pnpm" \
-    PATH="/root/.local/share/pnpm/bin:/root/.local/share/pnpm:${PATH}"
-RUN pnpm add -g opencode-ai@1.14.41
-
-# Install nono (kernel-enforced sandbox for AI agent processes)
-RUN NONO_VERSION=$(curl -sI https://github.com/always-further/nono/releases/latest | grep -i location | grep -oP 'v\K[0-9.]+') && \
-    ARCH=$(dpkg --print-architecture) && \
-    curl -fsSL -o /tmp/nono.deb "https://github.com/always-further/nono/releases/download/v${NONO_VERSION}/nono-cli_${NONO_VERSION}_${ARCH}.deb" && \
-    dpkg -i /tmp/nono.deb && \
-    rm /tmp/nono.deb
-
-# Pre-create XDG directories for opencode (nono sandbox blocks mkdir on parent paths)
-RUN mkdir -p /root/.local/share/opencode \
-    /root/.config/opencode /root/.cache/opencode /root/.local/state/opencode
-
-# Copy opencode user-level config (model, permissions, agent rules)
-COPY devops/opencode-config/ /root/.config/opencode/
 
 ENV NODE_ENV=production
 

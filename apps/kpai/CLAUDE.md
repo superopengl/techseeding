@@ -14,7 +14,7 @@ Multi-page app with four views:
 
 1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Crafts" CTA
 2. **Login** (`/login`) — Student enters their name and clicks "Request Login"; waits for admin approval
-3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is a chat-bubble UI streaming the OpenCode agent (backed by DeepSeek) over a WebSocket
+3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is a chat-bubble UI streaming the in-process DeepSeek agent (Vercel AI SDK) over a WebSocket
 4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students (name, status, session active, sandbox link, message count, token info) with approve/reject actions
 
 ## How It Works
@@ -24,10 +24,10 @@ Multi-page app with four views:
 3. A record is created in PostgreSQL with status `pending`; the student sees a "Waiting for Approval" screen
 4. An admin visits `/admin`, sees pending students, and clicks "Approve"
 5. The login page polls `/api/login/status/:studentId` and navigates to `/sandbox/:studentId` once approved
-6. A WebSocket connection spawns a per-sandbox `opencode serve` HTTP server (jailed with `nono`, scoped to the student's craft folder) and the backend talks to it via the `@opencode-ai/sdk` client; SSE events stream live to the browser
+6. A WebSocket connection establishes a chat session backed by an in-process agent loop (Vercel AI SDK + DeepSeek); streaming text, reasoning, and tool calls are forwarded live to the browser
 7. Kids type natural language requests in the chat input (e.g., "make a craft where I catch falling stars") and see the AI's reasoning, tool calls, and reply as message bubbles
-8. OpenCode edits the `index.html` file inside the sandbox
-9. The left panel iframe shows the updated craft
+8. The agent uses three craft tools (`read`, `edit`, `write`) scoped to the student's `index.html` via a path-jail helper
+9. The left panel iframe shows the updated craft as soon as a tool write lands
 
 ## Architecture
 
@@ -87,11 +87,14 @@ src/
       loginStatus.js      # GET /api/login/:loginRequestId/status
       adminStudents.js    # GET /api/admin/students
       adminCreateStudent.js # POST /api/admin/student
-      wsChat.js           # WS /api/ws — spawns per-sandbox `opencode serve`, bridges SDK events to the client
+      wsChat.js           # WS /api/ws — runs the in-process agent loop, streams events to the client
     resources/
-      sandbox_sample/     # Sandbox template — each new sandbox is a copy of this folder with API key injection
+      sandbox_sample/     # Sandbox template — each new sandbox starts as a copy of this folder
     lib/                  # Shared utilities
       sandboxManager.js   # Sandbox creation, ID generation, path constants
+      sandboxAgent.js     # Vercel AI SDK glue: system prompt, DeepSeek model factory, `runCraftTurn`
+      sandboxTools.js     # The three craft tools (read/edit/write) exposed to the model
+      pathJail.js         # Path-resolution helper that refuses any escape from a sandbox workDir
     db/
       schema.js           # Drizzle ORM schema
       index.js            # Database connection (postgres.js driver)
@@ -105,7 +108,7 @@ src/
       components/         # UI components (Conversation, MessageList, CraftPreview, ...)
     vite.config.js        # Vite config with dev proxy and build output to dist/public/
     package.json          # Frontend dependencies
-devops/                   # Docker image build (Dockerfile, entrypoint, opencode config)
+devops/                   # Docker image build (Dockerfile, entrypoint)
 deploy/                   # AWS CDK app — provisions all infra and ships the image (see Deployment section)
 mobile/ios/               # Native SwiftUI craft viewer — scan a craft QR and play it full-screen in WKWebView; see mobile/ios/README.md
 dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
@@ -129,10 +132,14 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 
 ## Security Model
 
-- **LLM-level**: OpenCode is configured with a restricted tool allowlist (safe file operations only)
-- **OS-level (MVP)**: `HOME` env override limits default file access to sandbox
-- **Future**: Docker containers per student for true OS-level isolation
-- **iframe**: `sandbox="allow-scripts allow-same-origin"` restricts preview capabilities
+The agent runs in-process inside the Fastify server, so OS-level jailing (Landlock via `nono`) is no longer available. Safety is enforced in JS:
+
+- **Tool surface**: only three tools (`read`, `edit`, `write`) over a hardcoded `index.html`. The model never names a path — it cannot ask for any other file.
+- **Path jail**: `src/api/lib/pathJail.js` resolves every file operation against the sandbox `workDir`, rejecting `..` escape, absolute paths, null bytes, and symlinks that point outside. Defense-in-depth in case the tool surface ever widens.
+- **No shell, no network**: there is no `bash`/`fetch`/external tool — the agent literally cannot execute commands or call out to the internet from the server.
+- **System prompt**: explicit rules forbid generating external URLs, downloading media, or revealing server-side info. Sits on top of the tool restriction, not as a substitute for it.
+- **iframe**: `Content-Security-Policy: sandbox allow-scripts` on `/api/sandbox/:id/preview` keeps the rendered craft from talking to anything else.
+- **Future**: per-student container isolation if/when we expand the tool surface beyond a single file or add network-capable tools.
 
 ## Coding Conventions
 
@@ -148,7 +155,7 @@ Finished crafts can be pushed to a public location (e.g., S3) so kids can share 
 - **Frontend**: React 19, Ant Design 6, Vite, react-router-dom v7, react-markdown + remark-gfm for assistant message rendering
 - **Backend**: Node.js, Fastify
 - **Database**: PostgreSQL with Drizzle ORM
-- **AI Agent**: per-sandbox `opencode serve` HTTP server (jailed with `nono` Landlock) backed by DeepSeek; backend talks to it via `@opencode-ai/sdk`, streams SSE events to the browser over a WebSocket
+- **AI Agent**: in-process agent loop via Vercel AI SDK (`ai` + `@ai-sdk/deepseek`), backed by DeepSeek. One Fastify process serves every concurrent chat session; the model's text, reasoning, and tool calls stream live to the browser over a WebSocket. Tool execution is jailed in JS (see Security Model)
 - **Mobile (iOS craft viewer)**: SwiftUI, WKWebView for craft preview, AVFoundation + CIDetector for QR scanning, XcodeGen for project generation (Xcode 17+, iOS target)
 - **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
 - **Cloud / IaC**: AWS, CDK v2 (JavaScript)
@@ -190,6 +197,8 @@ All env vars are prefixed with `KPAI_`.
 | `KPAI_API_PORT` | Port the API server binds to (always binds `0.0.0.0`) | `9511` |
 | `KPAI_PUBLIC_URL` | Public-facing app origin (used in emails, share links, SMS) | `http://localhost:9512` |
 | `KPAI_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
+| `KPAI_SANDBOX_DEEPSEEK_API_KEY` | DeepSeek API key used by the sandbox agent | *(required)* |
+| `KPAI_SANDBOX_DEEPSEEK_MODEL` | DeepSeek model id passed to the AI SDK | `deepseek-chat` |
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)

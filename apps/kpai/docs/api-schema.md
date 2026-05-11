@@ -334,22 +334,37 @@ All three WebSocket endpoints share the path prefix `/api/ws*`. Frames are JSON-
 
 ### `WS /api/ws?sandboxId=:id`
 
-Bidirectional terminal session for the student's OpenCode CLI inside a sandbox. The `sandboxId` is a **query** parameter, not a path parameter. The PTY lives for the life of the connection.
+Bidirectional chat session for the student's sandbox. The `sandboxId` is a **query** parameter, not a path parameter. The connection drives one in-process agent loop (Vercel AI SDK + DeepSeek) scoped to the student's `index.html`; conversation context is ephemeral per connection.
 
 - **Auth:** Required (`kpai_token` cookie). Closes the socket immediately on missing auth, missing `sandboxId`, or sandbox not owned by the caller.
-- **Rate limit:** 30 input "submits" (Enter key) per minute per session. Excess input is silently dropped and the user is notified inline.
-- **Side effects:** Creates a `sandbox_session` row; persists captured input as `session_message{type:"request"}` and aggregated output as `session_message{type:"response"}`; rewrites `workDir/index.html` and the `sandbox.indexHtmlContent` column when the file changes.
+- **Rate limit:** 30 `send` messages per minute per connection. Excess sends emit `{ "type": "rate-limit" }` and are dropped. A second `send` while the agent is still streaming is also dropped (the UI disables input while busy).
+- **Side effects:** Creates a `sandbox_session` row; persists each user / assistant message into `session_message` (jsonb `content = { text, parts }`); rewrites `workDir/index.html` and the `sandbox.indexHtmlContent` column whenever the agent's `write` or `edit` tool fires.
 - **Client → Server messages:**
   ```json
-  { "type": "input", "data": "string" }
-  { "type": "resize", "cols": 80, "rows": 24 }
+  { "type": "send", "text": "string (1..2000 chars)" }
   ```
 - **Server → Client messages:**
   ```json
-  { "type": "output", "data": "string (raw PTY bytes)" }
+  { "type": "starting" }
+  { "type": "ready" }
+  { "type": "message", "info": { "id": "uuid", "role": "user" | "assistant",
+        "sessionID": "uuid", "time": { "created": 0, "completed": 0 },
+        "providerID": "deepseek", "modelID": "deepseek-chat",
+        "tokens": { "input": 0, "output": 0, "reasoning": 0, "cache": { "read": 0, "write": 0 } } } }
+  { "type": "part", "part": { "id": "string", "messageID": "uuid",
+        "type": "text" | "reasoning" | "tool",
+        "text": "string (text/reasoning)",
+        "tool": "read | edit | write", "state": { "status": "pending | completed | error" } } }
+  { "type": "part-removed", "messageID": "uuid", "partID": "string" }
+  { "type": "idle" }
   { "type": "file-changed", "file": "index.html" }
+  { "type": "rate-limit" }
+  { "type": "error", "error": "string" }
+  { "type": "session-error", "error": "string" }
   ```
-- **Connection closed:** When the OpenCode/PTY process exits, when auth fails, or when the client disconnects.
+  Parts are emitted with their full current state (not deltas) — the client replaces by `part.id` as content streams in. `state.status` for tool parts goes `pending` → `completed` (or `error`); the UI renders both terminal states with the same green check chip.
+- **Heartbeat:** WebSocket ping every 30s; the server terminates if the peer misses a pong.
+- **Connection closed:** When auth fails, when the client disconnects, or when the heartbeat goes unanswered. Cleanup aborts any in-flight agent turn and stamps `sandbox_session.closed_at`.
 
 ### `WS /api/ws/login/:loginRequestId`
 
