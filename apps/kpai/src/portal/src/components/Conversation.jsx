@@ -1,30 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Input, Button, Alert, Typography } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { Loading } from "./Loading";
 import { MessageList, partsInOrder, partIsRenderable, entryFromPersistedMessage } from "./MessageList";
 import { apiCall } from "../api";
 import { colors } from "../theme";
 
 const { TextArea } = Input;
-
-function StartingMask() {
-  return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 12,
-        color: colors.body,
-      }}
-    >
-      <Loading size="large" description={<span style={{ fontSize: 16 }}>Starting AI assistant…</span>} />
-    </div>
-  );
-}
 
 function EmptyHint() {
   return (
@@ -301,9 +282,7 @@ export function Conversation({ sandboxId, onFileChanged }) {
           minHeight: 0,
         }}
       >
-        {phase === "starting" && orderedMessages.length === 0 ? (
-          <StartingMask />
-        ) : orderedMessages.length === 0 ? (
+        {orderedMessages.length === 0 ? (
           <EmptyHint />
         ) : (
           <MessageList
