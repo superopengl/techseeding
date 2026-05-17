@@ -32,3 +32,5 @@ Will do in later classes:
 4. All Crafts should be on the sandbox page as tiles, with preview
 5. Gallery page, QR code can be enlarged on click
 6. KidPlayAI Viewer should be able to save multiple QR code
+7. Gallery list on student sandbox page should be more obvious
+8. Student should be able to set password if password is null from the menu
