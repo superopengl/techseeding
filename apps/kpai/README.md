@@ -19,15 +19,15 @@ An AI-powered craft maker platform for kids aged 8–12 who love games, science,
 1. A kid visits the homepage and clicks **Start Making Crafts**
 2. They enter their name on the login page and request access
 3. An admin approves the request from `/admin`
-4. The kid is dropped into a **sandbox**: a live craft preview on the left, an AI terminal on the right
-5. They type natural language requests (e.g. *"make a craft where I catch falling stars"*) and the AI agent edits HTML/JS/CSS files in their sandbox
-6. The preview iframe updates as the craft takes shape
+4. The kid is dropped into a **sandbox**: a live craft preview on the left, a streaming chat with the AI on the right
+5. They type natural language requests (e.g. *"make a craft where I catch falling stars"*) and watch the AI think, call tools, and edit a single `index.html` in their sandbox
+6. The preview iframe refreshes each time the AI writes the file
 
 ## Tech Stack
 
-- **Frontend**: React 19, Ant Design 6, Vite, react-router-dom v7, xterm.js
+- **Frontend**: React 19, Ant Design 6, Vite, react-router-dom v7, react-markdown
 - **Backend**: Node.js, Fastify, WebSockets
-- **AI Agent**: OpenCode CLI backed by DeepSeek (spawned per kid via `node-pty`)
+- **AI Agent**: in-process agent loop via the Vercel AI SDK (`ai` + `@ai-sdk/deepseek`), backed by DeepSeek. One Fastify process serves every chat session — no per-kid subprocess
 - **Database**: PostgreSQL with Drizzle ORM
 - **Infrastructure**: AWS (ECS Fargate, Aurora Serverless v2, EFS, ALB) provisioned with CDK v2
 - **Package Manager**: pnpm workspace monorepo
@@ -95,6 +95,8 @@ All env vars are prefixed with `KPAI_`. See `.env.sample` for the full template.
 | `KPAI_API_PORT` | Port the API server binds to |
 | `KPAI_PUBLIC_URL` | Public-facing app origin |
 | `KPAI_JWT_SECRET` | Secret for signing JWTs |
+| `KPAI_SANDBOX_DEEPSEEK_API_KEY` | DeepSeek API key used by the in-process sandbox agent |
+| `KPAI_SANDBOX_DEEPSEEK_MODEL` | DeepSeek model id (optional, defaults to `deepseek-chat`) |
 
 `pnpm dev` loads `.env`; `pnpm start:prod` loads `.env.production`.
 

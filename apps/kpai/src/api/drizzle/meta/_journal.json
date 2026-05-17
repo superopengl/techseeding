@@ -50,6 +50,13 @@
       "when": 1778201414961,
       "tag": "0006_mixed_spiral",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778991738176,
+      "tag": "0007_flaky_mastermind",
+      "breakpoints": true
     }
   ]
 }

@@ -239,10 +239,10 @@ All endpoints under `/api/admin/*` require `kpai_role=admin`. Anything else retu
 
 ### `GET /api/admin/students`
 
-List all student users with profile + outstanding-login-request info.
+List all student users with profile + outstanding-login-request info + gallery memberships.
 
 - **Query:** `page`, `pageSize`
-- **Response:** `200` — array of `{ id, userName, email, firstName, lastName, contactNumber, joinedAt, createdAt, loginRequestId, loginRequestStatus, loginRequestResetPassword }`
+- **Response:** `200` — array of `{ id, userName, email, firstName, lastName, contactNumber, joinedAt, createdAt, loginRequestId, loginRequestStatus, loginRequestResetPassword, galleries: [{ id, name, colorHex }] }`
 
 ### `POST /api/admin/student`
 
@@ -311,6 +311,78 @@ Upload (replace) the sandbox's `index.html`. Writes to both the database (`index
 - **Request body:** `{ "content": "string (HTML)" }`
 - **Response:** `200 { length: number }`
 - **Errors:** `400 BAD_REQUEST`, `404 NOT_FOUND`, `500 WORKDIR_SYNC_FAILED`
+
+### `GET /api/admin/galleries`
+
+List all galleries with their members, ordered by creation time.
+
+- **Response:** `200` — array of `{ id, name, notes, colorHex, createdAt, updatedAt, members: [{ userId, userName, firstName, lastName, avatarColor }] }` (members sorted by first/last name)
+
+### `POST /api/admin/gallery`
+
+Create a new gallery. Name is unique (case-insensitive).
+
+- **Request body:**
+  ```json
+  {
+    "name":     "string (≤50, required)",
+    "notes":    "string (≤2000, optional)",
+    "colorHex": "string (^#[0-9a-fA-F]{6}$, optional, default #7c5cfc)"
+  }
+  ```
+- **Response:** `201` — the created gallery row
+- **Errors:** `400 VALIDATION_ERROR`, `409 CONFLICT` (duplicate name)
+
+### `PATCH /api/admin/gallery/:id`
+
+Update a gallery. All body fields are optional; only the provided ones are changed.
+
+- **Request body:** `{ "name": "string", "notes": "string | null", "colorHex": "#rrggbb" }`
+- **Response:** `200` — the updated gallery row
+- **Errors:** `400 VALIDATION_ERROR`, `404 NOT_FOUND`, `409 CONFLICT` (duplicate name)
+
+### `DELETE /api/admin/gallery/:id`
+
+Delete a gallery. Cascades to `user_gallery`, so all member associations are removed too.
+
+- **Response:** `200 { id }`
+- **Errors:** `404 NOT_FOUND`
+
+### `GET /api/admin/user/:userId/galleries`
+
+List the galleries a user belongs to.
+
+- **Response:** `200` — array of `{ id, name, notes, colorHex }`
+- **Errors:** `404 NOT_FOUND` (user does not exist)
+
+### `PUT /api/admin/user/:userId/galleries`
+
+Replace a user's gallery memberships with the supplied set (idempotent). Pass `galleryIds: []` to remove all memberships.
+
+- **Request body:** `{ "galleryIds": ["uuid", ...] }`
+- **Response:** `200` — array of `{ id, name, notes, colorHex }` (the user's current galleries after the update)
+- **Errors:** `400 VALIDATION_ERROR` (bad shape or unknown gallery id), `404 NOT_FOUND` (user does not exist)
+
+### `GET /api/admin/gallery/:galleryId/expo`
+
+List all sandboxes belonging to students in a gallery, ordered by `sandbox.updatedAt` descending. Powers the `/gallery/:id/expo` admin page that shows a grid of craft previews from every gallery member.
+
+- **Response:** `200`
+  ```json
+  {
+    "success": true,
+    "data": {
+      "gallery": { "id": "uuid", "name": "string", "colorHex": "#rrggbb" },
+      "sandboxes": [
+        { "id": "uuid", "title": "string | null", "updatedAt": "timestamp",
+          "userId": "uuid", "userName": "string",
+          "firstName": "string", "lastName": "string",
+          "avatarColor": "#rrggbb" }
+      ]
+    }
+  }
+  ```
+- **Errors:** `404 NOT_FOUND` (gallery does not exist)
 
 ### `GET /api/admin/enquiries`
 

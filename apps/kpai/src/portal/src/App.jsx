@@ -19,6 +19,9 @@ const SandboxRedirectPage = lazy(() =>
 const AdminPage = lazy(() =>
   import("./pages/AdminPage").then((m) => ({ default: m.AdminPage }))
 );
+const GalleryExpoPage = lazy(() =>
+  import("./pages/GalleryExpoPage").then((m) => ({ default: m.GalleryExpoPage }))
+);
 const PrivacyPolicyPage = lazy(() =>
   import("./pages/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage }))
 );
@@ -52,6 +55,7 @@ export function App() {
                 <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
                 <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
                 <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
+                <Route path="/gallery/:id/expo" element={<RoleGuard role="admin"><GalleryExpoPage /></RoleGuard>} />
                 <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms_of_use" element={<TermsOfUsePage />} />
                 <Route path="/logo" element={<LogoPage />} />

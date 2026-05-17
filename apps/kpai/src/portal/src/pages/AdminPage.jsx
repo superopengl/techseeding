@@ -15,6 +15,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { colors, shadows, fonts } from "../theme";
 import { Logo } from "../components/Logo";
 import { SandboxReviewDrawer } from "../components/SandboxReviewDrawer";
+import { GalleriesTab } from "../components/GalleriesTab";
+import { StudentGalleriesEditor } from "../components/StudentGalleriesEditor";
+import { StudentGallerySelect } from "../components/StudentGallerySelect";
 import { apiCall, logout } from "../api";
 import { useUser } from "../context/UserContext";
 
@@ -43,6 +46,7 @@ export function AdminPage() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewSandbox, setReviewSandbox] = useState(null);
   const [markingReadIds, setMarkingReadIds] = useState(() => new Set());
+  const [allGalleries, setAllGalleries] = useState([]);
 
   useEffect(() => {
     const { accountName, firstName, lastName } = addFormValues || {};
@@ -115,6 +119,15 @@ export function AdminPage() {
     }
   };
 
+  const fetchGalleries = async () => {
+    try {
+      const data = await apiCall("/api/admin/galleries");
+      setAllGalleries(data);
+    } catch {
+      message.error("Failed to load galleries");
+    }
+  };
+
   const handleMarkEnquiryRead = async (id) => {
     setMarkingReadIds((prev) => {
       const next = new Set(prev);
@@ -138,7 +151,15 @@ export function AdminPage() {
   useEffect(() => {
     fetchStudents();
     fetchEnquiries();
+    fetchGalleries();
   }, []);
+
+  useEffect(() => {
+    // Refresh the gallery option list when the user switches to the Students
+    // tab — new galleries may have been added/renamed/deleted in the Galleries
+    // tab while this tab was hidden.
+    if (activeTab === "students") fetchGalleries();
+  }, [activeTab]);
 
   useEffect(() => {
     let ws = null;
@@ -295,6 +316,29 @@ export function AdminPage() {
       key: "email",
       sorter: (a, b) => (a.email || "").localeCompare(b.email || ""),
       render: (v) => v || "-",
+    },
+    {
+      title: "Galleries",
+      dataIndex: "galleries",
+      key: "galleries",
+      width: 260,
+      render: (galleries, record) => (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <StudentGallerySelect
+            userId={record.id}
+            value={galleries}
+            allGalleries={allGalleries}
+            onChange={(updated) => {
+              setStudents((prev) =>
+                prev.map((s) => (s.id === record.id ? { ...s, galleries: updated } : s)),
+              );
+            }}
+          />
+        </div>
+      ),
     },
     {
       title: "Joined At",
@@ -557,6 +601,11 @@ export function AdminPage() {
               ),
             },
             {
+              key: "galleries",
+              label: "Galleries",
+              children: <GalleriesTab />,
+            },
+            {
               key: "enquiries",
               label: (
                 <Space size={8}>
@@ -606,6 +655,18 @@ export function AdminPage() {
         onClose={() => setDrawerOpen(false)}
         destroyOnHidden
       >
+        {drawerStudent && (
+          <div style={{ marginBottom: 20 }}>
+            <StudentGalleriesEditor
+              userId={drawerStudent.id}
+              onChange={(galleries) => {
+                setStudents((prev) =>
+                  prev.map((s) => (s.id === drawerStudent.id ? { ...s, galleries } : s)),
+                );
+              }}
+            />
+          </div>
+        )}
         {sandboxesLoading ? (
           <div style={{ textAlign: "center", padding: 48 }}>
             <Loading />

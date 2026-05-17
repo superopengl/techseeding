@@ -85,6 +85,28 @@ export const enquiry = pgTable("enquiry", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const gallery = pgTable("gallery", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  notes: text("notes"),
+  colorHex: text("color_hex").notNull().default("#7c5cfc"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("gallery_name_lower_unique_idx").on(sql`lower(${table.name})`),
+]);
+
+export const userGallery = pgTable("user_gallery", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  galleryId: uuid("gallery_id").notNull().references(() => gallery.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("user_gallery_user_id_gallery_id_unique_idx").on(table.userId, table.galleryId),
+  index("user_gallery_user_id_idx").on(table.userId),
+  index("user_gallery_gallery_id_idx").on(table.galleryId),
+]);
+
 export const sessionMessage = pgTable("session_message", {
   id: uuid("id").primaryKey().defaultRandom(),
   sandboxSessionId: uuid("sandbox_session_id").notNull().references(() => sandboxSession.id),

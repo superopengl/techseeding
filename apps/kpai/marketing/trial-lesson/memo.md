@@ -19,8 +19,8 @@ Will do in later classes:
 
 1. Initial login is not smooth for kids
 2. Add marketplace feature where any kids can see any crafts, and star, downloading count, voting
-3. Viewer should be able to save multiple crafts
-4. AWS need to scale to 8 to support 5-6 kids. 2 vcpu / 16GB mem seems enough
+3. Viewer should be able to see multiple crafts
+4. AWS need to scale to 8 to support 5-6 kids. 4 vcpu / 16GB mem still goes to 100%. Limit memory usage.
 5. Slow AI response
 6. Hide thinking details for kids
 7. Create new craft button should be obvious, as new session save tokens

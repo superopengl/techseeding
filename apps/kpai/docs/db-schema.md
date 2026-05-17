@@ -10,6 +10,7 @@ user 1──* login_request
 user 1──* sandbox_session *──1 sandbox
 user 1──* sandbox 1──* session_message
                 sandbox 1──* sandbox_release
+user *──* gallery  (via user_gallery)
 ```
 
 ---
@@ -109,6 +110,34 @@ A published snapshot of a sandbox craft. Each release captures a point-in-time v
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
 **Indexes:** `sandbox_id`
+
+### `gallery`
+
+A label that can be applied to one or more users (typically students). Used by admins to organise students into cohorts, classes, etc.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| name | text | NOT NULL, unique (case-insensitive) | Gallery display name |
+| notes | text | nullable | Free-form notes |
+| color_hex | text | NOT NULL, default `#7c5cfc` | Hex color used to render the gallery tag |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+| updated_at | timestamp | NOT NULL, default `now()` | Last update time |
+
+**Indexes:** `lower(name)` (unique)
+
+### `user_gallery`
+
+Junction table mapping users to galleries (many-to-many). A user can belong to multiple galleries; a gallery can have multiple users.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| user_id | uuid | NOT NULL, FK → `user.id` ON DELETE CASCADE | Member user |
+| gallery_id | uuid | NOT NULL, FK → `gallery.id` ON DELETE CASCADE | Owning gallery |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+
+**Indexes:** `(user_id, gallery_id)` (unique), `user_id`, `gallery_id`
 
 ### `session_message`
 
