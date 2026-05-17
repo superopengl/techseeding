@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { apiCall } from "../api";
@@ -9,12 +9,13 @@ import { Loading } from "../components/Loading";
 export function SandboxRedirectPage() {
   const navigate = useNavigate();
   const { user, loaded, refresh } = useUser();
+  const [skipped, setSkipped] = useState(false);
   const passwordChecked = loaded;
   const hasPassword = user ? Boolean(user.hasPassword) : (loaded ? true : null);
 
   useEffect(() => {
     if (!passwordChecked) return;
-    if (hasPassword === false) return;
+    if (hasPassword === false && !skipped) return;
     (async () => {
       try {
         const sandboxes = await apiCall("/api/sandbox");
@@ -32,7 +33,7 @@ export function SandboxRedirectPage() {
         message.error("Failed to load sandbox");
       }
     })();
-  }, [passwordChecked, hasPassword, navigate]);
+  }, [passwordChecked, hasPassword, skipped, navigate]);
 
   return (
     <>
@@ -50,9 +51,10 @@ export function SandboxRedirectPage() {
         </div>
       </div>
       <PasswordModal
-        open={hasPassword === false}
+        open={hasPassword === false && !skipped}
         mode="set"
         onSuccess={() => refresh()}
+        onSkip={() => setSkipped(true)}
       />
     </>
   );

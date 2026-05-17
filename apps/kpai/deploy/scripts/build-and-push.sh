@@ -26,6 +26,19 @@ fi
 REGISTRY="${REPO_URI%/*}"
 
 echo "==> Logging in to ECR ($REGISTRY)"
+# Clear any stale credential entry so `docker login` can overwrite it.
+# Without this, the macOS osxkeychain helper fails with
+# "The specified item already exists in the keychain. (-25299)" — and
+# `docker logout` alone doesn't help because it only edits config.json.
+# Try the credential helper's erase first; fall back to the `security`
+# CLI if the helper lacks ACL permission (happens when the entry was
+# created by a different binary path, e.g. an older Docker Desktop).
+if command -v docker-credential-osxkeychain >/dev/null 2>&1; then
+  echo "https://$REGISTRY" | docker-credential-osxkeychain erase 2>/dev/null \
+    || security delete-internet-password -s "$REGISTRY" >/dev/null 2>&1 \
+    || true
+fi
+docker logout "$REGISTRY" >/dev/null 2>&1 || true
 aws ecr get-login-password --region "$REGION" | \
   docker login --username AWS --password-stdin "$REGISTRY"
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Form, Input, Typography, message } from "antd";
+import { Modal, Form, Input, Typography, Button, Divider, message } from "antd";
 import { LockOutlined } from "@ant-design/icons";
 import { fetchWithAuth } from "../api";
 import { colors, fonts } from "../theme";
@@ -21,7 +21,7 @@ function validatePassword(value) {
   return null;
 }
 
-export function PasswordModal({ open, mode, onSuccess, onCancel }) {
+export function PasswordModal({ open, mode, onSuccess, onCancel, onSkip }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
@@ -94,6 +94,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
           borderRadius: 12,
         },
       }}
+      footer={isSet && onSkip ? null : undefined}
       destroyOnHidden
     >
       {isSet && (
@@ -113,7 +114,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             name="currentPassword"
             rules={[{ required: true, message: "Please enter your current password" }]}
           >
-            <Input.Password size="large" autoFocus maxLength={MAX_LENGTH} />
+            <Input.Password size="large" autoFocus maxLength={MAX_LENGTH} styles={{ input: { textAlign: "center" } }} />
           </Form.Item>
         )}
         <Form.Item
@@ -128,7 +129,7 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             },
           ]}
         >
-          <Input.Password size="large" autoFocus={isSet} maxLength={MAX_LENGTH} />
+          <Input.Password size="large" autoFocus={isSet} maxLength={MAX_LENGTH} styles={{ input: { textAlign: "center" } }} />
         </Form.Item>
         <Form.Item
           label="Confirm new password"
@@ -144,11 +145,43 @@ export function PasswordModal({ open, mode, onSuccess, onCancel }) {
             }),
           ]}
         >
-          <Input.Password size="large" maxLength={MAX_LENGTH} />
+          <Input.Password size="large" maxLength={MAX_LENGTH} styles={{ input: { textAlign: "center" } }} />
         </Form.Item>
       </Form>
       {serverError && (
         <div style={{ color: "#ff4d4f", textAlign: "center", marginTop: -8 }}>{serverError}</div>
+      )}
+      {isSet && onSkip && (
+        <>
+          <Button
+            type="primary"
+            block
+            onClick={handleOk}
+            loading={submitting}
+            style={{
+              background: colors.ctaYellow,
+              color: colors.heading,
+              border: "none",
+              fontWeight: 600,
+              borderRadius: 12,
+              marginTop: 8,
+            }}
+          >
+            Set Password
+          </Button>
+          <Divider plain style={{ margin: "16px 0 12px", color: colors.body }}>or</Divider>
+          <Paragraph style={{ color: colors.body }}>
+            Without a password, you'll need a teacher to approve every login.
+          </Paragraph>
+          <Button
+            block
+            type="primary"
+            onClick={onSkip}
+            disabled={submitting}
+          >
+            Skip and Always Request Approval
+          </Button>
+        </>
       )}
     </Modal>
   );
