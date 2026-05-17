@@ -17,10 +17,18 @@ Will do in later classes:
 
 # Feedback from trial 2025-05-10
 
-1. Initial login is not smooth for kids
-2. Add marketplace feature where any kids can see any crafts, and star, downloading count, voting
+1. [x] Initial login is not smooth for kids
+2. [x] Add marketplace feature where any kids can see any crafts, and star, downloading count, voting
 3. Viewer should be able to see multiple crafts
-4. AWS need to scale to 8 to support 5-6 kids. 4 vcpu / 16GB mem still goes to 100%. Limit memory usage.
-5. Slow AI response
-6. Hide thinking details for kids
-7. Create new craft button should be obvious, as new session save tokens
+4. [x] AWS need to scale to 8 to support 5-6 kids. 4 vcpu / 16GB mem still goes to 100%. Limit memory usage.
+5. [x] Slow AI response
+6. [x] Hide thinking details for kids
+7. [x] Create new craft button should be obvious, as new session save tokens
+
+# Feedback from trial 2025-05-17
+1. Create new craft should be a new tab
+2. Open craft in new tab from craft list page
+3. Able to delete current draft
+4. All Crafts should be on the sandbox page as tiles, with preview
+5. Gallery page, QR code can be enlarged on click
+6. KidPlayAI Viewer should be able to save multiple QR code
