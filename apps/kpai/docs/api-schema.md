@@ -60,6 +60,28 @@ Submit a contact enquiry from the public marketing site.
 - **Errors:** `400 VALIDATION_ERROR`
 - **Side effects:** Inserts into `enquiry`; broadcasts `enquiry_created` over the admin WebSocket.
 
+### `GET /api/gallery/:galleryId/expo`
+
+List all sandboxes belonging to students in a gallery, ordered by `sandbox.updatedAt` descending. Powers the public `/gallery/:id/expo` page that shows a grid of craft previews from every gallery member.
+
+- **Auth:** None
+- **Response:** `200`
+  ```json
+  {
+    "success": true,
+    "data": {
+      "gallery": { "id": "uuid", "name": "string", "colorHex": "#rrggbb" },
+      "sandboxes": [
+        { "id": "uuid", "title": "string | null", "updatedAt": "timestamp",
+          "userId": "uuid", "userName": "string",
+          "firstName": "string", "lastName": "string",
+          "avatarColor": "#rrggbb" }
+      ]
+    }
+  }
+  ```
+- **Errors:** `404 NOT_FOUND` (gallery does not exist)
+
 ---
 
 ## Authentication
@@ -362,27 +384,6 @@ Replace a user's gallery memberships with the supplied set (idempotent). Pass `g
 - **Request body:** `{ "galleryIds": ["uuid", ...] }`
 - **Response:** `200` — array of `{ id, name, notes, colorHex }` (the user's current galleries after the update)
 - **Errors:** `400 VALIDATION_ERROR` (bad shape or unknown gallery id), `404 NOT_FOUND` (user does not exist)
-
-### `GET /api/admin/gallery/:galleryId/expo`
-
-List all sandboxes belonging to students in a gallery, ordered by `sandbox.updatedAt` descending. Powers the `/gallery/:id/expo` admin page that shows a grid of craft previews from every gallery member.
-
-- **Response:** `200`
-  ```json
-  {
-    "success": true,
-    "data": {
-      "gallery": { "id": "uuid", "name": "string", "colorHex": "#rrggbb" },
-      "sandboxes": [
-        { "id": "uuid", "title": "string | null", "updatedAt": "timestamp",
-          "userId": "uuid", "userName": "string",
-          "firstName": "string", "lastName": "string",
-          "avatarColor": "#rrggbb" }
-      ]
-    }
-  }
-  ```
-- **Errors:** `404 NOT_FOUND` (gallery does not exist)
 
 ### `GET /api/admin/enquiries`
 

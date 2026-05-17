@@ -23,7 +23,7 @@ export function GalleryExpoPage() {
   const fetchExpo = async () => {
     setLoading(true);
     try {
-      const data = await apiCall(`/api/admin/gallery/${id}/expo`);
+      const data = await apiCall(`/api/gallery/${id}/expo`);
       setGallery(data.gallery);
       setSandboxes(data.sandboxes);
       setPageTitle(`Gallery of ${data.gallery.name}`);
@@ -191,8 +191,8 @@ function UserGroup({ group }) {
 }
 
 function SandboxCard({ sandbox }) {
-  const previewUrl = `/api/admin/sandbox/${sandbox.id}/preview`;
-  const shareUrl = `${window.location.origin}/api/sandbox/${sandbox.id}/preview`;
+  const previewUrl = `/api/sandbox/${sandbox.id}/preview`;
+  const shareUrl = `${window.location.origin}${previewUrl}`;
   return (
     <div
       style={{

@@ -3,7 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Conversation } from "../components/Conversation";
@@ -89,7 +89,14 @@ export function SandboxPage() {
   const [colorDraft, setColorDraft] = useState(avatarColor);
   const [savingColor, setSavingColor] = useState(false);
   const [creatingCraft, setCreatingCraft] = useState(false);
+  const [galleries, setGalleries] = useState([]);
   const renameInputRef = useRef(null);
+
+  useEffect(() => {
+    apiCall("/api/me/galleries")
+      .then((data) => setGalleries(Array.isArray(data) ? data : []))
+      .catch(() => setGalleries([]));
+  }, []);
 
   useEffect(() => {
     if (!sandboxId) return;
@@ -664,6 +671,60 @@ export function SandboxPage() {
           <div style={{ height: 1, background: colors.border }} />
           <div style={{ display: "flex", flexDirection: "column", padding: "8px 0", flex: 1, overflowY: "auto" }}>
             {drawerItems.map((item) => renderDrawerItem(item, setDrawerOpen))}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "16px 20px 8px",
+                fontSize: 12,
+                fontWeight: 600,
+                color: colors.muted,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
+                <PictureOutlined />
+              </span>
+              <span>Gallery</span>
+            </div>
+            {galleries.length === 0 ? (
+              <div
+                style={{
+                  padding: "4px 20px 8px 54px",
+                  fontSize: 13,
+                  color: colors.muted,
+                  fontStyle: "italic",
+                }}
+              >
+                No galleries yet
+              </div>
+            ) : (
+              galleries.map((g) =>
+                renderDrawerItem(
+                  {
+                    key: `gallery-${g.id}`,
+                    label: g.name,
+                    icon: (
+                      <span
+                        aria-hidden
+                        style={{
+                          display: "inline-block",
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          background: g.colorHex || colors.primary,
+                        }}
+                      />
+                    ),
+                    onClick: () =>
+                      window.open(`/gallery/${g.id}/expo`, "_blank", "noopener,noreferrer"),
+                  },
+                  setDrawerOpen,
+                ),
+              )
+            )}
           </div>
           <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}`, padding: "4px 0" }}>
             {renderDrawerItem(logoutItem, setDrawerOpen)}

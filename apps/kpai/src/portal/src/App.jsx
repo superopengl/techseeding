@@ -55,7 +55,7 @@ export function App() {
                 <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
                 <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
                 <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
-                <Route path="/gallery/:id/expo" element={<RoleGuard role="admin"><GalleryExpoPage /></RoleGuard>} />
+                <Route path="/gallery/:id/expo" element={<GalleryExpoPage />} />
                 <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms_of_use" element={<TermsOfUsePage />} />
                 <Route path="/logo" element={<LogoPage />} />

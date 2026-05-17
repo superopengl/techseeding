@@ -3,8 +3,8 @@ import { sandbox, user, studentProfile, gallery, userGallery } from "../db/schem
 import { eq, desc } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 
-export function adminGalleryExpo(fastify) {
-  fastify.get("/api/admin/gallery/:galleryId/expo", async (request, reply) => {
+export function galleryExpo(fastify) {
+  fastify.get("/api/gallery/:galleryId/expo", async (request, reply) => {
     const { galleryId } = request.params;
 
     const [g] = await db
