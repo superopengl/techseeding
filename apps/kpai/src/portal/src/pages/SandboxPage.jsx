@@ -3,7 +3,7 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined, DownOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Conversation } from "../components/Conversation";
@@ -33,12 +33,12 @@ function renderDrawerItem(item, setDrawerOpen) {
         display: "flex",
         alignItems: "center",
         gap: 14,
-        padding: "12px 20px",
+        padding: item.indent ? "10px 20px 10px 40px" : "12px 20px",
         background: "transparent",
         border: "none",
         width: "100%",
         textAlign: "left",
-        fontSize: 15,
+        fontSize: item.indent ? 14 : 15,
         fontWeight: 500,
         fontFamily: "inherit",
         cursor: item.disabled ? "not-allowed" : "pointer",
@@ -90,6 +90,7 @@ export function SandboxPage() {
   const [savingColor, setSavingColor] = useState(false);
   const [creatingCraft, setCreatingCraft] = useState(false);
   const [galleries, setGalleries] = useState([]);
+  const [galleryExpanded, setGalleryExpanded] = useState(true);
   const renameInputRef = useRef(null);
 
   useEffect(() => {
@@ -671,60 +672,84 @@ export function SandboxPage() {
           <div style={{ height: 1, background: colors.border }} />
           <div style={{ display: "flex", flexDirection: "column", padding: "8px 0", flex: 1, overflowY: "auto" }}>
             {drawerItems.map((item) => renderDrawerItem(item, setDrawerOpen))}
-            <div
+            <button
+              type="button"
+              onClick={() => setGalleryExpanded((v) => !v)}
+              aria-expanded={galleryExpanded}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 14,
-                padding: "16px 20px 8px",
-                fontSize: 12,
-                fontWeight: 600,
-                color: colors.muted,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                padding: "12px 20px",
+                background: "transparent",
+                border: "none",
+                width: "100%",
+                textAlign: "left",
+                fontSize: 15,
+                fontWeight: 500,
+                fontFamily: "inherit",
+                cursor: "pointer",
+                color: colors.bodyStrong,
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = colors.canvas;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
               }}
             >
               <span style={{ fontSize: 18, display: "inline-flex", width: 20, justifyContent: "center" }}>
                 <PictureOutlined />
               </span>
-              <span>Gallery</span>
-            </div>
-            {galleries.length === 0 ? (
-              <div
+              <span style={{ flex: 1 }}>Gallery</span>
+              <DownOutlined
                 style={{
-                  padding: "4px 20px 8px 54px",
-                  fontSize: 13,
+                  fontSize: 11,
                   color: colors.muted,
-                  fontStyle: "italic",
+                  transition: "transform 0.15s",
+                  transform: galleryExpanded ? "rotate(0deg)" : "rotate(-90deg)",
                 }}
-              >
-                No galleries yet
-              </div>
-            ) : (
-              galleries.map((g) =>
-                renderDrawerItem(
-                  {
-                    key: `gallery-${g.id}`,
-                    label: g.name,
-                    icon: (
-                      <span
-                        aria-hidden
-                        style={{
-                          display: "inline-block",
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: g.colorHex || colors.primary,
-                        }}
-                      />
-                    ),
-                    onClick: () =>
-                      window.open(`/gallery/${g.id}/expo`, "_blank", "noopener,noreferrer"),
-                  },
-                  setDrawerOpen,
-                ),
-              )
-            )}
+              />
+            </button>
+            {galleryExpanded &&
+              (galleries.length === 0 ? (
+                <div
+                  style={{
+                    padding: "4px 20px 8px 54px",
+                    fontSize: 13,
+                    color: colors.muted,
+                    fontStyle: "italic",
+                  }}
+                >
+                  No galleries yet
+                </div>
+              ) : (
+                galleries.map((g) =>
+                  renderDrawerItem(
+                    {
+                      key: `gallery-${g.id}`,
+                      label: g.name,
+                      indent: true,
+                      icon: (
+                        <span
+                          aria-hidden
+                          style={{
+                            display: "inline-block",
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: g.colorHex || colors.primary,
+                          }}
+                        />
+                      ),
+                      onClick: () =>
+                        window.open(`/gallery/${g.id}/expo`, "_blank", "noopener,noreferrer"),
+                    },
+                    setDrawerOpen,
+                  ),
+                )
+              ))}
           </div>
           <div style={{ flexShrink: 0, borderTop: `1px solid ${colors.border}`, padding: "4px 0" }}>
             {renderDrawerItem(logoutItem, setDrawerOpen)}
