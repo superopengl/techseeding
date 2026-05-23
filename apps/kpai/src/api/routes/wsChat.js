@@ -8,6 +8,7 @@ import { ensureSandboxWorkDir } from "../lib/sandboxManager.js";
 import { verifyToken } from "../lib/verifyToken.js";
 import { runCraftTurn } from "../lib/sandboxAgent.js";
 import { INDEX_FILE } from "../lib/sandboxTools.js";
+import computeMessageCost from "../lib/computeMessageCost.js";
 
 const MAX_REQUESTS_PER_MINUTE = 30;
 const HEARTBEAT_MS = 30_000;
@@ -289,7 +290,13 @@ function createAssistantTurn({ socket, sessionId, modelId, persist }) {
       reasoningTokens: tokens.reasoning,
       cacheReadTokens: tokens.cache.read,
       cacheWriteTokens: tokens.cache.write,
-      cost: "0",
+      cost: computeMessageCost({
+        modelId,
+        inputTokens: tokens.input,
+        outputTokens: tokens.output,
+        reasoningTokens: tokens.reasoning,
+        cacheReadTokens: tokens.cache.read,
+      }),
     });
   }
 
