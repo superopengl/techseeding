@@ -57,7 +57,7 @@ docs/            Schema and design references
 pnpm install
 cp .env.sample .env        # then fill in KPAI_* values
 pnpm db:migrate            # apply schema migrations
-pnpm dev                   # API on :9511, portal on :9512
+pnpm start                 # API on :9511, portal on :9512
 ```
 
 Open http://localhost:9512.
@@ -65,7 +65,7 @@ Open http://localhost:9512.
 ### Development
 
 ```bash
-pnpm dev              # run API (:9511) and Vite portal (:9512) concurrently — Vite proxies API/WS calls to the API server
+pnpm start            # run API (:9511) and Vite portal (:9512) concurrently — Vite proxies API/WS calls to the API server
 pnpm start:api        # just the Fastify API with --watch and --inspect, loading .env
 pnpm start:portal     # just the Vite dev server (portal workspace)
 pnpm db:generate      # generate a Drizzle migration from schema changes in src/api/db/schema.js
@@ -98,7 +98,7 @@ All env vars are prefixed with `KPAI_`. See `.env.sample` for the full template.
 | `KPAI_SANDBOX_DEEPSEEK_API_KEY` | DeepSeek API key used by the in-process sandbox agent |
 | `KPAI_SANDBOX_DEEPSEEK_MODEL` | DeepSeek model id (optional, defaults to `deepseek-chat`) |
 
-`pnpm dev` loads `.env`; `pnpm start:prod` loads `.env.production`.
+`pnpm start` loads `.env`; `pnpm start:prod` loads `.env.production`.
 
 ## Deployment
 

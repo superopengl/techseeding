@@ -2,7 +2,7 @@
 # Build & launch the SwiftUI craft viewer on an iOS Simulator.
 #
 # Defaults to the Debug config, which points KPAIPublicURL at
-# http://localhost:9512 so it pairs with `pnpm dev`. Override with
+# http://localhost:9512 so it pairs with `pnpm start`. Override with
 # KPAI_PUBLIC_URL=… to target a different backend.
 #
 # Auto-picks a booted simulator if one is running; otherwise boots the

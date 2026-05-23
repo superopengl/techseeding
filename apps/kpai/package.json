@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/api/server.js",
   "scripts": {
-    "dev": "concurrently \"pnpm start:api\" \"pnpm start:portal\"",
+    "start": "concurrently -n api,portal -c blue,magenta \"pnpm start:api\" \"pnpm start:portal\"",
     "start:api": "node --env-file=.env --watch-path=src/api --inspect src/api/server.js",
     "start:portal": "pnpm --filter @techseeding/kidplayai-portal dev",
     "build:prod": "rm -rf dist && pnpm --filter @techseeding/kidplayai-portal build && mkdir -p dist/src && cp -r src/api dist/src/api && cp package.json pnpm-lock.yaml dist/",

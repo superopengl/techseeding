@@ -166,7 +166,7 @@ The agent runs in-process inside the Fastify server, so OS-level jailing (Landlo
 pnpm install        # install all dependencies (root + portal + deploy)
 pnpm build:prod     # build React frontend to dist/public/ and copy api to dist/src/
 pnpm build:docker   # build production Docker image (techseeding/kidplayai)
-pnpm dev            # local dev: Fastify server + Vite dev server (loads .env)
+pnpm start          # local dev: Fastify server + Vite dev server (loads .env)
 pnpm start:prod     # production: Fastify server from dist/ (loads .env.production)
 pnpm db:generate    # generate Drizzle migration from schema changes
 pnpm db:migrate     # run pending migrations against PostgreSQL
@@ -203,6 +203,6 @@ Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)
 
-- `pnpm dev` loads `.env` via `node --env-file=.env`
-- `pnpm start` loads `.env.production` via `node --env-file=.env.production`
+- `pnpm start` loads `.env` via `node --env-file=.env`
+- `pnpm start:prod` loads `.env.production` via `node --env-file=.env.production`
 - `pnpm db:*` commands load `.env` via `dotenv-cli`
