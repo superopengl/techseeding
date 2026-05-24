@@ -4,11 +4,11 @@ import {
   Cluster,
   ContainerInsights,
   FargateTaskDefinition,
+  FargateService,
   ContainerImage,
   Secret as EcsSecret,
   LogDrivers,
 } from "aws-cdk-lib/aws-ecs";
-import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { FileSystem, PerformanceMode, ThroughputMode } from "aws-cdk-lib/aws-efs";
 import {
   DatabaseCluster,
@@ -19,11 +19,24 @@ import {
 } from "aws-cdk-lib/aws-rds";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
-import { ApplicationProtocol } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import {
+  ApplicationLoadBalancer,
+  ApplicationListener,
+  ApplicationTargetGroup,
+  ApplicationProtocol,
+  ListenerAction,
+  TargetType,
+} from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import { HostedZone, ARecord, RecordTarget } from "aws-cdk-lib/aws-route53";
-import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
+import {
+  LoadBalancerTarget,
+  CloudFrontTarget,
+} from "aws-cdk-lib/aws-route53-targets";
 import { Repository } from "aws-cdk-lib/aws-ecr";
-import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
+import {
+  Certificate,
+  CertificateValidation,
+} from "aws-cdk-lib/aws-certificatemanager";
 import {
   Distribution,
   ViewerProtocolPolicy,
@@ -181,9 +194,8 @@ export class KidPlayAiStack extends Stack {
       ? HostedZone.fromLookup(this, "Zone", { domainName: hostedZoneName })
       : undefined;
 
-    // Pre-create the Fargate service security group so EFS/DB ingress rules
-    // can reference it without forming a CloudFormation circular dependency
-    // through the auto-created service SG.
+    // Pre-create the service security group so EFS/DB ingress rules can
+    // reference it without forming a CloudFormation circular dependency.
     const serviceSg = new SecurityGroup(this, "ServiceSecurityGroup", {
       vpc,
       description: "kpai Fargate service",
@@ -200,36 +212,127 @@ export class KidPlayAiStack extends Stack {
     }
     sandboxFs.connections.allowFrom(serviceSg, Port.tcp(2049), "Fargate to EFS");
 
-    const service = new ApplicationLoadBalancedFargateService(this, "Service", {
+    // === ALB stack ===========================================================
+    //
+    // Previously this stack used the L3 pattern
+    // `ApplicationLoadBalancedFargateService`, which owns the ALB, listener,
+    // target group, cert, and Route53 record internally. We now create those
+    // explicitly so they can (a) be shared with the ytai stack via a host
+    // header rule on the same listener and (b) survive the upcoming
+    // Fargate→EC2 service swap without being replaced.
+    //
+    // Every resource here pins its CFN logical ID via overrideLogicalId() to
+    // exactly match what the L3 pattern was producing, so this refactor is a
+    // pure code change with no CloudFormation diff on the ALB resources.
+
+    const albSg = new SecurityGroup(this, "AlbSecurityGroup", {
+      vpc,
+      description: "Automatically created Security Group for ELB kpaiprodServiceLB",
+      allowAllOutbound: true,
+    });
+    albSg.node.defaultChild.overrideLogicalId("ServiceLBSecurityGroupF7435A5C");
+
+    const albCert = albDomainName && domainZone
+      ? new Certificate(this, "AlbCertificate", {
+          domainName: albDomainName,
+          validation: CertificateValidation.fromDns(domainZone),
+        })
+      : undefined;
+    if (albCert) {
+      albCert.node.defaultChild.overrideLogicalId("ServiceCertificateA7C65FE6");
+    }
+
+    const alb = new ApplicationLoadBalancer(this, "Alb", {
+      vpc,
+      internetFacing: true,
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
+      securityGroup: albSg,
+    });
+    alb.node.defaultChild.overrideLogicalId("ServiceLBE9A1ADBC");
+    alb.setAttribute("idle_timeout.timeout_seconds", "3600");
+
+    const targetGroup = new ApplicationTargetGroup(this, "AlbTargetGroup", {
+      vpc,
+      port: 80,
+      protocol: ApplicationProtocol.HTTP,
+      targetType: TargetType.IP,
+      healthCheck: {
+        path: "/healthcheck",
+        interval: Duration.seconds(30),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 3,
+      },
+      stickinessCookieDuration: undefined,
+    });
+    targetGroup.setAttribute("stickiness.enabled", "false");
+    targetGroup.node.defaultChild.overrideLogicalId(
+      "ServiceLBPublicListenerECSGroup0CC8688C",
+    );
+
+    const primaryListener = albCert
+      ? new ApplicationListener(this, "AlbHttpsListener", {
+          loadBalancer: alb,
+          port: 443,
+          protocol: ApplicationProtocol.HTTPS,
+          certificates: [{ certificateArn: albCert.certificateArn }],
+          defaultAction: ListenerAction.forward([targetGroup]),
+        })
+      : new ApplicationListener(this, "AlbHttpListener", {
+          loadBalancer: alb,
+          port: 80,
+          protocol: ApplicationProtocol.HTTP,
+          defaultAction: ListenerAction.forward([targetGroup]),
+        });
+    primaryListener.node.defaultChild.overrideLogicalId(
+      "ServiceLBPublicListener46709EAA",
+    );
+
+    if (albCert) {
+      const httpRedirect = new ApplicationListener(this, "AlbHttpRedirect", {
+        loadBalancer: alb,
+        port: 80,
+        protocol: ApplicationProtocol.HTTP,
+        defaultAction: ListenerAction.redirect({
+          protocol: "HTTPS",
+          port: "443",
+          permanent: true,
+        }),
+      });
+      httpRedirect.node.defaultChild.overrideLogicalId(
+        "ServiceLBPublicRedirectListenerF055B333",
+      );
+      httpRedirect.node.addDependency(targetGroup, primaryListener);
+    }
+
+    if (domainZone && albDomainName) {
+      const albAlias = new ARecord(this, "AlbDnsAlias", {
+        zone: domainZone,
+        recordName: albDomainName,
+        target: RecordTarget.fromAlias(new LoadBalancerTarget(alb)),
+      });
+      albAlias.node.defaultChild.overrideLogicalId("ServiceDNS57754DD9");
+    }
+
+    // === ECS service =========================================================
+
+    const service = new FargateService(this, "FargateService", {
       cluster: ecsCluster,
       taskDefinition: taskDef,
       securityGroups: [serviceSg],
       desiredCount: 1,
       minHealthyPercent: 100,
       maxHealthyPercent: 200,
-      publicLoadBalancer: true,
       assignPublicIp: true,
-      taskSubnets: { subnetType: SubnetType.PUBLIC },
-      protocol: albDomainName ? ApplicationProtocol.HTTPS : ApplicationProtocol.HTTP,
-      redirectHTTP: !!albDomainName,
-      domainName: albDomainName,
-      domainZone,
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
       healthCheckGracePeriod: Duration.seconds(300),
       circuitBreaker: { rollback: true },
     });
-
-    service.targetGroup.configureHealthCheck({
-      path: "/healthcheck",
-      interval: Duration.seconds(30),
-      healthyThresholdCount: 2,
-      unhealthyThresholdCount: 3,
-    });
-
-    service.loadBalancer.setAttribute("idle_timeout.timeout_seconds", "3600");
+    service.node.defaultChild.overrideLogicalId("Service9571FDD8");
+    service.attachToApplicationTargetGroup(targetGroup);
 
     // CloudFront in front of the ALB. Caches /assets/* (Vite-hashed bundles) at
-    // the edge so the single Fargate task isn't the bottleneck for static
-    // delivery; passes /api/* and the SPA HTML through uncached.
+    // the edge so the single task isn't the bottleneck for static delivery;
+    // passes /api/* and the SPA HTML through uncached.
     let distribution;
     if (domainName && albDomainName && cdnCertificate && domainZone) {
       const origin = new HttpOrigin(albDomainName, {
@@ -294,8 +397,8 @@ export class KidPlayAiStack extends Stack {
     }
 
     new CfnOutput(this, "ClusterName", { value: ecsCluster.clusterName });
-    new CfnOutput(this, "ServiceName", { value: service.service.serviceName });
-    new CfnOutput(this, "LoadBalancerDns", { value: service.loadBalancer.loadBalancerDnsName });
+    new CfnOutput(this, "ServiceName", { value: service.serviceName });
+    new CfnOutput(this, "LoadBalancerDns", { value: alb.loadBalancerDnsName });
     new CfnOutput(this, "DbSecretArn", { value: dbCluster.secret.secretArn });
     new CfnOutput(this, "DbClusterEndpoint", { value: dbCluster.clusterEndpoint.hostname });
     new CfnOutput(this, "JwtSecretArn", { value: jwtSecret.secretArn });
