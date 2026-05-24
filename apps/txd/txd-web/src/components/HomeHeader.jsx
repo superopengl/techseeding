@@ -8,6 +8,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { Trans } from 'react-i18next';
 import LangToggleButton from './LangToggleButton';
 import kidPlayAiLogo from 'images/logo-kidplayai.png';
+import youTutorAiLogo from 'images/logo-yoututorai.png';
 
 const { Header } = Layout;
 
@@ -140,6 +141,19 @@ const productMenuItems = [
       </ProductMenuItemLink>
     ),
   },
+  {
+    key: 'yoututorai',
+    style: productMenuItemStyle,
+    label: (
+      <ProductMenuItemLink href="https://yoututorai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
+        <ProductLogo src={youTutorAiLogo} alt="YouTutorAI" />
+        <ProductTextBlock>
+          <ProductName>YouTutorAI</ProductName>
+          <ProductTagline>Personalized AI tutoring for students Y3–Y12</ProductTagline>
+        </ProductTextBlock>
+      </ProductMenuItemLink>
+    ),
+  },
 ];
 
 const headerHeight = 56;
@@ -244,6 +258,24 @@ function HomeHeader() {
             </ProductMenuItemLink>
           ),
         },
+        {
+          key: 'yoututorai',
+          style: { height: 'auto', lineHeight: 1.2, padding: '8px 12px' },
+          label: (
+            <ProductMenuItemLink
+              href="https://yoututorai.techseeding.com.au/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setDrawerVisible(false)}
+            >
+              <ProductLogo src={youTutorAiLogo} alt="YouTutorAI" />
+              <ProductTextBlock>
+                <ProductName>YouTutorAI</ProductName>
+                <ProductTagline>Personalized AI tutoring for students Y3–Y12</ProductTagline>
+              </ProductTextBlock>
+            </ProductMenuItemLink>
+          ),
+        },
       ],
     },
     {
@@ -290,7 +322,14 @@ function HomeHeader() {
             size={320}
             styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
           >
-            <Menu mode="inline" inlineIndent={16} style={{ border: 0 }} items={mobileMenuItems} />
+            <Menu
+              mode="inline"
+              inlineIndent={16}
+              style={{ border: 0 }}
+              items={mobileMenuItems}
+              openKeys={['products']}
+              expandIcon={() => null}
+            />
           </StyledDrawer>
         </>
       )}
