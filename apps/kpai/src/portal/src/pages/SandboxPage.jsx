@@ -3,13 +3,15 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined, DownOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined, DownOutlined, CompassOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Conversation } from "../components/Conversation";
 import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
+import { CoinBalance } from "../components/CoinBalance";
+import { PublishToggle } from "../components/PublishToggle";
 import { apiCall, fetchWithAuth, logout } from "../api";
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
@@ -76,6 +78,7 @@ export function SandboxPage() {
   const [activePanel, setActivePanel] = useState("preview");
   const [previewKey, setPreviewKey] = useState(0);
   const [title, setTitle] = useState("");
+  const [publishedAt, setPublishedAt] = useState(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [renameDraft, setRenameDraft] = useState("");
   const [showMyCrafts, setShowMyCrafts] = useState(false);
@@ -100,6 +103,7 @@ export function SandboxPage() {
     if (!sandboxId) return;
     apiCall(`/api/sandbox/${sandboxId}`).then((data) => {
       setTitle(data.title || "Untitled Craft");
+      setPublishedAt(data.publishedAt || null);
     }).catch((err) => {
       if (err.status === 404) {
         setSandboxNotFound(true);
@@ -205,6 +209,12 @@ export function SandboxPage() {
       label: "My Crafts",
       icon: <UnorderedListOutlined />,
       onClick: () => setShowMyCrafts(true),
+    },
+    {
+      key: "gallery",
+      label: "Gallery",
+      icon: <CompassOutlined />,
+      onClick: () => navigate("/gallery"),
     },
   ];
 
@@ -378,6 +388,12 @@ export function SandboxPage() {
             </span>
           </div>
           <Space size={8}>
+            <CoinBalance />
+            <PublishToggle
+              sandboxId={sandboxId}
+              publishedAt={publishedAt}
+              onChange={(s) => setPublishedAt(s.publishedAt || null)}
+            />
             <Tooltip title="Start a new craft">
               <Button
                 icon={<PlusOutlined />}

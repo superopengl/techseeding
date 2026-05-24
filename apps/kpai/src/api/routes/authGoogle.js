@@ -1,21 +1,10 @@
-import { randomBytes } from "crypto";
 import { db } from "../db/index.js";
 import { user, studentProfile } from "../db/schema.js";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { success, error } from "../lib/response.js";
 import { createJwtToken } from "../lib/createJwtToken.js";
 import { setAuthCookies } from "../lib/setAuthCookies.js";
 import { verifyGoogleIdToken } from "../lib/verifyGoogleIdToken.js";
-
-// Derive a userName from a Google email: local-part sanitized to the allowed
-// charset, plus a 4-char hex suffix to avoid collisions. The display can be
-// edited later by an admin; this is just a stable internal identifier.
-function deriveUserName(email) {
-  const local = email.split("@")[0] || "user";
-  const base = local.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") || "user";
-  const suffix = randomBytes(2).toString("hex");
-  return `${base}_${suffix}`;
-}
 
 function splitName(claims) {
   if (claims.givenName || claims.familyName) {
@@ -64,10 +53,12 @@ export function authGoogle(fastify) {
       return error(reply, 401, "INVALID_CREDENTIALS", "Google account is missing an email");
     }
 
+    const normalizedEmail = claims.email.toLowerCase();
+
     let [matchedUser] = await db
       .select()
       .from(user)
-      .where(sql`lower(${user.email}) = lower(${claims.email})`);
+      .where(sql`lower(${user.email}) = ${normalizedEmail}`);
 
     if (!matchedUser) {
       const { firstName, lastName } = splitName(claims);
@@ -75,9 +66,9 @@ export function authGoogle(fastify) {
         const [created] = await tx
           .insert(user)
           .values({
-            userName: deriveUserName(claims.email),
+            userName: normalizedEmail,
             role: "student",
-            email: claims.email,
+            email: normalizedEmail,
           })
           .returning();
 
@@ -90,6 +81,13 @@ export function authGoogle(fastify) {
         return created;
       });
       request.log.info({ userId: matchedUser.id, email: matchedUser.email }, "Auto-created student via Google SSO");
+    } else if (matchedUser.userName !== normalizedEmail) {
+      const [updated] = await db
+        .update(user)
+        .set({ userName: normalizedEmail, updatedAt: new Date() })
+        .where(eq(user.id, matchedUser.id))
+        .returning();
+      matchedUser = updated;
     }
 
     const token = createJwtToken({ userId: matchedUser.id, role: matchedUser.role });

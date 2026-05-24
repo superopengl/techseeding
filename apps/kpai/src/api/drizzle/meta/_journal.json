@@ -78,6 +78,27 @@
       "when": 1779583050914,
       "tag": "0010_drop_consumed_at",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779585188651,
+      "tag": "0011_normal_thunderbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1779672000000,
+      "tag": "0012_admin_password",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1779672900000,
+      "tag": "0013_seed_admin_password",
+      "breakpoints": true
     }
   ]
 }

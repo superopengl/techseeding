@@ -34,7 +34,7 @@ Multi-page app with four views:
 
 ### Database (PostgreSQL + Drizzle ORM)
 
-Tables: `user`, `student_profile`, `login_otp`, `sandbox`, `sandbox_session`, `sandbox_release`, `session_message`, `enquiry`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
+Tables: `user`, `student_profile`, `login_otp`, `sandbox`, `sandbox_session`, `sandbox_release`, `session_message`, `enquiry`, `gallery`, `user_gallery`, `craft_like`, `craft_play`, `coin_ledger`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
 
 Full schema documentation: [docs/db-schema.md](docs/db-schema.md)
 
@@ -49,6 +49,7 @@ Summary:
 - `POST /api/login/email` — issue a sign-in OTP for an email (auto-creates the student on first request)
 - `POST /api/login/otp` — verify the 6-digit code and set auth cookies
 - `POST /api/auth/google` — verify a Google ID token, auto-create student if needed, set auth cookies
+- `POST /api/auth/admin` — verify an admin's username + password and set auth cookies (used by the `/admin` page's sign-in modal)
 - `POST /api/admin/student` — create a new student user with profile
 - `GET /api/sandbox/:id` — get sandbox info (auth required)
 - `POST /api/sandbox/:id/message` — send message (auth required)
@@ -128,9 +129,44 @@ dist/                     # Production build artifacts (gitignored): dist/public
 - **CI/CD**: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — push to `main` deploys via GitHub OIDC.
 - **AWS profile**: all local deploy/admin commands run under `AWS_PROFILE=kpai`. Root pnpm wrappers (`pnpm release`, `pnpm db:connect:prod`, `pnpm db:jdbc:prod`) set it automatically; for raw `aws` / `cdk` calls, export `AWS_PROFILE=kpai` first.
 
-## Publishing (Planned)
+## Community Economy
 
-Finished crafts can be pushed to a public location (e.g., S3) so kids can share and play each other's crafts in their community.
+KidPlayAI rewards kids for shipping crafts and for making things other kids love. Coins are the platform currency: earned by publishing and by getting engagement (plays, likes, forks), spent on personal creative capacity (extra AI turns, templates, Gallery boosts, cosmetics). Coins are never traded between users.
+
+### Concepts
+
+- **Publish** — flips a sandbox public. Published crafts appear in the **Gallery**, where signed-in kids browse, play, like, and fork each other's work. Free to browse — no coin gating on viewing.
+- **Like / Play / Fork** — engagement signals that pay the original creator. Fork ≫ like ≫ play in coin value (200 : 10 : 2).
+- **Fork lineage** — a fork is a new sandbox owned by the forker, with `forked_from_sandbox_id` linking back. When a fork is itself published, ancestors up to depth 3 get a descendant-publish bonus.
+- **Coin ledger** — append-only `coin_ledger` table; balance is `sum(delta) WHERE user_id = $1`. Every grant has an idempotency key so retries don't double-pay.
+
+### Gallery surfaces
+
+The `gallery` / `user_gallery` cohort tables and the public craft showcase are now the **same** surface: Gallery. Routes:
+- `GET /api/gallery` — global feed of every published craft.
+- `GET /api/gallery/:galleryId` — same feed filtered to crafts by students in that cohort.
+- `GET /api/gallery/:galleryId/expo` — big-card, kid-grouped expo view (kept for in-person event displays, now interactive too).
+- `GET /api/craft/:sandboxId` — single published-craft detail (formerly `/api/discover/:id`).
+
+### Full design
+
+See [docs/community-design.md](docs/community-design.md) for:
+- The exact pointing algorithm (earn amounts, daily caps, decay rules)
+- Spending sinks and price list
+- Anti-abuse rules (eligibility filter, idempotency, caps)
+- Worked examples
+- Planned API surface and rollout phases
+
+### Implementation status
+
+- **Phase 1 (done):** Design doc, DB schema (`sandbox` columns + `craft_like`, `craft_play`, `coin_ledger`), Drizzle migration `0011`.
+- **Phase 2 (done):** Backend routes for publish/unpublish, gallery list + craft detail, play, like (toggle), fork, and `GET /api/me/coins`. Coin-granting logic with eligibility + daily caps + engagement decay + fork-chain ancestor payout, all under idempotency keys. Lives in `src/api/lib/{coinRules,grantCoins,getCoinBalance,listCoinLedger,canEarnCoins,checkDailyCap,publishCraft,forkCraft}.js`.
+- **Phase 3 (done):** Frontend. `GalleryListPage` (`/gallery` global feed + `/gallery/:galleryId` cohort feed, sortable), `CraftDetailPage` (`/craft/:id`, iframe + play recording + like/fork), and `GalleryExpoPage` (`/gallery/:id/expo`, big-card kid-grouped expo with the same interactive controls). New components `CoinBalance` (with `useCoinBalance` hook + `notifyCoinsChanged` event helper for cross-component refresh), `LikeButton`, `ForkButton`, `PublishToggle`. SandboxPage header shows the coin balance + a publish toggle; drawer menu has a Gallery entry.
+- **Phase 4:** Spending sinks (turn packs, boosts, templates, cosmetics) — depends on a daily AI turn quota table and catalogues. Admin coin tooling. WebSocket `me_coins_updated` push.
+
+## Publishing (legacy section)
+
+Finished crafts can be pushed to a public location (e.g., S3) so kids can share and play each other's crafts in their community. Superseded by the Community Economy section above for in-app publishing; external S3 publishing is still on the roadmap as a separate share/embed path.
 
 ## Security Model
 
@@ -202,6 +238,8 @@ All env vars are prefixed with `KPAI_`.
 | `KPAI_SANDBOX_DEEPSEEK_API_KEY` | DeepSeek API key used by the sandbox agent | *(required)* |
 | `KPAI_SANDBOX_DEEPSEEK_MODEL` | DeepSeek model id passed to the AI SDK | `deepseek-chat` |
 | `KPAI_GOOGLE_CLIENT_ID` | Google OAuth 2.0 web client ID (blank disables SSO) | *(blank)* |
+| `KPAI_ADMIN_USERNAME` | Username for the boot-time admin upsert. With `KPAI_ADMIN_PASSWORD`, the server ensures a role=admin user exists with this hash. | *(blank → no bootstrap)* |
+| `KPAI_ADMIN_PASSWORD` | Plain password hashed (scrypt) and persisted as `user.password_hash` on boot. Used to verify `POST /api/auth/admin`. | *(blank → no bootstrap)* |
 | `KPAI_AWS_REGION` | AWS region used by the SES client | `ap-southeast-2` |
 | `KPAI_SES_FROM_EMAIL` | Verified SES sender for sign-in OTP emails (blank → only console + admin UI fallback) | *(blank)* |
 Local dev ports:

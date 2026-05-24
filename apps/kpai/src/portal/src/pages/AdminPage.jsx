@@ -26,6 +26,93 @@ const { Header, Content } = Layout;
 
 export function AdminPage() {
   useEffect(() => { setPageTitle("Admin Dashboard"); }, []);
+  const { user, loaded, refresh } = useUser();
+  if (!loaded) return <Loading />;
+  if (!user || user.role !== "admin") {
+    return <AdminLoginGate onSuccess={refresh} />;
+  }
+  return <AdminDashboard />;
+}
+
+function AdminLoginGate({ onSuccess }) {
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
+  const [errorText, setErrorText] = useState(null);
+
+  const handleSubmit = async () => {
+    let values;
+    try {
+      values = await form.validateFields();
+    } catch {
+      return;
+    }
+    setSubmitting(true);
+    setErrorText(null);
+    try {
+      const res = await fetch("/api/auth/admin", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userName: values.userName.trim(), password: values.password }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error?.message || `Sign-in failed (${res.status})`);
+      }
+      await onSuccess?.();
+    } catch (e) {
+      setErrorText(e.message || "Invalid username or password");
+      form.setFieldValue("password", "");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal
+      open
+      closable={false}
+      maskClosable={false}
+      keyboard={false}
+      title="Admin sign-in"
+      okText="Sign in"
+      cancelText="Back"
+      onCancel={() => navigate("/")}
+      onOk={handleSubmit}
+      confirmLoading={submitting}
+      destroyOnHidden
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        requiredMark={false}
+        preserve={false}
+      >
+        <Form.Item
+          label="Username"
+          name="userName"
+          rules={[{ required: true, message: "Username is required" }]}
+        >
+          <Input autoFocus autoComplete="username" placeholder="admin" />
+        </Form.Item>
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[{ required: true, message: "Password is required" }]}
+        >
+          <Input.Password autoComplete="current-password" onPressEnter={handleSubmit} />
+        </Form.Item>
+        {errorText && (
+          <Typography.Text type="danger">{errorText}</Typography.Text>
+        )}
+      </Form>
+    </Modal>
+  );
+}
+
+function AdminDashboard() {
   const navigate = useNavigate();
   const { clear: clearUser } = useUser();
   const [activeTab, setActiveTab] = useState("students");

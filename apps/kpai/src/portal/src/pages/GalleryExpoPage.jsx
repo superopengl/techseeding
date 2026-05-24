@@ -1,15 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Layout, Typography, Tag, Empty, message, Button, Avatar } from "antd";
+import { Layout, Typography, Tag, Empty, message, Button, Avatar, Tooltip } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { setPageTitle } from "../utils/setPageTitle";
 import { Loading } from "../components/Loading";
 import { CraftPreview } from "../components/CraftPreview";
 import { Logo } from "../components/Logo";
+import { CoinBalance } from "../components/CoinBalance";
+import { LikeButton } from "../components/LikeButton";
+import { ForkButton } from "../components/ForkButton";
 import { PlayfulBackdrop } from "../components/PlayfulBackdrop";
 import { colors, gradients, shadows, fonts } from "../theme";
-import { apiCall } from "../api";
+import { apiCall, isAuthenticated } from "../api";
 import { fgForHex } from "../utils/fgForHex";
 
 const { Header, Content } = Layout;
@@ -97,7 +100,8 @@ export function GalleryExpoPage() {
             {sandboxes.length} {sandboxes.length === 1 ? "craft" : "crafts"}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {isAuthenticated() && <CoinBalance />}
           <Button
             type="text"
             icon={<ReloadOutlined />}
@@ -191,8 +195,10 @@ function UserGroup({ group }) {
 }
 
 function SandboxCard({ sandbox }) {
+  const navigate = useNavigate();
+  const authed = isAuthenticated();
   const previewUrl = `/api/sandbox/${sandbox.id}/preview`;
-  const shareUrl = `${window.location.origin}${previewUrl}`;
+  const detailUrl = `${window.location.origin}/craft/${sandbox.id}`;
   return (
     <div
       style={{
@@ -230,7 +236,7 @@ function SandboxCard({ sandbox }) {
           title="Scan to open this craft"
         >
           <QRCodeSVG
-            value={shareUrl}
+            value={detailUrl}
             size={88}
             fgColor={colors.heading}
             level="H"
@@ -243,7 +249,7 @@ function SandboxCard({ sandbox }) {
           />
         </div>
       </div>
-      <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
         <div
           style={{
             display: "flex",
@@ -266,14 +272,45 @@ function SandboxCard({ sandbox }) {
           >
             {sandbox.title || "Untitled Craft"}
           </Typography.Text>
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontSize: 12, flexShrink: 0 }}
-          >
+          <Link to={`/craft/${sandbox.id}`} style={{ fontSize: 12, flexShrink: 0 }}>
             Open
-          </a>
+          </Link>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {authed ? (
+            <>
+              <LikeButton
+                sandboxId={sandbox.id}
+                initialLiked={sandbox.viewerLiked}
+                initialCount={sandbox.likeCount ?? 0}
+              />
+              <ForkButton sandboxId={sandbox.id} count={sandbox.forkCount ?? 0} />
+            </>
+          ) : (
+            <Tooltip title="Sign in to like or fork">
+              <Button shape="round" size="small" onClick={() => navigate("/login")}>
+                Sign in to interact
+              </Button>
+            </Tooltip>
+          )}
+          <Tooltip title={`${sandbox.playCount ?? 0} plays`}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "2px 10px",
+                borderRadius: 999,
+                background: colors.canvas,
+                border: `1px solid ${colors.border}`,
+                color: colors.body,
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              ▶ {sandbox.playCount ?? 0}
+            </span>
+          </Tooltip>
         </div>
         <span style={{ fontSize: 11, color: colors.muted }}>
           Updated {new Date(sandbox.updatedAt).toLocaleString()}

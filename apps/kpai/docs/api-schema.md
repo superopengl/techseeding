@@ -62,7 +62,7 @@ Submit a contact enquiry from the public marketing site.
 
 ### `GET /api/gallery/:galleryId/expo`
 
-List all sandboxes belonging to students in a gallery, ordered by `sandbox.updatedAt` descending. Powers the public `/gallery/:id/expo` page that shows a grid of craft previews from every gallery member.
+List the **published** crafts belonging to students in a gallery, ordered by `sandbox.publishedAt` descending. Powers the public `/gallery/:id/expo` page that shows a grid of craft previews from every gallery member. Unpublished sandboxes are excluded.
 
 - **Auth:** None
 - **Response:** `200`
@@ -72,7 +72,8 @@ List all sandboxes belonging to students in a gallery, ordered by `sandbox.updat
     "data": {
       "gallery": { "id": "uuid", "name": "string", "colorHex": "#rrggbb" },
       "sandboxes": [
-        { "id": "uuid", "title": "string | null", "updatedAt": "timestamp",
+        { "id": "uuid", "title": "string | null",
+          "updatedAt": "timestamp", "publishedAt": "timestamp",
           "userId": "uuid", "userName": "string",
           "firstName": "string", "lastName": "string",
           "avatarColor": "#rrggbb" }
@@ -465,6 +466,151 @@ Subscribe to admin-broadcast events (login requests changing state, new enquirie
   { "type": "enquiry_created", "payload": { "id": "uuid" } }
   ```
   (Other event types may be added; consumers should ignore unknown `type` values.)
+
+---
+
+---
+
+## Community Economy
+
+The full design lives in [community-design.md](community-design.md). The earning side of the loop is implemented in Phase 2 (this section); spending sinks, admin tooling, and the `me_coins_updated` WebSocket event ship in Phase 4.
+
+### Publishing
+
+#### `POST /api/sandbox/:id/publish`
+
+Flip a sandbox public. Idempotent: re-publishing an already-public craft is a no-op for coins. On the first ever publish, walks `forked_from_sandbox_id` up to depth 3 to pay descendant-publish bonuses to ancestors.
+
+- **Auth:** Required (owner only)
+- **Response:** `200`
+  ```json
+  {
+    "success": true,
+    "data": {
+      "sandboxId": "uuid",
+      "publishedAt": "timestamp",
+      "grants": [
+        { "reason": "first_publish | publish | descendant_publish", "delta": 500, "userId": "uuid", "depth": 1 }
+      ]
+    }
+  }
+  ```
+- **Errors:** `401 UNAUTHORIZED`, `404 NOT_FOUND`
+
+#### `POST /api/sandbox/:id/unpublish`
+
+Hide from the Gallery. Engagement rows, ledger entries, and `publish_bounty_paid_at` are preserved so re-publishing doesn't re-pay bounties.
+
+- **Auth:** Required (owner only)
+- **Response:** `200 { id, publishedAt: null }`
+- **Errors:** `401 UNAUTHORIZED`, `404 NOT_FOUND`
+
+### Gallery
+
+#### `GET /api/gallery`
+
+Paginated public feed of every published craft.
+
+- **Auth:** Optional. When the caller is authenticated, `viewerLiked` reflects whether they have liked each craft.
+- **Query:** `sort=recent|liked|forked` (default `recent`), `page`, `pageSize`
+- **Response:** `200`
+  ```json
+  {
+    "crafts": [
+      { "id": "uuid", "title": "string", "publishedAt": "timestamp",
+        "forkedFromSandboxId": "uuid | null",
+        "ownerUserId": "uuid", "ownerUserName": "string",
+        "ownerFirstName": "string | null", "ownerLastName": "string | null",
+        "ownerAvatarColor": "#rrggbb | null",
+        "likeCount": 0, "playCount": 0, "viewerLiked": false }
+    ],
+    "gallery": null
+  }
+  ```
+  Meta: `{ total, page, pageSize, sort }`.
+
+#### `GET /api/gallery/:galleryId`
+
+Same feed shape as above, but filtered to crafts by students who are members of the named cohort. Response `gallery` is `{ id, name, colorHex }`.
+
+- **Errors:** `404 NOT_FOUND` if the gallery cohort doesn't exist.
+
+#### `GET /api/craft/:sandboxId`
+
+Single craft detail with owner, counts, and the caller's like state. (Formerly `/api/discover/:sandboxId`.)
+
+- **Auth:** Optional.
+- **Response:** `200`
+  ```json
+  {
+    "id": "uuid", "title": "string", "description": "string | null",
+    "publishedAt": "timestamp", "forkedFromSandboxId": "uuid | null",
+    "ownerUserId": "uuid", "ownerUserName": "string",
+    "ownerFirstName": "string | null", "ownerLastName": "string | null",
+    "ownerAvatarColor": "#rrggbb | null",
+    "forkedFrom": { "id": "uuid", "title": "string", "ownerUserName": "string" } | null,
+    "likeCount": 0, "playCount": 0, "forkCount": 0,
+    "viewerLiked": false
+  }
+  ```
+- **Errors:** `404 NOT_FOUND` (not published, or doesn't exist)
+
+### Engagement
+
+All engagement endpoints require the craft to be currently published (`published_at != null`). Coin grants are skipped silently when the actor is the craft owner, when the viewer is not yet eligible (account < 24h old or no published craft of their own), or when the craft has hit its per-day cap for that reason.
+
+#### `POST /api/craft/:id/play`
+
+Record a unique play. Idempotent per viewer — the first call inserts a `craft_play` row and (subject to the rules above) grants the play bounty; subsequent calls by the same viewer are silent no-ops.
+
+- **Auth:** Required
+- **Response:** `200 { sandboxId, firstPlay: boolean, grant: { reason, delta, userId } | null }`
+- **Errors:** `401 UNAUTHORIZED`, `404 NOT_FOUND`
+
+#### `POST /api/craft/:id/like`
+
+Toggle the caller's like on a craft. First-time likes grant the like bounty (subject to the rules above); unliking removes the `craft_like` row but does not refund. The grant's idempotency key is `like:<sandbox_id>:<viewer_id>` so unlike → relike does not re-pay.
+
+- **Auth:** Required
+- **Response:** `200 { sandboxId, liked: boolean, grant: { reason, delta, userId } | null }`
+- **Errors:** `401 UNAUTHORIZED`, `404 NOT_FOUND`
+
+#### `POST /api/craft/:id/fork`
+
+Create a new sandbox owned by the caller, seeded with the source's `index.html` (DB and `workDir`). Sets `forked_from_sandbox_id`. Grants the fork bounty to the source owner subject to the rules above. The new sandbox counts against the caller's 10-sandbox limit.
+
+- **Auth:** Required
+- **Response:** `201 { sandbox: <new-sandbox-row>, grant: { reason, delta, userId } | null }`
+- **Errors:** `401 UNAUTHORIZED`, `404 NOT_FOUND` (source missing / not published), `409 SANDBOX_LIMIT_REACHED`
+
+### Coins
+
+#### `GET /api/me/coins`
+
+The caller's current balance plus recent ledger entries.
+
+- **Auth:** Required
+- **Query:** `limit` (1–100, default 20)
+- **Response:** `200`
+  ```json
+  {
+    "balance": 0,
+    "recent": [
+      { "id": "uuid", "delta": 100, "reason": "publish",
+        "sandboxId": "uuid | null", "relatedUserId": "uuid | null",
+        "metadata": { ... } | null, "createdAt": "timestamp" }
+    ]
+  }
+  ```
+- **Errors:** `401 UNAUTHORIZED`
+
+### Deferred (Phase 4)
+
+These endpoints are reserved by the design but not yet wired:
+
+- `POST /api/me/spend/turn-pack`, `/boost`, `/template`, `/cosmetic`, `/cover` — spending sinks. Depend on a per-user daily AI turn quota table and a catalogue of items (templates, cosmetics, boost rules) that haven't been designed yet.
+- `GET /api/admin/coin-ledger`, `POST /api/admin/coin-adjust`, `POST /api/admin/craft/:id/feature` — admin coin tooling.
+- WebSocket `me_coins_updated` event — pushed to the owner whenever their balance changes.
 
 ---
 

@@ -16,6 +16,8 @@ export function sandboxGet(fastify) {
         id: sandbox.id,
         title: sandbox.title,
         description: sandbox.description,
+        publishedAt: sandbox.publishedAt,
+        forkedFromSandboxId: sandbox.forkedFromSandboxId,
         createdAt: sandbox.createdAt,
         updatedAt: sandbox.updatedAt,
       })

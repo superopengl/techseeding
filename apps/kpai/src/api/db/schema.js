@@ -6,6 +6,7 @@ export const user = pgTable("user", {
   userName: text("user_name").notNull(),
   role: text("role").notNull(), // student | teacher | admin
   email: text("email").unique(),
+  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
@@ -36,10 +37,19 @@ export const sandbox = pgTable("sandbox", {
   title: text("title"),
   description: text("description"),
   indexHtmlContent: text("index_html_content"),
+  // Set on first publish, cleared on unpublish. NULL means private.
+  publishedAt: timestamp("published_at"),
+  // Set once on the very first publish of this craft; never reset.
+  // Used to enforce the once-per-craft publish bounty.
+  publishBountyPaidAt: timestamp("publish_bounty_paid_at"),
+  // For forks, points to the source craft. NULL on originals.
+  forkedFromSandboxId: uuid("forked_from_sandbox_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
   index("sandbox_user_id_idx").on(table.userId),
+  index("sandbox_published_at_idx").on(table.publishedAt),
+  index("sandbox_forked_from_idx").on(table.forkedFromSandboxId),
 ]);
 
 export const loginOtp = pgTable("login_otp", {
@@ -111,6 +121,54 @@ export const userGallery = pgTable("user_gallery", {
   uniqueIndex("user_gallery_user_id_gallery_id_unique_idx").on(table.userId, table.galleryId),
   index("user_gallery_user_id_idx").on(table.userId),
   index("user_gallery_gallery_id_idx").on(table.galleryId),
+]);
+
+// One row per viewer per liked craft. Unliking deletes the row; re-liking
+// inserts a new row but does not re-pay the like bounty (idempotency is
+// enforced at the coin_ledger level).
+export const craftLike = pgTable("craft_like", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sandboxId: uuid("sandbox_id").notNull().references(() => sandbox.id, { onDelete: "cascade" }),
+  viewerUserId: uuid("viewer_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("craft_like_sandbox_viewer_unique_idx").on(table.sandboxId, table.viewerUserId),
+  index("craft_like_sandbox_id_idx").on(table.sandboxId),
+  index("craft_like_viewer_user_id_idx").on(table.viewerUserId),
+]);
+
+// Records the first unique play of a craft by a given viewer. Subsequent
+// plays by the same viewer do not insert (the API call is idempotent).
+export const craftPlay = pgTable("craft_play", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sandboxId: uuid("sandbox_id").notNull().references(() => sandbox.id, { onDelete: "cascade" }),
+  viewerUserId: uuid("viewer_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("craft_play_sandbox_viewer_unique_idx").on(table.sandboxId, table.viewerUserId),
+  index("craft_play_sandbox_id_idx").on(table.sandboxId),
+]);
+
+// Append-only ledger of all coin movements. Balance = sum(delta) for user.
+// idempotencyKey prevents double-payouts for one-shot bounties.
+export const coinLedger = pgTable("coin_ledger", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  delta: integer("delta").notNull(), // signed; +ve earn, -ve spend
+  // first_publish | publish | play | like | fork | descendant_publish |
+  // featured | spend_ai_turn | spend_boost | spend_template | spend_cosmetic |
+  // spend_cover | admin_adjust
+  reason: text("reason").notNull(),
+  sandboxId: uuid("sandbox_id").references(() => sandbox.id, { onDelete: "set null" }),
+  relatedUserId: uuid("related_user_id").references(() => user.id, { onDelete: "set null" }),
+  idempotencyKey: text("idempotency_key"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("coin_ledger_user_id_idx").on(table.userId),
+  uniqueIndex("coin_ledger_idempotency_key_unique_idx").on(table.idempotencyKey),
+  index("coin_ledger_created_at_idx").on(table.createdAt),
+  index("coin_ledger_sandbox_id_idx").on(table.sandboxId),
 ]);
 
 export const sessionMessage = pgTable("session_message", {

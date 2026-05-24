@@ -12,7 +12,9 @@ import { healthcheck } from "./routes/healthcheck.js";
 import { loginEmail } from "./routes/loginEmail.js";
 import { loginOtp } from "./routes/loginOtp.js";
 import { authGoogle } from "./routes/authGoogle.js";
+import { adminLogin } from "./routes/adminLogin.js";
 import { logout } from "./routes/logout.js";
+import { bootstrapAdmin } from "./lib/bootstrapAdmin.js";
 import { adminStudents } from "./routes/adminStudents.js";
 import { adminCreateStudent } from "./routes/adminCreateStudent.js";
 import { adminCheckUserName } from "./routes/adminCheckUserName.js";
@@ -37,6 +39,14 @@ import { sandboxUpdate } from "./routes/sandboxUpdate.js";
 import { sandboxDelete } from "./routes/sandboxDelete.js";
 import { sandboxPreview } from "./routes/sandboxPreview.js";
 import { sandboxMessages } from "./routes/sandboxMessages.js";
+import { sandboxPublish } from "./routes/sandboxPublish.js";
+import { sandboxUnpublish } from "./routes/sandboxUnpublish.js";
+import { galleryList } from "./routes/galleryList.js";
+import { craftGet } from "./routes/craftGet.js";
+import { craftPlay } from "./routes/craftPlay.js";
+import { craftLike } from "./routes/craftLike.js";
+import { craftFork } from "./routes/craftFork.js";
+import { meCoins } from "./routes/meCoins.js";
 import { wsChat } from "./routes/wsChat.js";
 import { wsAdmin } from "./routes/wsAdmin.js";
 import { createEnquiry } from "./routes/enquiry.js";
@@ -127,6 +137,7 @@ healthcheck(fastify);
 loginEmail(fastify);
 loginOtp(fastify);
 authGoogle(fastify);
+adminLogin(fastify);
 logout(fastify);
 adminStudents(fastify);
 adminCreateStudent(fastify);
@@ -152,6 +163,14 @@ sandboxUpdate(fastify);
 sandboxDelete(fastify);
 sandboxPreview(fastify);
 sandboxMessages(fastify);
+sandboxPublish(fastify);
+sandboxUnpublish(fastify);
+galleryList(fastify);
+craftGet(fastify);
+craftPlay(fastify);
+craftLike(fastify);
+craftFork(fastify);
+meCoins(fastify);
 wsChat(fastify);
 wsAdmin(fastify);
 createEnquiry(fastify);
@@ -207,6 +226,12 @@ const kpaiEnv = Object.fromEntries(
     .map(([k, v]) => [k, redactEnvValue(k, v)])
 );
 fastify.log.info({ env: kpaiEnv }, "KidPlayAI environment");
+
+try {
+  await bootstrapAdmin(fastify.log);
+} catch (err) {
+  fastify.log.error({ err }, "bootstrapAdmin failed — admin login may not work");
+}
 
 const port = Number(process.env.KPAI_API_PORT);
 fastify.listen({ port, host: "0.0.0.0" }, (err) => {

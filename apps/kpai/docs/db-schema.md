@@ -10,7 +10,11 @@ user 1──* login_request
 user 1──* sandbox_session *──1 sandbox
 user 1──* sandbox 1──* session_message
                 sandbox 1──* sandbox_release
+                sandbox 1──* craft_like
+                sandbox 1──* craft_play
+                sandbox 0..1──* sandbox  (forked_from_sandbox_id self-reference)
 user *──* gallery  (via user_gallery)
+user 1──* coin_ledger
 ```
 
 ---
@@ -91,10 +95,14 @@ A craft workspace owned by a student. Each sandbox represents one craft creation
 | work_dir | text | nullable | Filesystem path to the sandbox working directory |
 | title | text | nullable | Craft title |
 | description | text | nullable | Craft description |
+| index_html_content | text | nullable | Cached copy of the craft's `index.html`; mirrors what's on disk in `work_dir` |
+| published_at | timestamp | nullable | Set when the craft is published to Discover; cleared on unpublish |
+| publish_bounty_paid_at | timestamp | nullable | Set once on the very first publish; never reset. Enforces the once-per-craft publish bounty |
+| forked_from_sandbox_id | uuid | nullable | If this craft was forked from another, the source sandbox id |
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 | updated_at | timestamp | NOT NULL, default `now()` | Last update time |
 
-**Indexes:** `user_id`
+**Indexes:** `user_id`, `published_at`, `forked_from_sandbox_id`
 
 ### `sandbox_release`
 
@@ -138,6 +146,52 @@ Junction table mapping users to galleries (many-to-many). A user can belong to m
 | created_at | timestamp | NOT NULL, default `now()` | Row creation time |
 
 **Indexes:** `(user_id, gallery_id)` (unique), `user_id`, `gallery_id`
+
+### `craft_like`
+
+A "like" given by a viewer to a published craft. One row per `(sandbox_id, viewer_user_id)`. Unliking deletes the row; relikes do not re-pay the like bounty (idempotency is enforced at the `coin_ledger` level).
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| sandbox_id | uuid | NOT NULL, FK → `sandbox.id` ON DELETE CASCADE | The liked craft |
+| viewer_user_id | uuid | NOT NULL, FK → `user.id` ON DELETE CASCADE | The user who liked |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+
+**Indexes:** `(sandbox_id, viewer_user_id)` (unique), `sandbox_id`, `viewer_user_id`
+
+### `craft_play`
+
+Records the first unique play of a craft by a viewer. Subsequent plays by the same viewer do not insert. Used to grant the per-play coin bounty exactly once per viewer.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| sandbox_id | uuid | NOT NULL, FK → `sandbox.id` ON DELETE CASCADE | The played craft |
+| viewer_user_id | uuid | NOT NULL, FK → `user.id` ON DELETE CASCADE | The viewer who played |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+
+**Indexes:** `(sandbox_id, viewer_user_id)` (unique), `sandbox_id`
+
+### `coin_ledger`
+
+Append-only ledger of every coin movement (earn and spend). A user's balance is `sum(delta) WHERE user_id = $1`. The `idempotency_key` column is uniquely indexed so retried bounty grants are safe — re-inserting an existing key fails cleanly.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK, default `gen_random_uuid()` | Unique identifier |
+| user_id | uuid | NOT NULL, FK → `user.id` ON DELETE CASCADE | Owner of the balance change |
+| delta | integer | NOT NULL | Signed coin movement; `+` for earn, `-` for spend |
+| reason | text | NOT NULL | One of `first_publish`, `publish`, `play`, `like`, `fork`, `descendant_publish`, `featured`, `spend_ai_turn`, `spend_boost`, `spend_template`, `spend_cosmetic`, `spend_cover`, `admin_adjust` |
+| sandbox_id | uuid | nullable, FK → `sandbox.id` ON DELETE SET NULL | The craft that triggered this movement, if any |
+| related_user_id | uuid | nullable, FK → `user.id` ON DELETE SET NULL | The other user involved (e.g. the liker/forker), if any |
+| idempotency_key | text | nullable, UNIQUE | Stable key for replay safety. Examples: `first_publish:<user_id>`, `publish:<sandbox_id>`, `like:<sandbox_id>:<viewer_user_id>` |
+| metadata | jsonb | nullable | Free-form context (e.g. decay multiplier, depth in fork chain) |
+| created_at | timestamp | NOT NULL, default `now()` | Row creation time |
+
+**Indexes:** `user_id`, `idempotency_key` (unique), `created_at`, `sandbox_id`
+
+See [community-design.md](community-design.md) for the full earn/spend algorithm and anti-abuse rules.
 
 ### `session_message`
 

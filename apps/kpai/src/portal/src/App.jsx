@@ -22,6 +22,12 @@ const AdminPage = lazy(() =>
 const GalleryExpoPage = lazy(() =>
   import("./pages/GalleryExpoPage").then((m) => ({ default: m.GalleryExpoPage }))
 );
+const GalleryListPage = lazy(() =>
+  import("./pages/GalleryListPage").then((m) => ({ default: m.GalleryListPage }))
+);
+const CraftDetailPage = lazy(() =>
+  import("./pages/CraftDetailPage").then((m) => ({ default: m.CraftDetailPage }))
+);
 const PrivacyPolicyPage = lazy(() =>
   import("./pages/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage }))
 );
@@ -54,8 +60,12 @@ export function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
                 <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
-                <Route path="/admin" element={<RoleGuard role="admin"><AdminPage /></RoleGuard>} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/gallery/:id/expo" element={<GalleryExpoPage />} />
+                <Route path="/gallery" element={<GalleryListPage />} />
+                <Route path="/gallery/:galleryId" element={<GalleryListPage />} />
+                <Route path="/discover" element={<Navigate to="/gallery" replace />} />
+                <Route path="/craft/:sandboxId" element={<CraftDetailPage />} />
                 <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms_of_use" element={<TermsOfUsePage />} />
                 <Route path="/logo" element={<LogoPage />} />
