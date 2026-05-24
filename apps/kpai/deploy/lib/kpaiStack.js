@@ -511,6 +511,20 @@ export class KidPlayAiStack extends Stack {
     new CfnOutput(this, "JwtSecretArn", { value: jwtSecret.secretArn });
     new CfnOutput(this, "DeepseekSecretArn", { value: deepseekSecret.secretArn });
     new CfnOutput(this, "ImageTag", { value: imageTag });
+    // Outputs consumed by the ytai stack (see ytai/deploy). ytai's release
+    // script reads them via aws cloudformation describe-stacks and passes
+    // them to cdk deploy as -c context values.
+    new CfnOutput(this, "VpcId", { value: vpc.vpcId });
+    new CfnOutput(this, "CapacityProviderName", {
+      value: capacityProvider.capacityProviderName,
+    });
+    new CfnOutput(this, "AlbArn", { value: alb.loadBalancerArn });
+    new CfnOutput(this, "AlbHttpsListenerArn", { value: primaryListener.listenerArn });
+    new CfnOutput(this, "AlbSecurityGroupId", { value: albSg.securityGroupId });
+    new CfnOutput(this, "InstanceSecurityGroupId", { value: instanceSg.securityGroupId });
+    new CfnOutput(this, "AlbCanonicalHostedZoneId", {
+      value: alb.loadBalancerCanonicalHostedZoneId,
+    });
     if (distribution) {
       new CfnOutput(this, "CdnDomain", { value: distribution.distributionDomainName });
       new CfnOutput(this, "CdnDistributionId", { value: distribution.distributionId });
