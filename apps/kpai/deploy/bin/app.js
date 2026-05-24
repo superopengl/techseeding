@@ -30,14 +30,6 @@ const dbPubliclyAccessibleRaw =
   app.node.tryGetContext("dbPubliclyAccessible") ?? process.env.KPAI_DB_PUBLICLY_ACCESSIBLE ?? false;
 const dbPubliclyAccessible =
   dbPubliclyAccessibleRaw === true || dbPubliclyAccessibleRaw === "true";
-// Multiplier applied to Fargate task cpu/memory. Bump to scale up the single
-// app task without code changes: `KPAI_SCALE_LEVEL=2 pnpm release`.
-const scaleLevelRaw =
-  app.node.tryGetContext("scaleLevel") ?? process.env.KPAI_SCALE_LEVEL ?? 1;
-const scaleLevel = Number(scaleLevelRaw);
-if (!Number.isInteger(scaleLevel) || scaleLevel < 1) {
-  throw new Error(`scaleLevel must be a positive integer, got: ${scaleLevelRaw}`);
-}
 
 new KidPlayAiStack(app, `kpai-${stage}`, {
   env: { account, region },
@@ -48,7 +40,6 @@ new KidPlayAiStack(app, `kpai-${stage}`, {
   imageTag,
   cdnCertificateArn,
   dbPubliclyAccessible,
-  scaleLevel,
 });
 
 Tags.of(app).add("Project", "kpai");

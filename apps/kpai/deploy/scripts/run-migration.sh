@@ -20,22 +20,17 @@ SERVICE_NAME=$(aws cloudformation describe-stacks \
   --stack-name "$STACK_NAME" --region "$REGION" \
   --query "Stacks[0].Outputs[?OutputKey=='ServiceName'].OutputValue" --output text)
 
-# Pull subnets/security groups from the running service config so we don't
-# duplicate them in this script.
-NETWORK=$(aws ecs describe-services \
-  --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME" --region "$REGION" \
-  --query "services[0].networkConfiguration" --output json)
-
 TASK_DEF=$(aws ecs describe-services \
   --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME" --region "$REGION" \
   --query "services[0].taskDefinition" --output text)
 
 echo "==> Running migration task on $CLUSTER_NAME"
+# Launch on the ASG-backed capacity provider; bridge-mode tasks don't take a
+# network configuration block.
 TASK_ARN=$(aws ecs run-task \
   --cluster "$CLUSTER_NAME" \
   --task-definition "$TASK_DEF" \
-  --launch-type FARGATE \
-  --network-configuration "$NETWORK" \
+  --launch-type EC2 \
   --overrides '{"containerOverrides":[{"name":"App","command":["npx","drizzle-kit","migrate","--config","src/api/drizzle.config.js"],"environment":[{"name":"RUN_MIGRATIONS","value":"false"}]}]}' \
   --region "$REGION" \
   --query "tasks[0].taskArn" --output text)

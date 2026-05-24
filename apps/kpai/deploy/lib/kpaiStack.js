@@ -1,10 +1,28 @@
 import { Stack, Duration, RemovalPolicy, CfnOutput } from "aws-cdk-lib";
-import { Vpc, SubnetType, Port, SecurityGroup, Peer } from "aws-cdk-lib/aws-ec2";
+import { AutoScalingGroup, SpotAllocationStrategy } from "aws-cdk-lib/aws-autoscaling";
+import {
+  Vpc,
+  SubnetType,
+  Port,
+  SecurityGroup,
+  Peer,
+  InstanceType,
+  LaunchTemplate,
+  UserData,
+} from "aws-cdk-lib/aws-ec2";
+import {
+  Role,
+  ServicePrincipal,
+  ManagedPolicy,
+} from "aws-cdk-lib/aws-iam";
 import {
   Cluster,
   ContainerInsights,
-  FargateTaskDefinition,
-  FargateService,
+  Ec2TaskDefinition,
+  Ec2Service,
+  AsgCapacityProvider,
+  EcsOptimizedImage,
+  NetworkMode,
   ContainerImage,
   Secret as EcsSecret,
   LogDrivers,
@@ -63,7 +81,6 @@ export class KidPlayAiStack extends Stack {
       imageTag,
       cdnCertificateArn,
       dbPubliclyAccessible = false,
-      scaleLevel = 1,
     } = props;
     const appRepo = Repository.fromRepositoryName(this, "AppRepo", appRepoName);
     const isProd = stage === "prod";
@@ -144,9 +161,102 @@ export class KidPlayAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    const taskDef = new FargateTaskDefinition(this, "Task", {
-      cpu: 1024 * scaleLevel,
-      memoryLimitMiB: 2048 * scaleLevel,
+    // === EC2 capacity ========================================================
+    //
+    // Single Spot-backed ASG that hosts the ECS tasks. Three instance types
+    // (t3.large, t3a.large, m5.large) span separate Spot pools so reclaim
+    // probability is the minimum of the three. desiredCapacity=1 keeps the
+    // cluster at a single host — this is a prototype, not HA. Managed
+    // draining lets ECS shut tasks down cleanly on Spot reclaim; managed
+    // termination protection would need a 2nd instance to drain *to* so it's
+    // off (would just block forever at max=1).
+
+    const instanceRole = new Role(this, "InstanceRole", {
+      assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AmazonEC2ContainerServiceforEC2Role",
+        ),
+        ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
+      ],
+    });
+
+    // The instance SG replaces the per-Fargate-task service SG. In bridge
+    // mode every task on the instance shares this SG. The construct ID stays
+    // `ServiceSecurityGroup` so the CFN logical ID — and every ingress rule
+    // referencing it (Aurora, EFS, ALB→service) — carries over unchanged.
+    const instanceSg = new SecurityGroup(this, "ServiceSecurityGroup", {
+      vpc,
+      description: "kpai Fargate service",
+      allowAllOutbound: true,
+    });
+
+    dbCluster.connections.allowFrom(instanceSg, Port.tcp(5432), "ECS instance to Aurora");
+    if (dbPubliclyAccessible) {
+      // Open 5432 to the internet so the DB can be reached from a local psql
+      // client with username/password. Toggled off by default; enable via
+      // `-c dbPubliclyAccessible=true` for occasional admin access. Lock down
+      // to a specific CIDR before treating prod data as sensitive.
+      dbCluster.connections.allowFrom(Peer.anyIpv4(), Port.tcp(5432), "Public psql access");
+    }
+    sandboxFs.connections.allowFrom(instanceSg, Port.tcp(2049), "ECS instance to EFS");
+
+    const launchTemplate = new LaunchTemplate(this, "LaunchTemplate", {
+      machineImage: EcsOptimizedImage.amazonLinux2023(),
+      // Placeholder — actual instance types are picked from the ASG's
+      // mixedInstancesPolicy overrides below. Required by CDK.
+      instanceType: new InstanceType("t3.large"),
+      role: instanceRole,
+      securityGroup: instanceSg,
+      userData: UserData.custom(
+        [
+          "#!/bin/bash",
+          `echo ECS_CLUSTER=${ecsCluster.clusterName} >> /etc/ecs/ecs.config`,
+          "echo ECS_ENABLE_SPOT_INSTANCE_DRAINING=true >> /etc/ecs/ecs.config",
+        ].join("\n"),
+      ),
+    });
+
+    const asg = new AutoScalingGroup(this, "Asg", {
+      vpc,
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
+      minCapacity: 1,
+      maxCapacity: 1,
+      desiredCapacity: 1,
+      mixedInstancesPolicy: {
+        launchTemplate,
+        launchTemplateOverrides: [
+          { instanceType: new InstanceType("t3.large") },
+          { instanceType: new InstanceType("t3a.large") },
+          { instanceType: new InstanceType("m5.large") },
+        ],
+        instancesDistribution: {
+          onDemandBaseCapacity: 0,
+          onDemandPercentageAboveBaseCapacity: 0,
+          spotAllocationStrategy: SpotAllocationStrategy.CAPACITY_OPTIMIZED,
+        },
+      },
+    });
+
+    const capacityProvider = new AsgCapacityProvider(this, "CapacityProvider", {
+      autoScalingGroup: asg,
+      enableManagedTerminationProtection: false,
+      enableManagedScaling: false,
+      enableManagedDraining: true,
+    });
+    ecsCluster.addAsgCapacityProvider(capacityProvider);
+
+    // === Task definition =====================================================
+    //
+    // Bridge mode: each task uses the host's network namespace with port
+    // mappings rather than its own ENI. ALB target group uses dynamic host
+    // port mapping (containerPort:80 → ephemeral host port assigned by ECS).
+    // Saves ENIs (a single t3.large only supports 3) and removes per-task SG
+    // complexity. The trade-off — all tasks share the instance SG — is fine
+    // because both apps need the same egress (Aurora, OpenRouter, S3).
+
+    const taskDef = new Ec2TaskDefinition(this, "Task", {
+      networkMode: NetworkMode.BRIDGE,
       volumes: [
         {
           name: "sandbox",
@@ -165,6 +275,12 @@ export class KidPlayAiStack extends Stack {
 
     const container = taskDef.addContainer("App", {
       image: ContainerImage.fromEcrRepository(appRepo, imageTag),
+      // EC2 mode requires per-container memory limits. 1.5 GiB hard cap with
+      // 1 GiB soft reservation gives kpai room to breathe and leaves the
+      // rest of the t3.large's 8 GiB for ytai's heavier merged container.
+      memoryLimitMiB: 1536,
+      memoryReservationMiB: 1024,
+      cpu: 512,
       logging: LogDrivers.awsLogs({ logGroup, streamPrefix: "app" }),
       environment: {
         NODE_ENV: "production",
@@ -182,6 +298,8 @@ export class KidPlayAiStack extends Stack {
         KPAI_JWT_SECRET: EcsSecret.fromSecretsManager(jwtSecret),
         KPAI_SANDBOX_DEEPSEEK_API_KEY: EcsSecret.fromSecretsManager(deepseekSecret),
       },
+      // hostPort omitted (defaults to 0) → ECS assigns an ephemeral host
+      // port. ALB target group with TargetType.INSTANCE picks it up.
       portMappings: [{ containerPort: 80 }],
     });
     container.addMountPoints({
@@ -194,36 +312,7 @@ export class KidPlayAiStack extends Stack {
       ? HostedZone.fromLookup(this, "Zone", { domainName: hostedZoneName })
       : undefined;
 
-    // Pre-create the service security group so EFS/DB ingress rules can
-    // reference it without forming a CloudFormation circular dependency.
-    const serviceSg = new SecurityGroup(this, "ServiceSecurityGroup", {
-      vpc,
-      description: "kpai Fargate service",
-      allowAllOutbound: true,
-    });
-
-    dbCluster.connections.allowFrom(serviceSg, Port.tcp(5432), "Fargate to Aurora");
-    if (dbPubliclyAccessible) {
-      // Open 5432 to the internet so the DB can be reached from a local psql
-      // client with username/password. Toggled off by default; enable via
-      // `-c dbPubliclyAccessible=true` for occasional admin access. Lock down
-      // to a specific CIDR before treating prod data as sensitive.
-      dbCluster.connections.allowFrom(Peer.anyIpv4(), Port.tcp(5432), "Public psql access");
-    }
-    sandboxFs.connections.allowFrom(serviceSg, Port.tcp(2049), "Fargate to EFS");
-
-    // === ALB stack ===========================================================
-    //
-    // Previously this stack used the L3 pattern
-    // `ApplicationLoadBalancedFargateService`, which owns the ALB, listener,
-    // target group, cert, and Route53 record internally. We now create those
-    // explicitly so they can (a) be shared with the ytai stack via a host
-    // header rule on the same listener and (b) survive the upcoming
-    // Fargate→EC2 service swap without being replaced.
-    //
-    // Every resource here pins its CFN logical ID via overrideLogicalId() to
-    // exactly match what the L3 pattern was producing, so this refactor is a
-    // pure code change with no CloudFormation diff on the ALB resources.
+    // === ALB =================================================================
 
     const albSg = new SecurityGroup(this, "AlbSecurityGroup", {
       vpc,
@@ -251,18 +340,30 @@ export class KidPlayAiStack extends Stack {
     alb.node.defaultChild.overrideLogicalId("ServiceLBE9A1ADBC");
     alb.setAttribute("idle_timeout.timeout_seconds", "3600");
 
+    // Bridge-mode tasks listen on ephemeral host ports (32768–60999 on AL2023);
+    // ALB needs an ingress to the EC2 instance SG covering that range.
+    // service.attachToApplicationTargetGroup() doesn't wire this up because
+    // the connectivity endpoint is the instance, not the task.
+    instanceSg.connections.allowFrom(
+      albSg,
+      Port.tcpRange(32768, 65535),
+      "ALB to ECS bridge-mode tasks",
+    );
+
+    // INSTANCE target type — ALB registers `(instance-id, ephemeral-port)`
+    // tuples. The IP-mode TG from the Fargate era is replaced (TargetType is
+    // immutable on AWS::ElasticLoadBalancingV2::TargetGroup).
     const targetGroup = new ApplicationTargetGroup(this, "AlbTargetGroup", {
       vpc,
       port: 80,
       protocol: ApplicationProtocol.HTTP,
-      targetType: TargetType.IP,
+      targetType: TargetType.INSTANCE,
       healthCheck: {
         path: "/healthcheck",
         interval: Duration.seconds(30),
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 3,
       },
-      stickinessCookieDuration: undefined,
     });
     targetGroup.setAttribute("stickiness.enabled", "false");
     targetGroup.node.defaultChild.overrideLogicalId(
@@ -314,20 +415,26 @@ export class KidPlayAiStack extends Stack {
     }
 
     // === ECS service =========================================================
+    //
+    // Ec2Service replaces the FargateService; CFN deletes the old service
+    // (logical ID Service9571FDD8) and creates a new one. Expect ~2–5 min
+    // outage during the swap deploy as the listener flips to the new TG
+    // before the new task on the EC2 instance is healthy.
 
-    const service = new FargateService(this, "FargateService", {
+    const service = new Ec2Service(this, "EcsService", {
       cluster: ecsCluster,
       taskDefinition: taskDef,
-      securityGroups: [serviceSg],
       desiredCount: 1,
-      minHealthyPercent: 100,
-      maxHealthyPercent: 200,
-      assignPublicIp: true,
-      vpcSubnets: { subnetType: SubnetType.PUBLIC },
+      // Single-instance/single-task: the new task must stop before the new
+      // revision starts. Brief outage per deploy is acceptable for prototype.
+      minHealthyPercent: 0,
+      maxHealthyPercent: 100,
       healthCheckGracePeriod: Duration.seconds(300),
       circuitBreaker: { rollback: true },
+      capacityProviderStrategies: [
+        { capacityProvider: capacityProvider.capacityProviderName, weight: 1 },
+      ],
     });
-    service.node.defaultChild.overrideLogicalId("Service9571FDD8");
     service.attachToApplicationTargetGroup(targetGroup);
 
     // CloudFront in front of the ALB. Caches /assets/* (Vite-hashed bundles) at
