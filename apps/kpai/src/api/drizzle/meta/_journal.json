@@ -57,6 +57,27 @@
       "when": 1778991738176,
       "tag": "0007_flaky_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779578008886,
+      "tag": "0008_otp_login",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779582889878,
+      "tag": "0009_otp_timestamptz",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779583050914,
+      "tag": "0010_drop_consumed_at",
+      "breakpoints": true
     }
   ]
 }

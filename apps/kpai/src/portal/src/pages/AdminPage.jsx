@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { setPageTitle } from "../utils/setPageTitle";
-import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Tabs, Badge } from "antd";
+import { Table, Button, Space, Layout, Typography, message, Modal, Input, DatePicker, Form, Radio, Tag, Drawer, Tabs, Badge, Tooltip } from "antd";
 import {
   ReloadOutlined,
   PlusOutlined,
@@ -8,6 +8,7 @@ import {
   CheckOutlined,
   CodeOutlined,
   LogoutOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { Loading } from "../components/Loading";
 import dayjs from "dayjs";
@@ -47,10 +48,13 @@ export function AdminPage() {
   const [reviewSandbox, setReviewSandbox] = useState(null);
   const [markingReadIds, setMarkingReadIds] = useState(() => new Set());
   const [allGalleries, setAllGalleries] = useState([]);
+  // Tick once per second so the OTP TTL column animates without re-fetching.
+  // Only runs when an unexpired OTP is on screen.
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    const { accountName, firstName, lastName } = addFormValues || {};
-    if (!accountName || !firstName || !lastName) {
+    const { accountName, firstName, lastName, email } = addFormValues || {};
+    if (!accountName || !firstName || !lastName || !email) {
       setAddSubmittable(false);
       return;
     }
@@ -155,6 +159,15 @@ export function AdminPage() {
   }, []);
 
   useEffect(() => {
+    const hasLive = students.some(
+      (s) => s.otp && new Date(s.otp.expiresAt).getTime() > Date.now(),
+    );
+    if (!hasLive) return;
+    const id = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [students]);
+
+  useEffect(() => {
     // Refresh the gallery option list when the user switches to the Students
     // tab — new galleries may have been added/renamed/deleted in the Galleries
     // tab while this tab was hidden.
@@ -176,8 +189,7 @@ export function AdminPage() {
       ws.onmessage = (e) => {
         try {
           const { type } = JSON.parse(e.data);
-          if (type === "login_request_changed") fetchStudents();
-          else if (type === "enquiry_created") fetchEnquiries();
+          if (type === "enquiry_created") fetchEnquiries();
         } catch { /* ignore malformed frames */ }
       };
       ws.onclose = () => {
@@ -209,7 +221,7 @@ export function AdminPage() {
     }
     setAddLoading(true);
     const userName = `${values.firstName.trim()} ${values.lastName.trim()}`;
-    const email = `${values.firstName.trim().toLowerCase()}.${values.lastName.trim().toLowerCase()}@student.kidplayai`;
+    const email = values.email?.trim().toLowerCase();
     try {
       await apiCall("/api/admin/student", {
         method: "POST",
@@ -245,20 +257,6 @@ export function AdminPage() {
         navigate("/");
       },
     });
-  };
-
-  const handleApproveLogin = async (loginRequestId) => {
-    try {
-      await apiCall("/api/admin/login/student/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginRequestId }),
-      });
-      message.success("Login approved");
-      fetchStudents();
-    } catch (e) {
-      message.error(e.message);
-    }
   };
 
   const handleRowClick = async (record) => {
@@ -349,33 +347,51 @@ export function AdminPage() {
       defaultSortOrder: "descend",
     },
     {
-      title: "Login Status",
-      dataIndex: "loginRequestStatus",
-      key: "loginRequestStatus",
-      render: (status) => {
-        if (!status) return <Tag>-</Tag>;
-        const colorMap = { requesting: "orange", approved: "green" };
-        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
-      },
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <Space>
-          {record.loginRequestStatus === "requesting" && (
-            <Button
-              type="primary"
-              size="small"
-              icon={<CheckOutlined />}
-              onClick={(e) => { e.stopPropagation(); handleApproveLogin(record.loginRequestId); }}
-              style={{ borderRadius: 6 }}
+      title: "Sign-in Code",
+      dataIndex: "otp",
+      key: "otp",
+      width: 220,
+      render: (otp) => {
+        if (!otp) return <Tag>—</Tag>;
+        const expires = new Date(otp.expiresAt);
+        const remainingMs = expires.getTime() - Date.now();
+        const expired = remainingMs <= 0;
+        const mins = Math.max(0, Math.floor(remainingMs / 60000));
+        const secs = Math.max(0, Math.floor((remainingMs % 60000) / 1000));
+        const ttl = expired
+          ? "Expired"
+          : `${mins}:${String(secs).padStart(2, "0")} left`;
+        return (
+          <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Tooltip title="Copy code">
+              <span
+                style={{
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  letterSpacing: 2,
+                  color: expired ? colors.muted : colors.heading,
+                  textDecoration: expired ? "line-through" : "none",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  navigator.clipboard.writeText(otp.code);
+                  message.success("Code copied");
+                }}
+              >
+                {otp.code}
+              </span>
+            </Tooltip>
+            <Tag
+              icon={<ClockCircleOutlined />}
+              color={expired ? "default" : remainingMs < 60_000 ? "orange" : "green"}
+              style={{ borderRadius: 12 }}
             >
-              Approve
-            </Button>
-          )}
-        </Space>
-      ),
+              {ttl}
+            </Tag>
+          </div>
+        );
+      },
     },
   ];
 
@@ -515,7 +531,7 @@ export function AdminPage() {
   ];
 
   const unreadEnquiryCount = enquiries.filter((e) => !e.readAt).length;
-  const pendingApprovalCount = students.filter((s) => s.loginRequestStatus === "requesting").length;
+  const activeOtpCount = students.filter((s) => s.otp && new Date(s.otp.expiresAt).getTime() > Date.now()).length;
 
   return (
     <Layout style={{ minHeight: "100vh", background: colors.canvas }}>
@@ -557,8 +573,8 @@ export function AdminPage() {
               label: (
                 <Space size={8}>
                   <span>Students</span>
-                  {pendingApprovalCount > 0 && (
-                    <Badge count={pendingApprovalCount} style={{ backgroundColor: colors.primary }} />
+                  {activeOtpCount > 0 && (
+                    <Badge count={activeOtpCount} style={{ backgroundColor: colors.primary }} />
                   )}
                 </Space>
               ),
@@ -772,6 +788,17 @@ export function AdminPage() {
           </Form.Item>
           <Form.Item name="lastName" label="Last Name" rules={[{ required: true, message: "Last Name is required" }, { max: 50, message: "Last Name must be 50 characters or less" }]}>
             <Input maxLength={50} />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Email is required" },
+              { type: "email", message: "Enter a valid email" },
+              { max: 120, message: "Email must be 120 characters or less" },
+            ]}
+          >
+            <Input maxLength={120} placeholder="kid@example.com" />
           </Form.Item>
           <Form.Item name="dob" label="Date of Birth">
             <DatePicker style={{ width: "100%" }} defaultPickerValue={dayjs().subtract(10, "year")} />

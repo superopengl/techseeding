@@ -26,6 +26,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { colors, gradients, shadows, fonts } from "../theme";
 import { APP_STORE_URL } from "../constants";
 import { Logo } from "../components/Logo";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
+import { useUser } from "../context/UserContext";
 
 // Lazy-load the enquiry form so it stays out of the initial render path. The
 // antd Form / Input / Select components run rc-resize-observer and dom-align
@@ -125,27 +127,6 @@ function NavBar({ onStart }) {
     >
       <Logo size={60} square />
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {import.meta.env.DEV && (
-          <Button
-            size="large"
-            type="primary"
-            href="/admin"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              borderRadius: 24,
-              paddingInline: 20,
-              fontWeight: 600,
-              height: 44,
-              background: colors.body,
-              color: colors.onDark,
-              border: "none",
-              boxShadow: shadows.cardSubtle,
-            }}
-          >
-            Admin Portal
-          </Button>
-        )}
         <Button
           size="large"
           icon={<LoginOutlined />}
@@ -307,7 +288,12 @@ export function HomePage() {
   }, []);
   const navigate = useNavigate();
   const { hash } = useLocation();
+  const { refresh: refreshUser } = useUser();
   const goLogin = () => navigate("/login");
+  const handleSsoSuccess = async ({ role }) => {
+    await refreshUser();
+    navigate(role === "admin" ? "/admin" : "/sandbox");
+  };
 
   const [mountForm, setMountForm] = useState(false);
   const [autoFocusForm, setAutoFocusForm] = useState(false);
@@ -415,23 +401,18 @@ export function HomePage() {
           >
             Kids dream up crafts, command AI to build them — and learn how it all works along the way.
           </Paragraph>
-          <Button
-            size="large"
-            onClick={scrollToEnquiry}
-            icon={<RocketOutlined />}
-            style={ctaButtonStyle}
-          >
-            Enquire About Classes
-          </Button>
-          <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 12, marginBottom: 0 }}>
-            For parents & guardians — we'll send back schedule, pricing, and class details
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <GoogleSignInButton scale={1.4} onSuccess={handleSsoSuccess} />
+          </div>
+          <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 16, marginBottom: 0 }}>
+            Sign in with your Google account to start making crafts
           </Paragraph>
           <div style={{ marginTop: 16 }}>
             <Text
               style={{ color: "rgba(255,255,255,0.85)", fontSize: 15, cursor: "pointer" }}
               onClick={goLogin}
             >
-              Already a student? <span style={{ textDecoration: "underline", fontWeight: 600 }}>Log in here</span>
+              Have a username & password? <span style={{ textDecoration: "underline", fontWeight: 600 }}>Log in here</span>
             </Text>
           </div>
         </div>

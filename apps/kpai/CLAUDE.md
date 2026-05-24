@@ -12,28 +12,29 @@ Kids aged 8-12 who love games, science, engineering, and AI. No prior experience
 
 Multi-page app with four views:
 
-1. **Homepage** (`/`) — Public promotion/landing page with feature highlights and "Start Making Crafts" CTA
-2. **Login** (`/login`) — Student enters their name and clicks "Request Login"; waits for admin approval
+1. **Homepage** (`/`) — Public promotion/landing page with a Google "Sign in with Google" button as the hero CTA
+2. **Login** (`/login`) — Two passwordless paths: Google SSO, or "Email me a code" → 6-digit OTP. Auto-creates a student account on first sign-in
 3. **Sandbox** (`/sandbox/:studentId`) — Split-panel layout: left panel is live iframe preview of the student's craft, right panel is a chat-bubble UI streaming the in-process DeepSeek agent (Vercel AI SDK) over a WebSocket
-4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students (name, status, session active, sandbox link, message count, token info) with approve/reject actions
+4. **Admin** (`/admin`) — Dashboard with Ant Design table listing all students; per-row "Sign-in Code" column shows any live OTP + TTL so admins can read it back to a kid when email isn't reaching them
 
 ## How It Works
 
-1. Student visits the homepage and clicks "Start Making Crafts"
-2. On the login page, they enter their name and click "Request Login"
-3. A record is created in PostgreSQL with status `pending`; the student sees a "Waiting for Approval" screen
-4. An admin visits `/admin`, sees pending students, and clicks "Approve"
-5. The login page polls `/api/login/status/:studentId` and navigates to `/sandbox/:studentId` once approved
-6. A WebSocket connection establishes a chat session backed by an in-process agent loop (Vercel AI SDK + DeepSeek); streaming text, reasoning, and tool calls are forwarded live to the browser
-7. Kids type natural language requests in the chat input (e.g., "make a craft where I catch falling stars") and see the AI's reasoning, tool calls, and reply as message bubbles
-8. The agent uses three craft tools (`read`, `edit`, `write`) scoped to the student's `index.html` via a path-jail helper
-9. The left panel iframe shows the updated craft as soon as a tool write lands
+1. Student visits the homepage and either clicks "Sign in with Google" or navigates to `/login`
+2. On the login page they pick one of two paths:
+   - **Google SSO** — popup flow via Google Identity Services; the backend verifies the ID token against the configured `KPAI_GOOGLE_CLIENT_ID`
+   - **Email OTP** — they type their email, the backend issues a 6-digit code stored in `login_otp` (plain text — admin UI surfaces it), and emails it via AWS SES; they type the code back to verify
+3. On either successful path, the backend auto-creates a `student` user + empty profile if the email isn't on file, then issues the `kpai_token` / `kpai_role` cookies the rest of the app expects
+4. The page navigates to `/sandbox` (or `/admin` for admin role) and the user is in
+5. A WebSocket connection establishes a chat session backed by an in-process agent loop (Vercel AI SDK + DeepSeek); streaming text, reasoning, and tool calls are forwarded live to the browser
+6. Kids type natural language requests in the chat input (e.g., "make a craft where I catch falling stars") and see the AI's reasoning, tool calls, and reply as message bubbles
+7. The agent uses three craft tools (`read`, `edit`, `write`) scoped to the student's `index.html` via a path-jail helper
+8. The left panel iframe shows the updated craft as soon as a tool write lands
 
 ## Architecture
 
 ### Database (PostgreSQL + Drizzle ORM)
 
-Tables: `user`, `student_profile`, `login_request`, `sandbox`, `sandbox_session`, `sandbox_release`, `session_message`, `enquiry`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
+Tables: `user`, `student_profile`, `login_otp`, `sandbox`, `sandbox_session`, `sandbox_release`, `session_message`, `enquiry`. All use UUID primary keys, singular table names, and automatic `created_at`/`updated_at` timestamps.
 
 Full schema documentation: [docs/db-schema.md](docs/db-schema.md)
 
@@ -45,8 +46,9 @@ Full API documentation: [docs/api-schema.md](docs/api-schema.md)
 
 Summary:
 - `GET /healthcheck` — public health check
-- `POST /api/login/student` — student login request
-- `GET /api/login/:loginRequestId/status` — poll login request status
+- `POST /api/login/email` — issue a sign-in OTP for an email (auto-creates the student on first request)
+- `POST /api/login/otp` — verify the 6-digit code and set auth cookies
+- `POST /api/auth/google` — verify a Google ID token, auto-create student if needed, set auth cookies
 - `POST /api/admin/student` — create a new student user with profile
 - `GET /api/sandbox/:id` — get sandbox info (auth required)
 - `POST /api/sandbox/:id/message` — send message (auth required)
@@ -199,6 +201,9 @@ All env vars are prefixed with `KPAI_`.
 | `KPAI_JWT_SECRET` | Secret key for signing JWT tokens | *(required)* |
 | `KPAI_SANDBOX_DEEPSEEK_API_KEY` | DeepSeek API key used by the sandbox agent | *(required)* |
 | `KPAI_SANDBOX_DEEPSEEK_MODEL` | DeepSeek model id passed to the AI SDK | `deepseek-chat` |
+| `KPAI_GOOGLE_CLIENT_ID` | Google OAuth 2.0 web client ID (blank disables SSO) | *(blank)* |
+| `KPAI_AWS_REGION` | AWS region used by the SES client | `ap-southeast-2` |
+| `KPAI_SES_FROM_EMAIL` | Verified SES sender for sign-in OTP emails (blank → only console + admin UI fallback) | *(blank)* |
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)

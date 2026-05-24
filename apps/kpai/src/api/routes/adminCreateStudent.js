@@ -5,16 +5,16 @@ import { success, error } from "../lib/response.js";
 
 export function adminCreateStudent(fastify) {
   fastify.post("/api/admin/student", async (request, reply) => {
-    const { accountName, firstName, lastName, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
+    const { accountName, firstName, lastName, email, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
 
-    if (!accountName || !firstName || !lastName) {
-      return error(reply, 400, "VALIDATION_ERROR", "accountName, firstName and lastName are required");
+    if (!accountName || !firstName || !lastName || !email) {
+      return error(reply, 400, "VALIDATION_ERROR", "accountName, firstName, lastName and email are required");
     }
     if (!isValidUserName(accountName)) {
       return error(reply, 400, "VALIDATION_ERROR", "accountName may only contain letters, digits, underscore, and slash");
     }
 
-    const limits = { accountName: 50, firstName: 50, lastName: 50, homeAddress: 100, contactNumber: 20, custodianName: 50, notes: 2000 };
+    const limits = { accountName: 50, firstName: 50, lastName: 50, email: 120, homeAddress: 100, contactNumber: 20, custodianName: 50, notes: 2000 };
     for (const [field, max] of Object.entries(limits)) {
       const val = request.body[field];
       if (val && val.length > max) {
@@ -25,7 +25,7 @@ export function adminCreateStudent(fastify) {
     const { newUser, profile: newProfile } = await db.transaction(async (tx) => {
       const [newUser] = await tx
         .insert(user)
-        .values({ userName: accountName, role: "student" })
+        .values({ userName: accountName, role: "student", email: email.toLowerCase() })
         .returning();
 
       const [profile] = await tx

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, timestamp, jsonb, date, index, uniqueIndex, varchar, numeric } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, integer, timestamp, jsonb, date, index, uniqueIndex, varchar, numeric } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
@@ -6,7 +6,6 @@ export const user = pgTable("user", {
   userName: text("user_name").notNull(),
   role: text("role").notNull(), // student | teacher | admin
   email: text("email").unique(),
-  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
@@ -16,8 +15,8 @@ export const user = pgTable("user", {
 export const studentProfile = pgTable("student_profile", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().unique().references(() => user.id),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
   dob: date("dob"),
   gender: text("gender"),
   homeAddress: text("home_address"),
@@ -43,14 +42,21 @@ export const sandbox = pgTable("sandbox", {
   index("sandbox_user_id_idx").on(table.userId),
 ]);
 
-export const loginRequest = pgTable("login_request", {
+export const loginOtp = pgTable("login_otp", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().unique().references(() => user.id),
-  status: text("status").notNull(), // requesting | approved (row is deleted on consumption)
-  resetPassword: boolean("reset_password").notNull().default(false),
+  userId: uuid("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  // Stored as plain text on purpose: the admin user list shows the current
+  // code so a teacher can read it back to a kid whose inbox is broken. The
+  // table's only secret is the email-to-code mapping, and rows expire fast.
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  attempts: integer("attempts").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("login_otp_user_id_idx").on(table.userId),
+  index("login_otp_email_idx").on(sql`lower(${table.email})`),
+]);
 
 export const sandboxSession = pgTable("sandbox_session", {
   id: uuid("id").primaryKey().defaultRandom(),

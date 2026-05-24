@@ -3,14 +3,13 @@ import { setPageTitle } from "../utils/setPageTitle";
 import { fgForHex } from "../utils/fgForHex";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Input, Button, Space, Modal, Tooltip, Avatar, Drawer, message, Typography, ColorPicker, Segmented } from "antd";
-import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, LockOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined, DownOutlined } from "@ant-design/icons";
+import { UnorderedListOutlined, ShareAltOutlined, LogoutOutlined, EditOutlined, UserOutlined, CodeOutlined, EyeOutlined, PlusOutlined, PictureOutlined, DownOutlined } from "@ant-design/icons";
 import { useUser } from "../context/UserContext";
 import { ShareCraftModal } from "../components/ShareCraftModal";
 import { Conversation } from "../components/Conversation";
 import { Logo } from "../components/Logo";
 import { CraftPreview } from "../components/CraftPreview";
 import { SandboxList } from "../components/SandboxList";
-import { PasswordModal } from "../components/PasswordModal";
 import { apiCall, fetchWithAuth, logout } from "../api";
 import confetti from "canvas-confetti";
 import { colors, fonts, shadows, gradients } from "../theme";
@@ -68,7 +67,6 @@ export function SandboxPage() {
   const userName = user?.userName || "";
   const firstName = user?.firstName || "";
   const lastName = user?.lastName || "";
-  const hasPassword = user ? Boolean(user.hasPassword) : null;
   const avatarColor = user?.avatarColor || "#7c5cfc";
   const [leftPct, setLeftPct] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -84,7 +82,6 @@ export function SandboxPage() {
   const [showShare, setShowShare] = useState(false);
   const [sandboxNotFound, setSandboxNotFound] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showChangePassword, setShowChangePassword] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorDraft, setColorDraft] = useState(avatarColor);
   const [savingColor, setSavingColor] = useState(false);
@@ -208,13 +205,6 @@ export function SandboxPage() {
       label: "My Crafts",
       icon: <UnorderedListOutlined />,
       onClick: () => setShowMyCrafts(true),
-    },
-    {
-      key: "change-password",
-      label: "Change Password",
-      icon: <LockOutlined />,
-      disabled: hasPassword === false,
-      onClick: () => setShowChangePassword(true),
     },
   ];
 
@@ -586,12 +576,6 @@ export function SandboxPage() {
           showCount
         />
       </Modal>
-      <PasswordModal
-        open={showChangePassword}
-        mode="change"
-        onSuccess={() => setShowChangePassword(false)}
-        onCancel={() => setShowChangePassword(false)}
-      />
       <Drawer
         placement="right"
         width={260}

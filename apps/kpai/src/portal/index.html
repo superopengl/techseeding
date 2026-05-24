@@ -187,6 +187,10 @@
   </style>
 </head>
 <body>
+  <!-- Google Identity Services (Sign in with Google). Async so it never
+       blocks the LCP image; the SSO button waits for `window.google` to
+       become available before rendering. -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <div id="root">
     <!-- Static LCP placeholder. The road-racer hero is the LCP element on the
          homepage, so we render it inline here — it paints as soon as the HTML
