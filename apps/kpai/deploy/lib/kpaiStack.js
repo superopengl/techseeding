@@ -316,7 +316,11 @@ export class KidPlayAiStack extends Stack {
 
     const albSg = new SecurityGroup(this, "AlbSecurityGroup", {
       vpc,
-      description: "Automatically created Security Group for ELB kpaiprodServiceLB",
+      // Exact description string the original L3 pattern generated — must
+      // match the deployed SG's GroupDescription byte-for-byte, since CFN
+      // treats GroupDescription as immutable (any change replaces the SG,
+      // which would briefly drop ALL ALB ingress).
+      description: "Automatically created Security Group for ELB kpaiprodServiceLBB69C6AB9",
       allowAllOutbound: true,
     });
     albSg.node.defaultChild.overrideLogicalId("ServiceLBSecurityGroupF7435A5C");
