@@ -202,12 +202,11 @@ Start a new tutoring session. (Currently dev-mode: bootstraps a `dev` user autom
 **Returns**: `{ sessionId: string }`
 
 ### `PATCH /api/tutor/:sessionId`
-Update mutable fields on an existing session. Each field is optional — send any subset and the rest stay untouched — but at least one must be present. Used by the Tutor page to switch guidance levels, change subject, set the active doc, or rename the session.
+Update mutable fields on an existing session. Each field is optional — send any subset and the rest stay untouched — but at least one must be present. Used by the Tutor page to change subject, set the active doc, or rename the session. Guidance level is per-message — flipped on the `POST /api/tutor/:sessionId/message` body — and is not a session attribute.
 
 **Body** (any combination, at least one required):
 ```json
 {
-  "guidanceLevel": "<one of GUIDANCE_LEVELS>",
   "subject": "math" | "thinking" | "reading" | "writing",
   "currentDocId": "<doc uuid owned by this session>" | null,
   "title": "string (1..80 chars)" | null
@@ -219,7 +218,6 @@ Update mutable fields on an existing session. Each field is optional — send an
 ```json
 {
   "sessionId": "uuid",
-  "guidanceLevel": "...",
   "subject": "...",
   "currentDocId": "uuid | null",
   "title": "string | null"
@@ -242,6 +240,7 @@ Fetch the full transcript for a session, ordered by `created_at`.
       "id": "...",
       "role": "user" | "assistant",
       "content": "...",
+      "guidanceLevel": "guided" | "balanced" | "direct" | null,
       "interrupted": false,
       "toolCalls": [{ "id": "...", "name": "draw_annotation", "args": { ... } }] | null,
       "createdAt": "..."
@@ -250,7 +249,7 @@ Fetch the full transcript for a session, ordered by `created_at`.
 }
 ```
 
-`toolCalls` contains the user-visible `draw_annotation` audit trail so the client can re-render past AI annotations on the canvas.
+`toolCalls` contains the user-visible `draw_annotation` audit trail so the client can re-render past AI annotations on the canvas. `guidanceLevel` is set only on `user` rows (the pacing the student picked for that turn); assistant rows and legacy user rows from before per-message pacing landed carry `null`.
 
 ### `POST /api/tutor/:sessionId/message`
 Send a chat message. The server builds a multimodal user message — every page of the session's active doc is attached as an `image_url` block, followed by the student's text — and runs Brain (the configured multimodal model) in a tool-call loop. The only tool exposed is `draw_annotation`.
@@ -262,6 +261,7 @@ Send a chat message. The server builds a multimodal user message — every page 
 {
   "content": "string",
   "viewingPage": 1,
+  "guidanceLevel": "guided" | "balanced" | "direct",
   "annotatedImage": {
     "imageId": "<session_image.id of the page the student drew on this turn>",
     "dataUrl": "data:image/png;base64,..."
@@ -269,6 +269,7 @@ Send a chat message. The server builds a multimodal user message — every page 
 }
 ```
 - `viewingPage` (optional) tells Brain which page the student is currently looking at so it biases attention toward that page.
+- `guidanceLevel` (optional, default `direct`) sets Brain's pacing for this single turn. The value is persisted on the inserted user row so the audit log reflects exactly what was asked of Brain. Unknown or missing values fall back to `direct`.
 - `annotatedImage` (optional) is a per-turn snapshot of the student's freehand canvas. When present, its bytes substitute for the original page so Brain sees the marks. Not persisted — it lives just for this turn.
 
 **Response**: `text/event-stream`.

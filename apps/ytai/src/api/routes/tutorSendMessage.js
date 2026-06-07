@@ -14,7 +14,7 @@ import buildUserMessageWithImages from '../lib/buildUserMessageWithImages.js';
 import makeTutorTools from '../lib/makeTutorTools.js';
 import { normaliseUsage, recordLlmUsageBatch, sumUsage } from '../lib/recordLlmUsage.js';
 import runBrainTurn from '../lib/runBrainTurn.js';
-import tutorPrompt from '../lib/tutorPrompt.js';
+import tutorPrompt, { DEFAULT_GUIDANCE_LEVEL, isGuidanceLevel } from '../lib/tutorPrompt.js';
 
 const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
@@ -182,6 +182,14 @@ export default function tutorSendMessage(fastify) {
       typeof annotatedImageRaw.dataUrl === 'string'
         ? annotatedImageRaw
         : null;
+    // Per-turn pacing dial. The student picks Guided / Balanced / Direct
+    // in the chat-panel control; the frontend ships the active value on
+    // every send. Anything missing or invalid falls back to the default,
+    // matching how `tutorPrompt` handles a null value downstream.
+    const requestedGuidance = request.body?.guidanceLevel;
+    const guidanceLevel = isGuidanceLevel(requestedGuidance)
+      ? requestedGuidance
+      : DEFAULT_GUIDANCE_LEVEL;
 
     if (!content) {
       reply.code(400);
@@ -192,7 +200,6 @@ export default function tutorSendMessage(fastify) {
       .select({
         id: tutorSession.id,
         currentDocId: tutorSession.currentDocId,
-        guidanceLevel: tutorSession.guidanceLevel,
         subject: tutorSession.subject
       })
       .from(tutorSession)
@@ -267,7 +274,8 @@ export default function tutorSendMessage(fastify) {
         sessionId,
         role: 'user',
         content,
-        imageId: null
+        imageId: null,
+        guidanceLevel
       })
       .returning({ id: sessionMessage.id, createdAt: sessionMessage.createdAt });
 
@@ -284,7 +292,7 @@ export default function tutorSendMessage(fastify) {
       activeDoc,
       viewingPage,
       usedColors,
-      guidanceLevel: session.guidanceLevel,
+      guidanceLevel,
       subject: session.subject,
       annotatedPages: annotatedPageNumbers
     });
@@ -356,6 +364,7 @@ export default function tutorSendMessage(fastify) {
       role: 'user',
       content,
       imageId: null,
+      guidanceLevel,
       createdAt: userRow.createdAt
     });
 

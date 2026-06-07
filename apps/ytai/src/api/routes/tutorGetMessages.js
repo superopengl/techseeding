@@ -10,7 +10,6 @@ export default function tutorGetMessages(fastify) {
     const [session] = await db()
       .select({
         id: tutorSession.id,
-        guidanceLevel: tutorSession.guidanceLevel,
         subject: tutorSession.subject,
         year: tutorSession.year,
         currentDocId: tutorSession.currentDocId,
@@ -31,6 +30,7 @@ export default function tutorGetMessages(fastify) {
         role: sessionMessage.role,
         content: sessionMessage.content,
         imageId: sessionMessage.imageId,
+        guidanceLevel: sessionMessage.guidanceLevel,
         interrupted: sessionMessage.interrupted,
         toolCalls: sessionMessage.toolCalls,
         createdAt: sessionMessage.createdAt
@@ -85,7 +85,6 @@ export default function tutorGetMessages(fastify) {
     return {
       session: {
         id: session.id,
-        guidanceLevel: session.guidanceLevel,
         subject: session.subject,
         year: session.year,
         currentDocId: session.currentDocId,

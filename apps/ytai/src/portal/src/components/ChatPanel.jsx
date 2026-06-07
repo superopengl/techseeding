@@ -46,6 +46,12 @@ const GUIDANCE_OPTIONS = [
     description: 'Full walkthrough in one message — best when you just want the whole answer explained.'
   }
 ];
+
+// Per-message pacing dial. The dropdown's value rides on the next outgoing
+// message; on history load we seed it from the most recent user-row value
+// so flipping the dial sticks across reloads. Mirrors the API's fallback —
+// any unknown value collapses to 'direct'.
+const DEFAULT_GUIDANCE_LEVEL = 'direct';
 import useSpeechRecognition from '../hooks/useSpeechRecognition.js';
 import MarkdownMessage from './MarkdownMessage.jsx';
 
@@ -83,7 +89,7 @@ export default function ChatPanel({
   const [busy, setBusy] = useState(false);
   const [awaitingTokens, setAwaitingTokens] = useState(false);
   const [error, setError] = useState(null);
-  const [guidanceLevel, setGuidanceLevel] = useState('direct');
+  const [guidanceLevel, setGuidanceLevel] = useState(DEFAULT_GUIDANCE_LEVEL);
   const [uploading, setUploading] = useState(false);
   const scrollRef = useRef(null);
   const abortRef = useRef(null);
@@ -116,7 +122,14 @@ export default function ChatPanel({
         );
         setMessages(filtered);
         setHistoryLoaded(true);
-        if (body.session?.guidanceLevel) setGuidanceLevel(body.session.guidanceLevel);
+        // Seed the dropdown from the most recent user-row pacing so the
+        // last choice the student made on this session sticks across
+        // reloads. Falls back to the default for legacy rows (or empty
+        // sessions) that don't carry the column.
+        const lastUserGuidance = [...filtered]
+          .reverse()
+          .find((m) => m.role === 'user' && m.guidanceLevel)?.guidanceLevel;
+        if (lastUserGuidance) setGuidanceLevel(lastUserGuidance);
 
         // Rebuild per-page AI annotations from past tool calls. Each call
         // carries imageId so we can route it directly.
@@ -186,28 +199,9 @@ export default function ChatPanel({
     return items;
   }, [messages, docs]);
 
-  const changeGuidanceLevel = useCallback(
-    async (next) => {
-      if (!sessionId || next === guidanceLevel) return;
-      const previous = guidanceLevel;
-      setGuidanceLevel(next);
-      try {
-        const res = await apiFetch(`/api/tutor/${sessionId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ guidanceLevel: next })
-        });
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error || "Couldn't change tutor mode");
-        }
-      } catch (err) {
-        setGuidanceLevel(previous);
-        setError(err.message || "Couldn't change tutor mode.");
-      }
-    },
-    [guidanceLevel, sessionId]
-  );
+  // Guidance level is committed per-message — flipping the dial just
+  // changes the value that will ride on the next /message send.
+  const changeGuidanceLevel = useCallback((next) => setGuidanceLevel(next), []);
 
   const toggleDictation = useCallback(() => {
     if (!speech.supported) return;
@@ -293,7 +287,8 @@ export default function ChatPanel({
         body: JSON.stringify({
           content: text,
           viewingPage: Number.isInteger(currentPage) ? currentPage : undefined,
-          annotatedImage: annotatedImage || undefined
+          annotatedImage: annotatedImage || undefined,
+          guidanceLevel
         }),
         signal: controller.signal
       });
@@ -386,7 +381,7 @@ export default function ChatPanel({
         setAwaitingTokens(false);
       }
     }
-  }, [input, sessionId, currentPage, voice, speech, onAiAnnotation, getAnnotatedImage]);
+  }, [input, sessionId, currentPage, guidanceLevel, voice, speech, onAiAnnotation, getAnnotatedImage]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();

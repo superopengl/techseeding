@@ -204,6 +204,13 @@
       "when": 1782300000000,
       "tag": "0028_year_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1782400000000,
+      "tag": "0029_per_message_guidance_level",
+      "breakpoints": true
     }
   ]
 }

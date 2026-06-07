@@ -51,7 +51,6 @@ One row per tutoring sitting. A user starts a new session each time they begin t
 | `id` | uuid | PK |
 | `user_id` | uuid | FK → `user.id` |
 | `current_image_id` | uuid | nullable; most recent image attached to the session |
-| `guidance_level` | text | `guided` \| `balanced` \| `direct` — Brain's pacing for this session |
 | `subject` | text | `math` \| `thinking` \| `reading` \| `writing` — subject this session is anchored to |
 | `title` | text | nullable; student-set display name. `null` → sider falls back to the first user message preview. Capped at 80 chars on the API. |
 | `started_at` | timestamptz | |
@@ -87,6 +86,7 @@ Chat transcript. Ordered by `created_at`. Only `user` and `assistant` messages a
 | `session_id` | uuid | FK → `tutor_session.id` |
 | `role` | text | `user` \| `assistant` |
 | `content` | text | message body |
+| `guidance_level` | text | nullable; `guided` \| `balanced` \| `direct` — pacing the student picked for this turn. Set only on `user` rows; assistant rows and legacy pre-migration user rows are null (read as `direct`) |
 | `image_id` | uuid | nullable; FK → `session_image.id` (the active image when the turn was sent) |
 | `region_hash` | text | nullable; legacy column, unused under the on-demand pipeline |
 | `model_id` | text | model that produced an `assistant` row (e.g. `deepseek/deepseek-chat`) |

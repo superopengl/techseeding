@@ -95,12 +95,6 @@ export const tutorSession = ytai.table('tutor_session', {
   // Text-only turns reuse the current doc's cached OCR / vision_extraction
   // so Brain doesn't need bytes resent.
   currentDocId: uuid('current_doc_id'),
-  // How Brain paces explanations: 'guided' (Socratic, one tiny step per
-  // message), 'balanced' (a couple of sentences then a check-in), or
-  // 'direct' (full reasoning in one message). Student-tunable mid-session
-  // via the chat-panel control. Default 'direct' so new sessions feel
-  // useful without configuration.
-  guidanceLevel: text('guidance_level').notNull().default('direct'),
   // Subject the session is anchored to: 'math', 'thinking', 'reading',
   // or 'writing'. Selected by the student on the Tutor page; drives
   // subject-specific prompt scaffolding later.
@@ -186,6 +180,15 @@ export const sessionMessage = ytai.table('session_message', {
   role: text('role').notNull(),
   content: text('content').notNull(),
   imageId: uuid('image_id').references(() => sessionImage.id),
+  // How Brain should pace its reply to this user turn: 'guided' (Socratic,
+  // one tiny step per message), 'balanced' (a couple of sentences then a
+  // check-in), or 'direct' (full reasoning in one message). Set only on
+  // `user` rows — the student picks the level for each message via the
+  // chat-panel control. Null on assistant rows and on legacy user rows
+  // recorded before this column landed; readers treat null as the default
+  // ('direct'). Persisted so the audit log shows the exact pacing
+  // requested for each turn.
+  guidanceLevel: text('guidance_level'),
   // Brain's model identity for this turn. `provider` is the platform that
   // served it (openrouter, anthropic, openai, …); `modelId` is the model
   // string we asked for (e.g. "deepseek/deepseek-v4-flash"). The audit

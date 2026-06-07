@@ -1,7 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { sessionDoc, tutorSession } from '../db/schema.js';
-import { GUIDANCE_LEVELS, isGuidanceLevel } from '../lib/tutorPrompt.js';
 import isSubject, { SUBJECTS } from '../lib/tutorSubject.js';
 import isYear, { YEARS } from '../lib/year.js';
 
@@ -10,19 +9,14 @@ export default function tutorUpdateSession(fastify) {
     const { sessionId } = request.params;
     const userId = request.userId;
     const body = request.body ?? {};
-    const hasGuidance = Object.prototype.hasOwnProperty.call(body, 'guidanceLevel');
     const hasSubject = Object.prototype.hasOwnProperty.call(body, 'subject');
     const hasCurrentDoc = Object.prototype.hasOwnProperty.call(body, 'currentDocId');
     const hasTitle = Object.prototype.hasOwnProperty.call(body, 'title');
     const hasYear = Object.prototype.hasOwnProperty.call(body, 'year');
 
-    if (!hasGuidance && !hasSubject && !hasCurrentDoc && !hasTitle && !hasYear) {
+    if (!hasSubject && !hasCurrentDoc && !hasTitle && !hasYear) {
       reply.code(400);
-      return { error: 'guidanceLevel, subject, currentDocId, title, or year is required' };
-    }
-    if (hasGuidance && !isGuidanceLevel(body.guidanceLevel)) {
-      reply.code(400);
-      return { error: `guidanceLevel must be one of: ${GUIDANCE_LEVELS.join(', ')}` };
+      return { error: 'subject, currentDocId, title, or year is required' };
     }
     if (hasSubject && !isSubject(body.subject)) {
       reply.code(400);
@@ -59,7 +53,6 @@ export default function tutorUpdateSession(fastify) {
     }
 
     const patch = { updatedAt: new Date() };
-    if (hasGuidance) patch.guidanceLevel = body.guidanceLevel;
     if (hasSubject) patch.subject = body.subject;
     if (hasCurrentDoc) patch.currentDocId = body.currentDocId;
     if (hasTitle) patch.title = nextTitle;
@@ -82,7 +75,6 @@ export default function tutorUpdateSession(fastify) {
         .where(and(eq(tutorSession.id, sessionId), eq(tutorSession.userId, userId)))
         .returning({
           id: tutorSession.id,
-          guidanceLevel: tutorSession.guidanceLevel,
           subject: tutorSession.subject,
           currentDocId: tutorSession.currentDocId,
           title: tutorSession.title,
@@ -105,7 +97,6 @@ export default function tutorUpdateSession(fastify) {
     const { updated } = result;
     return {
       sessionId: updated.id,
-      guidanceLevel: updated.guidanceLevel,
       subject: updated.subject,
       currentDocId: updated.currentDocId,
       title: updated.title,
