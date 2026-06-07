@@ -448,7 +448,7 @@ export default function TutorPage() {
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
         />
-        {isNarrow ? null : <Logo height={24} />}
+        {/* {isNarrow ? null : <Logo height={24} />} */}
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, minWidth: 0, padding: '0 12px' }}>
           <SessionSelect
             value={sessionId}
