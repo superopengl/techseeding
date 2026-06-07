@@ -405,11 +405,11 @@ export default function ChatPanel({
             prev.map((m) =>
               m.id === userLocalId
                 ? {
-                    id: data.id,
-                    role: 'user',
-                    content: data.content,
-                    createdAt: m.createdAt
-                  }
+                  id: data.id,
+                  role: 'user',
+                  content: data.content,
+                  createdAt: m.createdAt
+                }
                 : m
             )
           );
@@ -432,12 +432,12 @@ export default function ChatPanel({
             prev.map((m) =>
               m.id === placeholderId
                 ? {
-                    id: data.messageId,
-                    role: 'assistant',
-                    content: m.content,
-                    interrupted: data.interrupted,
-                    createdAt: data.createdAt
-                  }
+                  id: data.messageId,
+                  role: 'assistant',
+                  content: m.content,
+                  interrupted: data.interrupted,
+                  createdAt: data.createdAt
+                }
                 : m
             )
           );
@@ -496,6 +496,12 @@ export default function ChatPanel({
   };
 
   const thinkingActive = busy && awaitingTokens;
+  // "Truly empty" — no transcript, no queued worksheet pages. In this state
+  // we let the hero + composer float to the vertical middle of the page so
+  // the message input panel sits where the eye lands first; once anything
+  // arrives (a queued page or the first message), it snaps back to the
+  // usual transcript-fills-top, composer-pinned-bottom layout.
+  const isEmptyState = historyLoaded && timeline.length === 0 && pendingPages.length === 0;
 
   if (!sessionId) {
     return (
@@ -506,8 +512,19 @@ export default function ChatPanel({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      <div ref={scrollRef} style={scrollStyle}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        minHeight: 0,
+        justifyContent: isEmptyState ? 'center' : undefined
+      }}
+    >
+      <div
+        ref={scrollRef}
+        style={isEmptyState ? { ...scrollStyle, flex: '0 0 auto', overflow: 'visible' } : scrollStyle}
+      >
         {!historyLoaded ? (
           <div style={centeredHint}>
             <LoadingOutlined style={{ marginRight: 8 }} /> Loading chat…
@@ -542,15 +559,15 @@ export default function ChatPanel({
                 onReplay={
                   voice.supported
                     ? () => {
-                        if (isThisSpeaking) {
-                          voice.stop();
-                          return;
-                        }
-                        // Close the mic before TTS starts — otherwise the
-                        // recognizer would pick up the read-aloud audio.
-                        if (speech.listening) speech.stop();
-                        voice.speak(message.content, message.id);
+                      if (isThisSpeaking) {
+                        voice.stop();
+                        return;
                       }
+                      // Close the mic before TTS starts — otherwise the
+                      // recognizer would pick up the read-aloud audio.
+                      if (speech.listening) speech.stop();
+                      voice.speak(message.content, message.id);
+                    }
                     : null
                 }
               />
@@ -665,32 +682,25 @@ export default function ChatPanel({
                 />
               </Tooltip>
             )}
-            <Tooltip
-              title={(() => {
-                const current = GUIDANCE_OPTIONS.find((o) => o.value === guidanceLevel);
-                return current ? `${current.label}: ${current.description}` : '';
-              })()}
-            >
-              <Select
-                size="small"
-                value={guidanceLevel}
-                onChange={changeGuidanceLevel}
-                options={GUIDANCE_OPTIONS}
-                optionLabelProp="label"
-                optionRender={(option) => (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '4px 0' }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: palette.text, lineHeight: 1.3 }}>
-                      {option.data.label}
-                    </div>
-                    <div style={{ fontSize: 11, color: palette.textMuted, lineHeight: 1.35, whiteSpace: 'normal' }}>
-                      {option.data.description}
-                    </div>
+            <Select
+              size="small"
+              value={guidanceLevel}
+              onChange={changeGuidanceLevel}
+              options={GUIDANCE_OPTIONS}
+              optionLabelProp="label"
+              optionRender={(option) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '4px 0' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: palette.text, lineHeight: 1.3 }}>
+                    {option.data.label}
                   </div>
-                )}
-                popupMatchSelectWidth={280}
-                style={{ width: 110 }}
-              />
-            </Tooltip>
+                  <div style={{ fontSize: 11, color: palette.textMuted, lineHeight: 1.35, whiteSpace: 'normal' }}>
+                    {option.data.description}
+                  </div>
+                </div>
+              )}
+              popupMatchSelectWidth={280}
+              style={{ width: 110 }}
+            />
             <Tooltip
               title={
                 !voice.supported
