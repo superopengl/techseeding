@@ -72,6 +72,89 @@ function sanitizeAssistantContentForBrain(row) {
   return stripPhantomAnnotationNarration(content);
 }
 
+// Sentence boundary in a streaming buffer: `.!?` followed by whitespace or
+// end-of-buffer, OR a bare newline. Returns the index *after* the boundary
+// (i.e. where the next sentence begins) or -1 if there's no complete
+// sentence yet.
+function findSentenceBoundary(buffer) {
+  const m = /[.!?](?=\s)|\n/.exec(buffer);
+  return m ? m.index + m[0].length : -1;
+}
+
+// Token gate that buffers Brain's streamed text and only releases it to
+// the client once we know whether the annotation announcement (if any)
+// has a real draw_annotation tool call behind it. Sentence-buffered:
+// each completed sentence is checked against the phantom-narration
+// regex; if it matches and no draw_annotation has fired this turn,
+// we hold ALL subsequent text until the verdict lands. Order is
+// preserved — we never emit later sentences ahead of held earlier ones.
+//
+// Verdict flows:
+//   - draw_annotation tool call surfaces on the wire → markDrawAnnotation()
+//     releases the held buffer in order, then passes through tokens.
+//   - Stream ends without a draw_annotation call → finish() scrubs phantom
+//     sentences from the held buffer and emits what's left.
+//
+// `drewAlready` seeds the flag from prior rounds in the same turn: once
+// Brain has called draw_annotation in any round, every subsequent
+// annotation narration in this turn is grounded and should pass straight
+// through.
+function createPhantomNarrationGate({ emit, drewAlready = false }) {
+  let pending = '';
+  let holding = false;
+  let drawAnnotationSeen = drewAlready;
+
+  function flushNow(text) {
+    if (text) emit(text);
+  }
+
+  return {
+    pushToken(delta) {
+      if (!delta) return;
+      pending += delta;
+      // Drain whole sentences while we're not in HOLDING. Once we enter
+      // HOLDING, every subsequent token joins `pending` and stays there
+      // until the verdict releases it (or stream end scrubs it).
+      while (!holding) {
+        const end = findSentenceBoundary(pending);
+        if (end < 0) break;
+        const sentence = pending.slice(0, end);
+        if (looksLikeAnnotationAnnouncement(sentence) && !drawAnnotationSeen) {
+          holding = true;
+          break;
+        }
+        flushNow(sentence);
+        pending = pending.slice(end);
+      }
+    },
+    markDrawAnnotation() {
+      if (drawAnnotationSeen) return;
+      drawAnnotationSeen = true;
+      if (holding) {
+        flushNow(pending);
+        pending = '';
+        holding = false;
+      }
+    },
+    finish() {
+      if (!pending) return;
+      // If we were holding (phantom detected without a tool call), or the
+      // tail buffer itself is a partial phantom sentence with no terminator
+      // yet, scrub before flushing. Otherwise just flush the tail as-is.
+      const needsScrub =
+        holding || (!drawAnnotationSeen && looksLikeAnnotationAnnouncement(pending));
+      if (needsScrub) {
+        const scrubbed = stripPhantomAnnotationNarration(pending);
+        flushNow(scrubbed);
+      } else {
+        flushNow(pending);
+      }
+      pending = '';
+      holding = false;
+    }
+  };
+}
+
 function brainConfig() {
   return {
     baseUrl: process.env.YTAI_OPENROUTER_BASE_URL || DEFAULT_OPENROUTER_BASE_URL,
@@ -376,6 +459,18 @@ export default function tutorSendMessage(fastify) {
       usedColorsForTurn
     });
 
+    // Sentence-buffered gate around Brain's streamed text. Holds any
+    // annotation-narration sentence ("I've put a yellow highlight on
+    // question 5…") until draw_annotation surfaces on the wire. If the
+    // tool call never fires, the phantom sentence is dropped before it
+    // ever reaches the client — so the chat bubble and TTS never speak
+    // a claim Brain didn't back up with a real mark. The post-stream
+    // scrub below still runs for the persisted assistantContent, so the
+    // saved transcript matches what the student saw.
+    const narrationGate = createPhantomNarrationGate({
+      emit: (delta) => sse('token', { delta })
+    });
+
     let {
       assistantContent,
       allToolCalls,
@@ -392,8 +487,13 @@ export default function tutorSendMessage(fastify) {
       log: request.log,
       logFields: { sessionId },
       dispatchTool,
-      onToken: (delta) => sse('token', { delta })
+      onToken: (delta) => narrationGate.pushToken(delta),
+      onToolCall: (name) => {
+        if (name === 'draw_annotation') narrationGate.markDrawAnnotation();
+      }
     });
+
+    narrationGate.finish();
 
     if (turnError) {
       request.log.error({ err: turnError, sessionId }, 'Chat stream failed');

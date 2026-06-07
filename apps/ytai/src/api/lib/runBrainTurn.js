@@ -56,6 +56,13 @@ export default async function runBrainTurn({
   logFields = {},
   dispatchTool,
   onToken,
+  // Fired as soon as a new tool call's function name first surfaces in
+  // the streamed toolCallChunks. The caller learns about an in-flight
+  // tool call BEFORE the round closes and dispatchTool runs — useful for
+  // token gating: as soon as `draw_annotation` is on the wire, the route
+  // can release any held narration sentences instead of waiting for
+  // end-of-round dispatch. Called at most once per unique tool call.
+  onToolCall,
   idleTimeoutMs,
   maxToolRounds = MAX_TOOL_ROUNDS,
   toolSpamThreshold = TOOL_SPAM_THRESHOLD
@@ -133,7 +140,15 @@ export default async function runBrainTurn({
               toolCallAccum.set(idx, acc);
             }
             if (tc.id) acc.id = tc.id;
-            if (tc.function?.name) acc.name = tc.function.name;
+            if (tc.function?.name) {
+              // Only fire onToolCall the first time a name surfaces for
+              // this accumulator — later chunks for the same call are
+              // argument fragments, not a new tool invocation.
+              if (!acc.name && tc.function.name) {
+                onToolCall?.(tc.function.name);
+              }
+              acc.name = tc.function.name;
+            }
             if (typeof tc.function?.arguments === 'string') {
               acc.argsRaw += tc.function.arguments;
             }
