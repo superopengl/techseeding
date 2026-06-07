@@ -65,7 +65,11 @@ export default async function runBrainTurn({
   onToolCall,
   idleTimeoutMs,
   maxToolRounds = MAX_TOOL_ROUNDS,
-  toolSpamThreshold = TOOL_SPAM_THRESHOLD
+  toolSpamThreshold = TOOL_SPAM_THRESHOLD,
+  // Stable per-session identifier forwarded to the upstream provider as
+  // the OpenAI-compatible `user` field. Drives provider-side cache routing
+  // so every turn in one session sticks to the same backend shard.
+  user
 }) {
   if (typeof dispatchTool !== 'function') {
     throw new Error('runBrainTurn requires a dispatchTool function');
@@ -87,8 +91,12 @@ export default async function runBrainTurn({
 
   const hasTools = Array.isArray(tools) && tools.length > 0;
 
+  // Hoisted out of the try block so the diagnostic return value at the
+  // bottom can report how many rounds actually ran when the turn ended
+  // empty.
+  let round = 0;
+
   try {
-    let round = 0;
     for (; round < maxToolRounds; round += 1) {
       if (
         !forceTextOnly &&
@@ -124,7 +132,10 @@ export default async function runBrainTurn({
         messages,
         tools: forceTextOnly ? undefined : tools,
         signal,
-        idleTimeoutMs
+        idleTimeoutMs,
+        user,
+        log,
+        logFields: { ...logFields, round }
       })) {
         if (chunk.delta) {
           assistantContentThisRound += chunk.delta;
@@ -234,6 +245,18 @@ export default async function runBrainTurn({
           });
           continue;
         }
+        if (assistantContentThisRound.length === 0) {
+          log?.warn(
+            {
+              ...logFields,
+              round,
+              cumulativeContentChars: assistantContent.length,
+              emptyStopRecovery,
+              forceTextOnly
+            },
+            'Brain finished round empty even after recovery reminder — exiting turn'
+          );
+        }
         break;
       }
 
@@ -309,6 +332,13 @@ export default async function runBrainTurn({
     usageRecords,
     hitRoundCap,
     interrupted,
-    error
+    error,
+    // Diagnostic flags for the route to log when assistantContent ends up
+    // empty: tells us which recovery branches fired before Brain gave up.
+    // `rounds` is the number of round iterations actually executed (0 if
+    // the loop never entered, MAX if the cap was hit).
+    emptyStopRecovery,
+    forceTextOnly,
+    rounds: round
   };
 }

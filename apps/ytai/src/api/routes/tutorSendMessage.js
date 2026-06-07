@@ -358,7 +358,7 @@ export default function tutorSendMessage(fastify) {
           .map((p) => p.pageNumber)
       : [];
 
-    const { systemMessages: promptMessages, pacePrompt } = await tutorPrompt({
+    const { systemMessages: promptMessages, turnPrompt } = await tutorPrompt({
       activeDoc,
       viewingPage,
       usedColors,
@@ -405,13 +405,14 @@ export default function tutorSendMessage(fastify) {
           return { role: m.role, content: m.content };
         })
         .filter((m) => m.content),
-      // Pace lives here — right after history, right before the current
-      // user message — so the model reads "this turn's pacing rule" as
-      // the most recent system instruction. Prior assistant turns may
-      // have been guided/balanced; this directive forces the current
-      // reply to match the dropdown's current value regardless of the
-      // pattern set above.
-      pacePrompt,
+      // Per-turn signals (viewing page, freehand marks this turn, used
+      // colors, pacing rule) ride here — right after history, right before
+      // the current user message — so the long static prefix above stays
+      // byte-identical across turns and providers can hit their prompt
+      // cache. The pacing line at the bottom of this block forces the
+      // current reply to match the dropdown's current value regardless of
+      // the pattern set by prior assistant turns.
+      turnPrompt,
       { role: 'user', content: latestUserContent }
     ];
 
@@ -476,7 +477,14 @@ export default function tutorSendMessage(fastify) {
       allToolCalls,
       usageRecords,
       interrupted,
-      error: turnError
+      error: turnError,
+      // Diagnostic flags surfaced when assistantContent ends up empty —
+      // logged below so we can tell apart "Brain returned nothing" from
+      // "Brain replied and the phantom scrub stripped it".
+      emptyStopRecovery,
+      forceTextOnly,
+      hitRoundCap,
+      rounds
     } = await runBrainTurn({
       baseUrl,
       apiKey,
@@ -490,7 +498,11 @@ export default function tutorSendMessage(fastify) {
       onToken: (delta) => narrationGate.pushToken(delta),
       onToolCall: (name) => {
         if (name === 'draw_annotation') narrationGate.markDrawAnnotation();
-      }
+      },
+      // Sticky-routing key: every turn in one tutor session ships the same
+      // identifier so the upstream provider can route to the same shard and
+      // hit its prefix cache.
+      user: sessionId
     });
 
     narrationGate.finish();
@@ -510,13 +522,21 @@ export default function tutorSendMessage(fastify) {
     // reply was the false claim — handled by the "no content" branch
     // below.
     const finalDrewSomething = allToolCalls.some((c) => c.name === 'draw_annotation');
+    // Preserved so the empty-content fallback log below can show what
+    // Brain actually said before the phantom scrub erased it.
+    const rawAssistantContent = assistantContent;
+    let phantomScrubbed = false;
+    let phantomScrubEmptied = false;
     if (!finalDrewSomething && looksLikeAnnotationAnnouncement(assistantContent)) {
       const scrubbed = stripPhantomAnnotationNarration(assistantContent);
+      phantomScrubbed = true;
+      phantomScrubEmptied = scrubbed.length === 0;
       request.log.warn(
         {
           sessionId,
           before: assistantContent.slice(0, 200),
-          after: scrubbed.slice(0, 200)
+          after: scrubbed.slice(0, 200),
+          emptied: phantomScrubEmptied
         },
         'Phantom annotation narration survived retry — scrubbing sentence before persistence'
       );
@@ -528,6 +548,25 @@ export default function tutorSendMessage(fastify) {
     // llm_usage record has the right messageId FK.
     const brainNormalised = (usageRecords ?? []).map((r) => normaliseUsage(r.usage));
     const turnTotals = sumUsage(brainNormalised);
+
+    // One log line per round, dumping the raw `usage` block the provider
+    // returned. Lets us see exactly which cache / token fields the upstream
+    // populated (or didn't) — invaluable when a model+provider combo
+    // doesn't surface cache_* metrics through OpenRouter and the persisted
+    // columns end up null. Keep at info level; volume is one line per
+    // Brain round (typically 1, sometimes 2-3 with tool calls).
+    for (const [round, rec] of (usageRecords ?? []).entries()) {
+      request.log.info(
+        {
+          sessionId,
+          model: modelId,
+          modelVersion: rec.modelVersion,
+          round,
+          rawUsage: rec.usage
+        },
+        'Brain round upstream usage'
+      );
+    }
 
     try {
       const [assistantRow] = await db()
@@ -575,6 +614,33 @@ export default function tutorSendMessage(fastify) {
         // emitted nothing even after forceTextOnly + emptyStopRecovery tried
         // to coax a reply out of it. Either way the student is staring at a
         // blank bubble — give them something useful instead.
+        //
+        // Dump enough state to tell the two failure modes apart on the
+        // next bug report:
+        //   - rawAssistantLen=0  → Brain genuinely returned nothing in any
+        //     round (model refusal, upstream stall, or the recovery
+        //     reminder failed). `emptyStopRecovery`/`forceTextOnly`/
+        //     `hitRoundCap` show which branches fired.
+        //   - rawAssistantLen>0 + phantomScrubEmptied=true → Brain replied,
+        //     but the entire reply was a phantom highlight claim and the
+        //     scrub erased it. `rawAssistantPreview` shows what was said.
+        request.log.warn(
+          {
+            sessionId,
+            rounds,
+            emptyStopRecovery,
+            forceTextOnly,
+            hitRoundCap,
+            rawAssistantLen: rawAssistantContent.length,
+            rawAssistantPreview: rawAssistantContent.slice(0, 300),
+            phantomScrubbed,
+            phantomScrubEmptied,
+            drewAnnotation: finalDrewSomething,
+            toolCallCount: allToolCalls.length,
+            toolCallNames: allToolCalls.map((c) => c.name)
+          },
+          'Empty-content fallback firing — Brain produced no usable reply this turn'
+        );
         sse('error', {
           error:
             "Hmm, I couldn't put together an answer for that one. Could you say a bit more about " +

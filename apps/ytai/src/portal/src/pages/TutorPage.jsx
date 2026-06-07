@@ -100,6 +100,15 @@ export default function TutorPage() {
     [navigate, sessionId]
   );
 
+  // Fired when ChatPanel's history fetch comes back 404 — the sessionId
+  // in the URL doesn't point at any session this user owns (stale link,
+  // typo, deleted from another tab). Bounce back to /tutor so it can pick
+  // the most-recent session (or kick off a new one) instead of stranding
+  // the user on a broken /tutor/:sessionId.
+  const handleSessionNotFound = useCallback(() => {
+    navigate('/tutor', { replace: true });
+  }, [navigate]);
+
   const onSessionRenamed = useCallback(() => {
     // The session list's GET response carries the title, so a refresh is
     // enough to flow the new name into the header Select.
@@ -371,6 +380,7 @@ export default function TutorPage() {
       onDocCreated={handleDocCreated}
       onAiAnnotation={handleAiAnnotation}
       onSelectDoc={handleSelectDoc}
+      onSessionNotFound={handleSessionNotFound}
       getAnnotatedImage={getAnnotatedImage}
     />
   );

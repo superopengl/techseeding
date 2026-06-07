@@ -1,4 +1,5 @@
-import loadImageDataUrl from './loadImageDataUrl.js';
+import downscaleImageForBrain from './downscaleImageForBrain.js';
+import loadImageBytes from './loadImageBytes.js';
 
 // Build a multimodal OpenAI-compatible user `content` array for unified-vision
 // mode. Brain (a multimodal model like Gemma 4) sees every page of the active
@@ -10,6 +11,10 @@ import loadImageDataUrl from './loadImageDataUrl.js';
 // page, those bytes substitute for the original photo so Brain sees what the
 // student circled/highlighted (same trick the legacy Eyes path used). Pages
 // the student didn't draw on are loaded from storage as-is.
+//
+// Every page goes through downscaleImageForBrain before encoding so a 12 MP
+// phone photo doesn't blow the model's context window on turn 2 (when
+// turn 1's history is also sitting in the prompt).
 //
 // Returns the content array on success, or null when no page bytes could be
 // resolved (caller should fall back to a text-only message).
@@ -24,17 +29,18 @@ export default async function buildUserMessageWithImages({
   const pageBlocks = await Promise.all(
     activeDoc.pages.map(async (page) => {
       const annotated = annotatedByImageId?.get?.(page.id) ?? null;
-      let dataUrl;
-      if (annotated) {
-        const mime = annotated.mimeType || 'image/png';
-        dataUrl = `data:${mime};base64,${annotated.bytes.toString('base64')}`;
-      } else {
-        dataUrl = await loadImageDataUrl(page.storageUrl);
-      }
-      if (!dataUrl) {
-        log?.warn({ imageId: page.id, pageNumber: page.pageNumber }, 'unified-vision: page bytes unavailable');
+      const source = annotated
+        ? { bytes: annotated.bytes, mimeType: annotated.mimeType || 'image/png' }
+        : await loadImageBytes(page.storageUrl);
+      if (!source) {
+        log?.warn(
+          { imageId: page.id, pageNumber: page.pageNumber },
+          'unified-vision: page bytes unavailable'
+        );
         return null;
       }
+      const compact = await downscaleImageForBrain(source.bytes, source.mimeType, log);
+      const dataUrl = `data:${compact.mimeType};base64,${compact.bytes.toString('base64')}`;
       return {
         pageNumber: page.pageNumber,
         annotated: !!annotated,

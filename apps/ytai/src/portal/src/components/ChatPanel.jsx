@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Input, message, Select, Tag, Tooltip, Upload } from 'antd';
+import { Alert, Button, Dropdown, Input, message, Select, Tag, Tooltip } from 'antd';
 import {
   AudioOutlined,
+  CameraOutlined,
   CheckOutlined,
   CopyOutlined,
   FilePdfOutlined,
@@ -11,7 +12,8 @@ import {
   PlusOutlined,
   SendOutlined,
   SoundOutlined,
-  StopOutlined
+  StopOutlined,
+  UploadOutlined
 } from '@ant-design/icons';
 import apiFetch, { authHeaders } from '../lib/apiFetch.js';
 import streamSSE from '../lib/streamSSE.js';
@@ -81,6 +83,7 @@ export default function ChatPanel({
   onAiAnnotation,
   onDocCreated,
   onSelectDoc,
+  onSessionNotFound,
   getAnnotatedImage
 }) {
   const [messages, setMessages] = useState([]);
@@ -90,9 +93,16 @@ export default function ChatPanel({
   const [awaitingTokens, setAwaitingTokens] = useState(false);
   const [error, setError] = useState(null);
   const [guidanceLevel, setGuidanceLevel] = useState(DEFAULT_GUIDANCE_LEVEL);
-  const [uploading, setUploading] = useState(false);
+  // Pages picked from the composer's `+` dropdown, queued until the next
+  // Send. Each entry is { file, isPdf, previewUrl }. send() uploads the
+  // doc first, then streams the chat message — both initial and
+  // mid-session adds go through this single queue, so the worksheet
+  // always ships alongside a question rather than as a bare upload.
+  const [pendingPages, setPendingPages] = useState([]);
   const scrollRef = useRef(null);
   const abortRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const uploadInputRef = useRef(null);
   const voice = useTutorVoice(sessionId);
   const speech = useSpeechRecognition();
   const dictationBaseRef = useRef('');
@@ -107,11 +117,20 @@ export default function ChatPanel({
 
     apiFetch(`/api/tutor/${sessionId}/messages`)
       .then((res) => {
+        // 404 means the sessionId in the URL doesn't point at any session
+        // this user owns — probably a stale link, a typo, or a session
+        // that was deleted from another tab. Let the parent redirect off
+        // /tutor/:sessionId rather than rendering an error inside a chat
+        // panel for a session that doesn't exist.
+        if (res.status === 404) {
+          if (!cancelled) onSessionNotFound?.();
+          return null;
+        }
         if (!res.ok) throw new Error("Couldn't load chat history");
         return res.json();
       })
       .then((body) => {
-        if (cancelled) return;
+        if (cancelled || !body) return;
         const loaded = body.messages ?? [];
         // Filter out legacy image-only user messages (role=user, empty
         // content, with imageId). The new model represents those via doc
@@ -217,21 +236,78 @@ export default function ChatPanel({
     speech.start();
   }, [input, speech, voice]);
 
-  const handleUploadFiles = useCallback(
-    async (files) => {
-      if (!sessionId || !files || files.length === 0) return;
-      setUploading(true);
-      setError(null);
-      try {
-        const { doc } = await uploadDoc(sessionId, files);
-        onDocCreated?.(doc);
-      } catch (err) {
-        setError(err.message || "Couldn't upload that worksheet.");
-      } finally {
-        setUploading(false);
+  const handleFileInputChange = useCallback(
+    (event) => {
+      const files = Array.from(event.target.files || []);
+      event.target.value = '';
+      if (files.length) addPendingFiles(files);
+    },
+    // addPendingFiles is a stable useCallback below, but listing it in
+    // deps keeps the lint rule honest if that ever changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const addMenuItems = useMemo(
+    () => [
+      {
+        key: 'camera',
+        icon: <CameraOutlined />,
+        label: 'Take photo',
+        onClick: () => cameraInputRef.current?.click()
+      },
+      {
+        key: 'upload',
+        icon: <UploadOutlined />,
+        label: 'Upload files',
+        onClick: () => uploadInputRef.current?.click()
+      }
+    ],
+    []
+  );
+
+  // Enqueue camera/upload picks onto the initial PhotoCapture screen.
+  // Only images and PDFs are accepted; everything else is dropped silently
+  // (matches the file inputs' accept= filters, this is defense in depth).
+  const addPendingFiles = useCallback((fileList) => {
+    const incoming = Array.from(fileList || []).filter((f) => {
+      const isImage = f.type?.startsWith('image/');
+      const isPdf = f.type === 'application/pdf' || f.name?.toLowerCase().endsWith('.pdf');
+      return isImage || isPdf;
+    });
+    if (incoming.length === 0) return;
+    setPendingPages((prev) => [
+      ...prev,
+      ...incoming.map((file) => {
+        const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
+        return {
+          file,
+          isPdf,
+          previewUrl: isPdf ? null : URL.createObjectURL(file)
+        };
+      })
+    ]);
+  }, []);
+
+  const removePendingPage = useCallback((idx) => {
+    setPendingPages((prev) => {
+      const next = prev.slice();
+      const [removed] = next.splice(idx, 1);
+      if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+      return next;
+    });
+  }, []);
+
+  useEffect(
+    () => () => {
+      for (const p of pendingPages) {
+        if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
       }
     },
-    [sessionId, onDocCreated]
+    // Cleanup on unmount only — revoking on every pendingPages change
+    // would also revoke the URLs we're about to keep showing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const send = useCallback(async () => {
@@ -254,6 +330,30 @@ export default function ChatPanel({
     setError(null);
     setBusy(true);
     setAwaitingTokens(true);
+
+    // Drain the PhotoCapture queue (initial-upload screen): upload the
+    // worksheet first so the server's session.currentDocId points at it
+    // before the /message handler reads it. We clear the queue up front
+    // so the UI hides the PhotoCapture screen as soon as the student
+    // commits; if the upload fails we restore it and bail out.
+    const pagesToUpload = pendingPages;
+    if (pagesToUpload.length > 0) {
+      setPendingPages([]);
+      try {
+        const { doc } = await uploadDoc(sessionId, pagesToUpload.map((p) => p.file));
+        onDocCreated?.(doc);
+        for (const p of pagesToUpload) {
+          if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+        }
+      } catch (err) {
+        setPendingPages(pagesToUpload);
+        setInput(text);
+        setError(err.message || "Couldn't upload that worksheet.");
+        setBusy(false);
+        setAwaitingTokens(false);
+        return;
+      }
+    }
 
     const placeholderId = `pending-${Date.now()}`;
     const userLocalId = `local-${placeholderId}`;
@@ -369,7 +469,18 @@ export default function ChatPanel({
         setAwaitingTokens(false);
       }
     }
-  }, [input, sessionId, currentPage, guidanceLevel, voice, speech, onAiAnnotation, getAnnotatedImage]);
+  }, [
+    input,
+    sessionId,
+    currentPage,
+    guidanceLevel,
+    voice,
+    speech,
+    onAiAnnotation,
+    getAnnotatedImage,
+    pendingPages,
+    onDocCreated
+  ]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -403,7 +514,7 @@ export default function ChatPanel({
           </div>
         ) : timeline.length === 0 ? (
           <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <PhotoCapture onStart={handleUploadFiles} busy={uploading} />
+            <PhotoCapture pages={pendingPages} onRemovePage={removePendingPage} />
           </div>
         ) : (
           timeline.map((item, idx) => {
@@ -481,9 +592,12 @@ export default function ChatPanel({
               ? 'Listening… speak now, then click the mic to stop.'
               : busy
                 ? 'Tutor is thinking — type or speak to jump in…'
-                : 'Ask a question, or add a worksheet…'
+                : pendingPages.length > 0
+                  ? 'Type a question and hit Send — your worksheet will go with it.'
+                  : 'Ask a question, or add a worksheet…'
           }
           readOnly={speech.listening}
+          autoFocus={true}
           maxLength={2000}
           style={{
             borderRadius: 12,
@@ -493,32 +607,37 @@ export default function ChatPanel({
         />
         <div style={composerActionsStyle}>
           <div style={composerActionsLeftStyle}>
-            <Tooltip title="Add an image or PDF">
-              <Upload
-                beforeUpload={(file, list) => {
-                  // antd fires beforeUpload once per file in a multi-select.
-                  // Only act on the first call (when file === list[0]) so we
-                  // don't upload the same batch N times.
-                  if (Array.isArray(list) && list.length > 0 && file === list[0]) {
-                    handleUploadFiles(list);
-                  } else if (!Array.isArray(list) || list.length === 0) {
-                    handleUploadFiles([file]);
-                  }
-                  return false;
-                }}
-                accept="image/*,application/pdf"
-                multiple
-                showUploadList={false}
-                disabled={uploading}
-              >
+            <Dropdown
+              menu={{ items: addMenuItems }}
+              disabled={busy}
+              trigger={['click']}
+              placement="topLeft"
+            >
+              <Tooltip title="Add photo or docs">
                 <Button
                   size="small"
-                  icon={uploading ? <LoadingOutlined /> : <PlusOutlined />}
-                  disabled={uploading}
-                  aria-label="Upload a new worksheet"
+                  icon={<PlusOutlined />}
+                  disabled={busy}
+                  aria-label="Add a photo or document"
                 />
-              </Upload>
-            </Tooltip>
+              </Tooltip>
+            </Dropdown>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onChange={handleFileInputChange}
+            />
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              multiple
+              hidden
+              onChange={handleFileInputChange}
+            />
             {speech.supported && (
               <Tooltip
                 title={

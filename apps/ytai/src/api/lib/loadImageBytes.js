@@ -5,16 +5,17 @@ import { getObjectBytes } from './s3.js';
 
 // Re-hydrate an image we previously persisted so vision lookups on later
 // turns can run without the client resending the bytes. Supports both
-// file:// (dev) and s3:// (prod). Returns null when the bytes can't be
-// fetched so the caller can log and degrade.
-export default async function loadImageDataUrl(storageUrl) {
+// file:// (dev) and s3:// (prod). Returns `{ bytes, mimeType }` or null
+// when the bytes can't be fetched. Callers run the bytes through
+// downscaleImageForBrain before sending to Brain — encoding to a
+// data URL here would force a re-decode every turn.
+export default async function loadImageBytes(storageUrl) {
   if (typeof storageUrl !== 'string' || storageUrl.length === 0) return null;
 
   if (storageUrl.startsWith('file://')) {
     const filePath = fileURLToPath(storageUrl);
     const bytes = await readFile(filePath);
-    const mime = mimeFromPath(filePath);
-    return `data:${mime};base64,${bytes.toString('base64')}`;
+    return { bytes, mimeType: mimeFromPath(filePath) };
   }
 
   if (storageUrl.startsWith('s3://')) {
@@ -23,7 +24,7 @@ export default async function loadImageDataUrl(storageUrl) {
     const mime = obj.contentType?.startsWith('image/')
       ? obj.contentType
       : mimeFromPath(storageUrl);
-    return `data:${mime};base64,${obj.bytes.toString('base64')}`;
+    return { bytes: obj.bytes, mimeType: mime };
   }
 
   return null;

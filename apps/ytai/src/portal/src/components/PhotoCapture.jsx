@@ -1,12 +1,5 @@
-import { useRef, useState } from 'react';
-import { Alert, Button, Space, Typography } from 'antd';
-import {
-  CameraOutlined,
-  CloseOutlined,
-  FilePdfOutlined,
-  PlusOutlined,
-  UploadOutlined
-} from '@ant-design/icons';
+import { Button, Typography } from 'antd';
+import { CloseOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { palette } from '../theme.js';
 
 // PDF thumbnail uses a peach tint + warm orange icon — the writing-subject
@@ -14,69 +7,16 @@ import { palette } from '../theme.js';
 const PDF_TINT = palette.tint.secondary;
 const PDF_ICON = palette.subjects.writing.color;
 
-// Initial-upload screen shown when a session has no doc yet. The student
-// can:
-//   - Take photos one-by-one with the camera (mobile capture)
-//   - Pick one or many image files from disk
-//   - Stack multiple pages in a queue before hitting "Send to tutor"
+// Initial-upload empty state shown when a session has no doc yet.
+// Controlled component: queued pages live in the parent (ChatPanel) and
+// are added via the composer's `+` dropdown below — that's the single
+// affordance for picking files, so this view is intentionally button-free
+// and just shows the queued thumbnails (if any) plus instructional copy.
 //
-// Onstart() is called with a list of File objects in page order. The
-// parent owns the upload (POST /api/tutor/:sessionId/doc) and the
-// resulting state changes.
-export default function PhotoCapture({ onStart, busy = false }) {
-  const cameraRef = useRef(null);
-  const uploadRef = useRef(null);
-  const [pages, setPages] = useState([]); // [{ file, previewUrl }]
-  const [error, setError] = useState(null);
-
-  function addFiles(fileList) {
-    const incoming = Array.from(fileList).filter((f) => {
-      const isImage = f.type?.startsWith('image/');
-      const isPdf = f.type === 'application/pdf' || f.name?.toLowerCase().endsWith('.pdf');
-      return isImage || isPdf;
-    });
-    if (incoming.length === 0) return;
-    setPages((prev) => [
-      ...prev,
-      ...incoming.map((file) => {
-        const isPdf = file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf');
-        return {
-          file,
-          isPdf,
-          previewUrl: isPdf ? null : URL.createObjectURL(file)
-        };
-      })
-    ]);
-  }
-
-  function handleCamera(event) {
-    addFiles(event.target.files);
-    event.target.value = '';
-  }
-  function handleUpload(event) {
-    addFiles(event.target.files);
-    event.target.value = '';
-  }
-  function removePage(idx) {
-    setPages((prev) => {
-      const next = prev.slice();
-      const [removed] = next.splice(idx, 1);
-      if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
-      return next;
-    });
-  }
-  async function start() {
-    if (pages.length === 0) return;
-    setError(null);
-    try {
-      await onStart?.(pages.map((p) => p.file));
-      for (const p of pages) if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
-      setPages([]);
-    } catch (err) {
-      setError(err.message || "Couldn't upload that worksheet");
-    }
-  }
-
+// Props:
+//   pages           — [{ file, isPdf, previewUrl }] currently queued
+//   onRemovePage(idx) — drop a queued page by index
+export default function PhotoCapture({ pages = [], onRemovePage }) {
   return (
     <div
       style={{
@@ -94,8 +34,8 @@ export default function PhotoCapture({ onStart, busy = false }) {
         Snap or upload your worksheet
       </Typography.Title>
       <Typography.Paragraph type="secondary" style={{ maxWidth: 460, fontSize: 16, margin: 0 }}>
-        I'll take a look at the page, find the questions, and we can work through anything
-        you're stuck on together. Got more than one page or a PDF? Add them all.
+        Tap the <strong>+</strong> button below to add a photo or PDF of your worksheet,
+        then type a question and hit Send — your worksheet will go with it.
       </Typography.Paragraph>
 
       {pages.length > 0 && (
@@ -115,63 +55,11 @@ export default function PhotoCapture({ onStart, busy = false }) {
               src={p.previewUrl}
               isPdf={p.isPdf}
               name={p.file.name}
-              onRemove={() => removePage(idx)}
+              onRemove={() => onRemovePage?.(idx)}
             />
           ))}
         </div>
       )}
-
-      <Space size="large" wrap>
-        <Button
-          type={pages.length === 0 ? 'primary' : 'default'}
-          size="large"
-          icon={<CameraOutlined />}
-          onClick={() => cameraRef.current?.click()}
-          disabled={busy}
-        >
-          {pages.length === 0 ? 'Take Photo' : 'Take Another'}
-        </Button>
-        <Button
-          size="large"
-          icon={<UploadOutlined />}
-          onClick={() => uploadRef.current?.click()}
-          disabled={busy}
-        >
-          {pages.length === 0 ? 'Upload Image(s)' : 'Add More'}
-        </Button>
-        {pages.length > 0 && (
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={start}
-            loading={busy}
-          >
-            Send {pages.length} page{pages.length === 1 ? '' : 's'} to tutor
-          </Button>
-        )}
-      </Space>
-
-      {error && (
-        <Alert type="warning" showIcon message={error} style={{ maxWidth: 500 }} />
-      )}
-
-      <input
-        ref={cameraRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        hidden
-        onChange={handleCamera}
-      />
-      <input
-        ref={uploadRef}
-        type="file"
-        accept="image/*,application/pdf"
-        multiple
-        hidden
-        onChange={handleUpload}
-      />
     </div>
   );
 }
