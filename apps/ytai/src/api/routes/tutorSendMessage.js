@@ -288,7 +288,7 @@ export default function tutorSendMessage(fastify) {
           .map((p) => p.pageNumber)
       : [];
 
-    const promptMessages = await tutorPrompt({
+    const { systemMessages: promptMessages, pacePrompt } = await tutorPrompt({
       activeDoc,
       viewingPage,
       usedColors,
@@ -335,6 +335,13 @@ export default function tutorSendMessage(fastify) {
           return { role: m.role, content: m.content };
         })
         .filter((m) => m.content),
+      // Pace lives here — right after history, right before the current
+      // user message — so the model reads "this turn's pacing rule" as
+      // the most recent system instruction. Prior assistant turns may
+      // have been guided/balanced; this directive forces the current
+      // reply to match the dropdown's current value regardless of the
+      // pattern set above.
+      pacePrompt,
       { role: 'user', content: latestUserContent }
     ];
 

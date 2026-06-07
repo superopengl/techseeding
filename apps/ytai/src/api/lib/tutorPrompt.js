@@ -50,19 +50,21 @@ export default async function tutorPrompt({
   const hasDoc = !!activeDoc && Array.isArray(activeDoc.pages) && activeDoc.pages.length > 0;
   const messages = [
     { role: 'system', content: PERSONA },
-    { role: 'system', content: SUBJECT_PROMPTS[subjectKey] },
     {
-      // Cache breakpoint on the last stable system message — caches the
-      // whole PERSONA + SUBJECT + PACE prefix above it. Content-block form
+      // Cache breakpoint on the last stable system message — caches PERSONA
+      // + SUBJECT above it. PACE is per-turn now, so it can't sit in the
+      // cached prefix; it gets emitted separately as `pacePrompt` and
+      // attached right before the current user message so the model reads
+      // it as the freshest instruction for THIS turn. Content-block form
       // with `cache_control: ephemeral` is the OpenRouter / Anthropic-
-      // compatible prompt-caching hint; providers that don't support
-      // caching ignore the key harmlessly. LM Studio's KV cache reuses
-      // matching prefixes on its own, so this is a no-op in dev.
+      // compatible caching hint; providers that don't support it ignore
+      // the key harmlessly. LM Studio's KV cache reuses matching prefixes
+      // on its own, so this is a no-op in dev.
       role: 'system',
       content: [
         {
           type: 'text',
-          text: PACE_BY_LEVEL[level],
+          text: SUBJECT_PROMPTS[subjectKey],
           cache_control: { type: 'ephemeral' }
         }
       ]
@@ -157,5 +159,19 @@ export default async function tutorPrompt({
     });
   }
 
-  return messages;
+  // PACE is per-turn — the student can flip the dial between messages —
+  // so it ships separately from the cached prefix and is attached right
+  // before the current user message at call sites. That keeps it as the
+  // freshest system instruction the model reads, overriding any pacing
+  // pattern set by prior assistant turns. Prefixed with PACE_DIRECTIVE_LEAD
+  // so the model treats the body as a hard rule, not advisory.
+  const pacePrompt = {
+    role: 'system',
+    content:
+      'For this single turn, follow this pacing rule. It overrides any pacing implied by ' +
+      'earlier assistant messages in this conversation.\n\n' +
+      PACE_BY_LEVEL[level]
+  };
+
+  return { systemMessages: messages, pacePrompt };
 }
