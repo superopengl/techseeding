@@ -1,0 +1,6 @@
+packages:
+  - 'src/portal'
+  - 'deploy'
+allowBuilds:
+  esbuild: true
+  sharp: true

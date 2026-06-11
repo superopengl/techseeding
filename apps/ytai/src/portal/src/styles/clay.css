@@ -1,0 +1,217 @@
+/* Soft-neumorphism interaction primitives.
+ *
+ * Visual identity:
+ *   - Paired shadows: soft white highlight (top-left) + black shadow
+ *     (bottom-right) make elements feel gently raised from the page.
+ *   - Press (:active) inverts both into insets — the element appears pushed
+ *     into the surface, no translate needed.
+ *   - No hard borders. Depth is shadow-only.
+ *   - "Sticker" class names are kept for API compatibility with the rest of
+ *     the app; the values themselves are now neumorphic.
+ */
+
+:root {
+  --neu-bg: #f0f4f8;
+  --neu-shadow-light: rgba(255, 255, 255, 0.85);
+  --neu-shadow-dark: rgba(0, 0, 0, 0.45);
+  --neu-shadow-dark-strong: rgba(0, 0, 0, 0.55);
+}
+
+/* ---- Sticker card -------------------------------------------------------- */
+
+.sticker-card {
+  background: var(--neu-bg);
+  border: 0;
+  border-radius: 24px;
+  box-shadow:
+    -8px -8px 20px var(--neu-shadow-light),
+    8px 8px 20px var(--neu-shadow-dark);
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, box-shadow;
+}
+
+.sticker-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    -10px -10px 25px rgba(255, 255, 255, 0.95),
+    10px 10px 25px var(--neu-shadow-dark-strong);
+}
+
+/* ---- Sticker button (used by Ant Buttons via className) ------------------ */
+
+.sticker-btn {
+  border: 0 !important;
+  border-radius: 16px !important;
+  box-shadow:
+    -4px -4px 10px var(--neu-shadow-light),
+    4px 4px 10px var(--neu-shadow-dark) !important;
+  font-weight: 600 !important;
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.sticker-btn:hover,
+.sticker-btn:focus {
+  transform: translateY(-2px);
+  box-shadow:
+    -6px -6px 15px var(--neu-shadow-light),
+    6px 6px 15px var(--neu-shadow-dark-strong) !important;
+}
+
+.sticker-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    inset -4px -4px 10px var(--neu-shadow-light),
+    inset 4px 4px 10px var(--neu-shadow-dark) !important;
+}
+
+/* ---- Sticker chip (small pill) ------------------------------------------- */
+
+.sticker-chip {
+  border: 0;
+  border-radius: 999px;
+  background: var(--neu-bg);
+  box-shadow:
+    -2px -2px 6px var(--neu-shadow-light),
+    2px 2px 6px var(--neu-shadow-dark);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sticker-chip:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    -3px -3px 8px var(--neu-shadow-light),
+    3px 3px 8px var(--neu-shadow-dark-strong);
+}
+
+/* ---- Press-only (no shadow restyling, just tactile feedback) ------------ */
+
+.sticker-press {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.sticker-press:active {
+  transform: scale(0.98);
+}
+
+/* ---- Breathing pulse used on the hero "calm" badge ---------------------- */
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.04); }
+}
+.breathing-circle {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* ---- Slow drift for hero blobs ------------------------------------------ */
+
+@keyframes clay-float-a {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(10px, -16px, 0); }
+}
+@keyframes clay-float-b {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(-12px, 12px, 0); }
+}
+.clay-blob-a { animation: clay-float-a 14s ease-in-out infinite; }
+.clay-blob-b { animation: clay-float-b 16s ease-in-out infinite; }
+
+/* ---- Gradient text helper ----------------------------------------------- */
+
+.gradient-text {
+  background: linear-gradient(135deg, #7c9eb2 0%, #b8a9c9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---- Marketing grids ---------------------------------------------------- */
+/* HomePage stopped using AntD's <Row>/<Col> so its initial chunk can skip
+ * the antd vendor bundle. These mirror the original 24-col breakpoints:
+ *   - .ytai-grid-4: xs 1 / sm 2 / lg 4
+ *   - .ytai-grid-3: xs 1 / sm 3
+ * Gap matches the previous `gutter={[28, 28]}`. */
+
+.ytai-grid-4,
+.ytai-grid-3 {
+  display: grid;
+  gap: 28px;
+}
+
+.ytai-grid-4 { grid-template-columns: 1fr; }
+.ytai-grid-3 { grid-template-columns: 1fr; }
+
+@media (min-width: 576px) {
+  .ytai-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .ytai-grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 992px) {
+  .ytai-grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ---- Mobile paint budget ------------------------------------------------ */
+/* HeroBackdrop's notebook lines, dot grid, and floating doodles don't
+ * render below 768px to keep the LCP paint cheap. The nav uses a solid
+ * tinted fill in every viewport (no backdrop-filter) so phones don't
+ * pay the blur tax. */
+
+.ytai-nav-glass {
+  background: #ffffff;
+}
+
+.ytai-hero-decoration {
+  display: none;
+}
+@media (min-width: 768px) {
+  .ytai-hero-decoration {
+    display: block;
+  }
+}
+
+/* Floating NavBar CTA: keep the label on one line and trim padding +
+ * font on phones so the call-to-action ("Sign in" / "Start session")
+ * doesn't wrap next to the logo on narrow screens. Desktop sizing
+ * stays generous. */
+.ytai-nav-cta {
+  white-space: nowrap;
+  padding: 8px 14px;
+  font-size: 13px;
+  gap: 8px;
+}
+@media (min-width: 480px) {
+  .ytai-nav-cta {
+    padding: 10px 24px;
+    font-size: 15px;
+    gap: 10px;
+  }
+}
+
+/* ---- Reduced motion ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker-card,
+  .sticker-btn,
+  .sticker-chip,
+  .sticker-press,
+  .breathing-circle,
+  .clay-blob-a,
+  .clay-blob-b {
+    transition: none;
+    animation: none;
+  }
+  .sticker-card:hover,
+  .sticker-btn:hover,
+  .sticker-btn:focus,
+  .sticker-btn:active,
+  .sticker-chip:hover,
+  .sticker-press:active {
+    transform: none;
+  }
+}

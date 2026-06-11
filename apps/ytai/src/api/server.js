@@ -1,0 +1,207 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import Fastify from 'fastify';
+import fastifyCompress from '@fastify/compress';
+import fastifyJwt from '@fastify/jwt';
+import fastifyStatic from '@fastify/static';
+import pinoPretty from 'pino-pretty';
+import authEmail from './routes/authEmail.js';
+import authGoogle from './routes/authGoogle.js';
+import authOtp from './routes/authOtp.js';
+import authPassword from './routes/authPassword.js';
+import bootstrapAdmin from './lib/bootstrapAdmin.js';
+import failOrphanReports from './lib/failOrphanReports.js';
+import changeAdminPassword from './routes/changeAdminPassword.js';
+import createAnalysisReport from './routes/createAnalysisReport.js';
+import deleteAdminUserData from './routes/deleteAdminUserData.js';
+import deleteAnalysisReport from './routes/deleteAnalysisReport.js';
+import getAdminUserTokenUsage from './routes/getAdminUserTokenUsage.js';
+import getMyProfile from './routes/getMyProfile.js';
+import healthcheck from './routes/healthcheck.js';
+import listAdminUsers from './routes/listAdminUsers.js';
+import listAnalysisReports from './routes/listAnalysisReports.js';
+import tutorCreateDoc from './routes/tutorCreateDoc.js';
+import tutorCreateSession from './routes/tutorCreateSession.js';
+import tutorDeleteSession from './routes/tutorDeleteSession.js';
+import tutorGetImage from './routes/tutorGetImage.js';
+import tutorGetMessages from './routes/tutorGetMessages.js';
+import tutorListSessions from './routes/tutorListSessions.js';
+import tutorSendMessage from './routes/tutorSendMessage.js';
+import tutorSpeak from './routes/tutorSpeak.js';
+import tutorUpdateSession from './routes/tutorUpdateSession.js';
+import updateMyProfile from './routes/updateMyProfile.js';
+
+export default async function server() {
+  const isProd = process.env.NODE_ENV === 'production';
+  // In dev, pipe through pino-pretty as a direct stream instead of using
+  // the transport: worker option. The worker-thread transport (thread-stream)
+  // races with `node --watch` on restart and crashes with
+  // "this should not happen: undefined".
+  const app = Fastify({
+    logger: isProd
+      ? true
+      : { stream: pinoPretty({ colorize: true, translateTime: 'SYS:HH:MM:ss.l' }) },
+    bodyLimit: 20 * 1024 * 1024
+  });
+
+  // Brotli/gzip everything we can — text/* (HTML, JS, CSS, JSON) compresses
+  // 60-80% on the wire. Threshold of 1024 skips tiny payloads where the
+  // CPU cost outweighs the savings. Safe to leave global: the SSE chat
+  // stream calls `reply.hijack()` so @fastify/compress never sees it, and
+  // the TTS route serves `audio/mpeg` which isn't in the compressible
+  // mime-type list.
+  await app.register(fastifyCompress, {
+    global: true,
+    threshold: 1024,
+    encodings: ['br', 'gzip', 'deflate']
+  });
+
+  const jwtSecret = process.env.YTAI_JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('YTAI_JWT_SECRET is required');
+  }
+  await app.register(fastifyJwt, { secret: jwtSecret });
+
+  // Every /api/* request except /api/auth/* and /healthcheck must carry a
+  // valid YTAI JWT. We verify once here and stash the user id on the
+  // request so individual route handlers can scope every query to the
+  // authenticated user — no per-route auth boilerplate, no chance of
+  // forgetting to filter.
+  app.addHook('onRequest', async (request, reply) => {
+    const url = request.raw.url || '';
+    if (!url.startsWith('/api/')) return;
+    if (url.startsWith('/api/auth/')) return;
+    try {
+      await request.jwtVerify();
+      request.userId = request.user?.sub;
+      if (!request.userId) throw new Error('JWT missing sub claim');
+    } catch (err) {
+      reply.code(401).send({ error: 'Unauthorized' });
+      return;
+    }
+    // /api/admin/* is gated to role=admin. The JWT carries the role claim
+    // from the login routes, so we don't need an extra DB lookup on every
+    // request — the token itself is the source of truth.
+    if (url.startsWith('/api/admin/') && request.user?.role !== 'admin') {
+      reply.code(403).send({ error: 'Forbidden' });
+    }
+  });
+
+  healthcheck(app);
+  authEmail(app);
+  authGoogle(app);
+  authOtp(app);
+  authPassword(app);
+  changeAdminPassword(app);
+  createAnalysisReport(app);
+  deleteAdminUserData(app);
+  deleteAnalysisReport(app);
+  getAdminUserTokenUsage(app);
+  getMyProfile(app);
+  listAdminUsers(app);
+  listAnalysisReports(app);
+  tutorCreateDoc(app);
+  tutorCreateSession(app);
+  tutorDeleteSession(app);
+  tutorGetImage(app);
+  tutorGetMessages(app);
+  tutorListSessions(app);
+  tutorSendMessage(app);
+  tutorSpeak(app);
+  tutorUpdateSession(app);
+  updateMyProfile(app);
+
+  // SPA serving — only in prod, and only when the built portal exists.
+  // In dev, Vite serves the portal separately on YTAI_PORTAL_PORT, so the
+  // API doesn't need to ship static files. In prod, dist/public lands at
+  // /opt/ytai/public (kpai-style image layout: dist contents copied flat).
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const publicDir = path.resolve(__dirname, '../../public');
+  if (isProd && existsSync(publicDir)) {
+    await app.register(fastifyStatic, {
+      root: publicDir,
+      prefix: '/',
+      // Vite emits content-hashed filenames into /assets/*, so they are
+      // safe to cache forever. Everything else (index.html, favicons,
+      // robots.txt) stays short-lived so deploys take effect immediately.
+      setHeaders(res, filePath) {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        }
+      }
+    });
+    // SPA fallback: any non-/api/* miss falls through to index.html so
+    // react-router-dom can take over client-side. /api/* keeps the
+    // standard JSON 404 so misrouted API calls don't silently land on
+    // the HTML shell.
+    app.setNotFoundHandler((request, reply) => {
+      const url = request.raw.url || '';
+      if (url.startsWith('/api/')) {
+        reply.code(404).send({
+          message: `Route ${request.method}:${url} not found`,
+          error: 'Not Found',
+          statusCode: 404,
+        });
+        return;
+      }
+      reply.sendFile('index.html');
+    });
+  }
+
+  try {
+    await bootstrapAdmin(app.log);
+  } catch (err) {
+    app.log.error({ err }, 'bootstrapAdmin failed');
+  }
+
+  // Anything still 'pending' must be a leftover from the previous process
+  // (its background task didn't survive the restart). Mark them failed so
+  // the polling UI unblocks instead of spinning forever.
+  await failOrphanReports(app.log);
+
+  // Periodic memory + leak-suspect snapshot. Off by default — the post-fix
+  // baseline is healthy and the log line was only useful while we were
+  // hunting for the cause. Re-enable for future investigations by setting
+  // YTAI_MEM_LOG_INTERVAL_MS to a positive number of milliseconds (e.g.
+  // 60_000 for a one-minute tick).
+  const memLogIntervalMs = Number(process.env.YTAI_MEM_LOG_INTERVAL_MS ?? 0);
+  if (memLogIntervalMs > 0) {
+    const timer = setInterval(() => {
+      const mem = process.memoryUsage();
+      app.log.info(
+        {
+          rssMb: Math.round(mem.rss / 1024 / 1024),
+          heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024),
+          heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024),
+          externalMb: Math.round(mem.external / 1024 / 1024),
+          arrayBuffersMb: Math.round(mem.arrayBuffers / 1024 / 1024)
+        },
+        'memory snapshot'
+      );
+    }, memLogIntervalMs);
+    timer.unref?.();
+  }
+
+  const port = Number(process.env.YTAI_API_PORT ?? 9521);
+  await app.listen({ port, host: '0.0.0.0' });
+
+  for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.once(signal, async () => {
+      try {
+        await app.close();
+      } finally {
+        process.exit(0);
+      }
+    });
+  }
+
+  return app;
+}
+
+server().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -1,0 +1,33 @@
+/* Move the session-sider Splitter's collapse handle from the vertical
+   midpoint to near the top of the divider, so it sits alongside the
+   sider's "Sessions" header rather than floating in the middle of the
+   long vertical bar. AntD's default centerStyle pins it at top: 50%
+   with a Y translate; we override both. */
+.ytai-sider-splitter > .ant-splitter-bar > .ant-splitter-bar-collapse-bar {
+  top: 16px;
+  /* transform: translateX(-50%); */
+}
+
+/* AntD Splitter.Panel ships with 1px of padding; the sessions sider wants its
+   dark background to butt right up to the divider, so strip it on the first
+   panel only. */
+.ytai-sider-splitter > .ant-splitter-panel:first-child {
+  padding: 0;
+}
+
+/* Reports page splits a white list against a white generate/view panel; the
+   default grey divider reads as a stripe. Force the bar + dragger to the
+   surface color so the whole gutter is one clean white seam. */
+.ytai-white-splitter > .ant-splitter-bar {
+  background: #fff;
+}
+.ytai-white-splitter > .ant-splitter-bar > .ant-splitter-bar-dragger {
+  background: #fff;
+}
+.ytai-white-splitter > .ant-splitter-bar > .ant-splitter-bar-dragger::before,
+.ytai-white-splitter > .ant-splitter-bar > .ant-splitter-bar-dragger::after {
+  background: #fff;
+}
+.ytai-white-splitter > .ant-splitter-panel:last-child {
+  padding-left: 0;
+}
