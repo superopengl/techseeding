@@ -1,0 +1,8 @@
+/**
+ * Techseeding hooks
+ * ©2021 All right reserved. Technical solution by TECHSEEDING PTY LTD.
+ * https://www.techseeding.com.au
+ */
+(function() {
+  console.log('Technical solution by TECHSEEDING PTY LTD.', 'https://www.techseeding.com.au');
+})();

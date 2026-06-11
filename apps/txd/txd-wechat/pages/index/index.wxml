@@ -1,0 +1,23 @@
+<!--index.wxml-->
+<view class="container">
+  <view>
+    <image bindtap="bindViewTap" src="/images/logo.png" mode="widthFix"></image>
+  </view>
+  <view>
+    <text class="user-motto">Professional tech friend of your business</text>
+  </view>
+  <view>
+    <text class="user-motto">Information technology services for small businesses, home businesses, and startups</text>
+  </view>
+
+  <view class="userinfo">
+    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+    <block wx:else>
+      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+    </block>
+  </view>
+  <view class="usermotto">
+    <text class="user-motto">{{motto}}</text>
+  </view>
+</view>
