@@ -1,0 +1,61 @@
+import { db } from "../db/index.js";
+import { user, studentProfile } from "../db/schema.js";
+import { isValidUserName } from "../lib/isValidUserName.js";
+import { success, error } from "../lib/response.js";
+
+export function adminCreateStudent(fastify) {
+  fastify.post("/api/admin/student", async (request, reply) => {
+    const { accountName, firstName, lastName, email, dob, gender, homeAddress, contactNumber, custodianName, notes } = request.body || {};
+
+    if (!accountName || !firstName || !lastName || !email) {
+      return error(reply, 400, "VALIDATION_ERROR", "accountName, firstName, lastName and email are required");
+    }
+    if (!isValidUserName(accountName)) {
+      return error(reply, 400, "VALIDATION_ERROR", "accountName may only contain letters, digits, underscore, and slash");
+    }
+
+    const limits = { accountName: 50, firstName: 50, lastName: 50, email: 120, homeAddress: 100, contactNumber: 20, custodianName: 50, notes: 2000 };
+    for (const [field, max] of Object.entries(limits)) {
+      const val = request.body[field];
+      if (val && val.length > max) {
+        return error(reply, 400, "VALIDATION_ERROR", `${field} must be ${max} characters or less`);
+      }
+    }
+
+    const { newUser, profile: newProfile } = await db.transaction(async (tx) => {
+      const [newUser] = await tx
+        .insert(user)
+        .values({ userName: accountName, role: "student", email: email.toLowerCase() })
+        .returning();
+
+      const [profile] = await tx
+        .insert(studentProfile)
+        .values({
+          userId: newUser.id,
+          firstName: firstName,
+          lastName: lastName,
+          dob: dob || null,
+          gender: gender || null,
+          homeAddress: homeAddress || null,
+          contactNumber: contactNumber || null,
+          custodianName: custodianName || null,
+          notes: notes || null,
+        })
+        .returning();
+
+      return { newUser, profile };
+    });
+
+    return reply.status(201).send(success({
+      id: newUser.id,
+      userName: newUser.userName,
+      role: newUser.role,
+      profile: {
+        id: newProfile.id,
+        firstName: newProfile.firstName,
+        lastName: newProfile.lastName,
+        joinedAt: newProfile.joinedAt,
+      },
+    }));
+  });
+}

@@ -1,0 +1,1602 @@
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { setPageTitle } from "../utils/setPageTitle";
+import { Button, Typography, Card, Row, Col, Collapse } from "antd";
+import {
+  RocketOutlined,
+  RobotOutlined,
+  ThunderboltOutlined,
+  SmileOutlined,
+  BulbOutlined,
+  ExperimentOutlined,
+  TeamOutlined,
+  LoginOutlined,
+  SafetyCertificateOutlined,
+  BookOutlined,
+  CalendarOutlined,
+  LaptopOutlined,
+  ScheduleOutlined,
+  ToolOutlined,
+  CustomerServiceOutlined,
+  ReadOutlined,
+  BarChartOutlined,
+  FormatPainterOutlined,
+} from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
+import { colors, gradients, shadows, fonts } from "../theme";
+import { APP_STORE_URL } from "../constants";
+import { Logo } from "../components/Logo";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
+import { useUser } from "../context/UserContext";
+
+// Lazy-load the enquiry form so it stays out of the initial render path. The
+// antd Form / Input / Select components run rc-resize-observer and dom-align
+// geometry reads on mount, which PageSpeed flagged as forced reflow. Mounting
+// only when the user nears the section keeps the heavy work below-the-fold.
+const EnquiryForm = lazy(() =>
+  import("../components/EnquiryForm").then((m) => ({ default: m.EnquiryForm }))
+);
+
+const { Title, Paragraph, Text, Link } = Typography;
+
+const features = [
+  {
+    icon: <SmileOutlined />,
+    color: colors.primary,
+    bg: colors.mintBg,
+    title: "Built for Ages 8\u201312",
+    description:
+      "No experience needed. If you can imagine it, you can build it. Just describe your idea and let AI bring it to life.",
+  },
+  {
+    icon: <ThunderboltOutlined />,
+    color: colors.accentAmber,
+    bg: colors.amberBg,
+    title: "See How AI Thinks",
+    description:
+      "Drive a real AI agent to reason, design, and solve problems — not hidden behind a button, but right in front of you.",
+  },
+  {
+    icon: <BulbOutlined />,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+    title: "Your Ideas, Real Crafts",
+    description:
+      "Every craft is built with real technology. Play it, share it, and see how AI turned your vision into something real.",
+  },
+];
+
+const steps = [
+  {
+    icon: <ExperimentOutlined />,
+    color: colors.accentPurple,
+    num: "1",
+    title: "Imagine a Craft",
+    description: 'Type what you want — "a racing craft with power-ups" or "a puzzle where gravity flips."',
+  },
+  {
+    icon: <RocketOutlined />,
+    color: colors.primary,
+    num: "2",
+    title: "Command AI to Build It",
+    description: "See the AI think, plan, and create — like a super-powered partner that turns your words into a working craft.",
+  },
+  {
+    icon: <TeamOutlined />,
+    color: colors.accentAmber,
+    num: "3",
+    title: "Play, Tweak, Share",
+    description: "Your craft runs instantly. Keep improving it, experiment with new ideas, and share it with friends.",
+  },
+];
+
+const ctaButtonStyle = {
+  height: 56,
+  paddingInline: 40,
+  fontSize: 20,
+  fontWeight: 700,
+  borderRadius: 28,
+  background: colors.ctaYellow,
+  color: colors.heading,
+  border: "none",
+  boxShadow: shadows.ctaButton,
+  fontFamily: fonts.heading,
+};
+
+function NavBar({ onStart }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "14px clamp(16px, 4vw, 48px)",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        // background: "linear-gradient(135deg, rgba(232,248,240,0.7) 0%, rgba(232,244,250,0.7) 100%)",
+        background: 'transparent',
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        // borderBottom: "1px solid rgba(226,232,240,0.6)",
+        // boxShadow: shadows.cardSubtle,
+      }}
+    >
+      <Logo size={60} square />
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Button
+          size="large"
+          icon={<LoginOutlined />}
+          onClick={onStart}
+          style={{
+            borderRadius: 24,
+            paddingInline: 20,
+            fontWeight: 600,
+            height: 44,
+            background: colors.surface,
+            color: colors.primary,
+            border: `1.5px solid ${colors.primary}`,
+            boxShadow: shadows.cardSubtle,
+          }}
+        >
+          Login
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+const programs = [
+  {
+    icon: <BookOutlined />,
+    color: colors.primary,
+    bg: colors.mintBg,
+    title: "After School Workshop",
+    description: "Weekly hands-on sessions after school. Kids build projects at their own pace with guided support.",
+  },
+  {
+    icon: <CalendarOutlined />,
+    color: colors.accentPurple,
+    bg: "#f3f0ff",
+    title: "Weekend Workshop",
+    description: "Saturday or Sunday sessions for kids who want dedicated creative time on the weekend.",
+  },
+  {
+    icon: <ScheduleOutlined />,
+    color: colors.accentAmber,
+    bg: colors.amberBg,
+    title: "Holiday Camp",
+    description: "Multi-day intensive camps during school holidays. Deep dive into bigger projects with friends.",
+  },
+  {
+    icon: <LaptopOutlined />,
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+    title: "Online Coaching",
+    description: "Live 1-on-1 or small group sessions from home. Same hands-on experience, no commute needed.",
+  },
+];
+
+const beyondCrafts = [
+  {
+    icon: <ExperimentOutlined />,
+    title: "Science Simulations",
+    examples: "Solar system orbits, ecosystem models, physics playgrounds",
+    color: colors.primary,
+    bg: colors.mintBg,
+  },
+  {
+    icon: <FormatPainterOutlined />,
+    title: "Interactive Art",
+    examples: "Drawing apps, generative art, animated greeting cards",
+    color: colors.accentPurple,
+    bg: "#f3f0ff",
+  },
+  {
+    icon: <CustomerServiceOutlined />,
+    title: "Music & Sound",
+    examples: "Drum machines, piano keyboards, sound effect boards",
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+  },
+  {
+    icon: <ToolOutlined />,
+    title: "Tools & Utilities",
+    examples: "Calculators, timers, quiz makers, to-do lists",
+    color: colors.accentAmber,
+    bg: colors.amberBg,
+  },
+  {
+    icon: <ReadOutlined />,
+    title: "Stories & Chatbots",
+    examples: "Choose-your-own-adventure, virtual pets, mad libs",
+    color: colors.successGreen,
+    bg: "#e8f8e8",
+  },
+  {
+    icon: <BarChartOutlined />,
+    title: "Data & Dashboards",
+    examples: "Polls with live charts, personal dashboards, family trees",
+    color: colors.accentBlue,
+    bg: colors.skyBg,
+  },
+];
+
+const parentReasons = [
+  {
+    icon: <RobotOutlined />,
+    color: colors.accentAmber,
+    title: "AI-Ready for the Future",
+    description: "Your child learns to use AI as a creative tool — turning their own ideas into real projects.",
+  },
+  {
+    icon: <ExperimentOutlined />,
+    color: colors.accentPurple,
+    title: "Sparks Curiosity & Creativity",
+    description: "Driving AI to bring ideas to life builds real interest in science, engineering, and play.",
+  },
+  {
+    icon: <SafetyCertificateOutlined />,
+    color: colors.accentBlue,
+    title: "Safe & Supervised",
+    description: "Purpose-built kid AI agent, instructor-guided sessions, sandboxed tools.",
+  },
+  {
+    icon: <ThunderboltOutlined />,
+    color: colors.primary,
+    title: "Real Working Crafts",
+    description: "Not exercises — kids walk away with a real game they can play, share, and keep improving.",
+  },
+];
+
+const faqs = [
+  {
+    q: "Does my child need any coding experience?",
+    a: "No. KidPlayAI is built for ages 8–12 with zero experience required. Kids describe their idea in plain English and the AI agent does the building.",
+  },
+  {
+    q: "What do kids need at home?",
+    a: "A laptop or desktop with a modern browser (Chrome, Safari, or Edge). Tablets and phones work great for playing and sharing finished crafts via the KidPlayAI Viewer app.",
+  },
+  {
+    q: "How is it safe for kids to use AI?",
+    a: "Our AI agent is purpose-built for kids — it runs with a restricted tool allowlist, all activity happens inside a sandboxed environment, and instructors supervise every session.",
+  },
+  {
+    q: "What if my child gets stuck?",
+    a: "Instructors are present in every session to guide kids through challenges. The AI agent itself also helps explain and debug — kids build problem-solving skills alongside their crafts.",
+  },
+  {
+    q: "Can my child keep the crafts they build?",
+    a: "Yes. Finished crafts can be played anytime via QR code or the free KidPlayAI Viewer app for iPhone and iPad. Kids can keep iterating and share with friends.",
+  },
+  {
+    q: "How do I sign my child up?",
+    a: "To keep our young learners safe, we set up accounts offline. Fill out the enquiry form below and we'll follow up with schedule, pricing, and program details.",
+  },
+];
+
+export function HomePage() {
+  useEffect(() => {
+    setPageTitle(
+      "KidPlayAI — AI Craft Maker for Kids Ages 8-12",
+      "KidPlayAI is an AI-powered craft maker for kids ages 8-12. Kids describe a craft, harness a real AI agent to reason and build it step by step, then play and share the result. Workshops, holiday camps, and online coaching available.",
+    );
+  }, []);
+  const navigate = useNavigate();
+  const { hash } = useLocation();
+  const { refresh: refreshUser } = useUser();
+  const goLogin = () => navigate("/login");
+  const handleSsoSuccess = async ({ role }) => {
+    await refreshUser();
+    navigate(role === "admin" ? "/admin" : "/sandbox");
+  };
+
+  const [mountForm, setMountForm] = useState(false);
+  const [autoFocusForm, setAutoFocusForm] = useState(false);
+  const contactRef = useRef(null);
+
+  // Mount the form when the section nears the viewport. Generous rootMargin so
+  // a user scrolling toward it gets the form ready before they arrive.
+  useEffect(() => {
+    if (mountForm || !contactRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setMountForm(true);
+          obs.disconnect();
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    obs.observe(contactRef.current);
+    return () => obs.disconnect();
+  }, [mountForm]);
+
+  const scrollToEnquiry = () => {
+    setMountForm(true);
+    setAutoFocusForm(true);
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (hash !== "#contact") return;
+    scrollToEnquiry();
+  }, [hash]);
+
+  return (
+    <div style={{ minHeight: "100vh", background: colors.surface, position: "relative" }}>
+      <NavBar onStart={goLogin} />
+
+      {/* Hero Section */}
+      <div
+        style={{
+          background: gradients.hero,
+          padding: "clamp(120px, 18vw, 180px) 20px 220px",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Decorative circles */}
+        <div
+          style={{
+            position: "absolute",
+            width: 300,
+            height: 300,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: -60,
+            left: -80,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            bottom: -40,
+            right: 60,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+            top: 40,
+            right: "20%",
+          }}
+        />
+
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 720, margin: "0 auto" }}>
+          <Title
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: "clamp(34px, 8vw, 56px)",
+              color: colors.onDark,
+              marginBottom: 16,
+              lineHeight: 1.2,
+              textShadow: shadows.textOnGradient,
+            }}
+          >
+            Build It. Master It.<br />For the <span style={{ color: colors.ctaYellow }}>AI</span> Generation.
+          </Title>
+          <Paragraph
+            style={{
+              fontSize: "clamp(16px, 2.4vw, 20px)",
+              color: colors.onDarkSecondary,
+              marginBottom: 44,
+              maxWidth: 540,
+              marginInline: "auto",
+              lineHeight: 1.6,
+            }}
+          >
+            Kids dream up crafts, command AI to build them — and learn how it all works along the way.
+          </Paragraph>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <GoogleSignInButton scale={1.4} onSuccess={handleSsoSuccess} />
+          </div>
+          <Paragraph style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginTop: 16, marginBottom: 0 }}>
+            Sign in with your Google account to start making crafts
+          </Paragraph>
+          <div style={{ marginTop: 16 }}>
+            <Text
+              style={{ color: "rgba(255,255,255,0.85)", fontSize: 15, cursor: "pointer" }}
+              onClick={goLogin}
+            >
+              Have a username & password? <span style={{ textDecoration: "underline", fontWeight: 600 }}>Log in here</span>
+            </Text>
+          </div>
+        </div>
+      </div>
+
+      {/* Multi-device showcase — overlaps hero, demonstrates browser/tablet/phone reach */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          marginTop: -140,
+          padding: "0 max(20px, 6vw)",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            maxWidth: 720,
+            // Pad top/bottom so the absolutely-positioned tablet and phones don't
+            // overflow outside the section into the features grid below.
+            // paddingTop: "clamp(80px, 14vw, 200px)",
+            paddingBottom: "clamp(60px, 11vw, 120px)",
+            margin: "0 auto",
+          }}
+        >
+          {/* iPad — bottom right, peeking up behind the desktop */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: 30,
+              right: "clamp(-40px, -4vw, -10px)",
+              width: "clamp(190px, 46%, 460px)",
+              transform: "rotate(4deg)",
+              transformOrigin: "100% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(12px, 2.6vw, 26px)",
+              padding: "clamp(6px, 1.2vw, 12px)",
+              boxShadow: "0 18px 44px rgba(0,0,0,0.34)",
+              zIndex: 10,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-ipad-400.avif 400w, /img/road-racer-ipad-800.avif 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-ipad-400.webp 400w, /img/road-racer-ipad-800.webp 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+              />
+              <img
+                src="/img/road-racer-ipad-800.jpg"
+                srcSet="/img/road-racer-ipad-400.jpg 400w, /img/road-racer-ipad-800.jpg 800w"
+                sizes="(max-width: 600px) 46vw, 400px"
+                width="800"
+                height="600"
+                alt="KidPlayAI Road Racer on iPad"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(5px, 1.4vw, 13px)",
+                }}
+              />
+            </picture>
+          </div>
+
+          {/* Desktop browser — center, foreground; this is the LCP element */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 2,
+              background: "rgba(255,255,255,0.96)",
+              borderRadius: "clamp(8px, 1.4vw, 14px)",
+              overflow: "hidden",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25)",
+              border: "1px solid rgba(0,0,0,0.08)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "clamp(6px, 1.2vw, 11px)",
+                padding: "clamp(7px, 1.1vw, 10px) clamp(10px, 1.6vw, 14px)",
+                background: "linear-gradient(#f6f7f9, #e9ebef)",
+                borderBottom: "1px solid rgba(0,0,0,0.06)",
+              }}
+            >
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#ff5f57", flexShrink: 0 }} />
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#febc2e", flexShrink: 0 }} />
+              <span style={{ width: "clamp(8px, 1vw, 11px)", height: "clamp(8px, 1vw, 11px)", borderRadius: "50%", background: "#28c840", flexShrink: 0 }} />
+              <div
+                style={{
+                  flexGrow: 1,
+                  maxWidth: "60%",
+                  margin: "0 auto",
+                  padding: "clamp(2px, 0.5vw, 4px) clamp(8px, 1.4vw, 14px)",
+                  background: "#fff",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  borderRadius: "clamp(4px, 0.7vw, 7px)",
+                  fontSize: "clamp(9px, 1.2vw, 13px)",
+                  color: "#5f6368",
+                  fontFamily: "system-ui, sans-serif",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  textAlign: "center",
+                }}
+              >
+                kidplayai.techseeding.com.au
+              </div>
+            </div>
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-600.avif 600w, /img/road-racer-1200.avif 1200w, /img/road-racer-1465.avif 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-600.webp 600w, /img/road-racer-1200.webp 1200w, /img/road-racer-1465.webp 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+              />
+              <img
+                src="/img/road-racer-1200.jpg"
+                srcSet="/img/road-racer-600.jpg 600w, /img/road-racer-1200.jpg 1200w, /img/road-racer-1465.jpg 1465w"
+                sizes="(max-width: 932px) 88vw, 720px"
+                width="1465"
+                height="993"
+                alt="A kid building a Road Racer craft with AI in KidPlayAI"
+                fetchPriority="high"
+                decoding="async"
+                style={{ width: "100%", height: "auto", display: "block" }}
+              />
+            </picture>
+          </div>
+
+          {/* iPhone (Preview tab) — bottom left, foreground, tilted */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(10px, 2vw, 30px)",
+              left: "clamp(-8px, -0.6vw, 0px)",
+              width: "clamp(62px, 13%, 115px)",
+              transform: "rotate(-9deg)",
+              transformOrigin: "0% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(10px, 2vw, 20px)",
+              padding: "clamp(2px, 0.4vw, 4px)",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.42)",
+              zIndex: 4,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-iphone-preview-240.avif 240w, /img/road-racer-iphone-preview-400.avif 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-iphone-preview-240.webp 240w, /img/road-racer-iphone-preview-400.webp 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <img
+                src="/img/road-racer-iphone-preview-240.jpg"
+                srcSet="/img/road-racer-iphone-preview-240.jpg 240w, /img/road-racer-iphone-preview-400.jpg 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+                width="400"
+                height="870"
+                alt="KidPlayAI Preview tab on iPhone"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(7px, 1.5vw, 16px)",
+                }}
+              />
+            </picture>
+          </div>
+
+          {/* iPhone (AI Assistant tab) — sits next to the preview iPhone, slightly raised */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              bottom: "clamp(34px, 5.5vw, 72px)",
+              left: "clamp(54px, 11%, 100px)",
+              width: "clamp(62px, 13%, 115px)",
+              transform: "rotate(-2deg)",
+              transformOrigin: "0% 100%",
+              background: "#1d1d1f",
+              borderRadius: "clamp(10px, 2vw, 20px)",
+              padding: "clamp(2px, 0.4vw, 4px)",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.40)",
+              zIndex: 3,
+            }}
+          >
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/img/road-racer-iphone-terminal-240.avif 240w, /img/road-racer-iphone-terminal-400.avif 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/img/road-racer-iphone-terminal-240.webp 240w, /img/road-racer-iphone-terminal-400.webp 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+              />
+              <img
+                src="/img/road-racer-iphone-terminal-240.jpg"
+                srcSet="/img/road-racer-iphone-terminal-240.jpg 240w, /img/road-racer-iphone-terminal-400.jpg 400w"
+                sizes="(max-width: 600px) 13vw, 115px"
+                width="400"
+                height="870"
+                alt="KidPlayAI AI Assistant tab on iPhone"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  borderRadius: "clamp(9px, 2vw, 20px)",
+                }}
+              />
+            </picture>
+          </div>
+        </div>
+        <Paragraph
+          style={{
+            color: colors.body,
+            fontSize: 14,
+            marginTop: 4,
+            fontStyle: "italic",
+          }}
+        >
+          Road Racer — a real AI craft built by Leo, age 10, using KidPlayAI. Plays on browser, tablet, and phone.
+        </Paragraph>
+      </div>
+
+      {/* Features Section */}
+      <div
+        style={{
+          maxWidth: 1000,
+          margin: "0 auto",
+          padding: "48px 24px 80px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Why Kids Love <Logo size={43} style={{ display: "inline-block", verticalAlign: "middle", position: "relative", top: -6 }} />
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
+        >
+          Where young creators imagine crafts and harness AI to build them — learning to think, create, and understand AI along the way
+        </Paragraph>
+        <Row gutter={[32, 32]}>
+          {features.map((f, i) => (
+            <Col xs={24} sm={8} key={i}>
+              <Card
+                style={{
+                  borderRadius: 20,
+                  border: "none",
+                  boxShadow: shadows.card,
+                  height: "100%",
+                  textAlign: "center",
+                  padding: "12px 0",
+                }}
+                styles={{ body: { padding: "32px 24px" } }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 20,
+                    background: f.bg,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 20,
+                    fontSize: 32,
+                    color: f.color,
+                  }}
+                >
+                  {f.icon}
+                </div>
+                <Title
+                  level={4}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 8,
+                  }}
+                >
+                  {f.title}
+                </Title>
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                  {f.description}
+                </Text>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* How It Works Section */}
+      <div
+        style={{
+          background: colors.canvas,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          How It Works
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
+        >
+          From idea to playable craft in minutes
+        </Paragraph>
+        <Row gutter={[32, 32]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+          {steps.map((s, i) => (
+            <Col xs={24} sm={8} key={i}>
+              <div style={{ position: "relative", padding: "0 8px" }}>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "50%",
+                    background: s.color,
+                    color: colors.onDark,
+                    fontFamily: fonts.heading,
+                    fontSize: 26,
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 20,
+                    boxShadow: `0 4px 12px ${s.color}40`,
+                  }}
+                >
+                  {s.num}
+                </div>
+                <Title
+                  level={4}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 8,
+                  }}
+                >
+                  {s.title}
+                </Title>
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                  {s.description}
+                </Text>
+              </div>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* For Parents Section */}
+      <div
+        style={{
+          background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          For Parents & Guardians
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+        >
+          AI is the most powerful creative tool of their lifetime — let them start using it now
+        </Paragraph>
+        <Row gutter={[32, 32]} style={{ maxWidth: 1100, margin: "0 auto" }}>
+          {parentReasons.map((r, i) => (
+            <Col xs={24} sm={12} md={6} key={i}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: `${r.color}15`,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                  fontSize: 28,
+                  color: r.color,
+                }}
+              >
+                {r.icon}
+              </div>
+              <Title
+                level={4}
+                style={{
+                  fontFamily: fonts.heading,
+                  color: r.color,
+                  marginBottom: 8,
+                }}
+              >
+                {r.title}
+              </Title>
+              <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                {r.description}
+              </Text>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* Programs Section */}
+      <div
+        style={{
+          background: colors.canvas,
+          padding: "80px 24px",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Decorative background patterns */}
+        <div
+          style={{
+            position: "absolute",
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.04)",
+            top: -60,
+            left: -50,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 160,
+            height: 160,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.04)",
+            bottom: -40,
+            right: -30,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 120,
+            height: 120,
+            borderRadius: "50%",
+            background: "rgba(110,193,228,0.05)",
+            top: 40,
+            right: "10%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            border: "2px dashed rgba(67,184,140,0.08)",
+            bottom: 30,
+            left: "15%",
+          }}
+        />
+        {/* Small accent dots */}
+        <div
+          style={{
+            position: "absolute",
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: "rgba(245,158,11,0.15)",
+            top: 60,
+            left: "25%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.12)",
+            bottom: 80,
+            right: "22%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.12)",
+            top: "45%",
+            left: "5%",
+          }}
+        />
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <Title
+            level={2}
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: 38,
+              color: colors.heading,
+              marginBottom: 12,
+            }}
+          >
+            Our Programs
+          </Title>
+          <Paragraph
+            style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 500, marginInline: "auto" }}
+          >
+            Flexible options to fit every schedule — all ages 8–12 welcome, no experience needed
+          </Paragraph>
+          <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+            {programs.map((p, i) => (
+              <Col xs={24} sm={12} md={6} key={i}>
+                <Card
+                  style={{
+                    borderRadius: 20,
+                    border: "none",
+                    boxShadow: shadows.card,
+                    height: "100%",
+                    textAlign: "center",
+                  }}
+                  styles={{ body: { padding: "32px 20px" } }}
+                >
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 18,
+                      background: p.bg,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 18,
+                      fontSize: 28,
+                      color: p.color,
+                    }}
+                  >
+                    {p.icon}
+                  </div>
+                  <Title
+                    level={4}
+                    style={{
+                      fontFamily: fonts.heading,
+                      color: colors.heading,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {p.title}
+                  </Title>
+                  <Text style={{ color: colors.bodyStrong, fontSize: 14, lineHeight: 1.6 }}>
+                    {p.description}
+                  </Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <div style={{ marginTop: 40 }}>
+            <Button
+              size="large"
+              onClick={scrollToEnquiry}
+              icon={<RocketOutlined />}
+              style={ctaButtonStyle}
+            >
+              Enquire for Details
+            </Button>
+            <Paragraph style={{ color: colors.body, fontSize: 14, marginTop: 12, marginBottom: 0 }}>
+              Ask about schedules, pricing, and availability
+            </Paragraph>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div
+        style={{
+          background: colors.surface,
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Frequently Asked Questions
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 40, maxWidth: 500, marginInline: "auto" }}
+        >
+          Everything parents typically ask before signing up
+        </Paragraph>
+        <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "left" }}>
+          <Collapse
+            bordered={false}
+            expandIconPosition="end"
+            style={{ background: "transparent" }}
+            items={faqs.map((f, i) => ({
+              key: String(i),
+              label: (
+                <Text style={{ fontFamily: fonts.heading, fontSize: 16, color: colors.heading, fontWeight: 600 }}>
+                  {f.q}
+                </Text>
+              ),
+              children: (
+                <Text style={{ color: colors.bodyStrong, fontSize: 15, lineHeight: 1.6 }}>
+                  {f.a}
+                </Text>
+              ),
+              style: {
+                background: colors.canvas,
+                marginBottom: 12,
+                borderRadius: 16,
+                border: "none",
+                boxShadow: shadows.cardSubtle,
+              },
+            }))}
+          />
+        </div>
+      </div>
+
+      {/* Beyond Crafts Section */}
+      <div
+        style={{
+          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(67,184,140,0.28) 1px, transparent 0), ${gradients.login}`,
+          backgroundSize: "22px 22px, auto",
+          padding: "80px 24px",
+          textAlign: "center",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.heading,
+            marginBottom: 12,
+          }}
+        >
+          Crafts Are Just the Start
+        </Title>
+        <Paragraph
+          style={{ color: colors.body, fontSize: 17, marginBottom: 48, maxWidth: 560, marginInline: "auto" }}
+        >
+          Building crafts is how kids get hooked — but with AI as their creative partner, they can make anything they imagine
+        </Paragraph>
+        <Row gutter={[24, 24]} style={{ maxWidth: 1000, margin: "0 auto" }}>
+          {beyondCrafts.map((item, i) => (
+            <Col xs={12} sm={8} key={i}>
+              <Card
+                style={{
+                  borderRadius: 16,
+                  border: "none",
+                  boxShadow: shadows.card,
+                  height: "100%",
+                  textAlign: "center",
+                }}
+                styles={{ body: { padding: "28px 16px" } }}
+              >
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 16,
+                    background: item.bg,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 14,
+                    fontSize: 26,
+                    color: item.color,
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <Title
+                  level={5}
+                  style={{
+                    fontFamily: fonts.heading,
+                    color: colors.heading,
+                    marginBottom: 6,
+                  }}
+                >
+                  {item.title}
+                </Title>
+                <Text style={{ color: colors.body, fontSize: 13, lineHeight: 1.5 }}>
+                  {item.examples}
+                </Text>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+
+      {/* Play & Share Section */}
+      <div
+        style={{
+          background: `linear-gradient(135deg, ${colors.terminal} 0%, ${colors.footer} 100%)`,
+          padding: "80px 24px",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Decorative circles */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background: "rgba(110,193,228,0.12)",
+            top: -80,
+            left: -90,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "rgba(67,184,140,0.14)",
+            bottom: -60,
+            right: -40,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: 90,
+            height: 90,
+            borderRadius: "50%",
+            background: "rgba(124,92,252,0.20)",
+            top: 60,
+            right: "12%",
+          }}
+        />
+        <Title
+          level={2}
+          style={{
+            position: "relative",
+            zIndex: 1,
+            fontFamily: fonts.heading,
+            fontSize: 38,
+            color: colors.onDark,
+            marginBottom: 12,
+          }}
+        >
+          Play & Share Anywhere
+        </Title>
+        <Paragraph
+          style={{ position: "relative", zIndex: 1, color: colors.onDarkSecondary, fontSize: 17, marginBottom: 48, maxWidth: 640, marginInline: "auto" }}
+        >
+          Built crafts can be played and shared via QR code or the{" "}
+          <Link
+            href={APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: colors.ctaYellow,
+              fontWeight: 700,
+              textDecoration: "underline",
+            }}
+          >
+            KidPlayAI Viewer
+          </Link>{" "}
+          mobile app
+        </Paragraph>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            maxWidth: 520,
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "stretch",
+            gap: 28,
+          }}
+        >
+          {/* App Store QR — bare, no panel */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: 12,
+                borderRadius: 16,
+                boxShadow: "0 8px 28px rgba(0,0,0,0.35)",
+              }}
+            >
+              <QRCodeSVG
+                value={APP_STORE_URL}
+                size={148}
+                level="H"
+                bgColor="#ffffff"
+                fgColor={colors.heading}
+                imageSettings={{
+                  src: "/img/kidplayai-app-icon.png",
+                  height: 36,
+                  width: 36,
+                  excavate: true,
+                }}
+              />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontFamily: fonts.heading,
+                  color: colors.onDark,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  lineHeight: 1.2,
+                  marginBottom: 2,
+                }}
+              >
+                App Store
+              </div>
+              <Text style={{ color: colors.onDarkSecondary, fontSize: 12, lineHeight: 1.5 }}>
+                Scan to download for iPhone & iPad
+              </Text>
+            </div>
+          </div>
+
+          {/* App Store-style card */}
+          <div
+            style={{
+              background: colors.surface,
+              border: `1px solid ${colors.border}`,
+              borderRadius: 24,
+              padding: "24px 22px",
+              boxShadow: shadows.card,
+              textAlign: "left",
+            }}
+          >
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
+                <img
+                  src="/img/kidplayai-app-icon.png"
+                  alt="KidPlayAI Viewer app icon"
+                  width="84"
+                  height="84"
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    width: 84,
+                    height: 84,
+                    borderRadius: 20,
+                    boxShadow: shadows.cardSubtle,
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{
+                      fontFamily: fonts.heading,
+                      color: colors.heading,
+                      fontWeight: 700,
+                      fontSize: 18,
+                      lineHeight: 1.2,
+                      marginBottom: 2,
+                    }}
+                  >
+                    KidPlayAI Viewer
+                  </div>
+                  <Text style={{ color: colors.body, fontSize: 13 }}>
+                    Education
+                  </Text>
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: colors.accentAmber, fontSize: 13, letterSpacing: 1 }}>
+                      ★★★★★
+                    </span>
+                    <Text style={{ color: colors.body, fontSize: 12 }}>Ages 9+</Text>
+                  </div>
+                </div>
+                <Link
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: colors.primary,
+                    color: colors.onDark,
+                    border: "none",
+                    borderRadius: 999,
+                    padding: "6px 18px",
+                    fontFamily: fonts.heading,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  GET
+                </Link>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  overflow: "hidden",
+                  borderRadius: 14,
+                }}
+              >
+                <picture style={{ flex: 1 }}>
+                  <source
+                    type="image/avif"
+                    srcSet="/img/kidplayai-viewer-appstore-2-240.avif 240w, /img/kidplayai-viewer-appstore-2-400.avif 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet="/img/kidplayai-viewer-appstore-2-240.webp 240w, /img/kidplayai-viewer-appstore-2-400.webp 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <img
+                    src="/img/kidplayai-viewer-appstore-2-400.jpg"
+                    alt="KidPlayAI Viewer craft preview"
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: 14,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  />
+                </picture>
+                <picture style={{ flex: 1 }}>
+                  <source
+                    type="image/avif"
+                    srcSet="/img/kidplayai-viewer-appstore-1-240.avif 240w, /img/kidplayai-viewer-appstore-1-400.avif 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet="/img/kidplayai-viewer-appstore-1-240.webp 240w, /img/kidplayai-viewer-appstore-1-400.webp 400w"
+                    sizes="(max-width: 600px) 40vw, 200px"
+                  />
+                  <img
+                    src="/img/kidplayai-viewer-appstore-1-400.jpg"
+                    alt="KidPlayAI Viewer landing screen"
+                    loading="lazy"
+                    decoding="async"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: 14,
+                      border: `1px solid ${colors.border}`,
+                    }}
+                  />
+                </picture>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contact / Enquiry Section */}
+      <div
+        id="contact"
+        ref={contactRef}
+        style={{
+          background: gradients.cta,
+          padding: "80px 24px",
+          textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Decorative background patterns */}
+        <div
+          style={{
+            position: "absolute",
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.07)",
+            top: -80,
+            right: -60,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.05)",
+            bottom: -50,
+            left: -40,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            top: 30,
+            left: "12%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 140,
+            height: 140,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            bottom: 20,
+            right: "15%",
+          }}
+        />
+        {/* Dotted ring */}
+        <div
+          style={{
+            position: "absolute",
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            border: "2px dashed rgba(255,255,255,0.1)",
+            top: -30,
+            left: "30%",
+          }}
+        />
+        {/* Small accent dots */}
+        <div
+          style={{
+            position: "absolute",
+            width: 16,
+            height: 16,
+            borderRadius: "50%",
+            background: "rgba(252,214,60,0.3)",
+            top: 50,
+            right: "25%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "rgba(252,214,60,0.25)",
+            bottom: 60,
+            left: "20%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.15)",
+            top: "40%",
+            right: "8%",
+          }}
+        />
+
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <Logo size={80} square style={{ display: "inline-block", marginBottom: 20 }} />
+          <Title
+            level={2}
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: 38,
+              color: colors.onDark,
+              marginBottom: 16,
+              textShadow: shadows.textOnGradient,
+            }}
+          >
+            Ready to Get Your Child Started?
+          </Title>
+          <Paragraph
+            style={{ color: colors.onDarkSecondary, fontSize: 18, maxWidth: 520, marginInline: "auto" }}
+          >
+            To keep our young learners safe, we set up accounts offline. Reach out below and we'll follow up with class details, schedule, and fees.
+          </Paragraph>
+          {mountForm ? (
+            <Suspense fallback={<div style={{ minHeight: 540 }} aria-hidden="true" />}>
+              <EnquiryForm autoFocusOnMount={autoFocusForm} />
+            </Suspense>
+          ) : (
+            <div style={{ minHeight: 540 }} aria-hidden="true" />
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          padding: "32px 24px",
+          textAlign: "center",
+          background: colors.footer,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
+          &copy;2019&ndash;2026 Techseeding PTY LTD. All rights reserved.
+        </Text>
+        <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
+          KidPlayAI is a product owned by Techseeding
+        </Text>
+        <Link href="https://techseeding.com.au" target="_blank" rel="noopener noreferrer">
+          https://techseeding.com.au/
+        </Link>
+        <Text style={{ color: "rgba(255,255,255,0.55)", fontSize: 12 }}>
+          ABN: 35631597450 / ACN: 631597450
+        </Text>
+        <div style={{ marginTop: 12, display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+          <Link href="/privacy_policy" target="_blank" rel="noopener noreferrer" >Privacy Policy</Link>
+          <Link href="/terms_of_use" target="_blank" rel="noopener noreferrer">Terms of Use</Link>
+        </div>
+      </div>
+    </div>
+  );
+}

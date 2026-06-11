@@ -1,0 +1,1 @@
+ALTER TABLE "student_profile" ADD COLUMN "avatar_color" text DEFAULT '#7c5cfc' NOT NULL;

@@ -1,0 +1,80 @@
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ConfigProvider } from "antd";
+import { StyleProvider } from "@ant-design/cssinjs";
+import { antTheme, antModalConfig } from "./theme";
+import { HomePage } from "./pages/HomePage";
+import { getRole } from "./api";
+import { UserProvider } from "./context/UserContext";
+
+const LoginPage = lazy(() =>
+  import("./pages/LoginPage").then((m) => ({ default: m.LoginPage }))
+);
+const SandboxPage = lazy(() =>
+  import("./pages/SandboxPage").then((m) => ({ default: m.SandboxPage }))
+);
+const SandboxRedirectPage = lazy(() =>
+  import("./pages/SandboxRedirectPage").then((m) => ({ default: m.SandboxRedirectPage }))
+);
+const AdminPage = lazy(() =>
+  import("./pages/AdminPage").then((m) => ({ default: m.AdminPage }))
+);
+const GalleryExpoPage = lazy(() =>
+  import("./pages/GalleryExpoPage").then((m) => ({ default: m.GalleryExpoPage }))
+);
+const GalleryListPage = lazy(() =>
+  import("./pages/GalleryListPage").then((m) => ({ default: m.GalleryListPage }))
+);
+const CraftDetailPage = lazy(() =>
+  import("./pages/CraftDetailPage").then((m) => ({ default: m.CraftDetailPage }))
+);
+const PrivacyPolicyPage = lazy(() =>
+  import("./pages/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage }))
+);
+const TermsOfUsePage = lazy(() =>
+  import("./pages/TermsOfUsePage").then((m) => ({ default: m.TermsOfUsePage }))
+);
+const LogoPage = lazy(() =>
+  import("./pages/LogoPage").then((m) => ({ default: m.LogoPage }))
+);
+const OnepagePage = lazy(() =>
+  import("./pages/OnepagePage").then((m) => ({ default: m.OnepagePage }))
+);
+
+function RoleGuard({ role, children }) {
+  if (getRole() !== role) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+}
+
+export function App() {
+  return (
+    <StyleProvider hashPriority="high">
+      <ConfigProvider theme={antTheme} modal={antModalConfig}>
+        <UserProvider>
+          <BrowserRouter>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/sandbox" element={<RoleGuard role="student"><SandboxRedirectPage /></RoleGuard>} />
+                <Route path="/sandbox/:sandboxId" element={<RoleGuard role="student"><SandboxPage /></RoleGuard>} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/gallery/:id/expo" element={<GalleryExpoPage />} />
+                <Route path="/gallery" element={<GalleryListPage />} />
+                <Route path="/gallery/:galleryId" element={<GalleryListPage />} />
+                <Route path="/discover" element={<Navigate to="/gallery" replace />} />
+                <Route path="/craft/:sandboxId" element={<CraftDetailPage />} />
+                <Route path="/privacy_policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms_of_use" element={<TermsOfUsePage />} />
+                <Route path="/logo" element={<LogoPage />} />
+                <Route path="/onepage" element={<OnepagePage />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </UserProvider>
+      </ConfigProvider>
+    </StyleProvider>
+  );
+}

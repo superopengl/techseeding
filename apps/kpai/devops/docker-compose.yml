@@ -1,0 +1,14 @@
+services:
+  app:
+    container_name: kidplayai
+    build:
+      context: ..
+      dockerfile: devops/Dockerfile
+    ports:
+      - "80:80"
+    env_file:
+      - ../.env.production
+    environment:
+      KPAI_API_PORT: ${KPAI_API_PORT:-80}
+      KPAI_PUBLIC_URL: ${KPAI_PUBLIC_URL:-http://localhost}
+      RUN_MIGRATIONS: "true"

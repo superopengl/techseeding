@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160">
+  <rect width="280" height="160" rx="12" fill="#fef9e7"/>
+  <!-- Calculator body -->
+  <rect x="90" y="18" width="100" height="124" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+  <!-- Display -->
+  <rect x="102" y="30" width="76" height="28" rx="6" fill="#2d3748"/>
+  <text x="168" y="50" fill="#43b88c" font-family="monospace" font-size="16" text-anchor="end" font-weight="bold">42</text>
+  <!-- Buttons -->
+  <g>
+    <rect x="102" y="68" width="16" height="16" rx="4" fill="#f59e0b" opacity="0.8"/>
+    <rect x="122" y="68" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="142" y="68" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="162" y="68" width="16" height="16" rx="4" fill="#6ec1e4" opacity="0.6"/>
+    <rect x="102" y="88" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="122" y="88" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="142" y="88" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="162" y="88" width="16" height="16" rx="4" fill="#6ec1e4" opacity="0.6"/>
+    <rect x="102" y="108" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="122" y="108" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="142" y="108" width="16" height="16" rx="4" fill="#e2e8f0"/>
+    <rect x="162" y="108" width="16" height="16" rx="4" fill="#43b88c" opacity="0.7"/>
+  </g>
+  <!-- Checklist -->
+  <g transform="translate(210, 40)">
+    <rect x="0" y="0" width="14" height="14" rx="3" fill="none" stroke="#43b88c" stroke-width="2"/>
+    <path d="M3 7 L6 10 L11 4" stroke="#43b88c" stroke-width="2" fill="none"/>
+    <rect x="20" y="3" width="30" height="6" rx="3" fill="#e2e8f0"/>
+    <rect x="0" y="22" width="14" height="14" rx="3" fill="none" stroke="#43b88c" stroke-width="2"/>
+    <path d="M3 29 L6 32 L11 26" stroke="#43b88c" stroke-width="2" fill="none"/>
+    <rect x="20" y="25" width="24" height="6" rx="3" fill="#e2e8f0"/>
+    <rect x="0" y="44" width="14" height="14" rx="3" fill="none" stroke="#e2e8f0" stroke-width="2"/>
+    <rect x="20" y="47" width="34" height="6" rx="3" fill="#e2e8f0"/>
+  </g>
+  <!-- Timer arc -->
+  <g transform="translate(40, 75)">
+    <circle cx="20" cy="20" r="18" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+    <path d="M20 2 A18 18 0 1 1 5 30" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="20" y1="20" x2="20" y2="8" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+    <line x1="20" y1="20" x2="28" y2="20" stroke="#2d3748" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="20" cy="20" r="2" fill="#2d3748"/>
+  </g>
+</svg>

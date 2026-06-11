@@ -1,0 +1,9 @@
+packages:
+  - src/portal
+  - deploy
+
+ignoredBuiltDependencies:
+  - esbuild
+
+onlyBuiltDependencies:
+  - node-pty
