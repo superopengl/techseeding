@@ -22,6 +22,15 @@
     "diff:kpai": "pnpm -F @techseeding/deploy diff:kpai",
     "diff:ytai": "pnpm -F @techseeding/deploy diff:ytai",
     "synth:kpai": "pnpm -F @techseeding/deploy synth:kpai",
-    "synth:ytai": "pnpm -F @techseeding/deploy synth:ytai"
+    "synth:ytai": "pnpm -F @techseeding/deploy synth:ytai",
+    "azure:bootstrap": "pnpm -F @techseeding/deploy-azure bootstrap",
+    "azure:deploy:infra": "pnpm -F @techseeding/deploy-azure deploy:infra",
+    "azure:deploy:apps": "pnpm -F @techseeding/deploy-azure deploy:apps",
+    "azure:seed-secrets": "pnpm -F @techseeding/deploy-azure seed-secrets",
+    "azure:print-ns": "pnpm -F @techseeding/deploy-azure print-ns",
+    "release:azure:kpai": "pnpm -F @techseeding/deploy-azure release:kpai",
+    "release:azure:ytai": "pnpm -F @techseeding/deploy-azure release:ytai",
+    "release:azure:txd": "pnpm -F @techseeding/deploy-azure release:txd",
+    "release:azure:all": "pnpm release:azure:txd && pnpm release:azure:kpai && pnpm release:azure:ytai"
   }
 }

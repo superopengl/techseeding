@@ -1,0 +1,11 @@
+{
+  "analyzers": {
+    "core": {
+      "rules": {
+        "no-hardcoded-env-urls": { "level": "warning" },
+        "no-unused-params": { "level": "warning" },
+        "outputs-should-not-contain-secrets": { "level": "error" }
+      }
+    }
+  }
+}

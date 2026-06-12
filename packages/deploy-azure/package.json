@@ -1,0 +1,20 @@
+{
+  "name": "@techseeding/deploy-azure",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bootstrap": "./scripts/bootstrap-tenant.sh",
+    "deploy:infra": "./scripts/deploy-all.sh",
+    "deploy:apps": "./scripts/deploy-apps.sh",
+    "release:kpai": "./scripts/release-kpai.sh",
+    "release:ytai": "./scripts/release-ytai.sh",
+    "release:txd": "./scripts/release-txd.sh",
+    "build-and-push:kpai": "APP=kpai ./scripts/build-and-push.sh",
+    "build-and-push:ytai": "APP=ytai ./scripts/build-and-push.sh",
+    "migrate:kpai": "APP=kpai ./scripts/migrate.sh",
+    "migrate:ytai": "APP=ytai ./scripts/migrate.sh",
+    "seed-secrets": "./scripts/seed-secrets.sh",
+    "print-ns": "./scripts/print-ns-records.sh"
+  }
+}
