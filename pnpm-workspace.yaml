@@ -1,15 +1,9 @@
 packages:
   - "apps/*"
   - "apps/*/src/portal"
-  - "apps/*/deploy"
   - "packages/*"
 
 catalog:
-  # AWS CDK — used by both deploy packages and @techseeding/deploy
-  aws-cdk: ^2.170.0
-  aws-cdk-lib: ^2.170.0
-  constructs: ^10.4.2
-
   # API / backend (Fastify + Postgres + Azure SDK)
   "@azure/communication-email": ^1.0.0
   "@fastify/compress": ^8.3.1

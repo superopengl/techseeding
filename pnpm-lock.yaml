@@ -21,18 +21,9 @@ catalogs:
     antd:
       specifier: ^6.3.7
       version: 6.4.3
-    aws-cdk:
-      specifier: ^2.170.0
-      version: 2.1126.0
-    aws-cdk-lib:
-      specifier: ^2.170.0
-      version: 2.258.0
     concurrently:
       specifier: ^9.1.2
       version: 9.2.1
-    constructs:
-      specifier: ^10.4.2
-      version: 10.6.0
     fastify:
       specifier: ^5.3.3
       version: 5.8.5
@@ -107,19 +98,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.1
         version: 0.31.10
-
-  apps/kpai/deploy:
-    dependencies:
-      aws-cdk-lib:
-        specifier: 'catalog:'
-        version: 2.258.0(constructs@10.6.0)
-      constructs:
-        specifier: 'catalog:'
-        version: 10.6.0
-    devDependencies:
-      aws-cdk:
-        specifier: 'catalog:'
-        version: 2.1126.0
 
   apps/kpai/src/portal:
     dependencies:
@@ -277,19 +255,6 @@ importers:
         specifier: ^0.28.0
         version: 0.28.1
 
-  apps/ytai/deploy:
-    dependencies:
-      aws-cdk-lib:
-        specifier: 'catalog:'
-        version: 2.258.0(constructs@10.6.0)
-      constructs:
-        specifier: 'catalog:'
-        version: 10.6.0
-    devDependencies:
-      aws-cdk:
-        specifier: 'catalog:'
-        version: 2.1126.0
-
   apps/ytai/src/portal:
     dependencies:
       '@ant-design/icons':
@@ -341,19 +306,6 @@ importers:
       vite:
         specifier: 'catalog:'
         version: 6.4.3(tsx@4.22.4)
-
-  packages/deploy:
-    dependencies:
-      aws-cdk-lib:
-        specifier: 'catalog:'
-        version: 2.258.0(constructs@10.6.0)
-      constructs:
-        specifier: 'catalog:'
-        version: 10.6.0
-    devDependencies:
-      aws-cdk:
-        specifier: 'catalog:'
-        version: 2.1126.0
 
   packages/deploy-azure: {}
 
@@ -489,19 +441,6 @@ packages:
 
   '@antv/vendor@1.0.11':
     resolution: {integrity: sha512-LmhPEQ+aapk3barntaiIxJ5VHno/Tyab2JnfdcPzp5xONh/8VSfed4bo/9xKo5HcUAEydko38vYLfj6lJliLiw==}
-
-  '@aws-cdk/asset-awscli-v1@2.2.282':
-    resolution: {integrity: sha512-7hKMi5tTxDcKGIMIOq14PnY0GBcugW33Uh/2YHDZiEwSxLeFOCYBwhR+BFXONb/EJeVI3RETFgailNZbkcKF6g==}
-
-  '@aws-cdk/asset-node-proxy-agent-v6@2.1.2':
-    resolution: {integrity: sha512-pDiuqH+qY3zM9lhhLjbKJ1tnKOHzQ2V4Wr/3qsxyKeKAkuPMI/BVGvZG1PbrikUw949cGVTfVEt4ETKKYnrj0Q==}
-
-  '@aws-cdk/cloud-assembly-schema@54.2.0':
-    resolution: {integrity: sha512-u3lFXmiXSBozxGBmKTCVD/2mTDsaXzLZH3KYiIQKcB+zPldXOeE5TnooBgKV9ih2jVTo8ML0HpkhfAq2eiv0eQ==}
-    engines: {node: '>= 18.0.0'}
-    bundledDependencies:
-      - jsonschema
-      - semver
 
   '@azure-rest/core-client@2.6.1':
     resolution: {integrity: sha512-KzI10qnkWTsVS2yRBUdc8NLUJ1rOm+292mYs7Pe9wqAj/jv4bRskVm1l8XkKeVTN0OCQtrU5RG0Yhjbz1Wmg7g==}
@@ -2187,30 +2126,6 @@ packages:
   avvio@9.2.0:
     resolution: {integrity: sha512-2t/sy01ArdHHE0vRH5Hsay+RtCZt3dLPji7W7/MMOCEgze5b7SNDC4j5H6FnVgPkI1MTNFGzHdHrVXDDl7QSSQ==}
 
-  aws-cdk-lib@2.258.0:
-    resolution: {integrity: sha512-OfFfg30ikBRJ3dimlzsWhPIrj6qug1p2XYsdB38CtMtcur7SufzoUczgI6kWjbQkOVcQgYzhzN29DErV0yZG7A==}
-    engines: {node: '>= 20.0.0'}
-    peerDependencies:
-      constructs: ^10.5.0
-    bundledDependencies:
-      - '@balena/dockerignore'
-      - '@aws-cdk/cloud-assembly-api'
-      - case
-      - fs-extra
-      - ignore
-      - jsonschema
-      - minimatch
-      - punycode
-      - semver
-      - table
-      - yaml
-      - mime-types
-
-  aws-cdk@2.1126.0:
-    resolution: {integrity: sha512-uNoocb3vCPiAT3j9+SwL6pn/VVggHWBsgC2XpxyhNvYQYt6cE9BM/149GWwtdcwnLrPjnwW1+CV/5nSSh5dV+w==}
-    engines: {node: '>= 18.0.0'}
-    hasBin: true
-
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
@@ -2397,9 +2312,6 @@ packages:
     resolution: {integrity: sha512-fsfrO0MxV64Znoy8/l1vVIjjHa29SZyyqPgQBwhiDcaW8wJc2W3XWVOGx4M3oJBnv/zdUZIIp1gDeS98GzP8Ng==}
     engines: {node: '>=18'}
     hasBin: true
-
-  constructs@10.6.0:
-    resolution: {integrity: sha512-TxHOnBO5zMo/G76ykzGF/wMpEHu257TbWiIxP9K0Yv/+t70UzgBQiTqjkAsWOPC6jW91DzJI0+ehQV6xDRNBuQ==}
 
   content-disposition@0.5.4:
     resolution: {integrity: sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==}
@@ -4531,12 +4443,6 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  '@aws-cdk/asset-awscli-v1@2.2.282': {}
-
-  '@aws-cdk/asset-node-proxy-agent-v6@2.1.2': {}
-
-  '@aws-cdk/cloud-assembly-schema@54.2.0': {}
-
   '@azure-rest/core-client@2.6.1':
     dependencies:
       '@azure/abort-controller': 2.1.2
@@ -6068,15 +5974,6 @@ snapshots:
       '@fastify/error': 4.2.0
       fastq: 1.20.1
 
-  aws-cdk-lib@2.258.0(constructs@10.6.0):
-    dependencies:
-      '@aws-cdk/asset-awscli-v1': 2.2.282
-      '@aws-cdk/asset-node-proxy-agent-v6': 2.1.2
-      '@aws-cdk/cloud-assembly-schema': 54.2.0
-      constructs: 10.6.0
-
-  aws-cdk@2.1126.0: {}
-
   bail@2.0.2: {}
 
   balanced-match@1.0.2: {}
@@ -6251,8 +6148,6 @@ snapshots:
       supports-color: 8.1.1
       tree-kill: 1.2.2
       yargs: 17.7.2
-
-  constructs@10.6.0: {}
 
   content-disposition@0.5.4:
     dependencies:

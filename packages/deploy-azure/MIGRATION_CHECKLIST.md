@@ -105,32 +105,29 @@ include them.
 - [ ] **Verify ACS Email delivery in prod** by signing up with a fresh
   email — make sure the OTP lands.
 
-## 6. AWS teardown — after Azure is stable
+## 6. AWS teardown — done
 
-Run only after Azure has been serving prod traffic for at least a few
-days without incident.
+Completed 2026-06-12. Both CDK stacks (`ytai-prod`, `kpai-prod`),
+the txd S3 bucket + CloudFront distribution, ECR repos (kpai, ytai),
+the SES `techseeding.com.au` domain identity, the Route53 hosted zone,
+and all repo-side AWS code (`packages/deploy/`, `apps/{kpai,ytai}/deploy/`,
+root release/diff/synth scripts) are gone.
 
-- [ ] `pnpm -F @techseeding/deploy diff:kpai` — sanity check what's
-  about to disappear.
-- [ ] `pnpm -F @techseeding/deploy destroy:kpai` (will tear down the
-  whole shared core: VPC, ALB, Aurora, EFS).
-- [ ] `pnpm -F @techseeding/deploy destroy:ytai` (no-op if already
-  removed by kpai destroy's cascade — ytai stack just references
-  kpai resources).
-- [ ] **Manually delete txd's old infra:**
-  - `aws s3 rm s3://txd-portal --recursive && aws s3 rb s3://txd-portal`
-  - `aws cloudfront delete-distribution --id E1JLIDSYCZB9UH`
-    (disable first, wait for `Deployed` state, then delete)
-- [ ] **Delete ECR repos** (kpai, ytai) once you're sure no rollback is
-  needed: `aws ecr delete-repository --repository-name <name> --force`.
-- [ ] **Remove SES identity** for `techseeding.com.au` in AWS console.
-- [ ] **Delete Route53 hosted zone** for `techseeding.com.au` (only after
-  NS records have been pointing at Azure for several days and you've
-  confirmed no Route53-only consumers remain).
-- [ ] **Remove `apps/{kpai,ytai}/deploy/` and the AWS-side root scripts**
-  from the repo (`release:kpai`, `release:ytai`, `diff:kpai`, etc.).
-- [ ] **Cancel the AWS account** or scale it down to $0 if no other
-  workloads run on it.
+**Manual leftovers** the prod IAM user couldn't reach — clean up with a
+higher-privileged role when convenient (all of them are $0 to leave):
+
+- EFS `SandboxFs` (ap-southeast-2) — retained from kpai's `RemovalPolicy.RETAIN`.
+- Aurora final snapshot — auto-created by kpai's `RemovalPolicy.SNAPSHOT`
+  during stack destroy; verify and delete in RDS console.
+- us-east-1 ACM cert for `*.techseeding.com.au` — was used by txd's
+  CloudFront distribution; ACM certs are free, can stay.
+- `techseeding2020@gmail.com` SES email identity — pre-verified sender,
+  unclear if still needed elsewhere; leave unless you're sure.
+
+**Cost-only leftover** — the `techseeding.com.au` registration in
+Route53 Domains. AWS will auto-renew at ~$13/year. To stop the bill,
+either transfer the domain out (Cloudflare/Namecheap/etc.) or let it
+lapse. Until then the AWS account needs a valid payment method.
 
 ## Appendix: dropping VNet integration (cost-saver redeploy)
 

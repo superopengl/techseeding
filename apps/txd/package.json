@@ -18,10 +18,7 @@
     "watched": "nodemon -w src --ext js --exec pnpm run build",
     "watch": "npm-watch",
     "g": "npx generate-react-cli component --",
-    "p": "npx generate-react-cli component -- --type=page",
-    "upload": "aws s3 sync build s3://txd-portal/",
-    "flush": "aws cloudfront create-invalidation --distribution-id E1JLIDSYCZB9UH --paths \"/*\"",
-    "release": "pnpm run build:prod && pnpm run upload && pnpm run flush"
+    "p": "npx generate-react-cli component -- --type=page"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",

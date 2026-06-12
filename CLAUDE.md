@@ -17,7 +17,7 @@ packages/
 
 App-level architecture, schemas, and conventions live in `apps/kpai/CLAUDE.md` and `apps/ytai/CLAUDE.md` — read those when working inside an app. This file covers the monorepo-level concerns.
 
-Workspace globs (in `pnpm-workspace.yaml`): `apps/*`, `apps/*/src/portal`, `apps/*/deploy`, `packages/*`. The catalog block at the bottom of that file is the source of truth for cross-app dep versions — when an app references `"foo": "catalog:"`, bump the catalog, not the per-app entry.
+Workspace globs (in `pnpm-workspace.yaml`): `apps/*`, `apps/*/src/portal`, `packages/*`. The catalog block at the bottom of that file is the source of truth for cross-app dep versions — when an app references `"foo": "catalog:"`, bump the catalog, not the per-app entry.
 
 ## Working in the repo
 
