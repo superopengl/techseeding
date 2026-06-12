@@ -1,16 +1,67 @@
 {
   "name": "@techseeding/txd",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
+  "private": true,
+  "description": "Techseeding portal website",
+  "author": "mr.shaojun@gmail.com",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd txd-web; pnpm dev",
-    "release": "cd *web; pnpm release"
+    "start": "vite --port 5001",
+    "build": "pnpm run clean && vite build",
+    "build:prod": "vite build",
+    "clean": "rm -rf build",
+    "preview": "vite preview --port 5001",
+    "dev": "pnpm install && pnpm run start",
+    "watched": "nodemon -w src --ext js --exec pnpm run build",
+    "watch": "npm-watch",
+    "g": "npx generate-react-cli component --",
+    "p": "npx generate-react-cli component -- --type=page",
+    "upload": "aws s3 sync build s3://txd-portal/",
+    "flush": "aws cloudfront create-invalidation --distribution-id E1JLIDSYCZB9UH --paths \"/*\"",
+    "release": "pnpm run build:prod && pnpm run upload && pnpm run flush"
   },
-  "author": "mr.shaojun@gmail.com",
-  "license": "MIT"
+  "dependencies": {
+    "@ant-design/icons": "^6.2.2",
+    "@emailjs/browser": "^4.4.0",
+    "antd": "catalog:",
+    "i18next": "^24.2.0",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-i18next": "^15.4.0",
+    "react-icons": "^5.4.0",
+    "react-responsive": "^10.0.0",
+    "react-router-dom": "^6.28.0",
+    "styled-components": "^6.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "catalog:",
+    "generate-react-cli": "^8.0.0",
+    "nodemon": "^3.0.0",
+    "npm-watch": "^0.13.0",
+    "vite": "catalog:"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js,jsx"
+    }
+  }
 }

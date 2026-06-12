@@ -5,8 +5,7 @@ NC='\033[0m'
 
 echo -e "${ORANGE}TXD${NC}"
 
-alias thome='cd /Users/jshao/github/txd'
-alias tweb='cd /Users/jshao/github/txd/txd-web'
+alias thome='cd /Users/jshao/github/techseeding/apps/txd'
 
 export AWS_PROFILE=txd
 

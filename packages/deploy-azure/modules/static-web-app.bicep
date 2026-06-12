@@ -19,7 +19,7 @@ resource swa 'Microsoft.Web/staticSites@2024-11-01' = {
     repositoryUrl: ''
     branch: ''
     buildProperties: {
-      appLocation: 'apps/txd/txd-web'
+      appLocation: 'apps/txd'
       outputLocation: 'build'
     }
   }

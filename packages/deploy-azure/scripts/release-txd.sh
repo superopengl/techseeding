@@ -33,10 +33,10 @@ if [ -z "${AZURE_SWA_DEPLOYMENT_TOKEN:-}" ]; then
 fi
 
 echo "==> Building txd-web"
-( cd "$REPO_ROOT" && pnpm --filter web build:prod )
+( cd "$REPO_ROOT" && pnpm -F @techseeding/txd build:prod )
 
 echo "==> Deploying to Static Web App $AZURE_SWA_NAME"
-( cd "$REPO_ROOT/apps/txd/txd-web" && \
+( cd "$REPO_ROOT/apps/txd" && \
   swa deploy ./build \
     --deployment-token "$AZURE_SWA_DEPLOYMENT_TOKEN" \
     --env production )

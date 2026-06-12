@@ -32,5 +32,8 @@
     "release:azure:ytai": "pnpm -F @techseeding/deploy-azure release:ytai",
     "release:azure:txd": "pnpm -F @techseeding/deploy-azure release:txd",
     "release:azure:all": "pnpm release:azure:txd && pnpm release:azure:kpai && pnpm release:azure:ytai"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }
