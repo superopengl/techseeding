@@ -235,6 +235,19 @@ importers:
         specifier: ^6.0.0
         version: 6.4.3(tsx@4.22.4)
 
+  packages/deploy:
+    dependencies:
+      aws-cdk-lib:
+        specifier: ^2.170.0
+        version: 2.258.0(constructs@10.6.0)
+      constructs:
+        specifier: ^10.4.2
+        version: 10.6.0
+    devDependencies:
+      aws-cdk:
+        specifier: ^2.170.0
+        version: 2.1126.0
+
 packages:
 
   '@ai-sdk/deepseek@2.0.35':
