@@ -1,11 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { getObjectBytes } from './s3.js';
+import { getObjectBytes } from './blob.js';
 
 // Re-hydrate an image we previously persisted so vision lookups on later
 // turns can run without the client resending the bytes. Supports both
-// file:// (dev) and s3:// (prod). Returns `{ bytes, mimeType }` or null
+// file:// (dev) and azblob:// (prod). Returns `{ bytes, mimeType }` or null
 // when the bytes can't be fetched. Callers run the bytes through
 // downscaleImageForBrain before sending to Brain — encoding to a
 // data URL here would force a re-decode every turn.
@@ -18,7 +18,7 @@ export default async function loadImageBytes(storageUrl) {
     return { bytes, mimeType: mimeFromPath(filePath) };
   }
 
-  if (storageUrl.startsWith('s3://')) {
+  if (storageUrl.startsWith('azblob://')) {
     const obj = await getObjectBytes(storageUrl);
     if (!obj) return null;
     const mime = obj.contentType?.startsWith('image/')

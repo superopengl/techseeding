@@ -4,7 +4,7 @@ import path from 'node:path';
 import { and, eq } from 'drizzle-orm';
 import db from '../db/index.js';
 import { sessionImage, tutorSession } from '../db/schema.js';
-import { getObjectStream } from '../lib/s3.js';
+import { getObjectStream } from '../lib/blob.js';
 
 // Serves the flattened canvas bytes (photo + student strokes) for a given
 // session_image row. Used by the chat UI to show the same image the student
@@ -39,7 +39,7 @@ export default function tutorGetImage(fastify) {
       return reply.send(createReadStream(filePath));
     }
 
-    if (row.storageUrl.startsWith('s3://')) {
+    if (row.storageUrl.startsWith('azblob://')) {
       const obj = await getObjectStream(row.storageUrl);
       if (!obj) {
         reply.code(404);

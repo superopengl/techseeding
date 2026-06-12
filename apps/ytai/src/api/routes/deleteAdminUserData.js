@@ -9,7 +9,7 @@ import {
   tutorSession,
   user
 } from '../db/schema.js';
-import { markObjectOrphan } from '../lib/s3.js';
+import { markObjectOrphan } from '../lib/blob.js';
 
 // DELETE /api/admin/user/:id/data
 //

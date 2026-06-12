@@ -1,34 +1,40 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { EmailClient } from '@azure/communication-email';
 
-// Lazy-built SES client. Module-level so we don't recreate it on every send
+// Lazy-built EmailClient. Module-level so we don't recreate it on every send
 // — the SDK reuses HTTPS connections internally.
-let sesClient = null;
-function getSesClient() {
-  if (sesClient) return sesClient;
-  const region = process.env.YTAI_AWS_REGION || 'ap-southeast-2';
-  sesClient = new SESClient({ region });
-  return sesClient;
+let emailClient = null;
+function getEmailClient() {
+  if (emailClient) return emailClient;
+  const conn = process.env.YTAI_ACS_CONNECTION_STRING;
+  if (!conn) return null;
+  emailClient = new EmailClient(conn);
+  return emailClient;
 }
 
-// Best-effort delivery of a sign-in OTP. We log the code at info level so an
-// operator can recover it from server logs even if SES isn't configured —
-// the row is already stored, so failure to send is non-fatal.
+// Best-effort delivery of a sign-in OTP via Azure Communication Services. We
+// log the code at info level so an operator can recover it from server logs
+// even if ACS isn't configured — the row is already stored, so failure to
+// send is non-fatal.
 //
-// Requires `YTAI_SES_FROM_EMAIL` (a verified SES identity). Standard AWS
-// credential resolution applies (env vars, shared config, or IAM role).
+// Requires `YTAI_ACS_CONNECTION_STRING` and `YTAI_ACS_SENDER` (a verified
+// ACS sender address).
 export default async function sendOtpEmail({ to, code, expiresAt, recipientName, log }) {
   log?.info({ to, code, expiresAt: expiresAt.toISOString() }, 'OTP issued');
 
-  const fromAddr = process.env.YTAI_SES_FROM_EMAIL;
+  const fromAddr = process.env.YTAI_ACS_SENDER;
   if (!fromAddr) {
-    log?.warn({ to }, 'YTAI_SES_FROM_EMAIL not set; skipping SES send (code still in DB)');
-    return { delivered: false, reason: 'SES_NOT_CONFIGURED' };
+    log?.warn({ to }, 'YTAI_ACS_SENDER not set; skipping ACS send (code still in DB)');
+    return { delivered: false, reason: 'ACS_NOT_CONFIGURED' };
   }
-  // Inbox clients show the display name when the Source header is RFC 5322
-  // "Name <addr>" — without it Gmail just shows the local part ("yoututorai").
-  // If the operator already set a display-name form in the env var, pass it
-  // through untouched.
-  const from = fromAddr.includes('<') ? fromAddr : `YouTutorAI <${fromAddr}>`;
+  const client = getEmailClient();
+  if (!client) {
+    log?.warn({ to }, 'YTAI_ACS_CONNECTION_STRING not set; skipping ACS send (code still in DB)');
+    return { delivered: false, reason: 'ACS_NOT_CONFIGURED' };
+  }
+  // ACS accepts a displayName on the recipient and a senderAddress in the
+  // form `display name <local@domain>` is NOT supported — pass the bare
+  // address. Display names go via `recipients[].displayName` if needed.
+  const from = fromAddr.includes('<') ? fromAddr.match(/<([^>]+)>/)?.[1] || fromAddr : fromAddr;
 
   const ttl = formatMinutes(expiresAt);
   const greeting = recipientName ? `Hi ${escape(recipientName)},` : 'Hi there,';
@@ -45,24 +51,17 @@ export default async function sendOtpEmail({ to, code, expiresAt, recipientName,
   const htmlBody = renderHtml({ code, ttl, greeting, subject });
 
   try {
-    const result = await getSesClient().send(
-      new SendEmailCommand({
-        Source: from,
-        Destination: { ToAddresses: [to] },
-        Message: {
-          Subject: { Data: subject, Charset: 'UTF-8' },
-          Body: {
-            Html: { Data: htmlBody, Charset: 'UTF-8' },
-            Text: { Data: textBody, Charset: 'UTF-8' }
-          }
-        }
-      })
-    );
-    log?.info({ to, messageId: result.MessageId }, 'OTP email sent via SES');
-    return { delivered: true, messageId: result.MessageId };
+    const poller = await client.beginSend({
+      senderAddress: from,
+      recipients: { to: [{ address: to, displayName: recipientName || undefined }] },
+      content: { subject, html: htmlBody, plainText: textBody }
+    });
+    const result = await poller.pollUntilDone();
+    log?.info({ to, messageId: result.id }, 'OTP email sent via ACS');
+    return { delivered: true, messageId: result.id };
   } catch (err) {
-    log?.error({ err, to }, 'SES SendEmail failed');
-    return { delivered: false, reason: err.name || 'SES_ERROR' };
+    log?.error({ err, to }, 'ACS Email send failed');
+    return { delivered: false, reason: err.code || err.name || 'ACS_ERROR' };
   }
 }
 

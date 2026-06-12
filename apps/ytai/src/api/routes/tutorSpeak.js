@@ -6,7 +6,7 @@ import db from '../db/index.js';
 import { ttsAudio, tutorSession } from '../db/schema.js';
 import persistAudio from '../lib/persistAudio.js';
 import synthesizeSpeech from '../lib/synthesizeSpeech.js';
-import { getObjectStream, objectExists } from '../lib/s3.js';
+import { getObjectStream, objectExists } from '../lib/blob.js';
 
 const DEFAULT_MODEL = 'kokoro';
 const DEFAULT_VOICE = 'am_fenrir';
@@ -195,7 +195,7 @@ async function cacheBytesExist(storageUrl) {
       return false;
     }
   }
-  if (storageUrl.startsWith('s3://')) {
+  if (storageUrl.startsWith('azblob://')) {
     try {
       return await objectExists(storageUrl);
     } catch {
@@ -231,7 +231,7 @@ async function sendCachedAudio(reply, cached) {
     return reply.send(createReadStream(filePath));
   }
 
-  if (cached.storageUrl.startsWith('s3://')) {
+  if (cached.storageUrl.startsWith('azblob://')) {
     const obj = await getObjectStream(cached.storageUrl);
     if (!obj) {
       // Lost the race: object disappeared between the existence probe and

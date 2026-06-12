@@ -7,7 +7,7 @@ import {
   sessionReport,
   tutorSession
 } from '../db/schema.js';
-import { markObjectOrphan } from '../lib/s3.js';
+import { markObjectOrphan } from '../lib/blob.js';
 
 export default function tutorDeleteSession(fastify) {
   fastify.delete('/api/tutor/:sessionId', async (request, reply) => {
