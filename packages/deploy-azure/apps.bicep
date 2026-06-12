@@ -45,7 +45,7 @@ param storageBlobEndpoint string
 @description('Postgres FQDN.')
 param postgresFqdn string
 
-@description('ACS sender address (e.g. donotreply@techseeding.com.au or the AzureManagedDomain).')
+@description('ACS sender address (e.g. noreply@techseeding.com.au or the AzureManagedDomain).')
 param acsSender string
 
 @description('kpai container image tag.')

@@ -15,7 +15,7 @@ set -euo pipefail
 #   AZURE_PG_FQDN
 #   AZURE_PG_ADMIN_USERNAME   default: pgadmin
 #   AZURE_ACA_ENV_ID
-#   AZURE_ACS_SENDER          e.g. donotreply@techseeding.com.au
+#   AZURE_ACS_SENDER          e.g. noreply@techseeding.com.au
 # Optional env:
 #   KPAI_IMAGE_TAG            default: latest
 #   YTAI_IMAGE_TAG            default: latest

@@ -56,17 +56,24 @@ resource kvAdmin 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (pi
 
 // Empty secret slots — Bicep creates the slot, seed-secrets.sh fills it.
 // Listed here so they're observable in the deployed state even before seeding.
+// kpai-google-client-id / ytai-google-client-id are stored here for
+// operational consistency (rotate via portal/CLI) but consumed as plain
+// Bicep params, not secretRefs — Google OAuth client IDs are public
+// identifiers in web/SPA flows, so KV here is a record-of-truth, not a
+// security boundary.
 var secretNames = [
   'kpai-db-password'
   'kpai-jwt-secret'
   'kpai-sandbox-deepseek-api-key'
   'kpai-admin-password'
   'kpai-acs-connection-string'
+  'kpai-google-client-id'
   'ytai-db-password'
   'ytai-jwt-secret'
   'ytai-openrouter-api-key'
   'ytai-admin-password'
   'ytai-acs-connection-string'
+  'ytai-google-client-id'
   'pg-admin-password'
 ]
 

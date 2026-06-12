@@ -17,6 +17,8 @@ set -euo pipefail
 #   YTAI_OPENROUTER_API_KEY=...
 #   YTAI_ADMIN_PASSWORD=...
 #   YTAI_ACS_CONNECTION_STRING=...
+#   KPAI_GOOGLE_CLIENT_ID=...      # public client ID — KV stores for ops parity
+#   YTAI_GOOGLE_CLIENT_ID=...      # same
 #   PG_ADMIN_PASSWORD=...
 #
 # Required env:
@@ -43,11 +45,13 @@ declare -A MAP=(
   [KPAI_SANDBOX_DEEPSEEK_API_KEY]=kpai-sandbox-deepseek-api-key
   [KPAI_ADMIN_PASSWORD]=kpai-admin-password
   [KPAI_ACS_CONNECTION_STRING]=kpai-acs-connection-string
+  [KPAI_GOOGLE_CLIENT_ID]=kpai-google-client-id
   [YTAI_DB_PASSWORD]=ytai-db-password
   [YTAI_JWT_SECRET]=ytai-jwt-secret
   [YTAI_OPENROUTER_API_KEY]=ytai-openrouter-api-key
   [YTAI_ADMIN_PASSWORD]=ytai-admin-password
   [YTAI_ACS_CONNECTION_STRING]=ytai-acs-connection-string
+  [YTAI_GOOGLE_CLIENT_ID]=ytai-google-client-id
   [PG_ADMIN_PASSWORD]=pg-admin-password
 )
 
