@@ -132,6 +132,50 @@ days without incident.
 - [ ] **Cancel the AWS account** or scale it down to $0 if no other
   workloads run on it.
 
+## Appendix: dropping VNet integration (cost-saver redeploy)
+
+Postgres network mode and ACA Environment VNet config are both **immutable** —
+switching from VNet-integrated to public-endpoint requires destroying and
+recreating those two resources. The rest of the RG (KV, Storage, ACR, DNS,
+ACS, UAMI, Log Analytics) survives untouched, so secrets and DNS authority
+stay intact.
+
+Run from a healthy state (no in-flight deploys):
+
+```bash
+RG=techseeding-rg
+
+# 1. Delete the Container Apps + Jobs (apps.bicep resources).
+az containerapp delete -g $RG -n kpai --yes
+az containerapp delete -g $RG -n ytai --yes
+az containerapp job delete -g $RG -n kpai-migrate --yes
+az containerapp job delete -g $RG -n ytai-migrate --yes
+
+# 2. Delete the ACA Environment (frees the managed LB + Public IP).
+az containerapp env delete -g $RG -n techseeding-env --yes
+
+# 3. Delete the Postgres server (DATA LOSS — pg_dump first if needed).
+az postgres flexible-server delete -g $RG -n techseeding-pg --yes
+
+# 4. Delete the now-orphan VNet + private DNS zone link.
+az network vnet subnet delete -g $RG --vnet-name techseeding-vnet -n aca || true
+az network vnet subnet delete -g $RG --vnet-name techseeding-vnet -n db || true
+az network vnet delete -g $RG -n techseeding-vnet
+az network private-dns link vnet delete -g $RG \
+  -z privatelink.postgres.database.azure.com -n techseeding-vnet-pg-link --yes || true
+az network private-dns zone delete -g $RG \
+  -n privatelink.postgres.database.azure.com --yes || true
+
+# 5. Redeploy infra (Postgres + ACA env recreate without VNet).
+pnpm azure:deploy:infra
+
+# 6. Redeploy apps (Container Apps + Jobs rebind to the new env).
+pnpm azure:deploy:apps
+```
+
+KV secrets, ACR images, Storage blobs, DNS zone records, and ACS Email
+domain verification all survive — no re-seeding needed.
+
 ## Notes
 
 - The DNS authority change (step 1) is the single most-fragile moment.
