@@ -108,8 +108,10 @@ module kpaiApp 'modules/container-app.bicep' = {
     uamiId: uamiId
     externalIngress: true
     targetPort: 80
-    minReplicas: 1
-    maxReplicas: 3
+    // min=0 → scales to zero when idle (first request pays cold-start).
+    // Saves the ~$33/mo of an always-on replica for an early-stage app.
+    minReplicas: 0
+    maxReplicas: 1
     customDomain: kpaiCustomDomain
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-db-password' }
@@ -166,7 +168,7 @@ module ytaiApp 'modules/container-app.bicep' = {
     externalIngress: true
     targetPort: 80
     minReplicas: 0
-    maxReplicas: 2
+    maxReplicas: 1
     customDomain: ytaiCustomDomain
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/ytai-db-password' }
