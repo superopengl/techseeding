@@ -1,5 +1,7 @@
 // Container Apps Environment — the shared hosting plane both apps run in.
-// VNet-integrated so traffic to Postgres stays on the private network.
+// Non-VNet Consumption workload profile: cheapest tier, no managed Load
+// Balancer + Public IP in the infra-managed RG, and the lowest per-vCPU-second
+// rate. Outbound to Postgres goes over Azure backbone via public endpoint.
 
 @description('Azure region.')
 param location string
@@ -9,9 +11,6 @@ param tags object = {}
 
 @description('Environment name.')
 param name string
-
-@description('Subnet ID for ACA infrastructure (must be /23 or larger, delegated to Microsoft.App/environments).')
-param infrastructureSubnetId string
 
 @description('Log Analytics workspace ID.')
 param logAnalyticsCustomerId string
@@ -44,10 +43,6 @@ resource env 'Microsoft.App/managedEnvironments@2025-02-02-preview' = {
         customerId: logAnalyticsCustomerId
         sharedKey: logAnalyticsSharedKey
       }
-    }
-    vnetConfiguration: {
-      infrastructureSubnetId: infrastructureSubnetId
-      internal: false
     }
     workloadProfiles: [
       {

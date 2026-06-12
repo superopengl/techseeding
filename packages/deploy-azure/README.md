@@ -9,20 +9,14 @@ Single resource group, single region (`australiaeast` for everything except the 
 ```mermaid
 graph TD
   subgraph rg["techseeding-rg (australiaeast)"]
-    subgraph vnet["VNet techseeding-vnet (10.20.0.0/16)"]
-      direction LR
-      acaSubnet["aca subnet<br/>10.20.0.0/23"]
-      dbSubnet["db subnet<br/>10.20.2.0/28"]
-    end
-
-    subgraph env["techseeding-env (ACA Environment, VNet-integrated)"]
+    subgraph env["techseeding-env (ACA Environment, non-VNet Consumption)"]
       kpaiApp["kpai<br/>Container App"]
       ytaiApp["ytai<br/>Container App"]
       kpaiMig["kpai-migrate<br/>ACA Job"]
       ytaiMig["ytai-migrate<br/>ACA Job"]
     end
 
-    pg["techseeding-pg<br/>Postgres Flex B1ms<br/>(dbs: kpai, ytai)"]
+    pg["techseeding-pg<br/>Postgres Flex B1ms<br/>public endpoint + AllowAllAzureServices<br/>(dbs: kpai, ytai)"]
     acr["techseedingacr<br/>ACR Basic"]
     kv["techseeding-kv<br/>Key Vault (RBAC)"]
     sa["techseedingsa<br/>Storage Account<br/>(blob: ytai-images, txd-static<br/>file share: kpai-sandboxes)"]
@@ -36,7 +30,7 @@ graph TD
     env -.secrets.-> kv
     env -.blob + files.-> sa
     env -.logs.-> logs
-    env -.private network.-> pg
+    env -.public endpoint over Azure backbone.-> pg
 
     kpaiApp -.ACS Email.-> acs
     ytaiApp -.ACS Email.-> acs
@@ -63,7 +57,7 @@ Every Container App + Job attaches the **same** User-Assigned Managed Identity (
 Infra and apps deploy from two separate Bicep templates:
 
 1. **`main.bicep`** (subscription scope, via `pnpm azure:deploy:infra`)
-   - Creates the resource group + every infra resource: VNet, Log Analytics, ACR, Postgres, Storage, KV, DNS zone, ACS, ACA Environment, UAMI, Static Web App
+   - Creates the resource group + every infra resource: Log Analytics, ACR, Postgres, Storage, KV, DNS zone, ACS, ACA Environment, UAMI, Static Web App
    - Does not need container images to exist yet
    - Outputs: ACR login server, Postgres FQDN, KV URI, ACA env id, storage blob endpoint, ACS sender, UAMI id
 2. **`apps.bicep`** (resource-group scope, via `pnpm azure:deploy:apps`)

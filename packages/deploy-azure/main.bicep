@@ -40,6 +40,9 @@ param pgAdminPassword string
 @description('Principal IDs that need Key Vault Secrets Officer (for seed-secrets.sh).')
 param keyVaultAdminPrincipalIds array = []
 
+@description('Set true after ACS Email custom-domain verification (Domain/SPF/DKIM/DKIM2 all Verified) so ACS accepts the custom domain as a sender. Default false during initial bring-up.')
+param linkAcsCustomDomain bool = false
+
 @description('Tags applied to every resource.')
 param tags object = {
   project: 'techseeding'
@@ -52,18 +55,6 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-11-01' = {
   name: resourceGroupName
   location: location
   tags: tags
-}
-
-// ─── Networking ─────────────────────────────────────────────────────────────
-
-module network 'modules/network.bicep' = {
-  scope: rg
-  name: 'network'
-  params: {
-    location: location
-    tags: tags
-    namePrefix: namePrefix
-  }
 }
 
 // ─── Observability ──────────────────────────────────────────────────────────
@@ -101,8 +92,6 @@ module postgres 'modules/postgres.bicep' = {
     name: '${namePrefix}-pg'
     adminUsername: pgAdminUsername
     adminPassword: pgAdminPassword
-    delegatedSubnetId: network.outputs.dbSubnetId
-    privateDnsZoneId: network.outputs.pgPrivateDnsZoneId
   }
 }
 
@@ -152,6 +141,7 @@ module acsEmail 'modules/acs-email.bicep' = {
     acsName: '${namePrefix}-acs'
     emailServiceName: '${namePrefix}-email'
     customDomainName: dnsZoneName
+    linkCustomDomain: linkAcsCustomDomain
   }
 }
 
@@ -172,7 +162,6 @@ module containerAppsEnv 'modules/container-apps-env.bicep' = {
     location: location
     tags: tags
     name: '${namePrefix}-env'
-    infrastructureSubnetId: network.outputs.acaSubnetId
     logAnalyticsCustomerId: logAnalytics.outputs.customerId
     logAnalyticsSharedKey: logAnalytics.outputs.sharedKey
     storageAccountName: storage.outputs.name
