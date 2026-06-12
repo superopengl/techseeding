@@ -63,6 +63,8 @@ pnpm azure:print-ns         # 4 Azure DNS nameservers (for registrar update)
 
 All Bicep + scripts in `packages/deploy-azure/`. `main.bicep` is subscription-scoped (creates RG + everything inside). `apps.bicep` is rg-scoped and depends on container images existing in ACR. Verify any Bicep edit with `az bicep build --file main.bicep` before deploying.
 
+Detailed architecture (resource graph, identity model, two-pass deploy, secret flow, operational gotchas): `packages/deploy-azure/README.md`. Manual cutover steps the operator owns: `packages/deploy-azure/MIGRATION_CHECKLIST.md`.
+
 ## Conventions
 
 - **No `Co-Authored-By` lines in commit messages.**
