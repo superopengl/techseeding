@@ -87,8 +87,10 @@ DB connection: apps' entrypoints compose `${APP}_DATABASE_URL` from `PG_HOST` (p
 ## Network
 
 - **Apps**: external HTTPS ingress on each Container App (Azure-managed FQDN). No ALB equivalent needed.
-- **Postgres**: VNet-integrated via the `db` subnet's `Microsoft.DBforPostgreSQL/flexibleServers` delegation + a private DNS zone. **Not reachable from the public internet** — to run psql from a laptop, attach a jumpbox VM in the VNet or use an ACA Job.
-- **KV / Storage / ACR**: public endpoints with `defaultAction: Allow` for now; tighten to private endpoints if needed (the `pe` subnet exists for this).
+- **Postgres**: public endpoint with the `AllowAllAzureServices` firewall rule (start=end=0.0.0.0). Only callers with the admin password (in KV) can connect; traffic from ACA → Postgres rides Azure's regional backbone, not the public internet. To run psql from a laptop, add a temporary firewall rule via `params/prod.bicepparam` (`extraFirewallRules`) for your IP, or use an ACA Job.
+- **KV / Storage / ACR**: public endpoints with `defaultAction: Allow`. Tighten to private endpoints if compliance ever demands it — would require reintroducing a VNet.
+
+**Why no VNet:** ACA Consumption profile with VNet integration provisions a managed Standard Load Balancer + Public IP (~$20+/mo idle) and charges higher per-vCPU-second rates. For a two-app workload where Postgres is the only thing that benefits from private networking, the AllowAllAzureServices + KV-stored password model is the cheaper, simpler default. Reintroduce a VNet if you need private endpoints, on-prem hybrid connectivity, or stricter egress controls.
 
 ## Release workflow
 
@@ -114,7 +116,8 @@ pnpm azure:deploy:apps       # apps.bicep — Container Apps + Jobs only
 - **ACA Consumption profile** requires specific CPU:memory pairings (1:2 ratio). 1.0/4Gi is rejected; use 2.0/4Gi.
 - **Static Web Apps** only deploy in 5 regions: centralus, eastus2, westus2, westeurope, eastasia. AU East is not supported. Content is CDN-served globally so the resource region only matters for the control plane.
 - **In-place region change for SWA** isn't allowed. To move from westus2 → eastasia we deleted and recreated; the default hostname changes.
-- **Postgres Flex Server VNet-mode** can't toggle `publicNetworkAccess: Enabled` after creation. If you need laptop psql access, deploy a jumpbox or use an ACA Job for one-off SQL.
+- **Postgres Flex Server network mode is immutable.** You can't switch a VNet-integrated server to public access (or vice versa) in-place — it requires destroying and recreating the server. Plan a one-shot redeploy if you change this.
+- **ACA Environment VNet config is immutable.** Toggling `vnetConfiguration` on an existing environment requires recreating the environment (and therefore re-binding every Container App).
 
 ## Files
 
