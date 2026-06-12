@@ -73,37 +73,19 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# EasyOCR into Kokoro's existing venv. CPU torch index keeps uv from
-# pulling the 2.5 GB CUDA wheel set when resolving easyocr's torch dep.
-RUN VIRTUAL_ENV=/app/.venv uv pip install --no-cache \
-      --extra-index-url https://download.pytorch.org/whl/cpu \
-      --index-strategy unsafe-best-match \
-      easyocr==1.7.2 \
-      fastapi==0.115.0 \
-      "uvicorn[standard]==0.30.6" \
-      python-multipart==0.0.9
-
-# Pre-download EasyOCR's CRAFT detector + CRNN recognizer (~80 MB) so the
-# first request after a cold task start doesn't pay the network fetch.
-RUN /app/.venv/bin/python -c "import easyocr; easyocr.Reader(['en'], gpu=False)"
-
-# OCR FastAPI wrapper. Sits above the ytai-source COPYs so a ytai-only
-# change keeps this layer cached.
-RUN mkdir -p /opt/ocr
-COPY --link devops/ocr/server.py /opt/ocr/server.py
-
 # Entrypoint + ytai runtime ENVs. Above the ytai-source COPYs for the
 # same caching reason — they rarely change relative to app code.
+# (OCR sidecar was removed in b176e1c — Brain is now multimodal and does
+# vision/OCR directly. Kokoro TTS stays for voice synthesis.)
 COPY --link --chmod=755 devops/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENV NODE_ENV=production \
-    YTAI_OCR_BASE_URL=http://127.0.0.1:9531 \
     YTAI_TTS_BASE_URL=http://127.0.0.1:8880/v1 \
     YTAI_API_PORT=80
 
 # ytai prod node_modules. Lockfile-pinned, so this layer survives any
 # source-only change.
 WORKDIR /opt/ytai
-COPY dist/package.json dist/pnpm-lock.yaml dist/.npmrc ./
+COPY dist/package.json dist/pnpm-lock.yaml dist/pnpm-workspace.yaml dist/.npmrc ./
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --prod
 

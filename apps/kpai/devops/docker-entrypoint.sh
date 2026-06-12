@@ -5,7 +5,9 @@ set -e
 # Secrets Manager fields can't be composed into a single env var. Compose
 # KPAI_DATABASE_URL here when those parts are present.
 if [ -z "$KPAI_DATABASE_URL" ] && [ -n "$PG_HOST" ]; then
-  export KPAI_DATABASE_URL="postgresql://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}"
+  # sslmode=require so Azure Postgres Flex Server (which rejects unencrypted
+  # connections via pg_hba.conf) accepts the connection.
+  export KPAI_DATABASE_URL="postgresql://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=require"
 fi
 
 # Run database migrations on startup when RUN_MIGRATIONS=true.

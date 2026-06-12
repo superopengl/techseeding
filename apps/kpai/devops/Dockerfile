@@ -12,7 +12,7 @@ WORKDIR /app
 # Install production Node dependencies first so source-only changes don't bust
 # this layer. Corepack reads "packageManager" from package.json and activates
 # that exact pnpm version.
-COPY dist/package.json dist/pnpm-lock.yaml ./
+COPY dist/package.json dist/pnpm-lock.yaml dist/pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --prod
 

@@ -1,14 +1,11 @@
 #!/bin/bash
-# Boot the three processes that make up the merged ytai container. The app
-# runs in the foreground as PID 1 so ECS task stop / SIGTERM cleanly exits
-# the container; TTS and OCR are backgrounded.
+# Boot the two processes that make up the ytai container. The app runs in
+# the foreground as PID 1 so ECS / ACA task stop SIGTERM cleanly exits the
+# container; TTS is backgrounded.
 #
-# Restart semantics: if Kokoro or OCR crash, the app keeps serving and
-# falls back gracefully (Brain uses Eyes-only when OCR is unavailable; the
-# UI greys out voice when TTS returns errors). If the app crashes, the
-# container exits and ECS schedules a fresh task. This is the prototype's
-# explicit trade — one crashed sidecar shouldn't take the user-facing app
-# down with it.
+# Restart semantics: if Kokoro crashes, the app keeps serving and the UI
+# greys out voice when TTS returns errors. If the app crashes, the
+# container exits and the runtime schedules a fresh task.
 
 set -eu
 
@@ -34,10 +31,10 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   cd /opt/ytai && node src/api/db/migrate.js
 fi
 
-# Forward SIGTERM to the background children so ECS task stop drains them
-# rather than waiting for the grace-period SIGKILL.
+# Forward SIGTERM to the TTS child so task stop drains it rather than
+# waiting for the grace-period SIGKILL.
 shutdown() {
-  kill -TERM "${TTS_PID:-0}" "${OCR_PID:-0}" 2>/dev/null || true
+  kill -TERM "${TTS_PID:-0}" 2>/dev/null || true
   exit 0
 }
 trap shutdown TERM INT
@@ -51,16 +48,8 @@ trap shutdown TERM INT
 ) &
 TTS_PID=$!
 
-# OCR — EasyOCR FastAPI wrapper. Uses Kokoro's venv (PyTorch already there).
-(
-  cd /opt/ocr
-  exec /app/.venv/bin/python -m uvicorn server:app \
-    --host 127.0.0.1 --port 9531 --log-level warning
-) &
-OCR_PID=$!
-
 # ytai app — foreground, becomes PID 1's child but receives SIGTERM via the
-# trap above when ECS stops the task. Same cwd as migrations so any future
+# trap above when the task is stopped. Same cwd as migrations so any future
 # relative-path lookups (e.g., drizzle, static-asset paths) match build time.
 cd /opt/ytai
 exec node src/api/server.js
