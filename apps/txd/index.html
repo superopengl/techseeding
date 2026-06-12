@@ -5,6 +5,17 @@
   <base href="/" />
   <meta charset="utf-8" />
 
+  <!-- Canonical domain redirect: www.techseeding.com.au → techseeding.com.au.
+       Static Web Apps has no native host-based redirect, so the canonical
+       URL is enforced at first parse before any other asset loads. -->
+  <script>
+    if (location.host === 'www.techseeding.com.au') {
+      location.replace('https://techseeding.com.au' + location.pathname + location.search + location.hash);
+    }
+  </script>
+
+  <link rel="canonical" href="https://techseeding.com.au/">
+
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -25,8 +36,8 @@
   <meta property="og:title" content="Home, Techseeding">
   <meta property="og:description"
     content="A professional information technology services for small businesses, home businesses, and startups. Services include design and develop websites, web applications, mobile apps, WeChat Mini Programs, database optimisation, e-commerce, digital transformation and tech consulting. Our skills cover Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.">
-  <meta property="og:url" content="https://www.techseeding.com.au/">
-  <meta property="og:image" content="https://www.techseeding.com.au/android-chrome-192x192.png">
+  <meta property="og:url" content="https://techseeding.com.au/">
+  <meta property="og:image" content="https://techseeding.com.au/android-chrome-192x192.png">
   <meta property="og:site_name" content="Techseeding">
 
   <title>Techseeding | IT technical service for small businesses and startups</title>
@@ -34,10 +45,10 @@
     {
       "@context": "https://schema.org",
       "@type": "Product",
-      "@id": "https://www.techseeding.com.au/",
+      "@id": "https://techseeding.com.au/",
       "name": "Techseeding - Information Technology Service",
       "description": "A professional information technology services for small businesses, home businesses, and startups. Services include design and develop websites, web applications, mobile apps, WeChat Mini Programs, database optimisation, e-commerce, digital transformation and tech consulting. Our skills cover Nodejs, .NET, C#, Python, Reactjs, Angular, JavaScript, TypeScript, MongoDB, PostgreSQL, SQL Server, MySQL, Docker, AWS and Azure.",
-      "image": "https://www.techseeding.com.au/android-chrome-192x192.png",
+      "image": "https://techseeding.com.au/android-chrome-192x192.png",
       "offers": [],
       "address": {
         "@type": "PostalAddress",
@@ -65,7 +76,7 @@
           "name": "Jun Shao"
         }
       },
-      "url": "https://www.techseeding.com.au/",
+      "url": "https://techseeding.com.au/",
       "telephone": "+61-405581228",
       "openingHoursSpecification": [
         {
