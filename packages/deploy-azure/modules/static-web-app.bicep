@@ -1,8 +1,8 @@
 // Azure Static Web Apps for txd. Free SKU is fine — single static site.
 // Deploys via the `swa` CLI from packages/deploy-azure/scripts/release-txd.sh.
 
-@description('Region. SWA is multi-region; "westus2" is a common default for free tier.')
-param location string = 'westus2'
+@description('Region. Static Web Apps only deploy in: centralus, eastus2, westus2, westeurope, eastasia. Content is served from Microsoft\'s global CDN regardless of this choice — pick the closest control-plane region to your team. eastasia is the closest to Australia.')
+param location string = 'eastasia'
 
 @description('Tags applied to the resource.')
 param tags object = {}
