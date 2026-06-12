@@ -45,6 +45,7 @@ if [ -n "${AZURE_DEPLOYMENT_NAME:-}" ]; then
   : "${AZURE_ACA_ENV_ID:=$(az_output "$AZURE_DEPLOYMENT_NAME" containerAppsEnvId sub)}"
   : "${AZURE_STORAGE_BLOB_ENDPOINT:=$(az_output "$AZURE_DEPLOYMENT_NAME" storageBlobEndpoint sub)}"
   : "${AZURE_ACS_SENDER:=donotreply@$(az_output "$AZURE_DEPLOYMENT_NAME" acsManagedDomainSender sub)}"
+  : "${AZURE_UAMI_ID:=$(az_output "$AZURE_DEPLOYMENT_NAME" uamiId sub)}"
 fi
 
 : "${AZURE_RG:=techseeding-rg}"
@@ -57,14 +58,6 @@ fi
 : "${YTAI_GOOGLE_CLIENT_ID:=}"
 : "${YTAI_OPENROUTER_CHAT_MODEL:=google/gemini-2.5-pro}"
 : "${YTAI_OPENROUTER_BASE_URL:=https://openrouter.ai/api/v1}"
-
-# Resolve resource IDs from names (when bicep main has run we know names).
-acr_name="${AZURE_ACR_LOGIN_SERVER%%.*}"
-AZURE_ACR_ID="${AZURE_ACR_ID:-$(az acr show --name "$acr_name" --query id -o tsv)}"
-kv_name="$(echo "$AZURE_KV_URI" | sed -E 's|https://([^.]+)\..*|\1|')"
-AZURE_KV_ID="${AZURE_KV_ID:-$(az keyvault show --name "$kv_name" --query id -o tsv)}"
-storage_name="$(echo "$AZURE_STORAGE_BLOB_ENDPOINT" | sed -E 's|https://([^.]+)\..*|\1|')"
-AZURE_STORAGE_ID="${AZURE_STORAGE_ID:-$(az storage account show --name "$storage_name" --query id -o tsv)}"
 
 DEPLOYMENT_NAME="${AZURE_APPS_DEPLOYMENT_NAME:-techseeding-apps-$(date +%Y%m%d-%H%M%S)}"
 
@@ -81,10 +74,8 @@ az deployment group create \
   --parameters \
     containerAppsEnvId="$AZURE_ACA_ENV_ID" \
     acrLoginServer="$AZURE_ACR_LOGIN_SERVER" \
-    acrId="$AZURE_ACR_ID" \
-    keyVaultId="$AZURE_KV_ID" \
+    uamiId="$AZURE_UAMI_ID" \
     keyVaultUri="$AZURE_KV_URI" \
-    storageAccountId="$AZURE_STORAGE_ID" \
     storageBlobEndpoint="$AZURE_STORAGE_BLOB_ENDPOINT" \
     postgresFqdn="$AZURE_PG_FQDN" \
     acsSender="$AZURE_ACS_SENDER" \

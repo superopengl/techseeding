@@ -19,6 +19,9 @@ param image string
 @description('Container Registry login server.')
 param acrLoginServer string
 
+@description('User-Assigned Managed Identity resource ID for ACR pull + KV secret fetch.')
+param uamiId string
+
 @description('Command + args to run inside the container.')
 param command array
 
@@ -43,14 +46,19 @@ param replicaTimeout int = 600
 var formatSecrets = [for s in secretRefs: {
   name: s.appSecretName
   keyVaultUrl: s.keyVaultSecretUri
-  identity: 'system'
+  identity: uamiId
 }]
 
 resource job 'Microsoft.App/jobs@2025-02-02-preview' = {
   name: name
   location: location
   tags: tags
-  identity: { type: 'SystemAssigned' }
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uamiId}': {}
+    }
+  }
   properties: {
     environmentId: environmentId
     workloadProfileName: 'Consumption'
@@ -65,7 +73,7 @@ resource job 'Microsoft.App/jobs@2025-02-02-preview' = {
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          identity: uamiId
         }
       ]
       secrets: formatSecrets
@@ -85,5 +93,4 @@ resource job 'Microsoft.App/jobs@2025-02-02-preview' = {
 }
 
 output id string = job.id
-output principalId string = job.identity.principalId
 output name string = job.name

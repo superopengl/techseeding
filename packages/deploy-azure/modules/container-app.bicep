@@ -1,8 +1,10 @@
 // Reusable Container App module. One app per invocation (kpai, ytai).
 //
-// Secrets are referenced from Key Vault via the app's system-assigned managed
-// identity. RBAC role assignments wiring the MI to KV / ACR / Storage live in
-// role-assignments.bicep, invoked after this module so the principalId exists.
+// Identity model: every app uses the same User-Assigned Managed Identity
+// created in main.bicep (modules/managed-identity.bicep). That UAMI has
+// AcrPull, Key Vault Secrets User, and Storage Blob Data Contributor
+// granted up-front so the first revision can pull the image and read
+// KV secrets without a chicken-and-egg cycle.
 
 @description('Azure region.')
 param location string
@@ -21,6 +23,9 @@ param image string
 
 @description('Container Registry login server (e.g. techseedingacr.azurecr.io).')
 param acrLoginServer string
+
+@description('User-Assigned Managed Identity resource ID. Used for ACR pull, KV secret fetch, and Storage access.')
+param uamiId string
 
 @description('External HTTPS ingress? false for internal-only apps.')
 param externalIngress bool = true
@@ -62,14 +67,19 @@ param managedCertificateId string = ''
 var formatSecrets = [for s in secretRefs: {
   name: s.appSecretName
   keyVaultUrl: s.keyVaultSecretUri
-  identity: 'system'
+  identity: uamiId
 }]
 
 resource app 'Microsoft.App/containerApps@2025-02-02-preview' = {
   name: name
   location: location
   tags: tags
-  identity: { type: 'SystemAssigned' }
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uamiId}': {}
+    }
+  }
   properties: {
     managedEnvironmentId: environmentId
     workloadProfileName: 'Consumption'
@@ -91,7 +101,7 @@ resource app 'Microsoft.App/containerApps@2025-02-02-preview' = {
       registries: [
         {
           server: acrLoginServer
-          identity: 'system'
+          identity: uamiId
         }
       ]
       secrets: formatSecrets
@@ -120,6 +130,5 @@ resource app 'Microsoft.App/containerApps@2025-02-02-preview' = {
 }
 
 output id string = app.id
-output principalId string = app.identity.principalId
 output fqdn string = app.properties.configuration.ingress.fqdn
 output latestRevisionName string = app.properties.latestRevisionName

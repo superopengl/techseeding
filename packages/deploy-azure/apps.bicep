@@ -33,17 +33,11 @@ param containerAppsEnvId string
 @description('ACR login server (e.g. techseedingacr.azurecr.io).')
 param acrLoginServer string
 
-@description('ACR resource ID.')
-param acrId string
-
-@description('Key Vault resource ID.')
-param keyVaultId string
+@description('User-Assigned Managed Identity resource ID. From main.bicep output `uamiId`.')
+param uamiId string
 
 @description('Key Vault URI (https://name.vault.azure.net/).')
 param keyVaultUri string
-
-@description('Storage account resource ID.')
-param storageAccountId string
 
 @description('Storage account blob endpoint (https://name.blob.core.windows.net/).')
 param storageBlobEndpoint string
@@ -89,12 +83,16 @@ var ytaiImage = '${acrLoginServer}/ytai:${ytaiImageTag}'
 var kpaiPublicUrl = empty(kpaiCustomDomain) ? '' : 'https://${kpaiCustomDomain}'
 var ytaiPublicUrl = empty(ytaiCustomDomain) ? '' : 'https://${ytaiCustomDomain}'
 
-// kpai DB connection — built from server FQDN + KV-mounted password.
-// The app reads KPAI_DATABASE_URL as a single string, but here we set
-// individual components and let the runtime assemble them — except for
-// the password which must be a secret ref.
-var kpaiDbUser = 'kpai'
-var ytaiDbUser = 'ytai'
+// Postgres login per app. Default 'pgadmin' shares the Flexible Server
+// admin login for the smoke-test bring-up — flip these to per-app logins
+// once a CREATE USER bootstrap runs (needs VNet-reachable psql or a one-off
+// ACA Job). All three KV secrets (kpai-db-password / ytai-db-password /
+// pg-admin-password) currently hold the same value.
+@description('Postgres login for kpai. Defaults to the server admin login until per-app users are bootstrapped.')
+param kpaiDbUser string = 'pgadmin'
+
+@description('Postgres login for ytai. Defaults to the server admin login until per-app users are bootstrapped.')
+param ytaiDbUser string = 'pgadmin'
 
 // ─── kpai Container App ─────────────────────────────────────────────────────
 
@@ -107,6 +105,7 @@ module kpaiApp 'modules/container-app.bicep' = {
     environmentId: containerAppsEnvId
     image: kpaiImage
     acrLoginServer: acrLoginServer
+    uamiId: uamiId
     externalIngress: true
     targetPort: 80
     minReplicas: 1
@@ -122,10 +121,12 @@ module kpaiApp 'modules/container-app.bicep' = {
     envVars: [
       { name: 'KPAI_API_PORT', value: '80' }
       { name: 'KPAI_PUBLIC_URL', value: kpaiPublicUrl }
-      { name: 'KPAI_DB_HOST', value: postgresFqdn }
-      { name: 'KPAI_DB_PORT', value: '5432' }
-      { name: 'KPAI_DB_NAME', value: 'kpai' }
-      { name: 'KPAI_DB_USER', value: kpaiDbUser }
+      // entrypoint.sh composes KPAI_DATABASE_URL from these PG_* vars
+      // (mirrors the AWS Secrets-Manager-injection pattern).
+      { name: 'PG_HOST', value: postgresFqdn }
+      { name: 'PG_PORT', value: '5432' }
+      { name: 'PG_DATABASE', value: 'kpai' }
+      { name: 'PG_USER', value: kpaiDbUser }
       { name: 'KPAI_SANDBOX_DEEPSEEK_MODEL', value: kpaiDeepseekModel }
       { name: 'KPAI_GOOGLE_CLIENT_ID', value: kpaiGoogleClientId }
       { name: 'KPAI_ADMIN_USERNAME', value: 'admin' }
@@ -134,7 +135,7 @@ module kpaiApp 'modules/container-app.bicep' = {
       { name: 'TMPDIR', value: '/var/kpai' }
     ]
     envSecretRefs: [
-      { name: 'KPAI_DB_PASSWORD', secretRef: 'db-password' }
+      { name: 'PG_PASSWORD', secretRef: 'db-password' }
       { name: 'KPAI_JWT_SECRET', secretRef: 'jwt-secret' }
       { name: 'KPAI_SANDBOX_DEEPSEEK_API_KEY', secretRef: 'deepseek-key' }
       { name: 'KPAI_ADMIN_PASSWORD', secretRef: 'admin-password' }
@@ -161,6 +162,7 @@ module ytaiApp 'modules/container-app.bicep' = {
     environmentId: containerAppsEnvId
     image: ytaiImage
     acrLoginServer: acrLoginServer
+    uamiId: uamiId
     externalIngress: true
     targetPort: 80
     minReplicas: 0
@@ -176,10 +178,12 @@ module ytaiApp 'modules/container-app.bicep' = {
     envVars: [
       { name: 'YTAI_API_PORT', value: '80' }
       { name: 'YTAI_PUBLIC_URL', value: ytaiPublicUrl }
-      { name: 'YTAI_DB_HOST', value: postgresFqdn }
-      { name: 'YTAI_DB_PORT', value: '5432' }
-      { name: 'YTAI_DB_NAME', value: 'ytai' }
-      { name: 'YTAI_DB_USER', value: ytaiDbUser }
+      // entrypoint.sh composes YTAI_DATABASE_URL (with sslmode=require)
+      // from these YTAI_PG_* vars.
+      { name: 'YTAI_PG_HOST', value: postgresFqdn }
+      { name: 'YTAI_PG_PORT', value: '5432' }
+      { name: 'YTAI_PG_DATABASE', value: 'ytai' }
+      { name: 'YTAI_PG_USER', value: ytaiDbUser }
       { name: 'YTAI_OPENROUTER_CHAT_MODEL', value: ytaiOpenrouterChatModel }
       { name: 'YTAI_OPENROUTER_BASE_URL', value: ytaiOpenrouterBaseUrl }
       { name: 'YTAI_GOOGLE_CLIENT_ID', value: ytaiGoogleClientId }
@@ -193,13 +197,15 @@ module ytaiApp 'modules/container-app.bicep' = {
       { name: 'YTAI_TTS_VOICE', value: 'af_heart' }
     ]
     envSecretRefs: [
-      { name: 'YTAI_DB_PASSWORD', secretRef: 'db-password' }
+      { name: 'YTAI_PG_PASSWORD', secretRef: 'db-password' }
       { name: 'YTAI_JWT_SECRET', secretRef: 'jwt-secret' }
       { name: 'YTAI_OPENROUTER_API_KEY', secretRef: 'openrouter-key' }
       { name: 'YTAI_ADMIN_PASSWORD', secretRef: 'admin-password' }
       { name: 'YTAI_ACS_CONNECTION_STRING', secretRef: 'acs-connection-string' }
     ]
-    resources: { cpu: json('1.0'), memory: '4Gi' }
+    // Consumption profile requires CPU:memory ratio of 1:2 — 1.0/4Gi is
+    // rejected; 2.0/4Gi is the smallest valid pairing that fits Kokoro + Node.
+    resources: { cpu: json('2.0'), memory: '4Gi' }
   }
 }
 
@@ -214,19 +220,20 @@ module kpaiMigrate 'modules/container-app-job.bicep' = {
     environmentId: containerAppsEnvId
     image: kpaiImage
     acrLoginServer: acrLoginServer
-    command: ['npx', 'drizzle-kit', 'migrate', '--config', 'src/api/drizzle.config.js']
+    uamiId: uamiId
+    command:['npx', 'drizzle-kit', 'migrate', '--config', 'src/api/drizzle.config.js']
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-db-password' }
     ]
     envVars: [
-      { name: 'KPAI_DB_HOST', value: postgresFqdn }
-      { name: 'KPAI_DB_PORT', value: '5432' }
-      { name: 'KPAI_DB_NAME', value: 'kpai' }
-      { name: 'KPAI_DB_USER', value: kpaiDbUser }
+      { name: 'PG_HOST', value: postgresFqdn }
+      { name: 'PG_PORT', value: '5432' }
+      { name: 'PG_DATABASE', value: 'kpai' }
+      { name: 'PG_USER', value: kpaiDbUser }
       { name: 'RUN_MIGRATIONS', value: 'false' }
     ]
     envSecretRefs: [
-      { name: 'KPAI_DB_PASSWORD', secretRef: 'db-password' }
+      { name: 'PG_PASSWORD', secretRef: 'db-password' }
     ]
   }
 }
@@ -240,38 +247,27 @@ module ytaiMigrate 'modules/container-app-job.bicep' = {
     environmentId: containerAppsEnvId
     image: ytaiImage
     acrLoginServer: acrLoginServer
-    command: ['node', 'dist/src/api/db/migrate.js']
+    uamiId: uamiId
+    command:['node', 'dist/src/api/db/migrate.js']
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/ytai-db-password' }
     ]
     envVars: [
-      { name: 'YTAI_DB_HOST', value: postgresFqdn }
-      { name: 'YTAI_DB_PORT', value: '5432' }
-      { name: 'YTAI_DB_NAME', value: 'ytai' }
-      { name: 'YTAI_DB_USER', value: ytaiDbUser }
+      { name: 'YTAI_PG_HOST', value: postgresFqdn }
+      { name: 'YTAI_PG_PORT', value: '5432' }
+      { name: 'YTAI_PG_DATABASE', value: 'ytai' }
+      { name: 'YTAI_PG_USER', value: ytaiDbUser }
     ]
     envSecretRefs: [
-      { name: 'YTAI_DB_PASSWORD', secretRef: 'db-password' }
+      { name: 'YTAI_PG_PASSWORD', secretRef: 'db-password' }
     ]
   }
 }
 
-// ─── Role Assignments ───────────────────────────────────────────────────────
-
-module rbac 'modules/role-assignments.bicep' = {
-  name: 'rbac'
-  params: {
-    acrId: acrId
-    keyVaultId: keyVaultId
-    storageAccountId: storageAccountId
-    principals: [
-      { appName: 'kpai',         principalId: kpaiApp.outputs.principalId,     needsBlob: false }
-      { appName: 'ytai',         principalId: ytaiApp.outputs.principalId,     needsBlob: true  }
-      { appName: 'kpai-migrate', principalId: kpaiMigrate.outputs.principalId, needsBlob: false }
-      { appName: 'ytai-migrate', principalId: ytaiMigrate.outputs.principalId, needsBlob: false }
-    ]
-  }
-}
+// ─── Role Assignments ──────────────────────────────────────────────────────
+// RBAC moved into the UAMI itself (modules/managed-identity.bicep), invoked
+// from main.bicep. Container Apps + Jobs all share the same UAMI so there's
+// no per-app role assignment to wire here.
 
 output kpaiFqdn string = kpaiApp.outputs.fqdn
 output ytaiFqdn string = ytaiApp.outputs.fqdn

@@ -28,7 +28,7 @@ param emailServiceName string
 @description('Custom sender domain (e.g. techseeding.com.au). Verification is manual — see MIGRATION_CHECKLIST.md.')
 param customDomainName string = ''
 
-resource emailService 'Microsoft.Communication/emailServices@2025-05-01-preview' = {
+resource emailService 'Microsoft.Communication/emailServices@2025-09-01' = {
   name: emailServiceName
   location: location
   tags: tags
@@ -36,7 +36,7 @@ resource emailService 'Microsoft.Communication/emailServices@2025-05-01-preview'
 }
 
 // AzureManagedDomain is auto-verified — usable immediately for smoke tests.
-resource managedDomain 'Microsoft.Communication/emailServices/domains@2025-05-01-preview' = {
+resource managedDomain 'Microsoft.Communication/emailServices/domains@2025-09-01' = {
   parent: emailService
   name: 'AzureManagedDomain'
   location: location
@@ -47,9 +47,12 @@ resource managedDomain 'Microsoft.Communication/emailServices/domains@2025-05-01
   }
 }
 
-// CustomerManagedDomain — created in declared state, verified only after the
-// DNS records land in the Azure DNS zone (see checklist §2).
-resource customDomain 'Microsoft.Communication/emailServices/domains@2025-05-01-preview' = if (!empty(customDomainName)) {
+// CustomerManagedDomain — declared in unverified state so the verification
+// TXT records are visible in the portal. ACS can't *link* the domain until
+// it's been verified (DNS authority on Azure + DKIM/SPF/DMARC records in
+// place), so we don't add it to `linkedDomains` here. Re-deploy with
+// `linkCustomDomain=true` once verification lands (see MIGRATION_CHECKLIST §2).
+resource customDomain 'Microsoft.Communication/emailServices/domains@2025-09-01' = if (!empty(customDomainName)) {
   parent: emailService
   name: customDomainName
   location: location
@@ -60,15 +63,18 @@ resource customDomain 'Microsoft.Communication/emailServices/domains@2025-05-01-
   }
 }
 
-resource acs 'Microsoft.Communication/communicationServices@2025-05-01-preview' = {
+@description('Set to true once the customer-managed domain has been verified — links it to the ACS resource so apps can send from it.')
+param linkCustomDomain bool = false
+
+resource acs 'Microsoft.Communication/communicationServices@2025-09-01' = {
   name: acsName
   location: location
   tags: tags
   properties: {
     dataLocation: emailDataLocation
-    linkedDomains: empty(customDomainName)
-      ? [managedDomain.id]
-      : [managedDomain.id, customDomain.id]
+    linkedDomains: linkCustomDomain && !empty(customDomainName)
+      ? [managedDomain.id, customDomain.id]
+      : [managedDomain.id]
   }
 }
 

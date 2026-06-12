@@ -29,7 +29,10 @@ resource kv 'Microsoft.KeyVault/vaults@2024-12-01-preview' = {
     enableRbacAuthorization: true
     enableSoftDelete: true
     softDeleteRetentionInDays: 7
-    enablePurgeProtection: false
+    // Tenant policy in this subscription requires purge protection on. Once
+    // enabled this is irreversible — vault deletion is soft-delete-only for
+    // the retention window, then the vault name is released.
+    enablePurgeProtection: true
     publicNetworkAccess: 'Enabled'
     networkAcls: {
       defaultAction: 'Allow'

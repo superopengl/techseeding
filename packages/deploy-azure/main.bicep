@@ -182,6 +182,23 @@ module containerAppsEnv 'modules/container-apps-env.bicep' = {
   }
 }
 
+// ─── User-Assigned Managed Identity (Container Apps + Jobs use this) ──────
+// Existing-resource handles so we can scope RBAC inside the UAMI module
+// without re-passing every resource ID through main.bicep.
+
+module uami 'modules/managed-identity.bicep' = {
+  scope: rg
+  name: 'uami'
+  params: {
+    location: location
+    tags: tags
+    name: '${namePrefix}-apps-id'
+    acrId: acr.outputs.id
+    keyVaultId: keyVault.outputs.id
+    storageAccountId: storage.outputs.id
+  }
+}
+
 // ─── Static Web App (txd) ───────────────────────────────────────────────────
 
 module staticWebApp 'modules/static-web-app.bicep' = {
@@ -214,3 +231,6 @@ output acsHostname string = acsEmail.outputs.acsHostname
 output acsManagedDomainSender string = acsEmail.outputs.managedDomainName
 output staticWebAppHostname string = staticWebApp.outputs.defaultHostname
 output staticWebAppName string = staticWebApp.outputs.name
+output uamiId string = uami.outputs.id
+output uamiClientId string = uami.outputs.clientId
+output uamiPrincipalId string = uami.outputs.principalId
