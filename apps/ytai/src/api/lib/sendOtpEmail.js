@@ -31,10 +31,10 @@ export default async function sendOtpEmail({ to, code, expiresAt, recipientName,
     log?.warn({ to }, 'YTAI_ACS_CONNECTION_STRING not set; skipping ACS send (code still in DB)');
     return { delivered: false, reason: 'ACS_NOT_CONFIGURED' };
   }
-  // ACS accepts a displayName on the recipient and a senderAddress in the
-  // form `display name <local@domain>` is NOT supported — pass the bare
-  // address. Display names go via `recipients[].displayName` if needed.
-  const from = fromAddr.includes('<') ? fromAddr.match(/<([^>]+)>/)?.[1] || fromAddr : fromAddr;
+  // senderAddress is passed through to ACS as-is. RFC-5322 form
+  // `Display Name <local@domain>` works (verified empirically) and
+  // controls the From: header display in the recipient's mailbox.
+  const from = fromAddr;
 
   const ttl = formatMinutes(expiresAt);
   const greeting = recipientName ? `Hi ${escape(recipientName)},` : 'Hi there,';
