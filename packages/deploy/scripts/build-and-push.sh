@@ -27,8 +27,17 @@ BUILD_CMD="${BUILD_CMD:-pnpm --filter ./apps/$APP build:prod}"
 
 ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
 
-echo "==> Logging in to ACR ($ACR_LOGIN_SERVER)"
-az acr login --name "$ACR_NAME"
+# Two concurrent `az acr login` calls (e.g. release:kpai + release:ytai in
+# parallel) race on the macOS Keychain credential helper — one of them
+# fails with "The specified item already exists in the keychain (-25299)".
+# Skip the login when the caller has already done it (e.g. a wrapper that
+# pre-logs in then fans out the builds).
+if [ "${SKIP_ACR_LOGIN:-0}" != "1" ]; then
+  echo "==> Logging in to ACR ($ACR_LOGIN_SERVER)"
+  az acr login --name "$ACR_NAME"
+else
+  echo "==> Skipping ACR login (SKIP_ACR_LOGIN=1)"
+fi
 
 # Vite bakes the Google client ID into the JS bundle at build time. The
 # Container App's runtime env var (set by deploy-apps.sh) only covers the

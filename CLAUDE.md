@@ -38,10 +38,13 @@ pnpm deploy:apps        # az deployment group create apps.bicep (Container Apps 
 pnpm release:kpai       # build + push to ACR + update Container App + run migrations
 pnpm release:ytai
 pnpm release:txd        # swa deploy to Azure Static Web Apps
+pnpm release:all        # sequential: txd → kpai → ytai
 pnpm print-ns           # 4 Azure DNS nameservers (for registrar)
 ```
 
 All Bicep + scripts in `packages/deploy/`. `main.bicep` is subscription-scoped (creates RG + everything inside). `apps.bicep` is rg-scoped and depends on container images existing in ACR. Verify any Bicep edit with `az bicep build --file main.bicep` before deploying.
+
+**Don't run `release:kpai` and `release:ytai` truly in parallel** (two terminals, background `&`): the two `az acr login` calls race on the macOS Keychain and one fails with "item already exists (-25299)". Use `release:all` (sequential), or if you need parallelism, pre-`az acr login --name techseedingacr` once then run each release with `SKIP_ACR_LOGIN=1`.
 
 Detailed architecture (resource graph, identity model, two-pass deploy, secret flow, operational gotchas): `packages/deploy/README.md`.
 
