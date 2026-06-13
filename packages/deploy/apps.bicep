@@ -92,6 +92,16 @@ var ytaiImage = '${acrLoginServer}/ytai:${ytaiImageTag}'
 var kpaiPublicUrl = empty(kpaiCustomDomain) ? '' : 'https://${kpaiCustomDomain}'
 var ytaiPublicUrl = empty(ytaiCustomDomain) ? '' : 'https://${ytaiCustomDomain}'
 
+// Look up the UAMI by ID so we can pass its clientId into the app env as
+// AZURE_CLIENT_ID. @azure/identity's DefaultAzureCredential needs this to
+// pick the right managed identity on a Container App that has UAMI only
+// (no system-assigned identity) — otherwise its ManagedIdentityCredential
+// step queries IMDS without a client_id and the chain falls through to
+// "ChainedTokenCredential authentication failed".
+resource uami 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: last(split(uamiId, '/'))
+}
+
 // Postgres login per app. Default 'pgadmin' shares the Flexible Server
 // admin login for the smoke-test bring-up — flip these to per-app logins
 // once a CREATE USER bootstrap runs (needs VNet-reachable psql or a one-off
@@ -206,6 +216,10 @@ module ytaiApp 'modules/container-app.bicep' = {
       { name: 'YTAI_STORAGE_ACCOUNT_URL', value: storageBlobEndpoint }
       { name: 'YTAI_BLOB_CONTAINER', value: 'ytai-images' }
       { name: 'YTAI_BLOB_PREFIX', value: 'prod' }
+      // Tells @azure/identity which user-assigned identity to use when no
+      // system-assigned identity is attached. Required for blob.js to auth
+      // against Azure Storage.
+      { name: 'AZURE_CLIENT_ID', value: uami.properties.clientId }
       { name: 'YTAI_TTS_BASE_URL', value: 'http://127.0.0.1:8880/v1' }
       { name: 'YTAI_TTS_MODEL', value: 'kokoro' }
       { name: 'YTAI_TTS_VOICE', value: 'af_heart' }
