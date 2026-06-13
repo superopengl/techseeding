@@ -1,0 +1,1 @@
+- [Google SSO bundle injection](project_google_sso_bundle.md) — client IDs are Vite-baked at build time; release pipeline fetches from KV, recurring breakage pattern.
