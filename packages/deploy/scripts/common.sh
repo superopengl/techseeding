@@ -4,9 +4,21 @@
 DEPLOY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$DEPLOY_DIR/../.." && pwd)"
 
+# Load per-operator deploy env (resource group, ACR server, GOOGLE_CLIENT_IDs,
+# etc.) so every script — not just deploy-apps.sh — sees the same overrides.
+# Without this, `pnpm release:kpai` hit "AZURE_ACR_LOGIN_SERVER: unbound
+# variable" at Phase 2 because release-*.sh never sourced the file.
+if [ -f "${DEPLOY_DIR}/.env.azure-deploy" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "${DEPLOY_DIR}/.env.azure-deploy"
+  set +a
+fi
+
 AZURE_LOCATION="${AZURE_LOCATION:-australiaeast}"
 AZURE_RG="${AZURE_RG:-techseeding-rg}"
 AZURE_KV_NAME="${AZURE_KV_NAME:-techseeding-kv}"
+AZURE_ACR_LOGIN_SERVER="${AZURE_ACR_LOGIN_SERVER:-techseedingacr.azurecr.io}"
 
 # Read a Key Vault secret value by name. Prints the value on stdout.
 # Fails non-zero (under set -e) if the secret is missing or KV is unreachable.

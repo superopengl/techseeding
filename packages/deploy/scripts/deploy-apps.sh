@@ -34,13 +34,8 @@ set -euo pipefail
 
 require_az_login
 
-ENV_FILE="${DEPLOY_DIR}/.env.azure-deploy"
-if [ -f "$ENV_FILE" ]; then
-  set -a
-  # shellcheck disable=SC1090
-  . "$ENV_FILE"
-  set +a
-fi
+# .env.azure-deploy is now sourced from common.sh so all deploy scripts see
+# the same overrides.
 
 # Auto-fill from main deployment outputs if env vars not provided.
 if [ -n "${AZURE_DEPLOYMENT_NAME:-}" ]; then
