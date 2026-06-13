@@ -97,7 +97,7 @@ The Reports portal page (`/reports`) shows a `subjects × builtin types` grid pl
 
 - **Kid-safe content**: tutor system prompt explicitly forbids off-topic chat, profanity, and unsafe advice; refuses anything unrelated to homework
 - **No PII in prompts**: don't pass student names into the LLM; refer to them as "the student"
-- **Image privacy**: uploaded photos stored in S3 with private ACL; signed URLs only; auto-delete after N days (configurable)
+- **Image privacy**: uploaded photos stored in Azure Blob with no public access; only the ytai container (via managed identity) can read them; orphan blobs auto-expire via the storage account's lifecycle policy after the `lifecycle=orphan` index tag lands
 - **Auth**: JWT-based
 
 ## Key Files
@@ -119,7 +119,7 @@ src/
       makeTutorTools.js         # Dispatch for draw_annotation (validates bbox, assigns palette color)
       runBrainTurn.js           # Per-turn loop (streams chat, accumulates tool calls, dispatches)
       tutorPrompt.js            # Persona + per-turn system messages
-      persistImage.js           # S3 / disk image storage
+      persistImage.js           # Azure Blob / disk image storage
       loadImageDataUrl.js       # Re-hydrate persisted image bytes as data URL
     db/
       schema.js                 # Drizzle schema
@@ -144,14 +144,13 @@ src/
     vite.config.js
     package.json
 devops/                         # Dockerfile + entrypoint
-deploy/                         # AWS CDK app
 dist/                           # Build artifacts (gitignored)
+(deploy lives at packages/deploy/ in the monorepo root)
 ```
 
 ## Deployment
 
-- **Domain**: `yoututorai.techseeding.com.au` (or chosen domain)
-- **Target**: AWS `ap-southeast-2` — ECS Fargate behind ALB, Aurora Postgres Serverless v2, S3 for images, ECR for image, Secrets Manager, Route53 alias
-- **IaC**: AWS CDK v2 (JavaScript) under `deploy/`
-- **CI/CD**: GitHub Actions, push to `main` deploys via OIDC
-- **AWS profile**: dedicated profile (e.g. `yoututorai`) for local deploy commands
+- **Domain**: `yoututorai.techseeding.com.au`
+- **Target**: Azure `australiaeast` — Container App (Consumption profile, 2 vCPU / 4 GiB to fit Kokoro TTS sidecar) behind ACA-managed ingress, shared Azure Postgres Flexible Server, Azure Blob for session images + TTS audio cache, ACR for the image, Key Vault for secrets (KV-referenced via UAMI), ACS Email for OTP, Azure DNS
+- **IaC**: Bicep under `packages/deploy/` in the monorepo root
+- **Release**: `pnpm release:ytai` from the repo root — builds + pushes the image to ACR, updates the Container App, runs migrations as an ACA Job

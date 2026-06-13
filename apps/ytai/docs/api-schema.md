@@ -58,7 +58,7 @@ Create a user directly (bypasses login request flow). Admin-only.
 **Returns**: `{ userId: string }`
 
 ### `DELETE /api/admin/user/:id/data`
-Wipe every content row tied to a student account: every `tutor_session` and the cascade beneath it (`session_doc`, `session_image`, `session_message`, `session_report`) and every `subject_report` the student authored. The `user` row itself is kept so the student can sign back in to a fresh slate. `login_otp` (short-lived auth state) and `tts_audio` (cross-user TTS cache) are deliberately untouched. `llm_usage` is also preserved — it's the per-call billing audit log and must outlive the entities it references; its FK columns are plain UUIDs and become orphans on wipe, which is fine since the token-usage aggregates filter on `user_id` (kept). S3 objects are not deleted by this call — the `<prefix>/images/` lifecycle rule on `YTAI_S3_BUCKET` reclaims them automatically.
+Wipe every content row tied to a student account: every `tutor_session` and the cascade beneath it (`session_doc`, `session_image`, `session_message`, `session_report`) and every `subject_report` the student authored. The `user` row itself is kept so the student can sign back in to a fresh slate. `login_otp` (short-lived auth state) and `tts_audio` (cross-user TTS cache) are deliberately untouched. `llm_usage` is also preserved — it's the per-call billing audit log and must outlive the entities it references; its FK columns are plain UUIDs and become orphans on wipe, which is fine since the token-usage aggregates filter on `user_id` (kept). Blob objects are not deleted by this call — `markObjectOrphan` sets the `lifecycle=orphan` blob index tag, and the storage account's lifecycle policy expires tagged blobs after 1 day.
 
 The whole wipe runs in a single transaction so partial deletes can't leave dangling rows. Restricted to `role='student'` — calling it on an admin/parent/teacher returns `409` and does nothing.
 
@@ -158,7 +158,7 @@ Verify a Google Identity Services ID token (`credential`), upsert the `user` row
 - `503` — `YTAI_GOOGLE_CLIENT_ID` is unset on the server
 
 ### `POST /api/auth/email`
-Issue a 6-digit OTP for the given email and (best-effort) send it via AWS SES. The OTP row is stored in plain text so an operator can read it back when email delivery is broken (logs always carry the code). If the email is unknown, a new user is auto-created with `auth_provider='email'`. Resending within a 30 s window reuses the live row so a kid mashing the button doesn't fan out into a dozen valid codes.
+Issue a 6-digit OTP for the given email and (best-effort) send it via Azure Communication Services Email. The OTP row is stored in plain text so an operator can read it back when email delivery is broken (logs always carry the code). If the email is unknown, a new user is auto-created with `auth_provider='email'`. Resending within a 30 s window reuses the live row so a kid mashing the button doesn't fan out into a dozen valid codes.
 
 **Body**: `{ "email": "string" }`
 

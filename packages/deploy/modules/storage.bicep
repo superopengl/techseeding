@@ -1,11 +1,12 @@
 // Storage Account hosting:
 //   - ytai-images blob container (worksheet photos)
-//   - txd-static blob container (static site assets — replaces s3://txd-portal/)
-//   - kpai-sandboxes file share (replaces EFS at /var/kpai)
+//   - txd-static blob container (static site assets — historical; txd
+//     actually serves from a Static Web App now, so this container is unused)
+//   - kpai-sandboxes file share (mounted into kpai's Container App at /var/kpai)
 //
 // Lifecycle management policy deletes blobs tagged `lifecycle=orphan`
-// (set via blob index tags) after 1 day — direct equivalent of the old S3
-// tag-driven lifecycle.
+// (set via blob index tags) after 1 day — markObjectOrphan in ytai/lib/blob.js
+// sets the tag on delete-cascade paths.
 
 @description('Azure region.')
 param location string

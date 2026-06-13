@@ -124,7 +124,8 @@ module kpaiApp 'modules/container-app.bicep' = {
       { name: 'KPAI_API_PORT', value: '80' }
       { name: 'KPAI_PUBLIC_URL', value: kpaiPublicUrl }
       // entrypoint.sh composes KPAI_DATABASE_URL from these PG_* vars
-      // (mirrors the AWS Secrets-Manager-injection pattern).
+      // — PG_PASSWORD comes via secretRef from Key Vault so the URL is
+      // never assembled in Bicep (where secrets become plain strings).
       { name: 'PG_HOST', value: postgresFqdn }
       { name: 'PG_PORT', value: '5432' }
       { name: 'PG_DATABASE', value: 'kpai' }

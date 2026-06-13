@@ -29,7 +29,7 @@ An AI-powered craft maker platform for kids aged 8–12 who love games, science,
 - **Backend**: Node.js, Fastify, WebSockets
 - **AI Agent**: in-process agent loop via the Vercel AI SDK (`ai` + `@ai-sdk/deepseek`), backed by DeepSeek. One Fastify process serves every chat session — no per-kid subprocess
 - **Database**: PostgreSQL with Drizzle ORM
-- **Infrastructure**: AWS (ECS Fargate, Aurora Serverless v2, EFS, ALB) provisioned with CDK v2
+- **Infrastructure**: Azure (Container Apps, Postgres Flex, Azure Files, ACR, ACS Email) provisioned with Bicep — see `packages/deploy/` in the monorepo root
 - **Package Manager**: pnpm workspace monorepo
 
 ## Project Layout
@@ -37,7 +37,6 @@ An AI-powered craft maker platform for kids aged 8–12 who love games, science,
 ```
 src/api/         Fastify backend (routes, db schema, sandbox manager, ws)
 src/portal/      React frontend (Vite)
-deploy/          AWS CDK app
 devops/          Production Dockerfile + entrypoint
 docs/            Schema and design references
 ```
@@ -80,9 +79,7 @@ pnpm build:prod         # bundle the portal into dist/public/ and copy the api i
 pnpm build:docker       # run build:prod, then build the techseeding/kidplayai Docker image
 pnpm start:prod         # run the production server from dist/, loading .env.production
 pnpm start:local:docker # build and run the production image locally on :9515 with .env.localdocker
-pnpm release            # build the image and deploy via the CDK app under AWS_PROFILE=kpai
-pnpm db:connect:prod    # open a psql session against the production Aurora database
-pnpm db:jdbc:prod       # print a JDBC connection string for the production database
+pnpm -F root release:kpai   # build + push to ACR, update the Container App, run migrations
 ```
 
 ## Environment
@@ -102,7 +99,7 @@ All env vars are prefixed with `KPAI_`. See `.env.sample` for the full template.
 
 ## Deployment
 
-Production runs at **kidplayai.techseeding.com.au** on AWS `ap-southeast-2`. Infrastructure is defined in [deploy/](deploy/) using AWS CDK; pushes to `main` deploy via the GitHub Actions workflow in [.github/workflows/deploy.yml](.github/workflows/deploy.yml). See [deploy/README.md](deploy/README.md) for the first-deploy walkthrough.
+Production runs at **kidplayai.techseeding.com.au** on Azure `australiaeast`. Infrastructure is defined in `packages/deploy/` (Bicep, monorepo root) and deploys via `pnpm release:kpai` from the repo root. See `packages/deploy/README.md` for the resource graph + operational gotchas.
 
 ## Documentation
 
