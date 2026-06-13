@@ -235,7 +235,11 @@ module kpaiMigrate 'modules/container-app-job.bicep' = {
     image: kpaiImage
     acrLoginServer: acrLoginServer
     uamiId: uamiId
-    command:['npx', 'drizzle-kit', 'migrate', '--config', 'src/api/drizzle.config.js']
+    // Use the runtime migrator (drizzle-orm/postgres-js/migrator) baked into
+    // the prod image — drizzle-kit is a devDep and not installed under
+    // `pnpm install --prod`. Same script docker-entrypoint.sh runs when
+    // RUN_MIGRATIONS=true; safe to invoke standalone.
+    command:['node', 'src/api/migrate.js']
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-db-password' }
     ]
@@ -262,7 +266,9 @@ module ytaiMigrate 'modules/container-app-job.bicep' = {
     image: ytaiImage
     acrLoginServer: acrLoginServer
     uamiId: uamiId
-    command:['node', 'dist/src/api/db/migrate.js']
+    // dist/src is copied to /opt/ytai/src in the Dockerfile (not /opt/ytai/dist/src),
+    // so the migrate script lives at src/api/db/migrate.js relative to WORKDIR.
+    command:['node', 'src/api/db/migrate.js']
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/ytai-db-password' }
     ]
