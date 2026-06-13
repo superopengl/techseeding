@@ -66,6 +66,21 @@ resource customDomain 'Microsoft.Communication/emailServices/domains@2025-09-01'
 @description('Set to true once the customer-managed domain has been verified — links it to the ACS resource so apps can send from it.')
 param linkCustomDomain bool = false
 
+@description('Per-app sender usernames + display names on the custom domain. Each entry creates a sender-username resource that ACS validates against when senderAddress is `<username>@<customDomainName>`. The displayName becomes the From: header display in the recipient mailbox. Empty default keeps the default DoNotReply only.')
+param senderUsernames array = []
+
+// Sender usernames on the customer-managed domain. ACS only accepts
+// senderAddress values whose local-part matches one of these; the
+// resource\'s displayName drives the From: header display name.
+resource senderUsernameResources 'Microsoft.Communication/emailServices/domains/senderusernames@2025-09-01' = [for u in senderUsernames: if (!empty(customDomainName)) {
+  parent: customDomain
+  name: u.username
+  properties: {
+    username: u.username
+    displayName: u.displayName
+  }
+}]
+
 resource acs 'Microsoft.Communication/communicationServices@2025-09-01' = {
   name: acsName
   location: location

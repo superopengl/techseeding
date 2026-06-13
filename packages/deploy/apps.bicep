@@ -45,8 +45,11 @@ param storageBlobEndpoint string
 @description('Postgres FQDN.')
 param postgresFqdn string
 
-@description('ACS sender address (e.g. noreply@techseeding.com.au or the AzureManagedDomain).')
-param acsSender string
+@description('kpai ACS sender address. The local-part must match a sender username on the verified domain (see acs-email module). Display name comes from that sender-username resource — e.g. `kidplayai@techseeding.com.au` renders as `KidPlayAI <kidplayai@…>` in inboxes.')
+param kpaiAcsSender string = 'kidplayai@techseeding.com.au'
+
+@description('ytai ACS sender address. Same constraint as kpaiAcsSender.')
+param ytaiAcsSender string = 'yoututorai@techseeding.com.au'
 
 @description('kpai container image tag.')
 param kpaiImageTag string = 'latest'
@@ -133,7 +136,7 @@ module kpaiApp 'modules/container-app.bicep' = {
       { name: 'KPAI_SANDBOX_DEEPSEEK_MODEL', value: kpaiDeepseekModel }
       { name: 'KPAI_GOOGLE_CLIENT_ID', value: kpaiGoogleClientId }
       { name: 'KPAI_ADMIN_USERNAME', value: 'admin' }
-      { name: 'KPAI_ACS_SENDER', value: acsSender }
+      { name: 'KPAI_ACS_SENDER', value: kpaiAcsSender }
       { name: 'RUN_MIGRATIONS', value: 'true' }
       { name: 'TMPDIR', value: '/var/kpai' }
     ]
@@ -191,7 +194,7 @@ module ytaiApp 'modules/container-app.bicep' = {
       { name: 'YTAI_OPENROUTER_BASE_URL', value: ytaiOpenrouterBaseUrl }
       { name: 'YTAI_GOOGLE_CLIENT_ID', value: ytaiGoogleClientId }
       { name: 'YTAI_ADMIN_USERNAME', value: 'admin' }
-      { name: 'YTAI_ACS_SENDER', value: acsSender }
+      { name: 'YTAI_ACS_SENDER', value: ytaiAcsSender }
       { name: 'YTAI_STORAGE_ACCOUNT_URL', value: storageBlobEndpoint }
       { name: 'YTAI_BLOB_CONTAINER', value: 'ytai-images' }
       { name: 'YTAI_BLOB_PREFIX', value: 'prod' }

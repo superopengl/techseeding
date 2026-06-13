@@ -15,7 +15,8 @@ set -euo pipefail
 #   AZURE_PG_FQDN
 #   AZURE_PG_ADMIN_USERNAME   default: pgadmin
 #   AZURE_ACA_ENV_ID
-#   AZURE_ACS_SENDER          e.g. noreply@techseeding.com.au
+#   KPAI_ACS_SENDER           default: kidplayai@techseeding.com.au
+#   YTAI_ACS_SENDER           default: yoututorai@techseeding.com.au
 # Optional env:
 #   KPAI_IMAGE_TAG            default: latest
 #   YTAI_IMAGE_TAG            default: latest
@@ -44,9 +45,13 @@ if [ -n "${AZURE_DEPLOYMENT_NAME:-}" ]; then
   : "${AZURE_KV_URI:=$(az_output "$AZURE_DEPLOYMENT_NAME" keyVaultUri sub)}"
   : "${AZURE_ACA_ENV_ID:=$(az_output "$AZURE_DEPLOYMENT_NAME" containerAppsEnvId sub)}"
   : "${AZURE_STORAGE_BLOB_ENDPOINT:=$(az_output "$AZURE_DEPLOYMENT_NAME" storageBlobEndpoint sub)}"
-  : "${AZURE_ACS_SENDER:=donotreply@$(az_output "$AZURE_DEPLOYMENT_NAME" acsManagedDomainSender sub)}"
   : "${AZURE_UAMI_ID:=$(az_output "$AZURE_DEPLOYMENT_NAME" uamiId sub)}"
 fi
+
+# Per-app sender addresses. Local-part must match a sender username on the
+# verified ACS custom domain (declared in acs-email.bicep + main.bicep).
+: "${KPAI_ACS_SENDER:=kidplayai@techseeding.com.au}"
+: "${YTAI_ACS_SENDER:=yoututorai@techseeding.com.au}"
 
 : "${AZURE_RG:=techseeding-rg}"
 : "${AZURE_PG_ADMIN_USERNAME:=pgadmin}"
@@ -78,7 +83,8 @@ az deployment group create \
     keyVaultUri="$AZURE_KV_URI" \
     storageBlobEndpoint="$AZURE_STORAGE_BLOB_ENDPOINT" \
     postgresFqdn="$AZURE_PG_FQDN" \
-    acsSender="$AZURE_ACS_SENDER" \
+    kpaiAcsSender="$KPAI_ACS_SENDER" \
+    ytaiAcsSender="$YTAI_ACS_SENDER" \
     kpaiImageTag="$KPAI_IMAGE_TAG" \
     ytaiImageTag="$YTAI_IMAGE_TAG" \
     kpaiCustomDomain="$KPAI_CUSTOM_DOMAIN" \

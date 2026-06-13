@@ -142,6 +142,10 @@ module acsEmail 'modules/acs-email.bicep' = {
     emailServiceName: '${namePrefix}-email'
     customDomainName: dnsZoneName
     linkCustomDomain: linkAcsCustomDomain
+    senderUsernames: [
+      { username: 'kidplayai',  displayName: 'KidPlayAI' }
+      { username: 'yoututorai', displayName: 'YouTutorAI' }
+    ]
   }
 }
 

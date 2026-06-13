@@ -31,9 +31,13 @@ export default async function sendOtpEmail({ to, code, expiresAt, recipientName,
     log?.warn({ to }, 'YTAI_ACS_CONNECTION_STRING not set; skipping ACS send (code still in DB)');
     return { delivered: false, reason: 'ACS_NOT_CONFIGURED' };
   }
-  // senderAddress is passed through to ACS as-is. RFC-5322 form
-  // `Display Name <local@domain>` works (verified empirically) and
-  // controls the From: header display in the recipient's mailbox.
+  // ACS rejects RFC-5322 form (`Display Name <local@domain>`) in
+  // senderAddress — must be a bare email. The From: header's display
+  // name comes from the ACS sender-username resource's displayName
+  // property (configured per-username, per-domain), so to vary the
+  // display name per app we use a different local-part per app:
+  //   yoututorai@techseeding.com.au → displayName "YouTutorAI"
+  //   kidplayai@techseeding.com.au  → displayName "KidPlayAI"
   const from = fromAddr;
 
   const ttl = formatMinutes(expiresAt);
