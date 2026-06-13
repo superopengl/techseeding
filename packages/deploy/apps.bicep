@@ -133,13 +133,13 @@ module kpaiApp 'modules/container-app.bicep' = {
     envVars: [
       { name: 'KPAI_API_PORT', value: '80' }
       { name: 'KPAI_PUBLIC_URL', value: kpaiPublicUrl }
-      // entrypoint.sh composes KPAI_DATABASE_URL from these PG_* vars
-      // — PG_PASSWORD comes via secretRef from Key Vault so the URL is
+      // entrypoint.sh composes KPAI_DATABASE_URL from these KPAI_PG_* vars
+      // — KPAI_PG_PASSWORD comes via secretRef from Key Vault so the URL is
       // never assembled in Bicep (where secrets become plain strings).
-      { name: 'PG_HOST', value: postgresFqdn }
-      { name: 'PG_PORT', value: '5432' }
-      { name: 'PG_DATABASE', value: 'kpai' }
-      { name: 'PG_USER', value: kpaiDbUser }
+      { name: 'KPAI_PG_HOST', value: postgresFqdn }
+      { name: 'KPAI_PG_PORT', value: '5432' }
+      { name: 'KPAI_PG_DATABASE', value: 'kpai' }
+      { name: 'KPAI_PG_USER', value: kpaiDbUser }
       { name: 'KPAI_SANDBOX_DEEPSEEK_MODEL', value: kpaiDeepseekModel }
       { name: 'KPAI_GOOGLE_CLIENT_ID', value: kpaiGoogleClientId }
       { name: 'KPAI_ADMIN_USERNAME', value: 'admin' }
@@ -148,7 +148,7 @@ module kpaiApp 'modules/container-app.bicep' = {
       { name: 'TMPDIR', value: '/var/kpai' }
     ]
     envSecretRefs: [
-      { name: 'PG_PASSWORD', secretRef: 'db-password' }
+      { name: 'KPAI_PG_PASSWORD', secretRef: 'db-password' }
       { name: 'KPAI_JWT_SECRET', secretRef: 'jwt-secret' }
       { name: 'KPAI_SANDBOX_DEEPSEEK_API_KEY', secretRef: 'deepseek-key' }
       { name: 'KPAI_ADMIN_PASSWORD', secretRef: 'admin-password' }
@@ -244,14 +244,14 @@ module kpaiMigrate 'modules/container-app-job.bicep' = {
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-db-password' }
     ]
     envVars: [
-      { name: 'PG_HOST', value: postgresFqdn }
-      { name: 'PG_PORT', value: '5432' }
-      { name: 'PG_DATABASE', value: 'kpai' }
-      { name: 'PG_USER', value: kpaiDbUser }
+      { name: 'KPAI_PG_HOST', value: postgresFqdn }
+      { name: 'KPAI_PG_PORT', value: '5432' }
+      { name: 'KPAI_PG_DATABASE', value: 'kpai' }
+      { name: 'KPAI_PG_USER', value: kpaiDbUser }
       { name: 'RUN_MIGRATIONS', value: 'false' }
     ]
     envSecretRefs: [
-      { name: 'PG_PASSWORD', secretRef: 'db-password' }
+      { name: 'KPAI_PG_PASSWORD', secretRef: 'db-password' }
     ]
   }
 }
