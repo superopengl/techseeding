@@ -78,6 +78,12 @@ param ytaiOpenrouterChatModel string = 'google/gemini-2.5-pro'
 @description('ytai OpenRouter base URL.')
 param ytaiOpenrouterBaseUrl string = 'https://openrouter.ai/api/v1'
 
+@description('Managed certificate resource ID for kpai\'s custom domain. Empty → bindingType "Disabled" (which destroys any existing cert binding on redeploy). deploy-apps.sh auto-discovers this from the ACA env.')
+param kpaiManagedCertificateId string = ''
+
+@description('Managed certificate resource ID for ytai\'s custom domain. Same constraint as kpaiManagedCertificateId.')
+param ytaiManagedCertificateId string = ''
+
 // ─── Common derived values ──────────────────────────────────────────────────
 
 var kpaiImage = '${acrLoginServer}/kpai:${kpaiImageTag}'
@@ -116,6 +122,7 @@ module kpaiApp 'modules/container-app.bicep' = {
     minReplicas: 0
     maxReplicas: 1
     customDomain: kpaiCustomDomain
+    managedCertificateId: kpaiManagedCertificateId
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-db-password' }
       { appSecretName: 'jwt-secret', keyVaultSecretUri: '${keyVaultUri}secrets/kpai-jwt-secret' }
@@ -174,6 +181,7 @@ module ytaiApp 'modules/container-app.bicep' = {
     minReplicas: 0
     maxReplicas: 1
     customDomain: ytaiCustomDomain
+    managedCertificateId: ytaiManagedCertificateId
     secretRefs: [
       { appSecretName: 'db-password', keyVaultSecretUri: '${keyVaultUri}secrets/ytai-db-password' }
       { appSecretName: 'jwt-secret', keyVaultSecretUri: '${keyVaultUri}secrets/ytai-jwt-secret' }

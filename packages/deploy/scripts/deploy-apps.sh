@@ -20,8 +20,12 @@ set -euo pipefail
 # Optional env:
 #   KPAI_IMAGE_TAG            default: latest
 #   YTAI_IMAGE_TAG            default: latest
-#   KPAI_CUSTOM_DOMAIN        default: empty (no custom domain yet)
-#   YTAI_CUSTOM_DOMAIN        default: empty
+#   KPAI_CUSTOM_DOMAIN        default: kidplayai.techseeding.com.au
+#   YTAI_CUSTOM_DOMAIN        default: yoututorai.techseeding.com.au
+#                             (Bicep treats an empty value as "no custom
+#                             domain" and DESTRUCTIVELY removes existing
+#                             bindings on redeploy. Set to '' explicitly only
+#                             when you really want to unbind.)
 #   KPAI_GOOGLE_CLIENT_ID, YTAI_GOOGLE_CLIENT_ID
 #   YTAI_OPENROUTER_CHAT_MODEL, YTAI_OPENROUTER_BASE_URL
 
@@ -57,8 +61,28 @@ fi
 : "${AZURE_PG_ADMIN_USERNAME:=pgadmin}"
 : "${KPAI_IMAGE_TAG:=latest}"
 : "${YTAI_IMAGE_TAG:=latest}"
-: "${KPAI_CUSTOM_DOMAIN:=}"
-: "${YTAI_CUSTOM_DOMAIN:=}"
+# Defaulting to the live prod domains. Bicep would otherwise treat the empty
+# value as "no custom domain" and destructively unbind production traffic.
+: "${KPAI_CUSTOM_DOMAIN:=kidplayai.techseeding.com.au}"
+: "${YTAI_CUSTOM_DOMAIN:=yoututorai.techseeding.com.au}"
+
+# Auto-discover existing managed certs for each domain. Empty when the cert
+# hasn't been issued yet (first deploy); the operator then runs
+# `az containerapp hostname bind --validation-method CNAME ...` once after
+# the initial deploy. Subsequent deploys preserve the cert binding because
+# we look it up and pass it through.
+discover_cert_id() {
+  local domain="$1"
+  az containerapp env certificate list \
+    --name techseeding-env \
+    --resource-group "$AZURE_RG" \
+    --query "[?properties.subjectName == '$domain'] | [0].id" \
+    --output tsv 2>/dev/null || true
+}
+: "${KPAI_MANAGED_CERT_ID:=$(discover_cert_id "$KPAI_CUSTOM_DOMAIN")}"
+: "${YTAI_MANAGED_CERT_ID:=$(discover_cert_id "$YTAI_CUSTOM_DOMAIN")}"
+echo "    kpai cert: ${KPAI_MANAGED_CERT_ID:-(none — run 'az containerapp hostname bind' after first deploy)}"
+echo "    ytai cert: ${YTAI_MANAGED_CERT_ID:-(none — run 'az containerapp hostname bind' after first deploy)}"
 : "${KPAI_GOOGLE_CLIENT_ID:=}"
 : "${YTAI_GOOGLE_CLIENT_ID:=}"
 : "${YTAI_OPENROUTER_CHAT_MODEL:=google/gemini-2.5-pro}"
@@ -89,6 +113,8 @@ az deployment group create \
     ytaiImageTag="$YTAI_IMAGE_TAG" \
     kpaiCustomDomain="$KPAI_CUSTOM_DOMAIN" \
     ytaiCustomDomain="$YTAI_CUSTOM_DOMAIN" \
+    kpaiManagedCertificateId="$KPAI_MANAGED_CERT_ID" \
+    ytaiManagedCertificateId="$YTAI_MANAGED_CERT_ID" \
     kpaiGoogleClientId="$KPAI_GOOGLE_CLIENT_ID" \
     ytaiGoogleClientId="$YTAI_GOOGLE_CLIENT_ID" \
     ytaiOpenrouterChatModel="$YTAI_OPENROUTER_CHAT_MODEL" \
