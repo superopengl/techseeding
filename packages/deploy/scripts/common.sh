@@ -6,6 +6,18 @@ REPO_ROOT="$(cd "$DEPLOY_DIR/../.." && pwd)"
 
 AZURE_LOCATION="${AZURE_LOCATION:-australiaeast}"
 AZURE_RG="${AZURE_RG:-techseeding-rg}"
+AZURE_KV_NAME="${AZURE_KV_NAME:-techseeding-kv}"
+
+# Read a Key Vault secret value by name. Prints the value on stdout.
+# Fails non-zero (under set -e) if the secret is missing or KV is unreachable.
+kv_secret() {
+  local name="$1"
+  az keyvault secret show \
+    --vault-name "$AZURE_KV_NAME" \
+    --name "$name" \
+    --query value \
+    --output tsv
+}
 
 # Read a top-level output from a previous `az deployment ...` invocation.
 az_output() {

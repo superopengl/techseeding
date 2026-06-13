@@ -16,7 +16,12 @@ export default defineConfig(({ mode }) => {
     define: {
       // Exposed to client code as `__KPAI_GOOGLE_CLIENT_ID__`. Source is the
       // workspace-root `.env` so the same file feeds both the API and the build.
-      __KPAI_GOOGLE_CLIENT_ID__: JSON.stringify(env.KPAI_GOOGLE_CLIENT_ID || ""),
+      // process.env fallback covers release.sh / CI where the var is exported
+      // (no .env file) — without it, production builds ship an empty string
+      // and the SSO button reads "configure KPAI_GOOGLE_CLIENT_ID".
+      __KPAI_GOOGLE_CLIENT_ID__: JSON.stringify(
+        env.KPAI_GOOGLE_CLIENT_ID || process.env.KPAI_GOOGLE_CLIENT_ID || ""
+      ),
     },
     server: {
       port: 9512,
