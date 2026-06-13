@@ -2,28 +2,21 @@ import { eq, or } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { user } from '../db/schema.js';
 import verifyGoogleIdToken from '../lib/verifyGoogleIdToken.js';
-import verifyGoogleAccessToken from '../lib/verifyGoogleAccessToken.js';
 
 const ALLOWED_ROLES = new Set(['student', 'parent', 'teacher']);
 const DEFAULT_ROLE = 'student';
 
 // POST /api/auth/google
-//   body: { credential?, accessToken?, role?: 'student'|'parent'|'teacher' }
+//   body: { credential, role?: 'student'|'parent'|'teacher' }
 //
-// Two accepted token shapes:
-//   - `credential` — a Google Identity Services ID token (legacy, from the
-//     GIS-rendered button credential callback).
-//   - `accessToken` — an OAuth 2.0 access token from oauth2.initTokenClient,
-//     which is what the current frontend uses so it can ship its own AntD-
-//     styled button instead of GIS's personalized "Sign in as X" variant.
-//
-// Both paths resolve to the same claims shape (sub/email/name/picture) and
-// drive the same upsert.
+// `credential` is a Google Identity Services ID token from the
+// GIS-rendered button's credential callback. Verified against Google's
+// tokeninfo endpoint, then upserted into the user table.
 export default function authGoogle(fastify) {
   fastify.post('/api/auth/google', async (request, reply) => {
-    const { credential, accessToken, role: requestedRole } = request.body || {};
-    if (!credential && !accessToken) {
-      return reply.code(400).send({ error: 'Missing Google credential or access token' });
+    const { credential, role: requestedRole } = request.body || {};
+    if (!credential) {
+      return reply.code(400).send({ error: 'Missing Google credential' });
     }
 
     const clientId = process.env.YTAI_GOOGLE_CLIENT_ID;
@@ -33,9 +26,7 @@ export default function authGoogle(fastify) {
 
     let claims;
     try {
-      claims = accessToken
-        ? await verifyGoogleAccessToken(accessToken, { clientId })
-        : await verifyGoogleIdToken(credential, { clientId });
+      claims = await verifyGoogleIdToken(credential, { clientId });
     } catch (err) {
       request.log.warn({ err }, 'Google token verification failed');
       return reply.code(401).send({ error: 'Invalid Google credential' });

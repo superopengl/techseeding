@@ -1,189 +1,139 @@
-import { useRef, useState } from 'react';
-import { GoogleIcon } from './InlineIcons.jsx';
+import { useEffect, useRef, useState } from 'react';
 import authSession from '../lib/authSession.js';
 import loadGoogleSdk from '../lib/loadGoogleSdk.js';
-import { palette, radius } from '../theme.js';
+import { palette } from '../theme.js';
 
 // Read the client ID injected by Vite at build time. Falls back to empty
 // string so the button can render a clear "not configured" hint in dev.
 // eslint-disable-next-line no-undef
 const CLIENT_ID = typeof __YTAI_GOOGLE_CLIENT_ID__ !== 'undefined' ? __YTAI_GOOGLE_CLIENT_ID__ : '';
 
-// "Continue with Google" button backed by the OAuth 2.0 implicit flow
-// (oauth2.initTokenClient). We previously tried id.renderButton, but GIS
-// auto-personalizes that variant to "Sign in as <name>" the moment the
-// visitor has a Google session — and the rendered button doesn't expose
-// a way to opt out. initTokenClient leaves the button styling entirely to
-// us and just pops Google's account chooser on click; the resulting
-// access token goes to /api/auth/google, which resolves it via the
-// userinfo endpoint server-side.
-//
-// Plain HTML buttons (no antd) so HomePage's initial chunk can skip the
-// antd vendor bundle. antd only loads once the user navigates to a route
-// that needs it.
+// "Sign in with Google" via GIS `id.renderButton`. When the visitor has an
+// active Google session, GIS personalizes the button to "Sign in as <name>
+// <email>" with their avatar — same behavior as the kpai login. The
+// credential callback POSTs the ID token to /api/auth/google.
 export default function GoogleSignInButton({
   role = 'student',
+  width = 320,
   onSuccess,
   onError
 }) {
+  const containerRef = useRef(null);
   const [loadingSdk, setLoadingSdk] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const warmedRef = useRef(false);
+  // Stash the latest callbacks in a ref so the init effect doesn't re-run
+  // when the parent re-renders with new inline closures.
+  const callbacksRef = useRef({ onSuccess, onError, role });
+  callbacksRef.current = { onSuccess, onError, role };
 
-  // Kick off the SDK fetch on first hover/focus so the eventual click feels
-  // instant, but only if the visitor actually shows intent. Visitors who
-  // never aim at the button (most of them) skip the 95 KB entirely.
-  const warmSdk = () => {
-    if (warmedRef.current || !CLIENT_ID) return;
-    warmedRef.current = true;
-    loadGoogleSdk().catch(() => {
-      // Real error surfaces on click; silent here so a flaky network on
-      // hover doesn't paint a red banner the user never asked for.
-      warmedRef.current = false;
-    });
-  };
+  useEffect(() => {
+    if (!CLIENT_ID) return;
+    let cancelled = false;
+    setLoadingSdk(true);
 
-  const triggerSignIn = async () => {
-    setError(null);
-    if (!window.google?.accounts?.oauth2) {
-      setLoadingSdk(true);
-      try {
-        await loadGoogleSdk();
-      } catch (e) {
-        console.error('[GoogleSignIn] Google SDK never loaded', e);
-        setError(e.message);
-        setLoadingSdk(false);
-        return;
-      }
-      setLoadingSdk(false);
-    }
-    if (!window.google?.accounts?.oauth2) {
-      setError('Google sign-in not ready');
-      return;
-    }
-    let client;
-    try {
-      client = window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: 'openid email profile',
-        callback: async (response) => {
-          if (response.error) {
-            console.error('[GoogleSignIn] token client error', response);
-            const detail = response.error_description || response.error;
-            setError(detail);
-            onError?.(new Error(detail));
-            return;
-          }
-          if (!response.access_token) {
-            console.error('[GoogleSignIn] no access_token in response', response);
-            setError('No access token returned from Google');
-            return;
-          }
-          setSubmitting(true);
-          try {
-            const res = await fetch('/api/auth/google', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ accessToken: response.access_token, role })
-            });
-            if (!res.ok) {
-              const body = await res.json().catch(() => ({}));
-              const detail = body.error || `Sign-in failed (${res.status})`;
-              console.error('[GoogleSignIn] /api/auth/google failed', {
-                status: res.status,
-                body
-              });
-              throw new Error(detail);
+    loadGoogleSdk()
+      .then((google) => {
+        if (cancelled) return;
+        google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: async (response) => {
+            if (!response?.credential) {
+              setError('No credential returned from Google');
+              return;
             }
-            const data = await res.json();
-            authSession().save(data);
-            onSuccess?.(data.user);
-          } catch (e) {
-            console.error('[GoogleSignIn] sign-in exchange threw', e);
-            setError(e.message);
-            onError?.(e);
-          } finally {
-            setSubmitting(false);
-          }
+            setSubmitting(true);
+            setError(null);
+            try {
+              const res = await fetch('/api/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  credential: response.credential,
+                  role: callbacksRef.current.role
+                })
+              });
+              const body = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                throw new Error(body?.error || `Sign-in failed (${res.status})`);
+              }
+              authSession().save(body);
+              callbacksRef.current.onSuccess?.(body.user);
+            } catch (e) {
+              setError(e.message);
+              callbacksRef.current.onError?.(e);
+            } finally {
+              setSubmitting(false);
+            }
+          },
+          ux_mode: 'popup',
+          auto_select: false,
+          itp_support: true
+        });
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+          google.accounts.id.renderButton(containerRef.current, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'pill',
+            logo_alignment: 'left',
+            width: Math.min(Math.max(width, 200), 400)
+          });
         }
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSdk(false);
       });
-    } catch (e) {
-      console.error('[GoogleSignIn] initTokenClient threw', e);
-      setError(e.message);
-      return;
-    }
-    try {
-      client.requestAccessToken();
-    } catch (e) {
-      console.error('[GoogleSignIn] requestAccessToken threw', e);
-      setError(e.message);
-    }
-  };
 
-  // Sunrise Yellow (palette.pens.yellow) with dark ink text — bright and
-  // obvious without leaning on Google's blue brand color. White-on-yellow
-  // fails contrast, so text/icon stay on the dark ink token.
-  const baseButtonStyle = {
-    width: '100%',
-    height: 48,
-    borderRadius: radius.md,
-    fontWeight: 600,
-    fontSize: 15,
-    fontFamily: 'inherit',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    border: `1px solid ${palette.pens.yellow}`,
-    background: palette.pens.yellow,
-    color: palette.text,
-    cursor: 'pointer'
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, [width]);
 
   if (!CLIENT_ID) {
     return (
       <button
         type="button"
         disabled
-        style={{ ...baseButtonStyle, opacity: 0.5, cursor: 'not-allowed' }}
+        style={{
+          width: '100%',
+          height: 48,
+          borderRadius: 24,
+          fontWeight: 600,
+          background: '#f5f5f5',
+          color: palette.textMuted,
+          border: '1px solid #e5e5e5',
+          cursor: 'not-allowed'
+        }}
       >
-        <GoogleIcon />
         Google sign-in (configure YTAI_GOOGLE_CLIENT_ID)
       </button>
     );
   }
 
-  const disabled = loadingSdk || submitting;
-  const label = submitting
-    ? 'Signing in…'
-    : loadingSdk
-      ? 'Loading…'
-      : 'Continue with Google';
-
   return (
-    <div style={{ width: '100%' }}>
-      <button
-        type="button"
-        onClick={triggerSignIn}
-        onMouseEnter={warmSdk}
-        onFocus={warmSdk}
-        onTouchStart={warmSdk}
-        disabled={disabled}
-        style={{
-          ...baseButtonStyle,
-          opacity: disabled ? 0.6 : 1,
-          cursor: disabled ? 'not-allowed' : 'pointer'
-        }}
-      >
-        <GoogleIcon />
-        {label}
-      </button>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      <div ref={containerRef} aria-busy={submitting || loadingSdk} />
+      {loadingSdk && (
+        <span style={{ color: palette.textMuted, fontSize: 12 }}>
+          Loading Google sign-in…
+        </span>
+      )}
+      {submitting && (
+        <span style={{ color: palette.textMuted, fontSize: 12 }}>
+          Signing you in…
+        </span>
+      )}
       {error && (
         <div
           role="alert"
           style={{
-            marginTop: 8,
+            marginTop: 4,
             borderRadius: 8,
             padding: '6px 12px',
             background: '#fff2f0',

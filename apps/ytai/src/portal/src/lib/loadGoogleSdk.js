@@ -7,7 +7,7 @@ let promise = null;
 // button), so visitors who never aim at sign-in never pay the bytes.
 export default function loadGoogleSdk() {
   if (typeof window === 'undefined') return Promise.reject(new Error('no window'));
-  if (window.google?.accounts?.oauth2) return Promise.resolve(window.google);
+  if (window.google?.accounts?.id) return Promise.resolve(window.google);
   if (promise) return promise;
 
   promise = new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ export default function loadGoogleSdk() {
     tag.addEventListener('load', () => {
       const start = Date.now();
       const tick = () => {
-        if (window.google?.accounts?.oauth2) return resolve(window.google);
+        if (window.google?.accounts?.id) return resolve(window.google);
         if (Date.now() - start > 4000) return reject(new Error('Google SDK ready timeout'));
         setTimeout(tick, 60);
       };
