@@ -1,5 +1,5 @@
 {
-  "name": "@techseeding/deploy-azure",
+  "name": "@techseeding/deploy",
   "version": "0.1.0",
   "private": true,
   "type": "module",

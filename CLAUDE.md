@@ -12,7 +12,7 @@ apps/
   kpai/         KidPlayAI — Node/Fastify backend + React 19 + iOS SwiftUI viewer
   ytai/         YouTutorAI — Node/Fastify backend + React 19 (Konva annotation canvas)
 packages/
-  deploy-azure/ Azure deploy (Bicep): Container Apps + Jobs, ACR, Postgres, Key Vault, Static Web Apps
+  deploy/       Azure deploy (Bicep): Container Apps + Jobs, ACR, Postgres, Key Vault, Static Web Apps
 ```
 
 App-level architecture, schemas, and conventions live in `apps/kpai/CLAUDE.md` and `apps/ytai/CLAUDE.md` — read those when working inside an app. This file covers the monorepo-level concerns.
@@ -31,19 +31,19 @@ Per-app dev loops live in each app's own CLAUDE.md / package.json (`pnpm -F @tec
 ## Deploy / release
 
 ```bash
-pnpm azure:bootstrap        # one-time: register Azure resource providers
-pnpm azure:deploy:infra     # az deployment sub create main.bicep (RG + everything)
-pnpm azure:seed-secrets     # populate Key Vault from a local .env.azure-secrets
-pnpm azure:deploy:apps      # az deployment group create apps.bicep (Container Apps + Jobs)
-pnpm release:azure:kpai     # build + push to ACR + update Container App + run migrations
-pnpm release:azure:ytai
-pnpm release:azure:txd      # swa deploy to Azure Static Web Apps
-pnpm azure:print-ns         # 4 Azure DNS nameservers (for registrar update)
+pnpm bootstrap          # one-time: register Azure resource providers
+pnpm deploy:infra       # az deployment sub create main.bicep (RG + every infra resource)
+pnpm seed-secrets       # populate Key Vault from a local .env.azure-secrets
+pnpm deploy:apps        # az deployment group create apps.bicep (Container Apps + Jobs)
+pnpm release:kpai       # build + push to ACR + update Container App + run migrations
+pnpm release:ytai
+pnpm release:txd        # swa deploy to Azure Static Web Apps
+pnpm print-ns           # 4 Azure DNS nameservers (for registrar)
 ```
 
-All Bicep + scripts in `packages/deploy-azure/`. `main.bicep` is subscription-scoped (creates RG + everything inside). `apps.bicep` is rg-scoped and depends on container images existing in ACR. Verify any Bicep edit with `az bicep build --file main.bicep` before deploying.
+All Bicep + scripts in `packages/deploy/`. `main.bicep` is subscription-scoped (creates RG + everything inside). `apps.bicep` is rg-scoped and depends on container images existing in ACR. Verify any Bicep edit with `az bicep build --file main.bicep` before deploying.
 
-Detailed architecture (resource graph, identity model, two-pass deploy, secret flow, operational gotchas): `packages/deploy-azure/README.md`.
+Detailed architecture (resource graph, identity model, two-pass deploy, secret flow, operational gotchas): `packages/deploy/README.md`.
 
 ## Conventions
 

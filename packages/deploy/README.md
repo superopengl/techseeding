@@ -1,4 +1,4 @@
-# `@techseeding/deploy-azure`
+# `@techseeding/deploy`
 
 Bicep + bash for running the techseeding monorepo on Azure: txd as a Static Web App, kpai + ytai as Azure Container Apps backed by a shared Postgres Flexible Server, ACR for images, Key Vault for secrets, and ACS Email for OTP delivery.
 
@@ -108,24 +108,22 @@ pnpm azure:deploy:apps       # apps.bicep — Container Apps + Jobs only
 
 `apps.bicep` is parameterized on image tag, custom domain, and the optional model/Google-client overrides — re-running it is the safe way to make a configuration change.
 
-## Operational gotchas (all hit during first bring-up)
+## Operational gotchas
 
 - **ACS Email API versions** churn fast. Stick to GA versions (e.g. `2025-09-01`); avoid `*-preview` unless you know it's published.
 - **Key Vault purge protection** is tenant-policy-enforced — `enablePurgeProtection: false` is rejected. Once you enable it (which we do), the vault name is reserved for the soft-delete retention window after any deletion.
 - **ACS Email custom domain** can be *declared* immediately but **only links** to the ACS resource after DNS verification (DKIM/SPF/DMARC TXT records). `linkCustomDomain` defaults `false`; flip it after the registrar NS update propagates.
 - **ACA Consumption profile** requires specific CPU:memory pairings (1:2 ratio). 1.0/4Gi is rejected; use 2.0/4Gi.
 - **Static Web Apps** only deploy in 5 regions: centralus, eastus2, westus2, westeurope, eastasia. AU East is not supported. Content is CDN-served globally so the resource region only matters for the control plane.
-- **In-place region change for SWA** isn't allowed. To move from westus2 → eastasia we deleted and recreated; the default hostname changes.
-- **Postgres Flex Server network mode is immutable.** You can't switch a VNet-integrated server to public access (or vice versa) in-place — it requires destroying and recreating the server. Plan a one-shot redeploy if you change this.
+- **In-place region change for SWA** isn't allowed — delete and recreate (the default hostname changes).
+- **Postgres Flex Server network mode is immutable.** You can't switch a VNet-integrated server to public access (or vice versa) in-place — it requires destroying and recreating the server.
 - **ACA Environment VNet config is immutable.** Toggling `vnetConfiguration` on an existing environment requires recreating the environment (and therefore re-binding every Container App).
+- **Container Apps cache KV-referenced secrets** at revision-activation time. Rotating a KV value alone won't propagate — you must also force a new revision (`az containerapp update --revision-suffix …`).
 
 ## Files
 
-- `main.bicep` — subscription-scope, RG + everything
+- `main.bicep` — subscription-scope, RG + every infra resource
 - `apps.bicep` — RG-scope, Container Apps + Jobs
 - `modules/` — one file per resource type
-- `params/prod.bicepparam` — env-driven params (passwords + principal IDs come from `.env.azure-deploy`)
+- `params/prod.bicepparam` — env-driven params (passwords + principal IDs from `.env.azure-deploy`, gitignored)
 - `scripts/` — orchestration bash: bootstrap, deploy-all, deploy-apps, seed-secrets, build-and-push, migrate, release-{kpai,ytai,txd}, print-ns-records
-- `MIGRATION_CHECKLIST.md` — manual steps the operator must do (DNS, secret values, cutover signal, AWS teardown)
-
-See `MIGRATION_CHECKLIST.md` for the manual steps that bookend an automated deploy.

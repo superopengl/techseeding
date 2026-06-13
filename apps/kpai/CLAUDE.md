@@ -22,7 +22,7 @@ Multi-page app with four views:
 1. Student visits the homepage and either clicks "Sign in with Google" or navigates to `/login`
 2. On the login page they pick one of two paths:
    - **Google SSO** — popup flow via Google Identity Services; the backend verifies the ID token against the configured `KPAI_GOOGLE_CLIENT_ID`
-   - **Email OTP** — they type their email, the backend issues a 6-digit code stored in `login_otp` (plain text — admin UI surfaces it), and emails it via AWS SES; they type the code back to verify
+   - **Email OTP** — they type their email, the backend issues a 6-digit code stored in `login_otp` (plain text — admin UI surfaces it), and emails it via Azure Communication Services; they type the code back to verify
 3. On either successful path, the backend auto-creates a `student` user + empty profile if the email isn't on file, then issues the `kpai_token` / `kpai_role` cookies the rest of the app expects
 4. The page navigates to `/sandbox` (or `/admin` for admin role) and the user is in
 5. A WebSocket connection establishes a chat session backed by an in-process agent loop (Vercel AI SDK + DeepSeek); streaming text, reasoning, and tool calls are forwarded live to the browser
@@ -112,22 +112,20 @@ src/
     vite.config.js        # Vite config with dev proxy and build output to dist/public/
     package.json          # Frontend dependencies
 devops/                   # Docker image build (Dockerfile, entrypoint)
-deploy/                   # AWS CDK app — provisions all infra and ships the image (see Deployment section)
+(deploy lives at packages/deploy/ — see monorepo root)
 mobile/ios/               # Native SwiftUI craft viewer — scan a craft QR and play it full-screen in WKWebView; see mobile/ios/README.md
 dist/                     # Production build artifacts (gitignored): dist/public/ frontend, dist/src/api/ backend
 ```
 
 ## Deployment
 
-- **Domain**: `kidplayai.techseeding.com.au` (subdomain under TechSeeding company domain)
-- **Target**: AWS `ap-southeast-2` (Sydney) — ECS Fargate (single task, 1 vCPU / 2 GB) behind ALB, Aurora Postgres Serverless v2 (0.5–2 ACU), EFS for sandbox persistence, ECR for the image, Secrets Manager for credentials, Route53 alias on the existing `techseeding.com.au` hosted zone.
-- **Infrastructure-as-code**: AWS CDK (JavaScript) in [deploy/](deploy/). Single stack `kpai-<stage>` defined in [deploy/lib/kidPlayAiStack.js](deploy/lib/kidPlayAiStack.js). See [deploy/README.md](deploy/README.md) for first-deploy walkthrough.
-- **Image**: built from [devops/Dockerfile](devops/Dockerfile) via `pnpm build:docker`. Production deploys go through [deploy/scripts/build-and-push.sh](deploy/scripts/build-and-push.sh).
-- **Migrations**: run on container start when `RUN_MIGRATIONS=true` (set in the task definition). Manual one-off via [deploy/scripts/run-migration.sh](deploy/scripts/run-migration.sh).
-- **Sandbox persistence**: the container mounts EFS at `/var/kpai` and sets `TMPDIR` to that path so `os.tmpdir()` resolves to EFS, surviving container restarts.
-- **Secrets**: DB creds auto-generated; `KPAI_JWT_SECRET` auto-generated; `KPAI_SANDBOX_DEEPSEEK_API_KEY` populated manually post-deploy.
-- **CI/CD**: [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — push to `main` deploys via GitHub OIDC.
-- **AWS profile**: all local deploy/admin commands run under `AWS_PROFILE=kpai`. Root pnpm wrappers (`pnpm release`, `pnpm db:connect:prod`, `pnpm db:jdbc:prod`) set it automatically; for raw `aws` / `cdk` calls, export `AWS_PROFILE=kpai` first.
+- **Domain**: `kidplayai.techseeding.com.au`
+- **Target**: Azure `australiaeast` — Azure Container App on Consumption profile (0.5 vCPU / 1 GiB, min=0/max=1) backed by a shared Azure Postgres Flexible Server (Burstable B1ms), Azure Container Registry for the image, Key Vault for secrets, Azure DNS for the records, ACS Email for OTP delivery.
+- **Infrastructure-as-code**: Bicep in `packages/deploy/` (workspace package `@techseeding/deploy`). `main.bicep` provisions the RG + every shared resource; `apps.bicep` lays down the Container App + migration Job. See `packages/deploy/README.md` for the resource graph + operational gotchas.
+- **Image**: built from [devops/Dockerfile](devops/Dockerfile) via `pnpm build:docker`. Production deploys go through `packages/deploy/scripts/release-kpai.sh` (root: `pnpm release:kpai`).
+- **Migrations**: run on container start when `RUN_MIGRATIONS=true` (set in the Container App env). Manual one-off via `pnpm -F @techseeding/deploy migrate:kpai` (triggers an ACA Job).
+- **Sandbox persistence**: the container mounts an Azure Files share at `/var/kpai` and sets `TMPDIR` to that path so `os.tmpdir()` survives container restarts.
+- **Secrets**: live in Key Vault (`techseeding-kv`). Container App secret refs resolve at revision activation via a User-Assigned Managed Identity (`techseeding-apps-id`). Rotate via `az keyvault secret set` + `az containerapp update --revision-suffix …` to force a new revision.
 
 ## Community Economy
 
@@ -195,8 +193,8 @@ The agent runs in-process inside the Fastify server, so OS-level jailing (Landlo
 - **Database**: PostgreSQL with Drizzle ORM
 - **AI Agent**: in-process agent loop via Vercel AI SDK (`ai` + `@ai-sdk/deepseek`), backed by DeepSeek. One Fastify process serves every concurrent chat session; the model's text, reasoning, and tool calls stream live to the browser over a WebSocket. Tool execution is jailed in JS (see Security Model)
 - **Mobile (iOS craft viewer)**: SwiftUI, WKWebView for craft preview, AVFoundation + CIDetector for QR scanning, XcodeGen for project generation (Xcode 17+, iOS target)
-- **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`, `@techseeding/kidplayai-deploy`)
-- **Cloud / IaC**: AWS, CDK v2 (JavaScript)
+- **Package Manager**: pnpm (workspace monorepo — root `@techseeding/kidplayai`, `@techseeding/kidplayai-portal`)
+- **Cloud / IaC**: Azure (Container Apps, Postgres Flex, ACR, Key Vault, DNS, ACS Email, Static Web Apps), Bicep
 
 ## Commands
 
@@ -210,11 +208,11 @@ pnpm db:generate    # generate Drizzle migration from schema changes
 pnpm db:migrate     # run pending migrations against PostgreSQL
 pnpm db:studio      # open Drizzle Studio (DB GUI)
 
-# AWS deploy (run from deploy/ or via filter)
-pnpm -F @techseeding/kidplayai-deploy synth       # render CloudFormation
-pnpm -F @techseeding/kidplayai-deploy diff        # diff against deployed stack
-pnpm -F @techseeding/kidplayai-deploy deploy      # cdk deploy --all
-pnpm -F @techseeding/kidplayai-deploy migrate     # run drizzle migrate as a one-off ECS task
+# Azure deploy (run from repo root)
+pnpm deploy:infra          # az deployment sub create main.bicep (RG + every infra resource)
+pnpm deploy:apps           # az deployment group create apps.bicep (Container Apps + Jobs)
+pnpm release:kpai          # build + push image to ACR + update Container App + run migrations
+pnpm -F @techseeding/deploy migrate:kpai   # one-off drizzle migrate via ACA Job
 ```
 
 ## Environment
@@ -240,8 +238,8 @@ All env vars are prefixed with `KPAI_`.
 | `KPAI_GOOGLE_CLIENT_ID` | Google OAuth 2.0 web client ID (blank disables SSO) | *(blank)* |
 | `KPAI_ADMIN_USERNAME` | Username for the boot-time admin upsert. With `KPAI_ADMIN_PASSWORD`, the server ensures a role=admin user exists with this hash. | *(blank → no bootstrap)* |
 | `KPAI_ADMIN_PASSWORD` | Plain password hashed (scrypt) and persisted as `user.password_hash` on boot. Used to verify `POST /api/auth/admin`. | *(blank → no bootstrap)* |
-| `KPAI_AWS_REGION` | AWS region used by the SES client | `ap-southeast-2` |
-| `KPAI_SES_FROM_EMAIL` | Verified SES sender for sign-in OTP emails (blank → only console + admin UI fallback) | *(blank)* |
+| `KPAI_ACS_CONNECTION_STRING` | Azure Communication Services connection string (blank → emails skipped, OTP still in DB) | *(blank)* |
+| `KPAI_ACS_SENDER` | Verified ACS sender address (`noreply@techseeding.com.au` in prod) | *(blank)* |
 Local dev ports:
 - **API server**: `http://localhost:9511`
 - **Portal (Vite dev)**: `http://localhost:9512` (proxies API/WS to 9511)

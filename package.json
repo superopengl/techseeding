@@ -10,15 +10,15 @@
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
-    "azure:bootstrap": "pnpm -F @techseeding/deploy-azure bootstrap",
-    "azure:deploy:infra": "pnpm -F @techseeding/deploy-azure deploy:infra",
-    "azure:deploy:apps": "pnpm -F @techseeding/deploy-azure deploy:apps",
-    "azure:seed-secrets": "pnpm -F @techseeding/deploy-azure seed-secrets",
-    "azure:print-ns": "pnpm -F @techseeding/deploy-azure print-ns",
-    "release:azure:kpai": "pnpm -F @techseeding/deploy-azure release:kpai",
-    "release:azure:ytai": "pnpm -F @techseeding/deploy-azure release:ytai",
-    "release:azure:txd": "pnpm -F @techseeding/deploy-azure release:txd",
-    "release:azure:all": "pnpm release:azure:txd && pnpm release:azure:kpai && pnpm release:azure:ytai"
+    "bootstrap": "pnpm -F @techseeding/deploy bootstrap",
+    "deploy:infra": "pnpm -F @techseeding/deploy deploy:infra",
+    "deploy:apps": "pnpm -F @techseeding/deploy deploy:apps",
+    "seed-secrets": "pnpm -F @techseeding/deploy seed-secrets",
+    "print-ns": "pnpm -F @techseeding/deploy print-ns",
+    "release:kpai": "pnpm -F @techseeding/deploy release:kpai",
+    "release:ytai": "pnpm -F @techseeding/deploy release:ytai",
+    "release:txd": "pnpm -F @techseeding/deploy release:txd",
+    "release:all": "pnpm release:txd && pnpm release:kpai && pnpm release:ytai"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild"]

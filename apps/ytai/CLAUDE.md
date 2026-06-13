@@ -16,7 +16,7 @@ Students aged 8-14, plus the parents and teachers who help them. Three personas 
 Multi-page app with these views:
 
 1. **Homepage** (`/`) — Public landing page with feature highlights and a "Sign in with Google" entry point. Inline buttons also link to the full `/login` page for the email-OTP and admin-password paths.
-2. **Login** (`/login`) — Three sign-in paths in one card: Google SSO (preferred, one-tap), email OTP (6-digit code sent via SES; auto-creates a student on first sign-in), and an Admin tab with username + password (only role=admin users can log in here).
+2. **Login** (`/login`) — Three sign-in paths in one card: Google SSO (preferred, one-tap), email OTP (6-digit code sent via Azure Communication Services; auto-creates a student on first sign-in), and an Admin tab with username + password (only role=admin users can log in here).
 3. **Tutor** (`/tutor/:sessionId`) — Split-panel layout:
    - **Left**: photo capture / upload screen → switches to annotated image canvas (Konva.js) where the user can circle, highlight, and draw on top of the photo
    - **Right**: chat panel showing AI tutor messages, with a "Stop" button to interrupt streaming
@@ -29,7 +29,7 @@ Plus public utility pages: `/privacy_policy`, `/terms_of_use`, `/logo` (brand sh
 
 1. User visits the homepage and signs in via one of: Google SSO (one-tap), email OTP (`/login`, 6-digit code), or — admins only — username + password (`/login` → Admin tab).
 2. On the Tutor page, they **take a photo** with their phone (`<input capture="environment">`) or upload an image of the worksheet/exam. They may circle, underline, or highlight regions on top of the photo with the pen tools.
-3. When the student sends their first message, the canvas (photo + freehand strokes) is flattened to a single PNG and POSTed alongside the message. Each upload writes its own S3 object (key = the new `session_image.id`); the session remembers the active image id.
+3. When the student sends their first message, the canvas (photo + freehand strokes) is flattened to a single PNG and POSTed alongside the message. Each upload writes its own Azure Blob (key = the new `session_image.id`); the session remembers the active image id.
 4. **Brain — a multimodal model (default: Gemma 4)** — runs on every turn. The latest user message carries every page of the active doc as an `image_url` block, so Brain reads the printed text, the student's handwriting, diagrams, and any freehand marks directly. No separate Eyes call; no OCR sidecar.
 5. Brain may call `draw_annotation` to point at exactly what it's talking about. The bbox comes from Brain's own visual estimation. Tokens stream to the chat panel; `draw_annotation` calls render on the canvas.
 6. The student can hit **Stop** at any time to interrupt Brain mid-stream.
@@ -56,7 +56,7 @@ Subjects are the fixed 4-enum (math / thinking / reading / writing), bound 1:1 t
 
 ## Database
 
-PostgreSQL with Drizzle ORM. Tables: `user`, `login_otp`, `tutor_session`, `session_doc`, `session_image`, `session_message`, `tts_audio`, `session_report`, `subject_report`, `llm_usage`. UUID primary keys, singular table names, automatic `created_at`/`updated_at`. `user` carries `auth_provider` (`local` | `google` | `email`), `email`, `google_id`, `picture`, plus the admin-only `local_login_user_name` + `password_hash` (scrypt) pair; `email`, `google_id`, and `local_login_user_name` are unique. `login_otp` stores 6-digit email codes in plain text so an admin can read them back when SES delivery fails.
+PostgreSQL with Drizzle ORM. Tables: `user`, `login_otp`, `tutor_session`, `session_doc`, `session_image`, `session_message`, `tts_audio`, `session_report`, `subject_report`, `llm_usage`. UUID primary keys, singular table names, automatic `created_at`/`updated_at`. `user` carries `auth_provider` (`local` | `google` | `email`), `email`, `google_id`, `picture`, plus the admin-only `local_login_user_name` + `password_hash` (scrypt) pair; `email`, `google_id`, and `local_login_user_name` are unique. `login_otp` stores 6-digit email codes in plain text so an admin can read them back when ACS Email delivery fails.
 
 Schema in `src/api/db/schema.js`, migrations in `src/api/drizzle/`.
 
@@ -69,7 +69,7 @@ Fastify HTTP API. All routes prefixed with `/api` except `/healthcheck`. Auth vi
 Summary:
 - `GET /healthcheck` — public
 - `POST /api/auth/google` — verify a Google Identity Services ID token, upsert the user (linking by `google_id` then `email`), return a YTAI JWT (`{ token, user }`). Returns 503 if `YTAI_GOOGLE_CLIENT_ID` is unset.
-- `POST /api/auth/email` — issue a 6-digit OTP for an email, store it plain text in `login_otp` (admin can read it out if SES delivery fails), and best-effort send via AWS SES. Auto-creates a user on first request.
+- `POST /api/auth/email` — issue a 6-digit OTP for an email, store it plain text in `login_otp` (admin can read it out if delivery fails), and best-effort send via Azure Communication Services Email. Auto-creates a user on first request.
 - `POST /api/auth/otp` — verify a 6-digit code, burn the row, return the same `{ token, user }` shape as Google. 5-wrong-attempts and 10-minute TTL guard against brute force.
 - `POST /api/auth/password` — admin-only username + password sign-in. Verifies the scrypt hash; only `role='admin'` users can sign in here. Every failure returns the same generic 401. Bootstrapped via `YTAI_ADMIN_USERNAME` / `YTAI_ADMIN_PASSWORD`, defaulting to `admin` / `adminadmin` so a fresh checkout has a working admin.
 - `POST /api/admin/password` — admin-only. Change the signed-in admin's own password. Verifies `currentPassword` against the stored scrypt hash and writes a fresh scrypt hash for `newPassword` (min 8 chars). The bootstrap admin's password is re-asserted from `YTAI_ADMIN_PASSWORD` on every server restart, so a change made here is reverted on next restart unless the env var is updated too.
@@ -93,12 +93,12 @@ Full API documentation: [docs/api-schema.md](docs/api-schema.md)
 - **Math rendering**: KaTeX
 - **Backend**: Node.js, Fastify
 - **Database**: PostgreSQL with Drizzle ORM
-- **Image storage**: S3 in production, local disk in dev
+- **Image storage**: Azure Blob in production (via `@azure/storage-blob` + DefaultAzureCredential), local disk in dev
 - **AI — Brain (multimodal chat + vision)**: any OpenAI-compatible multimodal model. Default `google/gemma-4-e4b` via LM Studio in dev; can swap for OpenRouter-hosted multimodal models (`google/gemini-2.5-pro`, `openai/gpt-4o`, etc.) in prod. Streaming, abortable, tool-call enabled.
 - **AI — Voice (TTS)**: **Kokoro-82M** via [`Kokoro-FastAPI`](https://github.com/remsky/Kokoro-FastAPI) (OpenAI-compatible `/audio/speech`); runs as a Docker sidecar in dev (`pnpm start:local:tts`). Configurable via `YTAI_TTS_BASE_URL` — any compatible provider works.
 - **Streaming**: SSE (Server-Sent Events)
-- **Package manager**: pnpm (workspace monorepo — root `@techseeding/yoututorai`, `@techseeding/yoututorai-portal`, `@techseeding/yoututorai-deploy`)
-- **Cloud / IaC**: AWS, CDK v2 (JavaScript), region `ap-southeast-2` (Sydney)
+- **Package manager**: pnpm (workspace monorepo — root `@techseeding/yoututorai`, `@techseeding/yoututorai-portal`)
+- **Cloud / IaC**: Azure (Container Apps, Postgres Flex, ACR, Blob Storage, Key Vault, DNS, ACS Email), Bicep, region `australiaeast`
 
 ## Coding Conventions
 
@@ -126,10 +126,11 @@ pnpm db:studio          # open Drizzle Studio
 pnpm start:local:tts    # boot Kokoro-FastAPI sidecar for local voice (port 9530)
 pnpm stop:local:tts     # tear it down
 
-pnpm -F @techseeding/yoututorai-deploy synth
-pnpm -F @techseeding/yoututorai-deploy diff
-pnpm -F @techseeding/yoututorai-deploy deploy
-pnpm -F @techseeding/yoututorai-deploy migrate
+# Azure deploy (run from repo root)
+pnpm deploy:infra          # az deployment sub create main.bicep
+pnpm deploy:apps           # az deployment group create apps.bicep
+pnpm release:ytai          # build + push image to ACR + update Container App + run migrations
+pnpm -F @techseeding/deploy migrate:ytai   # one-off drizzle migrate via ACA Job
 ```
 
 ## Environment
@@ -153,15 +154,14 @@ All env vars prefixed with `YTAI_`.
 | `YTAI_GOOGLE_CLIENT_ID` | OAuth 2.0 Web Client ID from the Google Cloud Console. Enables the "Sign in with Google" button on the homepage / `/login` page and the `POST /api/auth/google` route. Unset disables Google SSO. | *(unset)* |
 | `YTAI_ADMIN_USERNAME` | Username for the boot-time admin upsert. With `YTAI_ADMIN_PASSWORD`, the server ensures a `role='admin'` user exists with this hash on every restart. | `admin` |
 | `YTAI_ADMIN_PASSWORD` | Plain password hashed (scrypt) and persisted as `user.password_hash` on boot. Used to verify `POST /api/auth/password`. Default exists so a fresh checkout has a working admin — **change it for any non-dev deploy**. | `adminadmin` |
-| `YTAI_SES_FROM_EMAIL` | Verified SES sender for sign-in OTP emails. Unset → SES is skipped; codes are still issued and visible in server logs / the DB. | *(unset)* |
-| `YTAI_AWS_REGION` | AWS region used by the SES client | `ap-southeast-2` |
+| `YTAI_ACS_CONNECTION_STRING` | Azure Communication Services connection string (blank → ACS skipped; codes still in DB) | *(blank)* |
+| `YTAI_ACS_SENDER` | Verified ACS sender address (`noreply@techseeding.com.au` in prod) | *(blank)* |
 | `YTAI_OPENROUTER_API_KEY` | API key for the chat endpoint. Any non-empty value works against LM Studio. | *(required)* |
 | `YTAI_OPENROUTER_CHAT_MODEL` | Multimodal Brain model id | `google/gemma-4-e4b` |
 | `YTAI_OPENROUTER_BASE_URL` | OpenAI-compatible `/v1/chat/completions` endpoint. Point at LM Studio in dev (`http://localhost:9529/v1`). Defaults to OpenRouter. | `https://openrouter.ai/api/v1` |
-| `YTAI_S3_BUCKET` | Bucket for session images and TTS audio. Unset → local-disk fallback (dev only). | *(required in prod)* |
-| `YTAI_S3_PREFIX` | Key namespace inside `YTAI_S3_BUCKET`. CDK sets this to the deployed stage (`prod`). Local dev defaults to `dev` so a misconfigured laptop can't write into prod's keyspace. | `dev` |
-| `YTAI_SES_FROM_EMAIL` | Verified AWS SES sender identity for sign-in OTP emails. Unset disables SES (the OTP still lands in the DB and logs so an operator can read it back). | *(unset)* |
-| `YTAI_AWS_REGION` | AWS region for SES and S3. Standard `AWS_*` credentials (env, shared config, IAM role) are resolved by the SDK chain. | `ap-southeast-2` |
+| `YTAI_STORAGE_ACCOUNT_URL` | Azure Storage blob endpoint (e.g. `https://techseedingsa.blob.core.windows.net`). Unset → local-disk fallback (dev). | *(required in prod)* |
+| `YTAI_BLOB_CONTAINER` | Blob container name for session images / TTS audio. | `ytai-images` |
+| `YTAI_BLOB_PREFIX` | Key namespace inside the container (stage). Local dev defaults to `dev` so a misconfigured laptop can't write into prod's keyspace. | `dev` |
 | `YTAI_TTS_BASE_URL` | OpenAI-compatible `/audio/speech` endpoint (e.g. local Kokoro at `http://localhost:9530/v1`). Unset disables voice (route returns 503, UI greys out). | *(unset)* |
 | `YTAI_TTS_API_KEY` | Optional auth for the TTS endpoint | *(unset)* |
 | `YTAI_TTS_MODEL` | TTS model id | `kokoro` |
