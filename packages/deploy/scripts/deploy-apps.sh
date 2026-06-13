@@ -37,6 +37,17 @@ require_az_login
 # .env.azure-deploy is now sourced from common.sh so all deploy scripts see
 # the same overrides.
 
+# Auto-discover AZURE_DEPLOYMENT_NAME from the latest successful main
+# deployment so the operator doesn't have to look it up after deploy:infra.
+if [ -z "${AZURE_DEPLOYMENT_NAME:-}" ]; then
+  AZURE_DEPLOYMENT_NAME="$(az deployment sub list \
+    --query "sort_by([?contains(name, 'techseeding-main') && properties.provisioningState=='Succeeded'], &properties.timestamp)[-1].name" \
+    --output tsv 2>/dev/null || true)"
+  if [ -n "$AZURE_DEPLOYMENT_NAME" ]; then
+    echo "==> Auto-discovered AZURE_DEPLOYMENT_NAME=$AZURE_DEPLOYMENT_NAME"
+  fi
+fi
+
 # Auto-fill from main deployment outputs if env vars not provided.
 if [ -n "${AZURE_DEPLOYMENT_NAME:-}" ]; then
   : "${AZURE_ACR_LOGIN_SERVER:=$(az_output "$AZURE_DEPLOYMENT_NAME" acrLoginServer sub)}"
