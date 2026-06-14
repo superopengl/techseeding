@@ -129,8 +129,10 @@ module kpaiApp 'modules/container-app.bicep' = {
     targetPort: 80
     // min=0 → scales to zero when idle (first request pays cold-start).
     // Saves the ~$33/mo of an always-on replica for an early-stage app.
+    // max=2 lets ACA run the new revision alongside the old during a release
+    // so traffic doesn't drop while the new one starts up.
     minReplicas: 0
-    maxReplicas: 1
+    maxReplicas: 2
     customDomain: kpaiCustomDomain
     managedCertificateId: kpaiManagedCertificateId
     secretRefs: [
@@ -189,7 +191,7 @@ module ytaiApp 'modules/container-app.bicep' = {
     externalIngress: true
     targetPort: 80
     minReplicas: 0
-    maxReplicas: 1
+    maxReplicas: 2
     customDomain: ytaiCustomDomain
     managedCertificateId: ytaiManagedCertificateId
     secretRefs: [
