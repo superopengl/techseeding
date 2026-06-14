@@ -309,6 +309,7 @@ export function Conversation({ sandboxId, onFileChanged }) {
       <div
         style={{
           padding: 12,
+          paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
           background: colors.surface,
           borderTop: `1px solid ${colors.border}`,
           display: "flex",
