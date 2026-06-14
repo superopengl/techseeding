@@ -79,6 +79,8 @@ export default function ChatPanel({
   currentDocId,
   currentPage,
   docs,
+  clientId,
+  refreshTick,
   onDocsLoaded,
   onAiAnnotation,
   onDocCreated,
@@ -102,13 +104,24 @@ export default function ChatPanel({
   const speech = useSpeechRecognition();
   const dictationBaseRef = useRef('');
   const sendGenRef = useRef(0);
+  // Tracks which session the previous fetch was for so a refreshTick
+  // bump within the same session doesn't blank the panel — only a real
+  // session switch does.
+  const lastSessionRef = useRef(null);
 
   useEffect(() => {
     if (!sessionId) return undefined;
     let cancelled = false;
-    setMessages([]);
-    setHistoryLoaded(false);
-    setError(null);
+    // First fetch for this session — clear state. On subsequent refetches
+    // (refreshTick > 0 within the same sessionId) we keep the old state
+    // visible until the new fetch lands so the UI doesn't flash empty.
+    const isInitial = refreshTick === 0 || lastSessionRef.current !== sessionId;
+    if (isInitial) {
+      setMessages([]);
+      setHistoryLoaded(false);
+      setError(null);
+      lastSessionRef.current = sessionId;
+    }
 
     apiFetch(`/api/tutor/${sessionId}/messages`)
       .then((res) => {
@@ -134,7 +147,17 @@ export default function ChatPanel({
         const filtered = loaded.filter(
           (m) => !(m.role === 'user' && !m.content && m.imageId)
         );
-        setMessages(filtered);
+        // Streaming-safe merge: any local bubble flagged `_streaming` is
+        // an in-progress assistant turn this device is currently writing
+        // — the server hasn't seen the row yet, so it won't be in
+        // `filtered`. We append it to the end so the user's view doesn't
+        // lose the half-typed reply when an unrelated event triggers a
+        // refresh mid-stream. `_local` user placeholders are dropped —
+        // the server's row already covers them.
+        setMessages((prev) => {
+          const carry = prev.filter((m) => m._streaming);
+          return [...filtered, ...carry];
+        });
         setHistoryLoaded(true);
         // Seed the dropdown from the most recent user-row pacing so the
         // last choice the student made on this session sticks across
@@ -179,7 +202,7 @@ export default function ChatPanel({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, refreshTick]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -243,7 +266,7 @@ export default function ChatPanel({
       setUploading(true);
       setError(null);
       try {
-        const { doc } = await uploadDoc(sessionId, accepted);
+        const { doc } = await uploadDoc(sessionId, accepted, clientId);
         onDocCreated?.(doc);
       } catch (err) {
         setError(err.message || "Couldn't upload that worksheet.");
@@ -335,7 +358,8 @@ export default function ChatPanel({
           content: text,
           viewingPage: Number.isInteger(currentPage) ? currentPage : undefined,
           annotatedImage: annotatedImage || undefined,
-          guidanceLevel
+          guidanceLevel,
+          clientId
         }),
         signal: controller.signal
       });
@@ -432,11 +456,14 @@ export default function ChatPanel({
   };
 
   const thinkingActive = busy && awaitingTokens;
-  // "Truly empty" — no transcript, no queued worksheet pages. In this state
-  // we let the hero + composer float to the vertical middle of the page so
-  // the message input panel sits where the eye lands first; once anything
-  // arrives (a queued page or the first message), it snaps back to the
-  // usual transcript-fills-top, composer-pinned-bottom layout.
+  // No worksheet on this session — keep the chat block (messages +
+  // composer) sized to its content and floated to the vertical middle of
+  // the page, instead of stretching the transcript over an empty column.
+  // Holds for both the "truly empty" landing state (PhotoCapture hero +
+  // composer) and a "pure chat" session that has messages but no docs.
+  // Once a worksheet is uploaded, the layout snaps back to
+  // transcript-fills-top, composer-pinned-bottom.
+  const isNoDocSession = (docs?.length ?? 0) === 0;
   const isEmptyState = historyLoaded && timeline.length === 0;
 
   if (!sessionId) {
@@ -454,12 +481,18 @@ export default function ChatPanel({
         flexDirection: 'column',
         height: '100%',
         minHeight: 0,
-        justifyContent: isEmptyState ? 'center' : undefined
+        justifyContent: isNoDocSession ? 'center' : undefined
       }}
     >
       <div
         ref={scrollRef}
-        style={isEmptyState ? { ...scrollStyle, flex: '0 0 auto', overflow: 'visible' } : scrollStyle}
+        style={
+          isEmptyState
+            ? { ...scrollStyle, flex: '0 0 auto', overflow: 'visible' }
+            : isNoDocSession
+              ? { ...scrollStyle, flex: '0 1 auto' }
+              : scrollStyle
+        }
       >
         {!historyLoaded ? (
           <div style={centeredHint}>
@@ -937,7 +970,8 @@ const composerStyle = {
   paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
   display: 'flex',
   flexDirection: 'column',
-  gap: 8
+  gap: 8,
+  flexShrink: 0
 };
 const composerActionsStyle = {
   display: 'flex',

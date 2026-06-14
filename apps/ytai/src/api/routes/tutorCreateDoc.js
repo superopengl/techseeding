@@ -3,6 +3,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { sessionDoc, sessionImage, tutorSession } from '../db/schema.js';
 import persistImage from '../lib/persistImage.js';
+import { publish as publishSessionEvent } from '../lib/sessionEventBus.js';
 
 // Create a new doc on a session from 1..N images. Each image becomes a
 // page (page_number 1..N) inside the new doc. After insert, the session's
@@ -21,6 +22,10 @@ export default function tutorCreateDoc(fastify) {
     const userId = request.userId;
     const images = Array.isArray(request.body?.images) ? request.body.images : [];
     const kind = typeof request.body?.kind === 'string' ? request.body.kind : 'images';
+    const senderClientId =
+      typeof request.body?.clientId === 'string' && request.body.clientId.length > 0
+        ? request.body.clientId
+        : null;
 
     if (images.length === 0) {
       reply.code(400);
@@ -145,6 +150,16 @@ export default function tutorCreateDoc(fastify) {
     request.log.info(
       { sessionId, docId: docRow.id, pageCount: inserted.length },
       'tutorCreateDoc: doc created'
+    );
+
+    // currentDocId on the session also flipped to this new doc — emit one
+    // event covering both so receivers refetch session + docs in a single
+    // round trip.
+    publishSessionEvent(
+      sessionId,
+      'doc:new',
+      { docId: docRow.id, senderClientId },
+      request.log
     );
 
     return {

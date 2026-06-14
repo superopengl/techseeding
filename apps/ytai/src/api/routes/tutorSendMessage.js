@@ -14,6 +14,7 @@ import createPhantomNarrationGate, {
 import { normaliseUsage, recordLlmUsageBatch, sumUsage } from '../lib/recordLlmUsage.js';
 import resolveAnnotatedImage from '../lib/resolveAnnotatedImage.js';
 import runBrainTurn from '../lib/runBrainTurn.js';
+import { publish as publishSessionEvent } from '../lib/sessionEventBus.js';
 import tutorPrompt, { DEFAULT_GUIDANCE_LEVEL, isGuidanceLevel } from '../lib/tutorPrompt.js';
 
 const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
@@ -51,6 +52,12 @@ export default function tutorSendMessage(fastify) {
     const guidanceLevel = isGuidanceLevel(requestedGuidance)
       ? requestedGuidance
       : DEFAULT_GUIDANCE_LEVEL;
+    // Opaque per-tab id from the calling device — used to filter the
+    // device's own NOTIFY echoes back to itself on the events stream.
+    const senderClientId =
+      typeof request.body?.clientId === 'string' && request.body.clientId.length > 0
+        ? request.body.clientId
+        : null;
 
     if (!content) {
       reply.code(400);
@@ -117,6 +124,16 @@ export default function tutorSendMessage(fastify) {
         guidanceLevel
       })
       .returning({ id: sessionMessage.id, createdAt: sessionMessage.createdAt });
+
+    // Tell other devices about the new user message right away — they
+    // shouldn't have to wait until Brain finishes streaming to see the
+    // question appear on their screen.
+    publishSessionEvent(
+      sessionId,
+      'message:new',
+      { role: 'user', messageId: userRow.id, senderClientId },
+      request.log
+    );
 
     const { systemMessages: promptMessages, turnPrompt } = await tutorPrompt({
       activeDoc,
@@ -364,6 +381,17 @@ export default function tutorSendMessage(fastify) {
       recordLlmUsageBatch(auditRecords, request.log).catch((err) => {
         request.log.warn({ err: err?.message, sessionId }, 'recordLlmUsageBatch background job rejected');
       });
+
+      // Notify the other devices that the assistant reply is committed.
+      // We deliberately don't stream tokens cross-device in v1 — the
+      // receiver just refetches and sees the finished reply land in one
+      // go. Less bandwidth and no Stop-button semantics to coordinate.
+      publishSessionEvent(
+        sessionId,
+        'message:new',
+        { role: 'assistant', messageId: assistantRow.id, senderClientId },
+        request.log
+      );
 
       if (turnError) {
         sse('error', {

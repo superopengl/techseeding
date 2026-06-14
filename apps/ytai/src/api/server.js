@@ -24,6 +24,7 @@ import listAnalysisReports from './routes/listAnalysisReports.js';
 import tutorCreateDoc from './routes/tutorCreateDoc.js';
 import tutorCreateSession from './routes/tutorCreateSession.js';
 import tutorDeleteSession from './routes/tutorDeleteSession.js';
+import tutorEvents from './routes/tutorEvents.js';
 import tutorGetImage from './routes/tutorGetImage.js';
 import tutorGetMessages from './routes/tutorGetMessages.js';
 import tutorListSessions from './routes/tutorListSessions.js';
@@ -104,6 +105,7 @@ export default async function server() {
   tutorCreateDoc(app);
   tutorCreateSession(app);
   tutorDeleteSession(app);
+  tutorEvents(app);
   tutorGetImage(app);
   tutorGetMessages(app);
   tutorListSessions(app);

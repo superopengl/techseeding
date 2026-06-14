@@ -25,7 +25,7 @@ export default function PhotoCapture() {
       </Typography.Title>
       <Typography.Paragraph type="secondary" style={{ maxWidth: 460, fontSize: 16, margin: 0 }}>
         Tap the <strong>+</strong> button below to add a photo or PDF of your worksheet,
-        then ask a question to get started.
+        and ask any question to get started.
       </Typography.Paragraph>
     </div>
   );

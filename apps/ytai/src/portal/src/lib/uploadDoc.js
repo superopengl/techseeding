@@ -28,7 +28,10 @@ export async function filesToPages(files) {
 // POST /api/tutor/:sessionId/doc with a list of File objects (images,
 // PDFs, or a mix). PDFs are rasterized on the client into individual
 // pages, so the server sees them as ordinary image-page rows.
-export default async function uploadDoc(sessionId, files) {
+//
+// `clientId` (optional) is the calling tab's id; the server uses it to
+// suppress the device's own echoes on the cross-device events channel.
+export default async function uploadDoc(sessionId, files, clientId) {
   const { pages, hadPdf } = await filesToPages(files);
   if (pages.length === 0) {
     throw new Error('No images decoded from upload.');
@@ -36,7 +39,7 @@ export default async function uploadDoc(sessionId, files) {
   const res = await apiFetch(`/api/tutor/${sessionId}/doc`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ images: pages, kind: hadPdf ? 'pdf' : 'images' })
+    body: JSON.stringify({ images: pages, kind: hadPdf ? 'pdf' : 'images', clientId })
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

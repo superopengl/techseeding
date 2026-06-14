@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { sessionDoc, tutorSession } from '../db/schema.js';
+import { publish as publishSessionEvent } from '../lib/sessionEventBus.js';
 import isSubject, { SUBJECTS } from '../lib/tutorSubject.js';
 import isYear, { YEARS } from '../lib/year.js';
 
@@ -13,6 +14,8 @@ export default function tutorUpdateSession(fastify) {
     const hasCurrentDoc = Object.prototype.hasOwnProperty.call(body, 'currentDocId');
     const hasTitle = Object.prototype.hasOwnProperty.call(body, 'title');
     const hasYear = Object.prototype.hasOwnProperty.call(body, 'year');
+    const senderClientId =
+      typeof body.clientId === 'string' && body.clientId.length > 0 ? body.clientId : null;
 
     if (!hasSubject && !hasCurrentDoc && !hasTitle && !hasYear) {
       reply.code(400);
@@ -95,6 +98,19 @@ export default function tutorUpdateSession(fastify) {
     }
 
     const { updated } = result;
+
+    const patchedFields = [];
+    if (hasSubject) patchedFields.push('subject');
+    if (hasCurrentDoc) patchedFields.push('currentDocId');
+    if (hasTitle) patchedFields.push('title');
+    if (hasYear) patchedFields.push('year');
+    publishSessionEvent(
+      sessionId,
+      'session:patch',
+      { fields: patchedFields, senderClientId },
+      request.log
+    );
+
     return {
       sessionId: updated.id,
       subject: updated.subject,
