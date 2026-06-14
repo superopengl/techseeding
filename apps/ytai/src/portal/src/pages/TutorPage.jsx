@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Avatar, Button, Drawer, Dropdown, Grid, Input, Menu, message, Modal, Radio, Select, Splitter, Tooltip, Typography } from 'antd';
+import { Avatar, Button, Drawer, Dropdown, Grid, Input, Menu, message, Modal, Select, Space, Splitter, Tooltip, Typography } from 'antd';
 import { DeleteOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
 import PagedCanvas from '../components/PagedCanvas.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
@@ -66,6 +66,52 @@ export default function TutorPage() {
       cancelled = true;
     };
   }, [sessionId, sessionsRefresh]);
+
+  // Cross-device sync: hold a long-lived SSE channel scoped to the
+  // current session. Each `event` frame we receive just bumps
+  // refreshTick — child components watching that tick re-fetch their
+  // slice of state from the API. The server filters out events
+  // originating from our own clientId, so a device never gets a refresh
+  // ping for its own writes (which would clobber any optimistic UI).
+  useEffect(() => {
+    if (!sessionId) return undefined;
+    let cancelled = false;
+    let abortCtrl = null;
+    let retryDelay = 1000;
+    (async () => {
+      while (!cancelled) {
+        abortCtrl = new AbortController();
+        try {
+          const url = `/api/tutor/${sessionId}/events?clientId=${encodeURIComponent(clientIdRef.current)}`;
+          const stream = streamSSE(url, {
+            headers: authHeaders(),
+            signal: abortCtrl.signal
+          });
+          // Successful connect — reset backoff so a transient blip doesn't
+          // leave us at a 30s reconnect interval forever.
+          retryDelay = 1000;
+          for await (const frame of stream) {
+            if (cancelled) return;
+            if (frame.event === 'event') setRefreshTick((n) => n + 1);
+          }
+        } catch (err) {
+          if (cancelled) return;
+          if (err?.name === 'AbortError') return;
+          // Auth or session-gone — don't retry; the rest of the app
+          // (apiFetch's 401 handler, the chat-panel 404 path) will deal
+          // with it.
+          if (err?.status === 401 || err?.status === 404) return;
+        }
+        if (cancelled) return;
+        await new Promise((r) => setTimeout(r, retryDelay));
+        retryDelay = Math.min(retryDelay * 2, 30_000);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      abortCtrl?.abort();
+    };
+  }, [sessionId]);
 
   const currentUser = authSession().user;
   const [modal, modalContextHolder] = Modal.useModal();
@@ -164,7 +210,10 @@ export default function TutorPage() {
       const res = await apiFetch(`/api/tutor/${sessionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: trimmed.length === 0 ? null : trimmed })
+        body: JSON.stringify({
+          title: trimmed.length === 0 ? null : trimmed,
+          clientId: clientIdRef.current
+        })
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -179,44 +228,41 @@ export default function TutorPage() {
     }
   }, [sessionId, renameDraft, renameSaving, onSessionRenamed]);
 
-  // The "+ New Session" tab opens this modal; year + subject are chosen
-  // inside it and only get committed when the user clicks Create. Defaults
-  // come from the page-level state — which is hydrated from the user
-  // profile + the most recently opened session — so the modal opens on
-  // what the kid most likely wants without making them re-pick every time.
+  // The "+ New Session" tab — and the no-session-yet landing path — opens
+  // this wizard. The kid picks year, then subject, and the session is
+  // created the moment subject is tapped (no explicit Create button).
+  // Defaults come from the page-level state (hydrated from the user
+  // profile + the most recently opened session) so the wizard opens on
+  // what they most likely want.
   const [newSessionOpen, setNewSessionOpen] = useState(false);
-  const [draftSubject, setDraftSubject] = useState(subject);
-  const [draftYear, setDraftYear] = useState(year);
 
   const onNewSession = useCallback(() => {
-    setDraftSubject(subject);
-    setDraftYear(year);
     setNewSessionOpen(true);
-  }, [subject, year]);
+  }, []);
 
-  const confirmNewSession = useCallback(async () => {
+  const confirmNewSession = useCallback(async ({ year: nextYear, subject: nextSubject }) => {
     if (creatingSession) return;
     setCreatingSession(true);
     try {
       const res = await apiFetch('/api/tutor/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: draftSubject, year: draftYear })
+        body: JSON.stringify({ subject: nextSubject, year: nextYear })
       });
       if (!res.ok) throw new Error("Couldn't start a new session");
       const body = await res.json();
       // Persist the picks as the new defaults for the next session. The
       // year also propagates back to the user profile so the choice
       // follows the kid across browsers.
-      setSubject(draftSubject);
-      currentSubject().save(draftSubject);
-      setYear(draftYear);
-      currentYear().save(draftYear);
-      if (draftYear !== year) {
+      setSubject(nextSubject);
+      currentSubject().save(nextSubject);
+      setYear(nextYear);
+      currentYear().save(nextYear);
+      if (nextYear !== year) {
         apiFetch('/api/me/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ year: draftYear })
+          body: JSON.stringify({ year: nextYear })
         }).catch((err) => {
           console.error('Failed to save year preference', err);
         });
@@ -228,7 +274,7 @@ export default function TutorPage() {
     } finally {
       setCreatingSession(false);
     }
-  }, [creatingSession, draftSubject, draftYear, navigate, year]);
+  }, [creatingSession, navigate, year]);
 
   // Hydrate the year from the server profile on mount. localStorage primes
   // the initial render so the dropdown isn't blank during the fetch; if the
@@ -259,6 +305,11 @@ export default function TutorPage() {
       setSessionId(routeSessionId);
       return undefined;
     }
+    // No route param means we're on /tutor — clear any stale sessionId
+    // immediately so the header Select renders its placeholder while we
+    // figure out where to send the kid next, instead of leaving a stale
+    // UUID hanging in the trigger.
+    setSessionId(null);
     let cancelled = false;
     (async () => {
       try {
@@ -272,16 +323,10 @@ export default function TutorPage() {
           navigate(`/tutor/${top.id}`, { replace: true });
           return;
         }
-        const createRes = await apiFetch('/api/tutor/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subject, year })
-        });
-        if (!createRes.ok) throw new Error("Couldn't start a new session");
-        const body = await createRes.json();
-        if (cancelled) return;
-        setSessionId(body.sessionId);
-        navigate(`/tutor/${body.sessionId}`, { replace: true });
+        // No session matches the kid's preferred subject — surface the
+        // new-session wizard so they pick year + subject deliberately
+        // instead of dropping into an auto-created default.
+        if (!cancelled) setNewSessionOpen(true);
       } catch (err) {
         if (!cancelled) console.error(err);
       }
@@ -289,12 +334,6 @@ export default function TutorPage() {
     return () => {
       cancelled = true;
     };
-    // `year` is read as a snapshot when the effect runs — it only
-    // matters when this branch falls through to creating a fresh session
-    // because the user has none yet, and re-running on every year change
-    // would auto-create a new session each time. The "+ New Session"
-    // modal is the explicit path for changing year/subject.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeSessionId, navigate, subject]);
 
   const handleDocsLoaded = useCallback(({ docs: loadedDocs, currentDocId: loadedCurrent, subject: loadedSubject, year: loadedYear, aiAnnotationsByPage: loadedAi }) => {
@@ -358,7 +397,7 @@ export default function TutorPage() {
         const res = await apiFetch(`/api/tutor/${sessionId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentDocId: docId })
+          body: JSON.stringify({ currentDocId: docId, clientId: clientIdRef.current })
         });
         if (!res.ok) throw new Error("Couldn't switch worksheets");
       } catch (err) {
@@ -376,6 +415,8 @@ export default function TutorPage() {
       currentDocId={currentDocId}
       currentPage={currentPage}
       docs={docs}
+      clientId={clientIdRef.current}
+      refreshTick={refreshTick}
       onDocsLoaded={handleDocsLoaded}
       onDocCreated={handleDocCreated}
       onAiAnnotation={handleAiAnnotation}
@@ -403,11 +444,10 @@ export default function TutorPage() {
       <NewSessionModal
         open={newSessionOpen}
         creating={creatingSession}
-        year={draftYear}
-        subject={draftSubject}
-        onYearChange={setDraftYear}
-        onSubjectChange={setDraftSubject}
-        onConfirm={confirmNewSession}
+        required={!sessionId}
+        defaultYear={year}
+        defaultSubject={subject}
+        onCreate={confirmNewSession}
         onCancel={() => setNewSessionOpen(false)}
       />
       <Modal
@@ -624,67 +664,98 @@ export default function TutorPage() {
 function NewSessionModal({
   open,
   creating,
-  year,
-  subject,
-  onYearChange,
-  onSubjectChange,
-  onConfirm,
+  required,
+  defaultYear,
+  defaultSubject,
+  onCreate,
   onCancel
 }) {
+  const [step, setStep] = useState(0);
+  const [year, setYear] = useState(defaultYear);
+  const [pickedSubject, setPickedSubject] = useState(null);
+
+  // Reset to step 0 every time the modal opens so the wizard always
+  // starts at year selection, even if the kid bailed out mid-flow last
+  // time. Tracking defaultYear / defaultSubject here keeps the initial
+  // highlight aligned with the page-level defaults each open.
+  useEffect(() => {
+    if (open) {
+      setStep(0);
+      setYear(defaultYear);
+      setPickedSubject(null);
+    }
+  }, [open, defaultYear, defaultSubject]);
+
+  const handleYearPick = (value) => {
+    setYear(value);
+    setStep(1);
+  };
+
+  const handleSubjectPick = (value) => {
+    setPickedSubject(value);
+    onCreate({ year, subject: value });
+  };
+
   return (
     <Modal
       open={open}
       title="Start a new tutoring session"
-      okText="Create"
-      cancelText="Cancel"
-      confirmLoading={creating}
-      onOk={onConfirm}
-      onCancel={onCancel}
-      destroyOnClose
+      footer={null}
+      width={360}
+      closable={!creating && !required}
+      maskClosable={!creating && !required}
+      keyboard={!required}
+      onCancel={required ? undefined : onCancel}
+      destroyOnHidden
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 8 }}>
-        <div>
-          <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
-            Year level
+      {step === 0 ? (
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Typography.Text type="secondary">What year are you in?</Typography.Text>
+          {YEARS.map((y) => (
+            <Button
+              key={y}
+              block
+              size="large"
+              type={year === y ? 'primary' : 'default'}
+              onClick={() => handleYearPick(y)}
+            >
+              {`Year ${y.slice(1)}`}
+            </Button>
+          ))}
+        </Space>
+      ) : (
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Button
+              type="link"
+              disabled={creating}
+              onClick={() => setStep(0)}
+            >
+              ← Back to Choose Year
+            </Button>
+          </div>
+          <Typography.Text type="secondary">
+            What subject do you want help with for <strong>{`Year ${year.slice(1)}`}</strong>?
           </Typography.Text>
-          <Radio.Group
-            value={year}
-            onChange={(e) => onYearChange(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
-          >
-            {YEARS.map((y) => (
-              <Radio.Button key={y} value={y}>
-                {y}
-              </Radio.Button>
-            ))}
-          </Radio.Group>
-        </div>
-        <div>
-          <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
-            Subject
-          </Typography.Text>
-          <Radio.Group
-            value={subject}
-            onChange={(e) => onSubjectChange(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
-          >
-            {SUBJECTS.map((s) => {
-              const Icon = s.icon;
-              const selected = subject === s.key;
-              return (
-                <Radio.Button key={s.key} value={s.key}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <Icon style={{ color: selected ? '#fff' : s.color }} />
-                    {s.label}
-                  </span>
-                </Radio.Button>
-              );
-            })}
-          </Radio.Group>
-        </div>
-      </div>
+          {SUBJECTS.map((s) => {
+            const Icon = s.icon;
+            const isPicked = pickedSubject === s.key;
+            return (
+              <Button
+                key={s.key}
+                block
+                size="large"
+                disabled={creating && !isPicked}
+                loading={creating && isPicked}
+                icon={<Icon style={{ color: s.color }} />}
+                onClick={() => handleSubjectPick(s.key)}
+              >
+                {s.label}
+              </Button>
+            );
+          })}
+        </Space>
+      )}
     </Modal>
   );
 }
