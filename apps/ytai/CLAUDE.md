@@ -165,7 +165,7 @@ All env vars prefixed with `YTAI_`.
 | `YTAI_TTS_BASE_URL` | OpenAI-compatible `/audio/speech` endpoint (e.g. local Kokoro at `http://localhost:9530/v1`). Unset disables voice (route returns 503, UI greys out). | *(unset)* |
 | `YTAI_TTS_API_KEY` | Optional auth for the TTS endpoint | *(unset)* |
 | `YTAI_TTS_MODEL` | TTS model id | `kokoro` |
-| `YTAI_TTS_VOICE` | Default voice id (Kokoro: `af_heart`, `af_bella`, `am_adam`, …) | `af_heart` |
+| `YTAI_TTS_VOICE` | Default voice id (Kokoro: `am_fenrir`, `am_adam`, `am_michael`, `af_heart`, …) | `am_fenrir` |
 | `YTAI_AUDIO_DIR` | Local disk path for cached MP3 bytes | `./data/audio` |
 
 ## Open Questions to Resolve During Build

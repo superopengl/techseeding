@@ -222,7 +222,7 @@ module ytaiApp 'modules/container-app.bicep' = {
       { name: 'AZURE_CLIENT_ID', value: uami.properties.clientId }
       { name: 'YTAI_TTS_BASE_URL', value: 'http://127.0.0.1:8880/v1' }
       { name: 'YTAI_TTS_MODEL', value: 'kokoro' }
-      { name: 'YTAI_TTS_VOICE', value: 'af_heart' }
+      { name: 'YTAI_TTS_VOICE', value: 'am_fenrir' }
     ]
     envSecretRefs: [
       { name: 'YTAI_PG_PASSWORD', secretRef: 'db-password' }
