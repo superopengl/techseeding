@@ -67,52 +67,6 @@ export default function TutorPage() {
     };
   }, [sessionId, sessionsRefresh]);
 
-  // Cross-device sync: hold a long-lived SSE channel scoped to the
-  // current session. Each `event` frame we receive just bumps
-  // refreshTick — child components watching that tick re-fetch their
-  // slice of state from the API. The server filters out events
-  // originating from our own clientId, so a device never gets a refresh
-  // ping for its own writes (which would clobber any optimistic UI).
-  useEffect(() => {
-    if (!sessionId) return undefined;
-    let cancelled = false;
-    let abortCtrl = null;
-    let retryDelay = 1000;
-    (async () => {
-      while (!cancelled) {
-        abortCtrl = new AbortController();
-        try {
-          const url = `/api/tutor/${sessionId}/events?clientId=${encodeURIComponent(clientIdRef.current)}`;
-          const stream = streamSSE(url, {
-            headers: authHeaders(),
-            signal: abortCtrl.signal
-          });
-          // Successful connect — reset backoff so a transient blip doesn't
-          // leave us at a 30s reconnect interval forever.
-          retryDelay = 1000;
-          for await (const frame of stream) {
-            if (cancelled) return;
-            if (frame.event === 'event') setRefreshTick((n) => n + 1);
-          }
-        } catch (err) {
-          if (cancelled) return;
-          if (err?.name === 'AbortError') return;
-          // Auth or session-gone — don't retry; the rest of the app
-          // (apiFetch's 401 handler, the chat-panel 404 path) will deal
-          // with it.
-          if (err?.status === 401 || err?.status === 404) return;
-        }
-        if (cancelled) return;
-        await new Promise((r) => setTimeout(r, retryDelay));
-        retryDelay = Math.min(retryDelay * 2, 30_000);
-      }
-    })();
-    return () => {
-      cancelled = true;
-      abortCtrl?.abort();
-    };
-  }, [sessionId]);
-
   const currentUser = authSession().user;
   const [modal, modalContextHolder] = Modal.useModal();
   // Imperative handle on the canvas so ChatPanel can pull a flattened PNG
@@ -210,10 +164,7 @@ export default function TutorPage() {
       const res = await apiFetch(`/api/tutor/${sessionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: trimmed.length === 0 ? null : trimmed,
-          clientId: clientIdRef.current
-        })
+        body: JSON.stringify({ title: trimmed.length === 0 ? null : trimmed })
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -397,7 +348,7 @@ export default function TutorPage() {
         const res = await apiFetch(`/api/tutor/${sessionId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentDocId: docId, clientId: clientIdRef.current })
+          body: JSON.stringify({ currentDocId: docId })
         });
         if (!res.ok) throw new Error("Couldn't switch worksheets");
       } catch (err) {
@@ -415,8 +366,6 @@ export default function TutorPage() {
       currentDocId={currentDocId}
       currentPage={currentPage}
       docs={docs}
-      clientId={clientIdRef.current}
-      refreshTick={refreshTick}
       onDocsLoaded={handleDocsLoaded}
       onDocCreated={handleDocCreated}
       onAiAnnotation={handleAiAnnotation}
