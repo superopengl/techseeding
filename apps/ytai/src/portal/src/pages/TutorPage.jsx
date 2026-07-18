@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Space, Splitter, Typography } from 'antd';
 import Tooltip from '../components/Tooltip.jsx';
-import { DeleteOutlined, DownOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, EditOutlined, FormOutlined, MenuOutlined, SettingOutlined } from '@ant-design/icons';
 import PagedCanvas from '../components/PagedCanvas.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
 import NavMenuDrawer from '../components/NavMenuDrawer.jsx';
@@ -395,7 +395,7 @@ export default function TutorPage() {
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
         boxSizing: 'border-box',
-        background: palette.bgPanel
+        background: palette.surface
       }}
     >
       {modalContextHolder}
@@ -452,6 +452,8 @@ export default function TutorPage() {
             sessions={sessions}
             onChange={onSelectSession}
           />
+        </div>
+        <Space size={4}>
           {sessionId ? (
             <Dropdown
               trigger={['click']}
@@ -475,19 +477,21 @@ export default function TutorPage() {
                 ]
               }}
             >
-              <Button type="text" icon={<MoreOutlined />} aria-label="Session menu" />
+              <Tooltip title="Session settings">
+                <Button type="text" icon={<SettingOutlined />} aria-label="Session settings" />
+              </Tooltip>
             </Dropdown>
           ) : null}
-        </div>
-        <Tooltip title="Create new session">
-          <Button
-            type="text"
-            icon={<FormOutlined />}
-            loading={creatingSession}
-            onClick={onNewSession}
-            aria-label="Create new session"
-          />
-        </Tooltip>
+          <Tooltip title="Create new session">
+            <Button
+              type="text"
+              icon={<FormOutlined />}
+              loading={creatingSession}
+              onClick={onNewSession}
+              aria-label="Create new session"
+            />
+          </Tooltip>
+        </Space>
       </header>
       <NavMenuDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div style={{ flex: 1, minHeight: 0, background: palette.surface }}>
