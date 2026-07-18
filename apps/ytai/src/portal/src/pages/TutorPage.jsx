@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Select, Space, Splitter, Typography } from 'antd';
+import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Space, Splitter, Typography } from 'antd';
 import Tooltip from '../components/Tooltip.jsx';
-import { DeleteOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined } from '@ant-design/icons';
 import PagedCanvas from '../components/PagedCanvas.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
 import NavMenuDrawer from '../components/NavMenuDrawer.jsx';
@@ -644,87 +644,103 @@ function NewSessionModal({
   );
 }
 
-// Centered session picker in the top nav. Trigger and dropdown items
-// share the same three-row layout (year/subject chips → title →
-// created time + "X ago") so a glance at the closed Select tells the
-// user the same thing as picking from the list.
+// Centered session picker in the top nav. On phones AntD Select's popup
+// hugs the trigger's width, which squashes multi-word session titles into
+// a narrow column that can't be read. So instead: a full-width button
+// that looks like a dropdown trigger, click pops a Modal with the full
+// session list — plenty of room for the two-line SessionOptionContent
+// rows on any viewport.
 function SessionSelect({ value, sessions, onChange }) {
   const loading = sessions === null;
   const [open, setOpen] = useState(false);
-  const options = (sessions ?? []).map((s) => ({
-    value: s.id,
-    label: sessionDisplayTitle(s),
-    session: s
-  }));
-  // Stretch the dropdown to fill the viewport below the trigger so the
-  // user can see as many sessions as possible without scrolling. AntD's
-  // default `listHeight` is 256px — far smaller than needed once a user
-  // has accumulated a dozen-plus sessions.
-  const listHeight = useDropdownListHeight(options.length);
+  const activeSession = value ? (sessions ?? []).find((s) => s.id === value) : null;
+  const rows = sessions ?? [];
+
+  const handlePick = (id) => {
+    setOpen(false);
+    onChange?.(id);
+  };
+
   return (
     <>
-      {open ? (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: palette.overlay.scrim,
-            // AntD Select's popup defaults to z-index 1050 — sit just below
-            // so the dropdown reads above the scrim but page chrome below
-            // gets dimmed.
-            zIndex: 1040
-          }}
-          aria-hidden="true"
-        />
-      ) : null}
-      <Select
-        className="ytai-session-select"
-        value={value ?? undefined}
-        onChange={(id) => onChange?.(id)}
-        open={open}
-        onDropdownVisibleChange={setOpen}
+      <Button
+        onClick={() => setOpen(true)}
         loading={loading}
-        placeholder={loading ? 'Loading sessions…' : 'Pick a session'}
-        style={{ width: '100%', maxWidth: 480 }}
-        optionLabelProp="label"
-        options={options}
-        listHeight={listHeight}
-        labelRender={({ value: id }) => {
-          const s = (sessions ?? []).find((row) => row.id === id);
-          if (!s) return null;
-          return <SessionTriggerLabel session={s} />;
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        style={{
+          width: '100%',
+          maxWidth: 480,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          textAlign: 'left',
+          paddingInline: 11,
+          background: palette.surface,
+          fontWeight: 400
         }}
-        optionRender={(option) => <SessionOptionContent session={option.data.session} />}
-      />
+      >
+        <span style={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
+          {activeSession ? (
+            <SessionTriggerLabel session={activeSession} />
+          ) : (
+            <span style={{ color: palette.textMuted }}>
+              {loading ? 'Loading sessions…' : 'Pick a session'}
+            </span>
+          )}
+        </span>
+        <DownOutlined style={{ fontSize: 10, color: palette.textMuted, marginLeft: 8, flexShrink: 0 }} />
+      </Button>
+      <Modal
+        title="Pick a session"
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnHidden
+        width={520}
+        styles={{ body: { padding: 0 } }}
+      >
+        <div style={{ maxHeight: '60vh', overflowY: 'auto', padding: '8px 0' }}>
+          {rows.length === 0 ? (
+            <div style={{ padding: '24px 20px', textAlign: 'center', color: palette.textMuted }}>
+              No sessions yet.
+            </div>
+          ) : (
+            rows.map((s) => {
+              const isSelected = s.id === value;
+              return (
+                <div
+                  key={s.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handlePick(s.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handlePick(s.id);
+                    }
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    cursor: 'pointer',
+                    background: isSelected ? palette.tint.primary : 'transparent'
+                  }}
+                >
+                  <SessionOptionContent session={s} />
+                </div>
+              );
+            })
+          )}
+        </div>
+      </Modal>
     </>
   );
 }
 
-// Cap dropdown height at (viewport - 160px) for header chrome and a small
-// gap below the dropdown. Each SessionOptionContent row renders at ~56px
-// (two text lines + chip row + padding), so we also clamp to the natural
-// height of the list to avoid an oversized empty pane when the user only
-// has a few sessions.
-const SESSION_OPTION_ROW_PX = 56;
-function useDropdownListHeight(optionCount) {
-  const [viewportH, setViewportH] = useState(() =>
-    typeof window !== 'undefined' ? window.innerHeight : 768
-  );
-  useEffect(() => {
-    const onResize = () => setViewportH(window.innerHeight);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-  const max = Math.max(256, viewportH - 160);
-  const natural = Math.max(1, optionCount) * SESSION_OPTION_ROW_PX + 8;
-  return Math.min(max, natural);
-}
-
 // Closed-trigger label: single row of [title] [year chip] [subject chip],
-// so the Select sits at AntD's default 32px height and matches the
-// "+ New Session" button beside it. The dropdown rows still use the
-// richer two-line SessionOptionContent layout.
+// so the Button stays at AntD's default control height and matches the
+// "+ New Session" button beside it. The Modal rows still use the richer
+// two-line SessionOptionContent layout.
 function SessionTriggerLabel({ session }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
