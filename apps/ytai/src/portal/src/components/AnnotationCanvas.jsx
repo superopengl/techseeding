@@ -11,7 +11,8 @@ import {
   Tag,
   Text as KonvaText
 } from 'react-konva';
-import { Button, ColorPicker, Popover, Slider, Space, Tooltip } from 'antd';
+import { Button, ColorPicker, Popover, Slider, Space } from 'antd';
+import Tooltip from './Tooltip.jsx';
 import {
   ClearOutlined,
   DragOutlined,

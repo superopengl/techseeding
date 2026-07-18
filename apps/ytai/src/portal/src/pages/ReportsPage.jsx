@@ -9,10 +9,10 @@ import {
   Select,
   Space,
   Spin,
-  Tooltip,
   Typography,
   message
 } from 'antd';
+import Tooltip from '../components/Tooltip.jsx';
 import {
   ArrowLeftOutlined,
   CheckOutlined,

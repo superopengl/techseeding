@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Select, Space, Splitter, Tooltip, Typography } from 'antd';
+import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Select, Space, Splitter, Typography } from 'antd';
+import Tooltip from '../components/Tooltip.jsx';
 import { DeleteOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined } from '@ant-design/icons';
 import PagedCanvas from '../components/PagedCanvas.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';

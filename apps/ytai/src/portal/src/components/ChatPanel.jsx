@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Dropdown, Input, message, Select, Tag, Tooltip } from 'antd';
+import { Alert, Button, Dropdown, Input, message, Select, Tag } from 'antd';
+import Tooltip from './Tooltip.jsx';
 import {
   AudioOutlined,
   CameraOutlined,
