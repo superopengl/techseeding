@@ -1,29 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import authSession from '../lib/authSession.js';
 import loadGoogleSdk from '../lib/loadGoogleSdk.js';
-import { palette } from '../theme.js';
+import { palette, stickerShadow, radius } from '../theme.js';
+import { GoogleIcon } from './InlineIcons.jsx';
 
-// Read the client ID injected by Vite at build time. Falls back to empty
-// string so the button can render a clear "not configured" hint in dev.
 // eslint-disable-next-line no-undef
 const CLIENT_ID = typeof __YTAI_GOOGLE_CLIENT_ID__ !== 'undefined' ? __YTAI_GOOGLE_CLIENT_ID__ : '';
 
-// "Sign in with Google" via GIS `id.renderButton`. When the visitor has an
-// active Google session, GIS personalizes the button to "Sign in as <name>
-// <email>" with their avatar — same behavior as the kpai login. The
-// credential callback POSTs the ID token to /api/auth/google.
+const YELLOW = '#F5C542';
+const YELLOW_DARK = '#E0A800';
+
+// "Sign in with Google" as a custom yellow sticker button. Clicking opens
+// Google's OAuth 2.0 popup (account chooser + consent), no personalized
+// preview on the button itself. The access token is POSTed to
+// /api/auth/google, which resolves it against Google's userinfo endpoint.
 export default function GoogleSignInButton({
   role = 'student',
   width = 320,
   onSuccess,
   onError
 }) {
-  const containerRef = useRef(null);
+  const tokenClientRef = useRef(null);
   const [loadingSdk, setLoadingSdk] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  // Stash the latest callbacks in a ref so the init effect doesn't re-run
-  // when the parent re-renders with new inline closures.
   const callbacksRef = useRef({ onSuccess, onError, role });
   callbacksRef.current = { onSuccess, onError, role };
 
@@ -35,11 +35,18 @@ export default function GoogleSignInButton({
     loadGoogleSdk()
       .then((google) => {
         if (cancelled) return;
-        google.accounts.id.initialize({
+        tokenClientRef.current = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
+          scope: 'openid email profile',
           callback: async (response) => {
-            if (!response?.credential) {
-              setError('No credential returned from Google');
+            if (response?.error) {
+              setError(response.error_description || response.error);
+              callbacksRef.current.onError?.(new Error(response.error));
+              return;
+            }
+            const accessToken = response?.access_token;
+            if (!accessToken) {
+              setError('No access token returned from Google');
               return;
             }
             setSubmitting(true);
@@ -49,7 +56,7 @@ export default function GoogleSignInButton({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  credential: response.credential,
+                  accessToken,
                   role: callbacksRef.current.role
                 })
               });
@@ -65,23 +72,8 @@ export default function GoogleSignInButton({
             } finally {
               setSubmitting(false);
             }
-          },
-          ux_mode: 'popup',
-          auto_select: false,
-          itp_support: true
+          }
         });
-        if (containerRef.current) {
-          containerRef.current.innerHTML = '';
-          google.accounts.id.renderButton(containerRef.current, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-            text: 'signin_with',
-            shape: 'pill',
-            logo_alignment: 'left',
-            width: Math.min(Math.max(width, 200), 400)
-          });
-        }
       })
       .catch((e) => {
         if (!cancelled) setError(e.message);
@@ -93,7 +85,17 @@ export default function GoogleSignInButton({
     return () => {
       cancelled = true;
     };
-  }, [width]);
+  }, []);
+
+  const handleClick = () => {
+    if (!tokenClientRef.current) return;
+    setError(null);
+    tokenClientRef.current.requestAccessToken();
+  };
+
+  const disabled = !CLIENT_ID || loadingSdk || submitting || !tokenClientRef.current;
+
+  const clampedWidth = Math.min(Math.max(width, 200), 400);
 
   if (!CLIENT_ID) {
     return (
@@ -101,9 +103,9 @@ export default function GoogleSignInButton({
         type="button"
         disabled
         style={{
-          width: '100%',
+          width: clampedWidth,
           height: 48,
-          borderRadius: 24,
+          borderRadius: radius.md,
           fontWeight: 600,
           background: '#f5f5f5',
           color: palette.textMuted,
@@ -118,7 +120,35 @@ export default function GoogleSignInButton({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-      <div ref={containerRef} aria-busy={submitting || loadingSdk} />
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={disabled}
+        aria-busy={submitting || loadingSdk}
+        className="sticker-press"
+        style={{
+          width: clampedWidth,
+          height: 48,
+          borderRadius: radius.md,
+          background: disabled
+            ? '#F0E1B0'
+            : `linear-gradient(135deg, ${YELLOW} 0%, ${YELLOW_DARK} 100%)`,
+          color: palette.text,
+          border: 0,
+          fontFamily: 'inherit',
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          boxShadow: stickerShadow.button
+        }}
+      >
+        <GoogleIcon style={{ fontSize: 18 }} />
+        Sign in with Google
+      </button>
       {loadingSdk && (
         <span style={{ color: palette.textMuted, fontSize: 12 }}>
           Loading Google sign-in…
