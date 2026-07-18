@@ -387,7 +387,17 @@ export default function TutorPage() {
   ) : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: palette.bgPanel }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        boxSizing: 'border-box',
+        background: palette.bgPanel
+      }}
+    >
       {modalContextHolder}
       <NewSessionModal
         open={newSessionOpen}

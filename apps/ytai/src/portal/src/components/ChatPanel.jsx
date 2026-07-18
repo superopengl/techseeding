@@ -980,7 +980,6 @@ function dictationErrorMessage(code) {
 const scrollStyle = { flex: 1, overflowY: 'auto', padding: 16, minHeight: 0 };
 const composerStyle = {
   padding: 12,
-  paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
   display: 'flex',
   flexDirection: 'column',
   gap: 8,
