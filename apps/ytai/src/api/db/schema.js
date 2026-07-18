@@ -300,6 +300,33 @@ export const subjectReport = ytai.table(
   }
 );
 
+// Editable per-(year, subject) system prompt injected after the hardcoded
+// global persona when Brain runs a tutoring turn. The persona (role +
+// safety limits) lives in `src/api/prompts/tutorPersona.md` and stays
+// builtin; only this second layer — the curriculum-scoping, year-appropriate
+// tone guidance — is admin-editable. On boot, `seedAgentPrompts` upserts
+// one row per (year, subject) combination using the on-disk defaults from
+// `src/api/prompts/subjects/*.md` for any row that doesn't exist yet.
+// Rows are loaded on every tutor turn so admin edits take effect without
+// a server restart.
+export const agentPrompt = ytai.table(
+  'agent_prompt',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    year: text('year').notNull(),
+    subject: text('subject').notNull(),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => ({
+    agentPromptYearSubjectUnique: uniqueIndex('agent_prompt_year_subject_uq').on(
+      t.year,
+      t.subject
+    )
+  })
+);
+
 // Per-call billing audit log. One row per actual upstream LLM API hit
 // (cache hits in vision_extraction don't write here — they didn't cost
 // anything). Every Brain chat completion, every Eyes vision call, every
