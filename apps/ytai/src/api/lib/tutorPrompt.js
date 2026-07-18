@@ -2,7 +2,9 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { ANNOTATION_COLOR_NAMES } from './annotationPalette.js';
-import isSubject, { DEFAULT_SUBJECT, SUBJECTS } from './tutorSubject.js';
+import loadAgentPrompt from './loadAgentPrompt.js';
+import isSubject, { DEFAULT_SUBJECT } from './tutorSubject.js';
+import { YEARS } from './year.js';
 
 const PROMPTS_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -13,22 +15,17 @@ function loadPrompt(name) {
   return readFileSync(path.join(PROMPTS_DIR, name), 'utf8').trimEnd();
 }
 
-// Loaded once at module init — edit the markdown files under
-// src/api/prompts/ to change Brain's persona, pacing, or tool-use rules,
-// then restart the server to pick up the change.
+// Loaded once at module init — the persona (role + safety limits) and the
+// pace files stay builtin. Only the per-(year, subject) curriculum prompt
+// lives in the DB (see `loadAgentPrompt`), so admin edits to that layer
+// take effect on the next tutor turn without a server restart.
 const PERSONA = loadPrompt('tutorPersona.md');
 const PACE_BY_LEVEL = {
   guided: loadPrompt('tutorPace.guided.md'),
   balanced: loadPrompt('tutorPace.balanced.md'),
   direct: loadPrompt('tutorPace.direct.md')
 };
-// Per-subject system prompts. One file per subject under prompts/subjects/.
-// Injected after the generic persona so subject-specific guidance (math
-// notation, reading evidence anchoring, writing planning, etc.) layers on
-// top of the shared teaching rules without duplicating them.
-const SUBJECT_PROMPTS = Object.fromEntries(
-  SUBJECTS.map((s) => [s, loadPrompt(`subjects/${s}.md`)])
-);
+const DEFAULT_YEAR = YEARS[0];
 
 export const GUIDANCE_LEVELS = Object.freeze(['guided', 'balanced', 'direct']);
 export const DEFAULT_GUIDANCE_LEVEL = 'direct';
@@ -43,11 +40,19 @@ export default async function tutorPrompt({
   usedColors = [],
   guidanceLevel,
   subject,
+  year,
   annotatedPages = []
 } = {}) {
   const level = isGuidanceLevel(guidanceLevel) ? guidanceLevel : DEFAULT_GUIDANCE_LEVEL;
   const subjectKey = isSubject(subject) ? subject : DEFAULT_SUBJECT;
+  const yearKey = YEARS.includes(year) ? year : DEFAULT_YEAR;
   const hasDoc = !!activeDoc && Array.isArray(activeDoc.pages) && activeDoc.pages.length > 0;
+
+  // Per-(year, subject) prompt is loaded from the DB on every turn so
+  // admin edits in `/admin` → Prompts take effect on the next message.
+  // The global persona above stays hardcoded — it carries the role +
+  // safety limits and must be non-editable.
+  const yearSubjectPrompt = await loadAgentPrompt(yearKey, subjectKey);
 
   // STATIC system messages — byte-identical across every turn in one
   // session (within a single active doc). This is the prefix we want
@@ -57,7 +62,7 @@ export default async function tutorPrompt({
   // history so the long stable prefix stays cacheable.
   const messages = [
     { role: 'system', content: PERSONA },
-    { role: 'system', content: SUBJECT_PROMPTS[subjectKey] }
+    { role: 'system', content: yearSubjectPrompt }
   ];
 
   if (hasDoc) {

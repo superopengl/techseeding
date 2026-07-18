@@ -68,7 +68,8 @@ export default function tutorSendMessage(fastify) {
       .select({
         id: tutorSession.id,
         currentDocId: tutorSession.currentDocId,
-        subject: tutorSession.subject
+        subject: tutorSession.subject,
+        year: tutorSession.year
       })
       .from(tutorSession)
       .where(and(eq(tutorSession.id, sessionId), eq(tutorSession.userId, userId)));
@@ -141,6 +142,7 @@ export default function tutorSendMessage(fastify) {
       usedColors,
       guidanceLevel,
       subject: session.subject,
+      year: session.year,
       annotatedPages: annotatedPageNumbers
     });
 

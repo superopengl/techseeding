@@ -12,6 +12,7 @@ import authOtp from './routes/authOtp.js';
 import authPassword from './routes/authPassword.js';
 import bootstrapAdmin from './lib/bootstrapAdmin.js';
 import failOrphanReports from './lib/failOrphanReports.js';
+import seedAgentPrompts from './lib/seedAgentPrompts.js';
 import changeAdminPassword from './routes/changeAdminPassword.js';
 import createAnalysisReport from './routes/createAnalysisReport.js';
 import deleteAdminUserData from './routes/deleteAdminUserData.js';
@@ -19,8 +20,10 @@ import deleteAnalysisReport from './routes/deleteAnalysisReport.js';
 import getAdminUserTokenUsage from './routes/getAdminUserTokenUsage.js';
 import getMyProfile from './routes/getMyProfile.js';
 import healthcheck from './routes/healthcheck.js';
+import listAdminAgentPrompts from './routes/listAdminAgentPrompts.js';
 import listAdminUsers from './routes/listAdminUsers.js';
 import listAnalysisReports from './routes/listAnalysisReports.js';
+import updateAdminAgentPrompt from './routes/updateAdminAgentPrompt.js';
 import tutorCreateDoc from './routes/tutorCreateDoc.js';
 import tutorCreateSession from './routes/tutorCreateSession.js';
 import tutorDeleteSession from './routes/tutorDeleteSession.js';
@@ -100,8 +103,10 @@ export default async function server() {
   deleteAnalysisReport(app);
   getAdminUserTokenUsage(app);
   getMyProfile(app);
+  listAdminAgentPrompts(app);
   listAdminUsers(app);
   listAnalysisReports(app);
+  updateAdminAgentPrompt(app);
   tutorCreateDoc(app);
   tutorCreateSession(app);
   tutorDeleteSession(app);
@@ -158,6 +163,11 @@ export default async function server() {
   } catch (err) {
     app.log.error({ err }, 'bootstrapAdmin failed');
   }
+
+  // Fill in any missing (year, subject) prompt rows so the admin UI has
+  // something to edit on a fresh install. Admin edits are preserved by
+  // ON CONFLICT DO NOTHING inside the seed.
+  await seedAgentPrompts(app.log);
 
   // Anything still 'pending' must be a leftover from the previous process
   // (its background task didn't survive the restart). Mark them failed so
