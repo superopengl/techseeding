@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Avatar, Button, Drawer, Dropdown, Grid, Input, Menu, message, Modal, Select, Space, Splitter, Tooltip, Typography } from 'antd';
-import { DeleteOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Drawer, Dropdown, Grid, Input, message, Modal, Select, Space, Splitter, Tooltip, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, FormOutlined, MenuOutlined, MoreOutlined } from '@ant-design/icons';
 import PagedCanvas from '../components/PagedCanvas.jsx';
 import ChatPanel from '../components/ChatPanel.jsx';
-import Logo from '../components/Logo.jsx';
+import NavMenuDrawer from '../components/NavMenuDrawer.jsx';
 import apiFetch from '../lib/apiFetch.js';
-import authSession from '../lib/authSession.js';
 import currentSubject from '../lib/currentSubject.js';
 import currentYear, { YEARS } from '../lib/currentYear.js';
 import SUBJECTS from '../lib/subjects.js';
@@ -67,7 +66,6 @@ export default function TutorPage() {
     };
   }, [sessionId, sessionsRefresh]);
 
-  const currentUser = authSession().user;
   const [modal, modalContextHolder] = Modal.useModal();
   // Imperative handle on the canvas so ChatPanel can pull a flattened PNG
   // of (photo + freehand strokes) at send time. Routed via a stable
@@ -437,7 +435,6 @@ export default function TutorPage() {
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
         />
-        {/* {isNarrow ? null : <Logo height={24} />} */}
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, minWidth: 0, padding: '0 12px' }}>
           <SessionSelect
             value={sessionId}
@@ -481,80 +478,7 @@ export default function TutorPage() {
           />
         </Tooltip>
       </header>
-      <Drawer
-        placement="left"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        size={280}
-        title="YouTutorAI"
-        styles={{
-          body: { padding: 0, display: 'flex', flexDirection: 'column' },
-          footer: { padding: 16 }
-        }}
-        footer={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Avatar
-              src={
-                currentUser?.picture
-                  ? <img src={currentUser.picture} alt="" referrerPolicy="no-referrer" />
-                  : undefined
-              }
-              icon={<UserOutlined />}
-              style={{ backgroundColor: palette.subjects.math.color }}
-            />
-            <Typography.Text strong>{currentUser?.name || 'Guest'}</Typography.Text>
-          </div>
-        }
-      >
-        <Menu
-          mode="inline"
-          selectable={false}
-          style={{ border: 'none', flex: 1 }}
-          onClick={({ key }) => {
-            if (key === '/') return; // handled by the anchor below
-            if (key === 'logout') {
-              modal.confirm({
-                title: 'Sign out?',
-                content: "You'll be signed out of YouTutorAI.",
-                okText: 'Sign out',
-                okButtonProps: { danger: true },
-                cancelText: 'Cancel',
-                onOk: () => {
-                  setDrawerOpen(false);
-                  authSession().clear();
-                  navigate('/');
-                }
-              });
-              return;
-            }
-            setDrawerOpen(false);
-            navigate(key);
-          }}
-          items={[
-            {
-              key: '/',
-              label: (
-                <a
-                  href="/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setDrawerOpen(false)}
-                  style={{ display: 'block', color: 'inherit' }}
-                >
-                  Home
-                </a>
-              )
-            },
-            { key: '/tutor', label: 'Tutor Sessions' },
-            { key: '/reports', label: 'Analysis Reports' },
-            { type: 'divider' },
-            {
-              key: 'logout',
-              label: <span style={{ color: palette.error }}>Sign out</span>
-            }
-          ]}
-        />
-      </Drawer>
+      <NavMenuDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div style={{ flex: 1, minHeight: 0, background: palette.surface }}>
         {isNarrow ? (
           <>

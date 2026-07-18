@@ -1,21 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
   Card,
-  ConfigProvider,
   Input,
   Modal,
-  Radio,
+  Progress,
+  Select,
   Space,
   Spin,
-  Splitter,
-  Tabs,
   Tooltip,
   Typography,
-  message,
-  theme as antdTheme
+  message
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -23,8 +19,9 @@ import {
   CopyOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
+  FormOutlined,
   LoadingOutlined,
-  PlusOutlined
+  MenuOutlined
 } from '@ant-design/icons';
 import SUBJECTS from '../lib/subjects.js';
 import apiFetch from '../lib/apiFetch.js';
@@ -32,6 +29,7 @@ import currentSubject from '../lib/currentSubject.js';
 import currentYear, { YEARS } from '../lib/currentYear.js';
 import { palette } from '../theme.js';
 import MarkdownMessage from '../components/MarkdownMessage.jsx';
+import NavMenuDrawer from '../components/NavMenuDrawer.jsx';
 
 const POLL_INTERVAL_MS = 10000;
 
@@ -201,45 +199,37 @@ function SubjectBadge({ subject, size = 'sm' }) {
   );
 }
 
-function StepHeader({ n, title, children }) {
+// Compact subject pill for the dense report-select trigger/dropdown row.
+// Mirrors HeaderSubjectChip on the TutorPage so the two pages feel of a
+// piece.
+function HeaderSubjectChip({ subject }) {
+  const meta = SUBJECTS.find((s) => s.key === subject);
+  if (!meta) return null;
+  const Icon = meta.icon;
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: '50%',
-            background: palette.cta,
-            color: '#fff',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: 13,
-            flexShrink: 0
-          }}
-        >
-          {n}
-        </span>
-        <Typography.Text strong style={{ fontSize: 15 }}>
-          {title}
-        </Typography.Text>
-      </div>
-      {children ? (
-        <Typography.Paragraph
-          type="secondary"
-          style={{ fontSize: 13, marginLeft: 36, marginTop: 4, marginBottom: 0 }}
-        >
-          {children}
-        </Typography.Paragraph>
-      ) : null}
-    </div>
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 3,
+        padding: '0 5px 0 4px',
+        border: `1px solid ${meta.color}`,
+        background: meta.tint,
+        borderRadius: 999,
+        color: palette.text,
+        fontSize: 9,
+        fontWeight: 600,
+        lineHeight: 1.4,
+        whiteSpace: 'nowrap'
+      }}
+    >
+      <Icon style={{ color: meta.color, fontSize: 9 }} />
+      {meta.label}
+    </span>
   );
 }
 
 export default function ReportsPage() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reports, setReports] = useState([]);
@@ -249,6 +239,7 @@ export default function ReportsPage() {
   const [customSubject, setCustomSubject] = useState(() => currentSubject().value);
   const [customTimespanDays, setCustomTimespanDays] = useState(DEFAULT_TIMESPAN_DAYS);
   const [customYear, setCustomYear] = useState(() => currentYear().value);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const updateSubject = useCallback((next) => {
     setCustomSubject(next);
@@ -433,196 +424,208 @@ export default function ReportsPage() {
       >
         <Button
           type="text"
-          size="large"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/tutor')}
-          aria-label="Back to tutor"
+          icon={<MenuOutlined />}
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open menu"
         />
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          Analysis Reports
-        </Typography.Title>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, minWidth: 0, padding: '0 12px' }}>
+          <ReportSelect
+            loading={loading}
+            value={selectedId}
+            reports={reports}
+            onChange={setSelectedId}
+          />
+        </div>
+        <Tooltip title="New report">
+          <Button
+            type="text"
+            icon={<FormOutlined />}
+            onClick={() => setSelectedId(null)}
+            aria-label="New report"
+          />
+        </Tooltip>
       </header>
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <Splitter
-          className="ytai-white-splitter"
-          style={{ height: '100%', background: palette.surface }}
-        >
-          <Splitter.Panel defaultSize={340} min={240} max="60%">
-            <ReportsList
-              loading={loading}
-              error={error}
-              reports={reports}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onNew={() => setSelectedId(null)}
-            />
-          </Splitter.Panel>
-          <Splitter.Panel>
-            {selectedReport ? (
-              <ReportPanel
-                report={selectedReport}
-                onDelete={handleDelete}
-                onGenerateSimilar={handleGenerateSimilar}
-              />
-            ) : (
-              <GeneratePanel
-                generating={generating}
-                customYear={customYear}
-                setCustomYear={updateYear}
-                customSubject={customSubject}
-                setCustomSubject={updateSubject}
-                customTimespanDays={customTimespanDays}
-                setCustomTimespanDays={setCustomTimespanDays}
-                customPrompt={customPrompt}
-                setCustomPrompt={setCustomPrompt}
-                onSubmit={handleSubmit}
-              />
-            )}
-          </Splitter.Panel>
-        </Splitter>
+      <NavMenuDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      <div style={{ flex: 1, overflow: 'hidden', background: palette.surface }}>
+        {error ? (
+          <div style={{ padding: 16 }}>
+            <Alert type="error" showIcon message={error} />
+          </div>
+        ) : selectedReport ? (
+          <ReportPanel
+            report={selectedReport}
+            onDelete={handleDelete}
+            onGenerateSimilar={handleGenerateSimilar}
+          />
+        ) : (
+          <GeneratePanel
+            generating={generating}
+            customYear={customYear}
+            setCustomYear={updateYear}
+            customSubject={customSubject}
+            setCustomSubject={updateSubject}
+            customTimespanDays={customTimespanDays}
+            setCustomTimespanDays={setCustomTimespanDays}
+            customPrompt={customPrompt}
+            setCustomPrompt={setCustomPrompt}
+            onSubmit={handleSubmit}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function ReportsList({ loading, error, reports, selectedId, onSelect, onNew }) {
-  // The "+ New report" entry is always the first tab; saved reports follow.
-  // We keep the tab strip in this Splitter panel and let the right panel
-  // render the actual content driven by the active key — see the
-  // `ytai-vert-nav-tabs` CSS class which hides AntD's content holder.
-  const items = useMemo(() => {
-    const tabs = [
-      {
-        key: 'new',
-        label: (
-          <Space
-            size={8}
-            align="center"
-            className="ytai-new-report-label"
-            style={{ '--ytai-new-report-color': palette.state.correct }}
-          >
-            <PlusOutlined />
-            <Typography.Text strong>New Report</Typography.Text>
-          </Space>
-        )
-      }
-    ];
-    for (const r of reports) {
-      tabs.push({ key: r.id, label: <ReportTabLabel report={r} /> });
-    }
-    return tabs;
-  }, [reports]);
-
-  const activeKey = selectedId ?? 'new';
-
-  // Dark theme scoped to the left nav panel only — same pattern as
-  // TutorSessionsSider so the two dark surfaces in the app feel of a
-  // piece. AntD's darkAlgorithm recolors Tabs internals automatically;
-  // the explicit `palette.sider.bg` sets the surface behind the tab strip.
+// Centered report picker in the top nav. Mirrors TutorPage's SessionSelect
+// — single-line trigger so the Select sits at AntD's 32px height beside
+// the menu and New Report buttons; the dropdown rows render a richer
+// two-line layout (title + subject chip + timestamp / status).
+function ReportSelect({ loading, value, reports, onChange }) {
+  const [open, setOpen] = useState(false);
+  const options = reports.map((r) => ({
+    value: r.id,
+    label: reportDisplayTitle(r),
+    report: r
+  }));
+  const listHeight = useDropdownListHeight(options.length);
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: antdTheme.darkAlgorithm,
-        token: {
-          // Seed tokens — darkAlgorithm derives the full text/bg scale
-          // from these. Without an explicit light `colorTextBase` the
-          // parent theme's dark slate would bleed through and the tab
-          // labels would render the same color as the dark surface.
-          colorTextBase: '#FFFFFF',
-          colorBgBase: palette.sider.bg,
-          colorPrimary: palette.sider.accent,
-          // Derived overrides for the surfaces we set ourselves.
-          colorBgContainer: palette.sider.bg,
-          colorBgElevated: palette.sider.activeBg,
-          colorBorderSecondary: palette.sider.border,
-          colorText: palette.sider.textPrimary,
-          colorTextSecondary: palette.sider.textMuted,
-          colorTextTertiary: palette.sider.textMuted
-        },
-        components: {
-          Tabs: {
-            itemColor: palette.sider.textMuted,
-            itemHoverColor: palette.sider.textPrimary,
-            itemSelectedColor: palette.sider.textPrimary,
-            inkBarColor: palette.sider.accent,
-            cardBg: 'transparent'
-          }
-        }
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          background: palette.sider.bg,
-          color: palette.sider.textPrimary
+    <>
+      {open ? (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: palette.overlay.scrim,
+            // AntD Select's popup defaults to z-index 1050 — sit just below
+            // so the dropdown reads above the scrim but page chrome below
+            // gets dimmed.
+            zIndex: 1040
+          }}
+          aria-hidden="true"
+        />
+      ) : null}
+      <Select
+        className="ytai-session-select"
+        value={value ?? undefined}
+        onChange={(id) => onChange?.(id)}
+        open={open}
+        onDropdownVisibleChange={setOpen}
+        loading={loading}
+        placeholder={loading ? 'Loading reports…' : 'Pick a report'}
+        style={{ width: '100%', maxWidth: 480 }}
+        optionLabelProp="label"
+        notFoundContent={loading ? <Spin size="small" /> : 'No reports yet'}
+        options={options}
+        listHeight={listHeight}
+        labelRender={({ value: id }) => {
+          const r = reports.find((row) => row.id === id);
+          if (!r) return null;
+          return <ReportTriggerLabel report={r} />;
         }}
-      >
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: 32 }}>
-            <Spin />
-          </div>
-        ) : error ? (
-          <div style={{ padding: 12 }}>
-            <Alert type="error" showIcon message={error} />
-          </div>
-        ) : (
-          <Tabs
-            className="ytai-vert-nav-tabs"
-            tabPosition="left"
-            type="card"
-            activeKey={activeKey}
-            onChange={(key) => (key === 'new' ? onNew() : onSelect(key))}
-            items={items}
-          />
-        )}
-      </div>
-    </ConfigProvider>
+        optionRender={(option) => <ReportOptionContent report={option.data.report} />}
+      />
+    </>
   );
 }
 
-function ReportTabLabel({ report }) {
+// Cap dropdown height at (viewport - 160px) for header chrome and a small
+// gap below the dropdown. Each ReportOptionContent row renders at ~64px
+// (title + chip row + date), so we also clamp to the natural list height
+// to avoid an oversized empty pane when only a few reports exist.
+const REPORT_OPTION_ROW_PX = 64;
+function useDropdownListHeight(optionCount) {
+  const [viewportH, setViewportH] = useState(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 768
+  );
+  useEffect(() => {
+    const onResize = () => setViewportH(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  const max = Math.max(256, viewportH - 160);
+  const natural = Math.max(1, optionCount) * REPORT_OPTION_ROW_PX + 8;
+  return Math.min(max, natural);
+}
+
+function ReportTriggerLabel({ report }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+      <span
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: palette.text,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          minWidth: 0,
+          flex: 1
+        }}
+      >
+        {reportDisplayTitle(report)}
+      </span>
+      {report.subject ? <HeaderSubjectChip subject={report.subject} /> : null}
+    </div>
+  );
+}
+
+function ReportOptionContent({ report }) {
   const subjectMeta = SUBJECTS.find((s) => s.key === report.subject);
   const isPending = report.status === 'pending';
   const isFailed = report.status === 'failed';
+  const absolute = formatDate(report.generatedAt || report.createdAt);
+  const relative = formatTimeAgo(report.generatedAt || report.createdAt);
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <SubjectBadge subject={report.subject} />
-        <Typography.Text strong style={{ fontSize: 13 }}>
-          {reportDisplayTitle(report)}
-        </Typography.Text>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: '4px 0', minWidth: 0 }}>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: palette.text,
+          lineHeight: 1.3,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        {reportDisplayTitle(report)}
       </div>
-      {report.customPrompt ? (
-        <Typography.Paragraph
-          type="secondary"
-          style={{ marginBottom: 0, fontSize: 12 }}
-          ellipsis={{ rows: 2 }}
-        >
-          {report.customPrompt}
-        </Typography.Paragraph>
-      ) : null}
-      {isPending ? (
-        <Space size={6} align="center">
-          <LoadingOutlined style={{ color: subjectMeta?.color || palette.primary }} />
-          <Typography.Text style={{ fontSize: 11, color: subjectMeta?.color || palette.primary }}>
-            Generating…
-          </Typography.Text>
-        </Space>
-      ) : isFailed ? (
-        <Space size={6} align="center">
-          <ExclamationCircleOutlined style={{ color: palette.state.wrong }} />
-          <Typography.Text style={{ fontSize: 11, color: palette.state.wrong }}>
-            Failed — open to retry
-          </Typography.Text>
-        </Space>
-      ) : (
-        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-          {formatDate(report.generatedAt || report.createdAt)} ({formatTimeAgo(report.generatedAt || report.createdAt)})
-        </Typography.Text>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        {report.subject ? <HeaderSubjectChip subject={report.subject} /> : null}
+        {isPending ? (
+          <Space size={4} align="center">
+            <LoadingOutlined style={{ color: subjectMeta?.color || palette.primary, fontSize: 11 }} />
+            <Typography.Text style={{ fontSize: 11, color: subjectMeta?.color || palette.primary }}>
+              Generating…
+            </Typography.Text>
+          </Space>
+        ) : isFailed ? (
+          <Space size={4} align="center">
+            <ExclamationCircleOutlined style={{ color: palette.state.wrong, fontSize: 11 }} />
+            <Typography.Text style={{ fontSize: 11, color: palette.state.wrong }}>
+              Failed
+            </Typography.Text>
+          </Space>
+        ) : null}
+        {!isPending && !isFailed && absolute ? (
+          <div
+            style={{
+              marginLeft: 'auto',
+              fontSize: 11,
+              color: palette.textMuted,
+              lineHeight: 1.3,
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            {absolute}
+            {relative ? ` (${relative})` : ''}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -639,121 +642,120 @@ function GeneratePanel({
   setCustomPrompt,
   onSubmit
 }) {
+  const [currentStep, setCurrentStep] = useState(0);
   const isGenerating = generating?.startsWith(`${customSubject}::`);
-  return (
-    <div
-      style={{
-        height: '100%',
-        overflowY: 'auto',
-        background: palette.surface
-      }}
-    >
-      <div
-        style={{
-          minHeight: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px 24px 64px',
-          boxSizing: 'border-box'
-        }}
-      >
-      <div style={{ maxWidth: 640, width: '100%' }}>
-      <Typography.Title level={4} style={{ marginTop: 0 }}>
-        Generate a new report
-      </Typography.Title>
-      <Typography.Paragraph type="secondary">
-        Reports turn the student's tutoring sessions into a clear picture — what they got wrong, what they've got down, and what to work on next. Each report is saved as a snapshot you can come back to.
-      </Typography.Paragraph>
+  const hasPrompt = customPrompt.trim().length > 0;
 
-      <section style={{ marginBottom: 20 }}>
-        <StepHeader n={1} title="Choose the year">
-          Which year level is the student in? This anchors the AI's expectations.
-        </StepHeader>
-        <div style={{ marginLeft: 36 }}>
-          <Radio.Group
-            value={customYear}
-            onChange={(e) => setCustomYear(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
-          >
+  const advance = () => setCurrentStep((s) => Math.min(s + 1, 3));
+  const pickYear = (y) => { setCustomYear(y); advance(); };
+  const pickSubject = (k) => { setCustomSubject(k); advance(); };
+  const pickTimespan = (days) => { setCustomTimespanDays(days); advance(); };
+
+  const optionColStyle = { width: '100%', maxWidth: 360, margin: '0 auto', display: 'flex' };
+
+  const steps = [
+    {
+      title: 'Year',
+      content: (
+        <>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            Choose the year
+          </Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Which year level is the student in? This anchors the AI's expectations.
+          </Typography.Paragraph>
+          <Space direction="vertical" size="small" style={optionColStyle}>
             {YEARS.map((y) => (
-              <Radio.Button key={y} value={y}>
+              <Button
+                key={y}
+                block
+                size="large"
+                type={customYear === y ? 'primary' : 'default'}
+                onClick={() => pickYear(y)}
+              >
                 {y}
-              </Radio.Button>
+              </Button>
             ))}
-          </Radio.Group>
-        </div>
-      </section>
-
-      <div style={{ borderTop: `1px dashed ${palette.borderSoft}`, margin: '24px 0' }} />
-
-      <section style={{ marginBottom: 20 }}>
-        <StepHeader n={2} title="Choose a subject">
-          Which subject's tutoring work should the AI analyze?
-        </StepHeader>
-        <div style={{ marginLeft: 36 }}>
-          <Radio.Group
-            value={customSubject}
-            onChange={(e) => setCustomSubject(e.target.value)}
-            optionType="button"
-            buttonStyle="solid"
-          >
+          </Space>
+        </>
+      )
+    },
+    {
+      title: 'Subject',
+      content: (
+        <>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            Choose a subject
+          </Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Which subject's tutoring work should the AI analyze?
+          </Typography.Paragraph>
+          <Space direction="vertical" size="small" style={optionColStyle}>
             {SUBJECTS.map((s) => {
               const Icon = s.icon;
               const selected = customSubject === s.key;
               return (
-                <Radio.Button key={s.key} value={s.key}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <Icon style={{ color: selected ? '#fff' : s.color }} />
-                    {s.label}
-                  </span>
-                </Radio.Button>
+                <Button
+                  key={s.key}
+                  block
+                  size="large"
+                  icon={<Icon style={{ color: selected ? '#fff' : s.color }} />}
+                  type={selected ? 'primary' : 'default'}
+                  onClick={() => pickSubject(s.key)}
+                >
+                  {s.label}
+                </Button>
               );
             })}
-          </Radio.Group>
-        </div>
-      </section>
-
-      <div style={{ borderTop: `1px dashed ${palette.borderSoft}`, margin: '24px 0' }} />
-
-      <section style={{ marginBottom: 20 }}>
-        <StepHeader n={3} title="Pick a time span">
-          How far back should the AI look? Only sessions started within this window are included.
-        </StepHeader>
-        <div style={{ marginLeft: 36 }}>
-          <Radio.Group
-            value={customTimespanDays === null ? 'all' : customTimespanDays}
-            onChange={(e) => {
-              const v = e.target.value;
-              setCustomTimespanDays(v === 'all' ? null : v);
-            }}
-            optionType="button"
-            buttonStyle="solid"
-          >
-            {TIMESPAN_OPTIONS.map((o) => (
-              <Radio.Button key={o.value ?? 'all'} value={o.value === null ? 'all' : o.value}>
-                {o.label}
-              </Radio.Button>
-            ))}
-          </Radio.Group>
-        </div>
-      </section>
-
-      <div style={{ borderTop: `1px dashed ${palette.borderSoft}`, margin: '24px 0' }} />
-
-      <section style={{ marginBottom: 28 }}>
-        <StepHeader n={4} title="Tell the AI what to analyze">
-          Start from a template, then tweak the prompt before generating.
-        </StepHeader>
-        <div style={{ marginLeft: 36 }}>
+          </Space>
+        </>
+      )
+    },
+    {
+      title: 'Time span',
+      content: (
+        <>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            Pick a time span
+          </Typography.Title>
+          <Typography.Paragraph type="secondary">
+            How far back should the AI look? Only sessions started within this window are included.
+          </Typography.Paragraph>
+          <Space direction="vertical" size="small" style={optionColStyle}>
+            {TIMESPAN_OPTIONS.map((o) => {
+              const selected = customTimespanDays === o.value;
+              return (
+                <Button
+                  key={o.value ?? 'all'}
+                  block
+                  size="large"
+                  type={selected ? 'primary' : 'default'}
+                  onClick={() => pickTimespan(o.value)}
+                >
+                  {o.label}
+                </Button>
+              );
+            })}
+          </Space>
+        </>
+      )
+    },
+    {
+      title: 'Prompt',
+      content: (
+        <>
+          <Typography.Title level={5} style={{ marginTop: 0 }}>
+            Tell the AI what to analyze
+          </Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Start from a template, then tweak the prompt before generating.
+          </Typography.Paragraph>
           <div
             style={{
               border: `1px solid ${palette.border}`,
               borderRadius: 8,
               background: '#fff',
-              padding: 12,
-              transition: 'border-color 120ms ease'
+              padding: 12
             }}
           >
             <div
@@ -777,9 +779,7 @@ function GeneratePanel({
                     borderColor: palette.tint.primary
                   }}
                 >
-                  <Typography.Text
-                    style={{ display: 'block', marginBottom: 2, fontSize: 13 }}
-                  >
+                  <Typography.Text style={{ display: 'block', marginBottom: 2, fontSize: 13 }}>
                     {t.label}
                   </Typography.Text>
                   <Typography.Paragraph
@@ -805,19 +805,69 @@ function GeneratePanel({
               style={{ padding: '4px 0', resize: 'none', overflow: 'hidden' }}
             />
           </div>
-          <div style={{ marginTop: 8, textAlign: 'right' }}>
+          <div style={{ marginTop: 16, textAlign: 'right' }}>
             <Button
               type="primary"
+              size="large"
               loading={isGenerating}
-              disabled={!customPrompt.trim()}
+              disabled={!hasPrompt}
               onClick={onSubmit}
             >
               Generate
             </Button>
           </div>
+        </>
+      )
+    }
+  ];
+
+  return (
+    <div
+      style={{
+        height: '100%',
+        overflowY: 'auto',
+        background: palette.surface
+      }}
+    >
+      <div
+        style={{
+          minHeight: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px 24px 64px',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ maxWidth: 640, width: '100%' }}>
+          <Progress
+            percent={((currentStep + 1) / steps.length) * 100}
+            showInfo={false}
+            strokeColor={palette.cta}
+            style={{ marginBottom: 16 }}
+          />
+
+          <Typography.Title level={4} style={{ marginTop: 0 }}>
+            Generate a new report
+          </Typography.Title>
+          <Typography.Paragraph type="secondary">
+            Reports turn the student's tutoring sessions into a clear picture — what they got wrong, what they've got down, and what to work on next. Each report is saved as a snapshot you can come back to.
+          </Typography.Paragraph>
+
+          {currentStep > 0 ? (
+            <Button
+              type="link"
+              size="small"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => setCurrentStep(currentStep - 1)}
+              style={{ paddingLeft: 0, marginBottom: 8 }}
+            >
+              Back
+            </Button>
+          ) : null}
+
+          <div>{steps[currentStep].content}</div>
         </div>
-      </section>
-      </div>
       </div>
     </div>
   );
@@ -872,7 +922,6 @@ function ReportPanel({ report, onDelete, onGenerateSimilar }) {
               <Button
                 type="link"
                 size="small"
-                // icon={<PlusOutlined />}
                 onClick={() => onGenerateSimilar?.(report)}
               >
                 Generate Similar
