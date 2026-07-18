@@ -127,11 +127,12 @@ module kpaiApp 'modules/container-app.bicep' = {
     uamiId: uamiId
     externalIngress: true
     targetPort: 80
-    // min=0 → scales to zero when idle (first request pays cold-start).
-    // Saves the ~$33/mo of an always-on replica for an early-stage app.
+    // min=1 → always-on replica, no scale-to-zero, so the first request after
+    // an idle period doesn't pay the ~20s cold-start. Costs ~$33/mo per app;
+    // we run this warm on purpose because we have Azure credits to spare.
     // max=2 lets ACA run the new revision alongside the old during a release
     // so traffic doesn't drop while the new one starts up.
-    minReplicas: 0
+    minReplicas: 1
     maxReplicas: 2
     customDomain: kpaiCustomDomain
     managedCertificateId: kpaiManagedCertificateId
@@ -190,7 +191,8 @@ module ytaiApp 'modules/container-app.bicep' = {
     uamiId: uamiId
     externalIngress: true
     targetPort: 80
-    minReplicas: 0
+    // min=1 → always-on replica, no scale-to-zero (see kpai note above).
+    minReplicas: 1
     maxReplicas: 2
     customDomain: ytaiCustomDomain
     managedCertificateId: ytaiManagedCertificateId

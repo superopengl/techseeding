@@ -119,6 +119,7 @@ pnpm azure:deploy:apps       # apps.bicep — Container Apps + Jobs only
 - **Postgres Flex Server network mode is immutable.** You can't switch a VNet-integrated server to public access (or vice versa) in-place — it requires destroying and recreating the server.
 - **ACA Environment VNet config is immutable.** Toggling `vnetConfiguration` on an existing environment requires recreating the environment (and therefore re-binding every Container App).
 - **Container Apps cache KV-referenced secrets** at revision-activation time. Rotating a KV value alone won't propagate — you must also force a new revision (`az containerapp update --revision-suffix …`).
+- **kpai + ytai run always-warm (`minReplicas: 1`).** Scale-to-zero (`minReplicas: 0`) saves ~$33/mo per app but makes the first request after an idle period pay a ~20s cold-start. We keep one replica always on because we have Azure credits to spare and the latency isn't worth the savings. The setting lives in `apps.bicep`; apply a change with `pnpm deploy:apps` (a `release:*` only swaps the image and leaves scale untouched).
 
 ## Files
 
