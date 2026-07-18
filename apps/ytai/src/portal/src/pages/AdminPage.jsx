@@ -35,8 +35,16 @@ import apiFetch from '../lib/apiFetch.js';
 import authSession from '../lib/authSession.js';
 import { palette, radius } from '../theme.js';
 
-const { Title, Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 const MIN_PASSWORD_LENGTH = 8;
+
+const YEARS = ['Y3', 'Y4', 'Y5', 'Y6'];
+const SUBJECTS = [
+  { key: 'math', label: 'Math' },
+  { key: 'thinking', label: 'Thinking' },
+  { key: 'reading', label: 'Reading' },
+  { key: 'writing', label: 'Writing' }
+];
 
 async function postJson(path, body) {
   const res = await fetch(path, {
@@ -436,6 +444,165 @@ function UsersPanel() {
   );
 }
 
+// Editor for the per-(year, subject) system prompt that sits between the
+// hardcoded persona and the per-turn context. The backend seeds all 16
+// combinations on boot, so we can assume every (year, subject) pair has a
+// row to fetch and update. Changes take effect on the very next tutor turn
+// — the tutor prompt builder reads from this table on every message.
+function AgentPromptsPanel() {
+  const [prompts, setPrompts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [year, setYear] = useState(YEARS[0]);
+  const [subject, setSubject] = useState(SUBJECTS[0].key);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch('/api/admin/agent-prompts');
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+      setPrompts(json.prompts || []);
+    } catch (e) {
+      setError(e.message || 'Failed to load prompts');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const currentRow = useMemo(
+    () => prompts.find((p) => p.year === year && p.subject === subject) || null,
+    [prompts, year, subject]
+  );
+
+  // Reset the draft to the DB copy whenever the user flips year/subject or
+  // fresh data lands. Anything the admin typed but didn't save is dropped
+  // on that switch — matches how the rest of the admin surface treats form
+  // state as scoped to a single row selection.
+  useEffect(() => {
+    setDraft(currentRow?.content ?? '');
+  }, [currentRow]);
+
+  const dirty = currentRow != null && draft !== currentRow.content;
+
+  const save = useCallback(async () => {
+    if (!dirty || !draft.trim()) return;
+    setSaving(true);
+    try {
+      const res = await apiFetch(`/api/admin/agent-prompt/${year}/${subject}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: draft })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+      const saved = json.prompt;
+      setPrompts((prev) =>
+        prev.map((p) => (p.year === saved.year && p.subject === saved.subject ? saved : p))
+      );
+      message.success(`Saved ${saved.year} · ${saved.subject}`);
+    } catch (e) {
+      message.error(e.message || 'Failed to save prompt');
+    } finally {
+      setSaving(false);
+    }
+  }, [dirty, draft, year, subject]);
+
+  return (
+    <div>
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          message={error}
+          style={{ marginBottom: 16 }}
+          action={
+            <Button size="small" onClick={load}>
+              Retry
+            </Button>
+          }
+        />
+      )}
+
+      <Paragraph style={{ color: palette.textMuted, marginTop: 0 }}>
+        These prompts are appended after the built-in tutor persona on every
+        message. Edit the wording per year and subject to scope Brain's
+        curriculum, examples, and tone — changes take effect on the next
+        student turn without a restart.
+      </Paragraph>
+
+      <Space wrap size={12} style={{ marginBottom: 12 }}>
+        <Text style={{ color: palette.textMuted, fontSize: 13 }}>Year</Text>
+        <Segmented
+          value={year}
+          onChange={setYear}
+          options={YEARS.map((y) => ({ label: y, value: y }))}
+        />
+        <Text style={{ color: palette.textMuted, fontSize: 13, marginLeft: 12 }}>
+          Subject
+        </Text>
+        <Segmented
+          value={subject}
+          onChange={setSubject}
+          options={SUBJECTS.map((s) => ({ label: s.label, value: s.key }))}
+        />
+      </Space>
+
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+          <Spin />
+        </div>
+      ) : (
+        <>
+          <Input.TextArea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            autoSize={{ minRows: 18, maxRows: 40 }}
+            style={{ fontFamily: 'monospace', fontSize: 13 }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 12
+            }}
+          >
+            <Text style={{ color: palette.textMuted, fontSize: 12 }}>
+              {currentRow?.updatedAt
+                ? `Last saved ${formatDateTime(currentRow.updatedAt)}`
+                : ''}
+            </Text>
+            <Space>
+              <Button
+                onClick={() => setDraft(currentRow?.content ?? '')}
+                disabled={!dirty || saving}
+              >
+                Revert
+              </Button>
+              <Button
+                type="primary"
+                loading={saving}
+                disabled={!dirty || !draft.trim()}
+                onClick={save}
+              >
+                Save
+              </Button>
+            </Space>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function ChangePasswordModal({ open, onClose }) {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
@@ -655,6 +822,11 @@ export default function AdminPage() {
                 key: 'users',
                 label: 'Users',
                 children: <UsersPanel />
+              },
+              {
+                key: 'prompts',
+                label: 'Agent prompts',
+                children: <AgentPromptsPanel />
               }
             ]}
           />
