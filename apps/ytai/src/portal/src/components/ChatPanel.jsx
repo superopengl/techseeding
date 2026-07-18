@@ -20,6 +20,7 @@ import apiFetch, { authHeaders } from '../lib/apiFetch.js';
 import streamSSE from '../lib/streamSSE.js';
 import uploadDoc from '../lib/uploadDoc.js';
 import useTutorVoice from '../hooks/useTutorVoice.js';
+import useIsTouchDevice from '../hooks/useIsTouchDevice.js';
 import AuthedImage from './AuthedImage.jsx';
 import PhotoCapture from './PhotoCapture.jsx';
 import { palette } from '../theme.js';
@@ -724,6 +725,17 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
   if (!isUser && !message.content && !thinking) return null;
   const canReplay = !isUser && onReplay && (!message._streaming || isSpeaking);
   const canCopy = Boolean(message.content) && !message._streaming;
+  const isTouch = useIsTouchDevice();
+  // Tiny replay/copy affordances are 22px on desktop; bump them to a ~36px
+  // tap target on touch so they meet the mobile hit-target standard.
+  const actionSize = isTouch ? 36 : 22;
+  const actionBtnStyle = {
+    color: ACCENT_BLUE,
+    width: actionSize,
+    height: actionSize,
+    minWidth: actionSize,
+    fontSize: isTouch ? 16 : 12
+  };
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef(null);
   useEffect(() => () => clearTimeout(copyTimerRef.current), []);
@@ -801,7 +813,7 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
                   onClick={onReplay}
                   aria-label={isSpeaking ? 'Stop reading this message' : 'Replay this message'}
                   aria-pressed={isSpeaking}
-                  style={{ color: ACCENT_BLUE, width: 22, height: 22, minWidth: 22, fontSize: 12 }}
+                  style={actionBtnStyle}
                 />
               </Tooltip>
             )}
@@ -814,7 +826,7 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
                   icon={copied ? <CheckOutlined /> : <CopyOutlined />}
                   onClick={handleCopy}
                   aria-label={copied ? 'Message copied' : 'Copy message to clipboard'}
-                  style={{ color: ACCENT_BLUE, width: 22, height: 22, minWidth: 22, fontSize: 12 }}
+                  style={actionBtnStyle}
                 />
               </Tooltip>
             )}
@@ -983,6 +995,8 @@ const composerActionsStyle = {
 const composerActionsLeftStyle = {
   display: 'flex',
   alignItems: 'center',
+  flexWrap: 'wrap',
+  rowGap: 8,
   gap: 8
 };
 const centeredHint = {

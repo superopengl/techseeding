@@ -429,5 +429,54 @@ const theme = {
   fonts
 };
 
-export { palette, stickerShadow, radius, fonts };
+// Touch-device control sizing. Phones and tablets (incl. iPad) need bigger
+// hit targets than a mouse pointer — Apple HIG asks for 44pt minimum,
+// Material Design 48dp, WCAG 2.5.5 44×44px. The desktop `theme` above is
+// tuned for a mouse (36px default); AntdShell swaps in this variant when it
+// detects a coarse-pointer device. We bump the global controlHeight tokens
+// AND every component that pins its own controlHeight (those would otherwise
+// ignore the global bump). Small controls land at 40 (compact toolbars),
+// default at 44 (the HIG floor), large at 52 (primary mobile CTAs).
+const TOUCH_CONTROL = {
+  controlHeight: 44,
+  controlHeightLG: 52,
+  controlHeightSM: 40
+};
+
+function withTouchSizing(base) {
+  const c = base.components;
+  const heights = {
+    controlHeight: TOUCH_CONTROL.controlHeight,
+    controlHeightLG: TOUCH_CONTROL.controlHeightLG,
+    controlHeightSM: TOUCH_CONTROL.controlHeightSM
+  };
+  return {
+    ...base,
+    token: { ...base.token, ...heights },
+    components: {
+      ...c,
+      // Button pins all three heights, so override all three.
+      Button: {
+        ...c.Button,
+        controlHeight: TOUCH_CONTROL.controlHeight,
+        controlHeightLG: TOUCH_CONTROL.controlHeightLG,
+        controlHeightSM: TOUCH_CONTROL.controlHeightSM
+      },
+      // These pin only the default height; their LG/SM variants read the
+      // global tokens, which we've already bumped above.
+      Input: { ...c.Input, controlHeight: TOUCH_CONTROL.controlHeight },
+      InputNumber: { ...c.InputNumber, controlHeight: TOUCH_CONTROL.controlHeight },
+      Select: { ...c.Select, controlHeight: TOUCH_CONTROL.controlHeight },
+      DatePicker: { ...c.DatePicker, controlHeight: TOUCH_CONTROL.controlHeight },
+      Mentions: { ...c.Mentions, controlHeight: TOUCH_CONTROL.controlHeight },
+      // Segmented + Pagination + Menu don't follow controlHeight; nudge their
+      // own size tokens so switches, pagers, and the nav drawer stay tappable.
+      Segmented: { ...c.Segmented, controlHeight: 40 },
+      Pagination: { ...c.Pagination, itemSize: 44 },
+      Menu: { ...c.Menu, itemHeight: 48 }
+    }
+  };
+}
+
+export { palette, stickerShadow, radius, fonts, withTouchSizing };
 export default theme;
