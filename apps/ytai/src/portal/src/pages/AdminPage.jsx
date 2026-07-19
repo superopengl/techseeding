@@ -26,6 +26,7 @@ import {
   BarChartOutlined,
   CheckCircleOutlined,
   DeleteOutlined,
+  DownOutlined,
   LockOutlined,
   LogoutOutlined,
   MinusSquareOutlined,
@@ -520,6 +521,7 @@ function AgentPromptsPanel() {
   const [error, setError] = useState(null);
   // The selected tree node — 'global' | 'subject:<s>' | 'year:<s>:<y>'.
   const [selectedKey, setSelectedKey] = useState('global');
+  const [activeEditorTab, setActiveEditorTab] = useState('editor');
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
   // Published, AI-refined composites (one per subject × year) + publish state.
@@ -663,24 +665,56 @@ function AgentPromptsPanel() {
       .join('\n\n');
   }, [contentFor, sel.subject, sel.year]);
 
-  const treeData = useMemo(
-    () => [
+  // A tier has unpublished changes when its draft (live for the open node)
+  // differs from its latest published version — or it's never been published
+  // but has content. Drives the red dot on the tree.
+  const tierHasUnpublishedChanges = useCallback(
+    (scope, key) => {
+      const latest = tierVersionsFor(scope, key)[0] || null;
+      const draftContent = contentFor(scope, key);
+      if (!latest) return draftContent.trim().length > 0;
+      return draftContent !== latest.content;
+    },
+    [tierVersionsFor, contentFor]
+  );
+
+  const treeData = useMemo(() => {
+    const nodeTitle = (label, scope, key) =>
+      tierHasUnpublishedChanges(scope, key) ? (
+        <span>
+          {label}
+          <span
+            title="Unpublished draft"
+            style={{
+              display: 'inline-block',
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: palette.danger ?? '#ff4d4f',
+              marginLeft: 6,
+              verticalAlign: 'middle'
+            }}
+          />
+        </span>
+      ) : (
+        label
+      );
+    return [
       {
-        title: 'Global',
+        title: nodeTitle('Global', 'global', GLOBAL_KEY),
         key: 'global',
         children: SUBJECTS.map((s) => ({
-          title: s.label,
+          title: nodeTitle(s.label, 'subject', s.key),
           key: `subject:${s.key}`,
           children: YEARS.map((y) => ({
-            title: y,
+            title: nodeTitle(y, 'year', y),
             key: `year:${s.key}:${y}`,
             isLeaf: true
           }))
         }))
       }
-    ],
-    []
-  );
+    ];
+  }, [tierHasUnpublishedChanges]);
 
   const subjectLabel = (key) => SUBJECTS.find((s) => s.key === key)?.label ?? key;
 
@@ -784,20 +818,7 @@ function AgentPromptsPanel() {
     if (ok) load();
   }, [publishTargets, load]);
 
-  const onPublishClick = useCallback(() => {
-    if (publishTargets.length <= 1) {
-      doPublish();
-      return;
-    }
-    Modal.confirm({
-      title: `Publish ${publishTargets.length} composites?`,
-      content:
-        'Each runs an AI refinement pass and overwrites the currently published ' +
-        'version. This can take a while.',
-      okText: 'Publish all',
-      onOk: doPublish
-    });
-  }, [publishTargets, doPublish]);
+  const onPublishClick = doPublish;
 
   // Publish status for the current selection: exact for a full (subject,
   // year) path, else a rollup across the target set.
@@ -823,6 +844,13 @@ function AgentPromptsPanel() {
   // unpublished draft (raw composition) when tiers changed since the last
   // publish — or nothing's published yet — otherwise it's the latest version.
   const fullPath = !!(sel.subject && sel.year);
+
+  // The Composite Diff tab only exists for a year node. If the admin was on it
+  // and then selects a global/subject node, fall back to the Diff tab.
+  useEffect(() => {
+    if (!fullPath && activeEditorTab === 'composite') setActiveEditorTab('diff');
+  }, [fullPath, activeEditorTab]);
+
   const pathVersions = fullPath ? versionsFor(sel.subject, sel.year) : [];
   const latestVersion = pathVersions[0] || null;
   const prevVersion = pathVersions[1] || null;
@@ -874,11 +902,10 @@ function AgentPromptsPanel() {
     ? 'Current draft vs the latest published version of this tier.'
     : 'Current draft — this tier has no published version yet.';
 
-  // Diff panes sit under the outer (Editor/Diff) tab bar and an inner
-  // (This tier/Composite) tab bar, plus a one-line subtitle.
+  // Diff panes sit under the tab bar plus a one-line subtitle.
   const diffPaneHeight = Math.max(
     MIN_EDITOR_HEIGHT,
-    areaHeight - COL_HEADER_H - TAB_BAR_H - TAB_BAR_H - 30
+    areaHeight - COL_HEADER_H - TAB_BAR_H - 30
   );
 
   return (
@@ -978,7 +1005,8 @@ function AgentPromptsPanel() {
               </div>
             </div>
             <Tabs
-              defaultActiveKey="editor"
+              activeKey={activeEditorTab}
+              onChange={setActiveEditorTab}
               items={[
                 {
                   key: 'editor',
@@ -1022,65 +1050,46 @@ function AgentPromptsPanel() {
                   key: 'diff',
                   label: 'Diff',
                   children: (
-                    <Tabs
-                      defaultActiveKey="tier"
-                      items={[
-                        {
-                          key: 'tier',
-                          label: `This tier · ${targetLabel}`,
-                          children: (
-                            <>
-                              <Paragraph
-                                style={{ color: palette.textMuted, fontSize: 12, marginTop: 0 }}
-                              >
-                                {tierSubtitle}
-                              </Paragraph>
-                              <SplitDiff
-                                oldText={tierDiff.oldText}
-                                newText={tierDiff.newText}
-                                oldLabel={tierDiff.oldLabel}
-                                newLabel={tierDiff.newLabel}
-                                height={diffPaneHeight}
-                              />
-                            </>
-                          )
-                        },
-                        {
-                          key: 'composite',
-                          label: 'Composite',
-                          children: (
-                            <>
-                              <Paragraph
-                                style={{ color: palette.textMuted, fontSize: 12, marginTop: 0 }}
-                              >
-                                {drawerSubtitle}
-                              </Paragraph>
-                              {diff ? (
-                                <SplitDiff
-                                  oldText={diff.oldText}
-                                  newText={diff.newText}
-                                  oldLabel={diff.oldLabel}
-                                  newLabel={diff.newLabel}
-                                  height={diffPaneHeight}
-                                />
-                              ) : (
-                                <div data-color-mode="light">
-                                  <MDEditor
-                                    value={composite}
-                                    preview="preview"
-                                    hideToolbar
-                                    height={diffPaneHeight}
-                                    onChange={() => {}}
-                                  />
-                                </div>
-                              )}
-                            </>
-                          )
-                        }
-                      ]}
-                    />
+                    <>
+                      <Paragraph style={{ color: palette.textMuted, fontSize: 12, marginTop: 0 }}>
+                        {tierSubtitle}
+                      </Paragraph>
+                      <SplitDiff
+                        oldText={tierDiff.oldText}
+                        newText={tierDiff.newText}
+                        oldLabel={tierDiff.oldLabel}
+                        newLabel={tierDiff.newLabel}
+                        height={diffPaneHeight}
+                      />
+                    </>
                   )
-                }
+                },
+                // Composite diff only makes sense at a full (subject, year)
+                // path — i.e. a year node. Global/subject nodes omit it.
+                ...(fullPath && diff
+                  ? [
+                      {
+                        key: 'composite',
+                        label: 'Composite Diff',
+                        children: (
+                          <>
+                            <Paragraph
+                              style={{ color: palette.textMuted, fontSize: 12, marginTop: 0 }}
+                            >
+                              {drawerSubtitle}
+                            </Paragraph>
+                            <SplitDiff
+                              oldText={diff.oldText}
+                              newText={diff.newText}
+                              oldLabel={diff.oldLabel}
+                              newLabel={diff.newLabel}
+                              height={diffPaneHeight}
+                            />
+                          </>
+                        )
+                      }
+                    ]
+                  : [])
               ]}
             />
           </div>
@@ -1272,7 +1281,7 @@ export default function AdminPage() {
       }}
     >
       {isAdmin && (
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ width: '100%' }}>
           <div
             style={{
               display: 'flex',
@@ -1284,22 +1293,32 @@ export default function AdminPage() {
             }}
           >
             <Logo height={24} />
-            <Space size={8}>
-              <Button
-                icon={<LockOutlined />}
-                onClick={() => setChangePasswordOpen(true)}
-              >
-                Change password
+            <Dropdown
+              trigger={['click']}
+              placement="bottomRight"
+              menu={{
+                items: [
+                  {
+                    key: 'password',
+                    icon: <LockOutlined />,
+                    label: 'Change password',
+                    onClick: () => setChangePasswordOpen(true)
+                  },
+                  { type: 'divider' },
+                  {
+                    key: 'signout',
+                    icon: <LogoutOutlined />,
+                    label: 'Sign out',
+                    danger: true,
+                    onClick: handleSignOut
+                  }
+                ]
+              }}
+            >
+              <Button icon={<UserOutlined />}>
+                {currentUser?.name || 'Account'} <DownOutlined />
               </Button>
-              <Button
-                danger
-                type="primary"
-                icon={<LogoutOutlined />}
-                onClick={handleSignOut}
-              >
-                Sign out
-              </Button>
-            </Space>
+            </Dropdown>
           </div>
           <Tabs
             defaultActiveKey="users"
