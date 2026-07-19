@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!--
+      Tint the browser chrome (iOS status-bar area + Safari toolbar) to the
+      same white as the tutor nav bar and chat composer (palette.surface,
+      #FFFFFF). Without this, Safari falls back to a pale/gray default that
+      reads as a mismatched margin around the safe-area insets.
+    -->
+    <meta name="theme-color" content="#FFFFFF" />
     <meta
       name="description"
       content="YouTutorAI is a Socratic AI homework tutor for kids 8–14. Snap a worksheet, circle what's tricky, and get calm, step-by-step guidance in math, thinking skills, English, and writing."
@@ -34,11 +41,21 @@
       />
     </noscript>
     <style>
-      body {
+      html, body {
         margin: 0;
         padding: 0;
+        /*
+          White (palette.surface, #FFFFFF) so the iOS safe-area edges behind
+          the status bar / home-indicator — which Safari samples to tint its
+          chrome — match the white tutor nav bar and chat composer. Every page
+          paints its own full-height background over this, so the pale-sky
+          look of HomePage/LoginPage is unaffected; only the otherwise-bare
+          safe-area margins change.
+        */
+        background: #FFFFFF;
+      }
+      body {
         font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        background: #F8FBFC;
         color: #1E3A4C;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
