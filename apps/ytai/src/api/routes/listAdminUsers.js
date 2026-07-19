@@ -1,6 +1,6 @@
-import { desc, isNull, ne, or } from 'drizzle-orm';
+import { desc, isNull, ne, or, sql } from 'drizzle-orm';
 import db from '../db/index.js';
-import { user } from '../db/schema.js';
+import { sessionMessage, tutorSession, user } from '../db/schema.js';
 
 // GET /api/admin/users
 //
@@ -14,6 +14,21 @@ import { user } from '../db/schema.js';
 // role=admin, so this handler doesn't need to re-check.
 export default function listAdminUsers(fastify) {
   fastify.get('/api/admin/users', async () => {
+    // Last activity = the most recent tutor message the user sent, across all
+    // their sessions. It's the truest "when did this person last use the app"
+    // signal; createdAt only tells us when they signed up. Correlated scalar
+    // subquery so the outer SELECT stays a clean per-user row (no join fanout,
+    // no GROUP BY over every user column). Null for users who never tutored.
+    // Aliased tables (sm/ts) + an explicit "user".id correlation: this
+    // drizzle build renders bare column refs unqualified, so an unaliased
+    // subquery makes "id" / "user_id" ambiguous across the two joined tables.
+    const lastActivityAt = sql`(
+      SELECT MAX(sm.created_at)
+      FROM ${sessionMessage} sm
+      JOIN ${tutorSession} ts ON ts.id = sm.session_id
+      WHERE ts.user_id = "user".id
+    )`.as('last_activity_at');
+
     const rows = await db()
       .select({
         id: user.id,
@@ -21,7 +36,8 @@ export default function listAdminUsers(fastify) {
         email: user.email,
         picture: user.picture,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        lastActivityAt
       })
       .from(user)
       .where(

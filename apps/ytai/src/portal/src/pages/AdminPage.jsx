@@ -385,6 +385,22 @@ function UsersPanel() {
         )
       },
       {
+        title: 'Last activity',
+        dataIndex: 'lastActivityAt',
+        key: 'lastActivityAt',
+        width: 220,
+        // Nulls (users who never tutored) sort to the bottom of a descending
+        // sort — treat a missing timestamp as epoch 0.
+        sorter: (a, b) =>
+          (a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0) -
+          (b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0),
+        render: (iso) => (
+          <span style={{ color: iso ? palette.text : palette.textMuted }}>
+            {iso ? formatDateTime(iso) : 'No activity yet'}
+          </span>
+        )
+      },
+      {
         title: '',
         key: 'actions',
         width: 56,
