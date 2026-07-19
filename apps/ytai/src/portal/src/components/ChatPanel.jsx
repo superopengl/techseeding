@@ -78,6 +78,7 @@ import MarkdownMessage from './MarkdownMessage.jsx';
 //     the active page, else null. Read at send time so Eyes sees the marks.
 export default function ChatPanel({
   sessionId,
+  isNarrow,
   currentDocId,
   currentPage,
   docs,
@@ -99,6 +100,7 @@ export default function ChatPanel({
   const [guidanceLevel, setGuidanceLevel] = useState(DEFAULT_GUIDANCE_LEVEL);
   const [uploading, setUploading] = useState(false);
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
   const abortRef = useRef(null);
   const cameraInputRef = useRef(null);
   const uploadInputRef = useRef(null);
@@ -210,6 +212,15 @@ export default function ChatPanel({
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, busy, docs]);
+
+  // Focus the composer once the session's history has landed. `autoFocus`
+  // on the TextArea only fires on the initial mount, so it misses the case
+  // where the async fetch swaps in a fresh transcript (new session, session
+  // switch) after mount — this re-focuses on every (sessionId, historyLoaded)
+  // tick so the student can start typing straight away.
+  useEffect(() => {
+    if (historyLoaded && !speech.listening) inputRef.current?.focus();
+  }, [sessionId, historyLoaded, speech.listening]);
 
   useEffect(() => {
     return () => {
@@ -465,8 +476,13 @@ export default function ChatPanel({
   // composer) and a "pure chat" session that has messages but no docs.
   // Once a worksheet is uploaded, the layout snaps back to
   // transcript-fills-top, composer-pinned-bottom.
-  const isNoDocSession = (docs?.length ?? 0) === 0;
-  const isEmptyState = historyLoaded && timeline.length === 0;
+  //
+  // Narrow/mobile is the exception: a composer floating in the vertical
+  // middle reads as broken on a phone, so there we always pin it to the
+  // bottom (transcript fills the top) regardless of doc state. Desktop keeps
+  // the centered "focused column" treatment for sparse, doc-less sessions.
+  const isNoDocSession = !isNarrow && (docs?.length ?? 0) === 0;
+  const isEmptyState = !isNarrow && historyLoaded && timeline.length === 0;
 
   if (!sessionId) {
     return (
@@ -571,6 +587,7 @@ export default function ChatPanel({
 
       <div style={composerStyle}>
         <Input.TextArea
+          ref={inputRef}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={onKeyDown}

@@ -19,13 +19,10 @@ export default function PhotoCapture() {
         textAlign: 'center'
       }}
     >
-      <Logo size={24}/>
-      <Typography.Title level={2} style={{ margin: 0 }}>
-        Snap or upload your worksheet
-      </Typography.Title>
+      <Logo height={32}/>
       <Typography.Paragraph type="secondary" style={{ maxWidth: 460, fontSize: 16, margin: 0 }}>
         Tap the <strong>+</strong> button below to add a photo or PDF of your worksheet,
-        and ask any question to get started.
+        or just type your question in the box. Then we'll work through it together, step by step.
       </Typography.Paragraph>
     </div>
   );
