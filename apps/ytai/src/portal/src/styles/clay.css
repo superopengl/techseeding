@@ -215,3 +215,14 @@
     transform: none;
   }
 }
+
+/* ---- Full-viewport flex host -------------------------------------------- */
+/* Mobile browsers report 100vh as the *largest* possible viewport (with the
+ * URL/toolbar hidden), so a bottom-pinned child inside a 100vh flex column
+ * gets shoved below the visible fold — e.g. the tutor composer floating off
+ * the bottom of the screen. `dvh` tracks the *current* visible height, toolbar
+ * included; the 100vh line stays as the fallback for engines without dvh. */
+.ytai-viewport-fill {
+  height: 100vh;
+  height: 100dvh;
+}

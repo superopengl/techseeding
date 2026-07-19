@@ -7,15 +7,12 @@ import { YEARS } from './year.js';
 
 const DEFAULT_YEAR = YEARS[0];
 
-// Compose the three editable tiers into the raw composite string, in the
-// canonical global → subject → year order. Shared by the publish route (as
-// the source it refines) and the runtime fallback below.
+// Compose the two editable tiers into the raw composite string, in the
+// canonical global → subject_year order. Shared by the publish route (as the
+// source it refines) and the runtime fallback below.
 export async function composeRawPrompt(year, subject) {
-  const { global, subject: subjectPrompt, year: yearPrompt } = await loadAgentPrompt(
-    year,
-    subject
-  );
-  return [global, subjectPrompt, yearPrompt]
+  const { global, subjectYear } = await loadAgentPrompt(year, subject);
+  return [global, subjectYear]
     .map((s) => (s || '').trim())
     .filter(Boolean)
     .join('\n\n');

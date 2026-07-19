@@ -246,6 +246,20 @@
       "when": 1782900000000,
       "tag": "0034_agent_prompt_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1783000000000,
+      "tag": "0035_merge_subject_year",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1783100000000,
+      "tag": "0036_admin_user_list_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -4,8 +4,6 @@ import Tooltip from './Tooltip.jsx';
 import {
   AudioOutlined,
   CameraOutlined,
-  CheckOutlined,
-  CopyOutlined,
   FilePdfOutlined,
   LoadingOutlined,
   MutedOutlined,
@@ -740,11 +738,13 @@ export default function ChatPanel({
 function Bubble({ message, onReplay, isSpeaking, thinking }) {
   const isUser = message.role === 'user';
   if (!isUser && !message.content && !thinking) return null;
+  // Read-aloud is the only per-bubble action — copy-to-clipboard was
+  // dropped since it has near-zero value for a Y3-Y6 audience and only
+  // added clutter under every message.
   const canReplay = !isUser && onReplay && (!message._streaming || isSpeaking);
-  const canCopy = Boolean(message.content) && !message._streaming;
   const isTouch = useIsTouchDevice();
-  // Tiny replay/copy affordances are 22px on desktop; bump them to a ~36px
-  // tap target on touch so they meet the mobile hit-target standard.
+  // The tiny replay affordance is 22px on desktop; bump it to a ~36px tap
+  // target on touch so it meets the mobile hit-target standard.
   const actionSize = isTouch ? 36 : 22;
   const actionBtnStyle = {
     color: ACCENT_BLUE,
@@ -753,20 +753,6 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
     minWidth: actionSize,
     fontSize: isTouch ? 16 : 12
   };
-  const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef(null);
-  useEffect(() => () => clearTimeout(copyTimerRef.current), []);
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(message.content);
-      setCopied(true);
-      clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // clipboard write can fail on insecure contexts or denied permission;
-      // surface nothing — the user can retry or copy by hand.
-    }
-  }, [message.content]);
   return (
     <div
       style={{
@@ -778,8 +764,8 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: isUser ? 'flex-end' : 'flex-start',
+          alignItems: 'flex-end',
+          gap: 4,
           maxWidth: '78%'
         }}
       >
@@ -792,6 +778,7 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
             whiteSpace: isUser ? 'pre-wrap' : 'normal',
             wordBreak: 'break-word',
             lineHeight: 1.5,
+            minWidth: 0,
             opacity: message.interrupted ? 0.85 : 1
           }}
         >
@@ -818,36 +805,19 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
             <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>(stopped)</div>
           )}
         </div>
-        {(canReplay || canCopy) && (
-          <div style={{ marginTop: 4, display: 'flex', gap: 0, alignSelf: 'flex-end' }}>
-            {canReplay && (
-              <Tooltip title={isSpeaking ? 'Stop reading' : 'Read this aloud'}>
-                <Button
-                  type="text"
-                  size="small"
-                  shape="circle"
-                  icon={isSpeaking ? <SpeakingIcon /> : <SoundOutlined />}
-                  onClick={onReplay}
-                  aria-label={isSpeaking ? 'Stop reading this message' : 'Replay this message'}
-                  aria-pressed={isSpeaking}
-                  style={actionBtnStyle}
-                />
-              </Tooltip>
-            )}
-            {canCopy && (
-              <Tooltip title={copied ? 'Copied' : 'Copy message'}>
-                <Button
-                  type="text"
-                  size="small"
-                  shape="circle"
-                  icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-                  onClick={handleCopy}
-                  aria-label={copied ? 'Message copied' : 'Copy message to clipboard'}
-                  style={actionBtnStyle}
-                />
-              </Tooltip>
-            )}
-          </div>
+        {canReplay && (
+          <Tooltip title={isSpeaking ? 'Stop reading' : 'Read this aloud'}>
+            <Button
+              type="text"
+              size="small"
+              shape="circle"
+              icon={isSpeaking ? <SpeakingIcon /> : <SoundOutlined />}
+              onClick={onReplay}
+              aria-label={isSpeaking ? 'Stop reading this message' : 'Replay this message'}
+              aria-pressed={isSpeaking}
+              style={{ ...actionBtnStyle, flexShrink: 0 }}
+            />
+          </Tooltip>
         )}
       </div>
     </div>

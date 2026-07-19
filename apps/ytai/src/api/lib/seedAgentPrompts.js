@@ -5,7 +5,13 @@ import { isNull } from 'drizzle-orm';
 import db from '../db/index.js';
 import { agentPrompt } from '../db/schema.js';
 import { SUBJECTS } from './tutorSubject.js';
-import { GLOBAL_KEY } from './agentPromptScope.js';
+import {
+  GLOBAL_KEY,
+  REPORT_SCOPE,
+  REPORT_BODY_KEY,
+  REPORT_TITLE_KEY,
+  subjectYearKey
+} from './agentPromptScope.js';
 import { YEARS } from './year.js';
 
 const PROMPTS_DIR = path.resolve(
@@ -17,26 +23,27 @@ function read(rel) {
   return readFileSync(path.join(PROMPTS_DIR, rel), 'utf8').trimEnd();
 }
 
-// Idempotent boot seed. Ensures each tier has a mutable DRAFT row (version
-// NULL) seeded from the on-disk defaults (prompts/tutorPersona.md,
-// prompts/subjects/*.md, prompts/years/*.md). Only missing drafts are
-// inserted — existing drafts (which the editor mutates) and any published
-// versions are left untouched. Runs once on server start.
+// Idempotent boot seed. Ensures a mutable DRAFT row (version NULL) exists for
+// the global tier, each subject×year cell, and the two analysis-report prompts.
+// The global draft comes from prompts/tutorPersona.md; each subject_year draft
+// is composed from the per-subject and per-year source files
+// (prompts/subjects/*.md + prompts/years/*.md); the report drafts come from
+// prompts/reports/{body,title}.md. Only missing drafts are inserted — existing
+// drafts (which the editor mutates) and any published versions are left
+// untouched.
 export default async function seedAgentPrompts(log) {
   const wanted = [
     { scope: 'global', scopeKey: GLOBAL_KEY, version: null, content: read('tutorPersona.md') },
-    ...SUBJECTS.map((s) => ({
-      scope: 'subject',
-      scopeKey: s,
-      version: null,
-      content: read(`subjects/${s}.md`)
-    })),
-    ...YEARS.map((y) => ({
-      scope: 'year',
-      scopeKey: y,
-      version: null,
-      content: read(`years/${y}.md`)
-    }))
+    ...SUBJECTS.flatMap((s) =>
+      YEARS.map((y) => ({
+        scope: 'subject_year',
+        scopeKey: subjectYearKey(s, y),
+        version: null,
+        content: [read(`subjects/${s}.md`), read(`years/${y}.md`)].join('\n\n')
+      }))
+    ),
+    { scope: REPORT_SCOPE, scopeKey: REPORT_BODY_KEY, version: null, content: read('reports/body.md') },
+    { scope: REPORT_SCOPE, scopeKey: REPORT_TITLE_KEY, version: null, content: read('reports/title.md') }
   ];
   try {
     const existing = await db()

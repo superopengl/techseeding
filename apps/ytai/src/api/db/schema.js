@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   boolean,
+  index,
   integer,
   jsonb,
   numeric,
@@ -88,32 +89,40 @@ export const loginOtp = ytai.table(
   })
 );
 
-export const tutorSession = ytai.table('tutor_session', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id').notNull().references(() => user.id),
-  // Most recent doc the student is working on. A doc is a unit of 1..N
-  // pages — either a multi-image worksheet or a PDF rasterized into pages.
-  // Text-only turns reuse the current doc's cached OCR / vision_extraction
-  // so Brain doesn't need bytes resent.
-  currentDocId: uuid('current_doc_id'),
-  // Subject the session is anchored to: 'math', 'thinking', 'reading',
-  // or 'writing'. Selected by the student on the Tutor page; drives
-  // subject-specific prompt scaffolding later.
-  subject: text('subject').notNull().default('math'),
-  // School year the student was in when this session ran: 'Y3'..'Y6'.
-  // Captured at creation time so a historical session reads back the year
-  // the kid was in then, not the year they're in now. Feeds report
-  // filtering (a Y4 subject_report only rolls up Y4 sessions).
-  year: text('year').notNull().default('Y3'),
-  // Student-set display name for the session. Null means "use the
-  // first-user-message preview". Set via the chat-panel Rename menu;
-  // capped on the API at 80 chars.
-  title: text('title'),
-  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-  endedAt: timestamp('ended_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
-});
+export const tutorSession = ytai.table(
+  'tutor_session',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull().references(() => user.id),
+    // Most recent doc the student is working on. A doc is a unit of 1..N
+    // pages — either a multi-image worksheet or a PDF rasterized into pages.
+    // Text-only turns reuse the current doc's cached OCR / vision_extraction
+    // so Brain doesn't need bytes resent.
+    currentDocId: uuid('current_doc_id'),
+    // Subject the session is anchored to: 'math', 'thinking', 'reading',
+    // or 'writing'. Selected by the student on the Tutor page; drives
+    // subject-specific prompt scaffolding later.
+    subject: text('subject').notNull().default('math'),
+    // School year the student was in when this session ran: 'Y3'..'Y6'.
+    // Captured at creation time so a historical session reads back the year
+    // the kid was in then, not the year they're in now. Feeds report
+    // filtering (a Y4 subject_report only rolls up Y4 sessions).
+    year: text('year').notNull().default('Y3'),
+    // Student-set display name for the session. Null means "use the
+    // first-user-message preview". Set via the chat-panel Rename menu;
+    // capped on the API at 80 chars.
+    title: text('title'),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => ({
+    // Sessions are looked up by owner constantly — the admin user rollup, the
+    // per-user session list, and the admin data wipe all filter on user_id.
+    tutorSessionUserIdIdx: index('tutor_session_user_id_idx').on(t.userId)
+  })
+);
 
 // A session_doc is the "thing the student is studying right now" — a
 // multi-page worksheet (1..N images) or a rasterized PDF. Every
@@ -175,50 +184,60 @@ export const ttsAudio = ytai.table(
   })
 );
 
-export const sessionMessage = ytai.table('session_message', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  sessionId: uuid('session_id').notNull().references(() => tutorSession.id),
-  role: text('role').notNull(),
-  content: text('content').notNull(),
-  imageId: uuid('image_id').references(() => sessionImage.id),
-  // How Brain should pace its reply to this user turn: 'guided' (Socratic,
-  // one tiny step per message), 'balanced' (a couple of sentences then a
-  // check-in), or 'direct' (full reasoning in one message). Set only on
-  // `user` rows — the student picks the level for each message via the
-  // chat-panel control. Null on assistant rows and on legacy user rows
-  // recorded before this column landed; readers treat null as the default
-  // ('direct'). Persisted so the audit log shows the exact pacing
-  // requested for each turn.
-  guidanceLevel: text('guidance_level'),
-  // Brain's model identity for this turn. `provider` is the platform that
-  // served it (openrouter, anthropic, openai, …); `modelId` is the model
-  // string we asked for (e.g. "deepseek/deepseek-v4-flash"). The audit
-  // log in llm_usage carries one row per upstream call with the same pair.
-  provider: text('provider'),
-  modelId: text('model_id'),
-  // Token + cost rollup for this assistant turn. Sum of the Brain chat call
-  // and every Eyes (vision) lookup it triggered — i.e. the full bill for
-  // producing this message. The per-call breakdown lives in llm_usage.
-  //
-  // inputTokens / outputTokens: standard prompt + completion counts.
-  // reasoningTokens: subset of outputTokens that the provider attributed
-  //   to chain-of-thought (DeepSeek / o1-style models).
-  // cacheReadTokens: subset of inputTokens that hit the provider's prompt
-  //   cache and was billed at a discount.
-  // cacheWriteTokens: tokens the provider wrote into its prompt cache on
-  //   this call (Anthropic / DeepSeek). Billed at a small premium.
-  // costUsd: what OpenRouter reported as `usage.cost`, summed across calls.
-  inputTokens: integer('input_tokens'),
-  outputTokens: integer('output_tokens'),
-  reasoningTokens: integer('reasoning_tokens'),
-  cacheReadTokens: integer('cache_read_tokens'),
-  cacheWriteTokens: integer('cache_write_tokens'),
-  costUsd: numeric('cost_usd'),
-  interrupted: boolean('interrupted').notNull().default(false),
-  toolCalls: jsonb('tool_calls'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
-});
+export const sessionMessage = ytai.table(
+  'session_message',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id').notNull().references(() => tutorSession.id),
+    role: text('role').notNull(),
+    content: text('content').notNull(),
+    imageId: uuid('image_id').references(() => sessionImage.id),
+    // How Brain should pace its reply to this user turn: 'guided' (Socratic,
+    // one tiny step per message), 'balanced' (a couple of sentences then a
+    // check-in), or 'direct' (full reasoning in one message). Set only on
+    // `user` rows — the student picks the level for each message via the
+    // chat-panel control. Null on assistant rows and on legacy user rows
+    // recorded before this column landed; readers treat null as the default
+    // ('direct'). Persisted so the audit log shows the exact pacing
+    // requested for each turn.
+    guidanceLevel: text('guidance_level'),
+    // Brain's model identity for this turn. `provider` is the platform that
+    // served it (openrouter, anthropic, openai, …); `modelId` is the model
+    // string we asked for (e.g. "deepseek/deepseek-v4-flash"). The audit
+    // log in llm_usage carries one row per upstream call with the same pair.
+    provider: text('provider'),
+    modelId: text('model_id'),
+    // Token + cost rollup for this assistant turn. Sum of the Brain chat call
+    // and every Eyes (vision) lookup it triggered — i.e. the full bill for
+    // producing this message. The per-call breakdown lives in llm_usage.
+    //
+    // inputTokens / outputTokens: standard prompt + completion counts.
+    // reasoningTokens: subset of outputTokens that the provider attributed
+    //   to chain-of-thought (DeepSeek / o1-style models).
+    // cacheReadTokens: subset of inputTokens that hit the provider's prompt
+    //   cache and was billed at a discount.
+    // cacheWriteTokens: tokens the provider wrote into its prompt cache on
+    //   this call (Anthropic / DeepSeek). Billed at a small premium.
+    // costUsd: what OpenRouter reported as `usage.cost`, summed across calls.
+    inputTokens: integer('input_tokens'),
+    outputTokens: integer('output_tokens'),
+    reasoningTokens: integer('reasoning_tokens'),
+    cacheReadTokens: integer('cache_read_tokens'),
+    cacheWriteTokens: integer('cache_write_tokens'),
+    costUsd: numeric('cost_usd'),
+    interrupted: boolean('interrupted').notNull().default(false),
+    toolCalls: jsonb('tool_calls'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => ({
+    // Transcripts and the admin last-activity rollup both read messages by
+    // their owning session (and MAX(created_at) within it).
+    sessionMessageSessionIdIdx: index('session_message_session_id_idx').on(
+      t.sessionId
+    )
+  })
+);
 
 // Post-session classification report for the parent/teacher view. One row
 // per session, lazy-generated on first GET. `questions` holds an array of
@@ -298,23 +317,28 @@ export const subjectReport = ytai.table(
     generatedAt: timestamp('generated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
-  }
+  },
+  (t) => ({
+    // Reports are always scoped to a user — the Reports page list, the admin
+    // report-count rollup, and the admin data wipe all filter on user_id.
+    subjectReportUserIdIdx: index('subject_report_user_id_idx').on(t.userId)
+  })
 );
 
-// Admin-editable system-prompt stack, composed in three tiers on every
-// tutor turn. The final system prompt prepended to the conversation is
-// `global + subject + year`:
-//   - GLOBAL (one row): agent role + product scope, applied to every turn.
-//   - SUBJECT (one row per subject): content scope, teaching tone, and any
-//     special format / symbol conventions for that subject.
-//   - YEAR (one row per school year): the knowledge area / boundary for the
-//     year plus any extra tutoring constraints.
+// Admin-editable prompt store, shared by the tutor and the analysis-report
+// generator. `scope`/`scopeKey` selects the prompt:
+//   - GLOBAL ('global'/'global'): agent role + product scope, on every tutor
+//     turn.
+//   - SUBJECT_YEAR ('subject_year'/'<subject>:<year>', e.g. 'math:Y3'): content
+//     scope, teaching tone, notation, and knowledge boundary for one subject at
+//     one year. The tutor turn injects global + subject_year (published/refined
+//     into composite_prompt).
+//   - REPORT ('report'/'body' and 'report'/'title'): the two system prompts the
+//     analysis-report generator uses. Unlike the tutor scopes these are read
+//     from the DRAFT directly at generation time — there's no publish/refine
+//     step — so they only ever have a draft row, never a versioned one.
 //
-// `scope` is 'global' | 'subject' | 'year'; `scopeKey` is the sentinel
-// 'global' for the single global row, the subject value ('math'…) for
-// subject rows, or the year value ('Y3'…) for year rows.
-//
-// Each tier has exactly one mutable DRAFT row (`version` IS NULL) plus zero+
+// Each tutor tier has exactly one mutable DRAFT row (`version` IS NULL) plus zero+
 // IMMUTABLE versioned rows (`version` = 1, 2, …). The prompt editor autosaves
 // in realtime into the draft row. Publishing a composite snapshots the source
 // tier drafts into new immutable tier versions (version = previous max + 1)

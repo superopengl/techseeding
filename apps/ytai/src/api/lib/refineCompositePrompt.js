@@ -15,9 +15,10 @@ function refinerConfig() {
 // invent capabilities — this is a polish/merge pass, not a rewrite of policy.
 const REFINER_SYSTEM =
   'You are a prompt engineer. You are given a tutor system prompt that was ' +
-  'assembled by concatenating three layers: a global role/product-scope layer, ' +
-  'a subject layer, and a school-year layer. Merge them into ONE coherent, ' +
-  'well-structured system prompt.\n\n' +
+  'assembled by concatenating two layers: a global role/product-scope layer, ' +
+  'and a subject-and-year layer (the content, teaching tone, notation, and ' +
+  'knowledge boundary for a specific school subject at a specific year level). ' +
+  'Merge them into ONE coherent, well-structured system prompt.\n\n' +
   'Rules:\n' +
   '- Preserve every instruction, constraint, role, tone rule, notation/format ' +
   'convention, boundary, and tool/annotation instruction. Lose nothing.\n' +
@@ -49,7 +50,7 @@ export default async function refineCompositePrompt({ rawComposite, subjectLabel
   const { baseUrl, apiKey, model } = refinerConfig();
   const userBody =
     `Refine the following ${subjectLabel} tutor system prompt for ${year}. ` +
-    'It was assembled from a global layer, a subject layer, and a year layer. ' +
+    'It was assembled from a global layer and a subject-and-year layer. ' +
     'Merge them into one clean prompt:\n\n' +
     rawComposite;
 

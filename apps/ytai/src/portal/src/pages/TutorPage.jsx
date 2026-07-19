@@ -362,6 +362,7 @@ export default function TutorPage() {
   const chatPanel = (
     <ChatPanel
       sessionId={sessionId}
+      isNarrow={isNarrow}
       currentDocId={currentDocId}
       currentPage={currentPage}
       docs={docs}
@@ -388,10 +389,10 @@ export default function TutorPage() {
 
   return (
     <div
+      className="ytai-viewport-fill"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
         boxSizing: 'border-box',

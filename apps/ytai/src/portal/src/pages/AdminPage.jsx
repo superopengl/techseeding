@@ -55,15 +55,17 @@ const SUBJECTS = [
 
 // Sentinel key the single global row stores itself under (mirrors the API).
 const GLOBAL_KEY = 'global';
+// Composite key for a (subject, year) cell (mirrors the API).
+const subjectYearKey = (subject, year) => `${subject}:${year}`;
 
-// Parse a prompt-tree node key into the row it edits plus the subject/year
-// path that led to it. Node keys: 'global' | 'subject:<s>' | 'year:<s>:<y>'.
-// Year nodes carry their parent subject only to keep tree keys unique — the
-// row they edit is the subject-independent (year, <y>) prompt.
+// Parse a prompt-tree node key into the row it edits plus its subject/year.
+// Node keys: 'global' | 'group:<s>' (non-selectable subject header) |
+// 'sy:<s>:<y>' (an editable subject×year cell).
 function parsePromptNode(key) {
   const [head, a, b] = String(key).split(':');
-  if (head === 'subject') return { scope: 'subject', scopeKey: a, subject: a, year: null };
-  if (head === 'year') return { scope: 'year', scopeKey: b, subject: a, year: b };
+  if (head === 'sy') {
+    return { scope: 'subject_year', scopeKey: subjectYearKey(a, b), subject: a, year: b };
+  }
   return { scope: 'global', scopeKey: GLOBAL_KEY, subject: null, year: null };
 }
 
@@ -373,6 +375,19 @@ function UsersPanel() {
         )
       },
       {
+        title: 'Year',
+        dataIndex: 'year',
+        key: 'year',
+        width: 100,
+        align: 'center',
+        sorter: (a, b) => (a.year || '').localeCompare(b.year || ''),
+        render: (year) => (
+          <span style={{ color: year ? palette.text : palette.textMuted }}>
+            {year || '—'}
+          </span>
+        )
+      },
+      {
         title: 'Created at',
         dataIndex: 'createdAt',
         key: 'createdAt',
@@ -382,6 +397,32 @@ function UsersPanel() {
         defaultSortOrder: 'descend',
         render: (iso) => (
           <span style={{ color: palette.textMuted }}>{formatDateTime(iso)}</span>
+        )
+      },
+      {
+        title: 'Sessions',
+        dataIndex: 'sessionCount',
+        key: 'sessionCount',
+        width: 120,
+        align: 'right',
+        sorter: (a, b) => (a.sessionCount || 0) - (b.sessionCount || 0),
+        render: (count) => (
+          <span style={{ color: count ? palette.text : palette.textMuted }}>
+            {count || 0}
+          </span>
+        )
+      },
+      {
+        title: 'Reports',
+        dataIndex: 'reportCount',
+        key: 'reportCount',
+        width: 120,
+        align: 'right',
+        sorter: (a, b) => (a.reportCount || 0) - (b.reportCount || 0),
+        render: (count) => (
+          <span style={{ color: count ? palette.text : palette.textMuted }}>
+            {count || 0}
+          </span>
         )
       },
       {
@@ -512,16 +553,16 @@ function SaveStatus({ saving, dirty, empty }) {
   );
 }
 
-// Editor for the three-tier system-prompt stack composed on every tutor
-// turn: GLOBAL (agent role + product scope), SUBJECT (content scope, tone,
-// notation), and YEAR (knowledge boundary + constraints). The final prompt
-// is global + subject + year. The backend seeds all 9 rows on boot, so every
-// tier is present to fetch and update.
+// Editor for the two-tier system-prompt stack composed on every tutor turn:
+// GLOBAL (agent role + product scope) and SUBJECT_YEAR (content, tone,
+// notation, and knowledge boundary for one subject at one year level). The
+// final prompt is global + subject_year. The backend seeds the global draft
+// plus one draft per subject×year cell on boot.
 //
-// Layout is three columns: a tree on the left (Global → Subject → Year) picks
-// the edit target, the middle column edits that node's prompt, and the right
-// column previews the composite along the selected path. Edits autosave and
-// take effect on the very next tutor turn.
+// The left tree is Global + a subject×year grid (subject headers are just
+// group nodes; the editable leaves are the year cells). Selecting a node edits
+// its draft (realtime autosave); the Diff tab compares against the last
+// published version; Publish refines the composite students receive.
 //
 // The editor/preview panes grow to fill the viewport: we measure the row's
 // top edge and size them to the remaining screen height (down to a floor).
@@ -669,17 +710,16 @@ function AgentPromptsPanel() {
     [activeScope, activeKey, draft, rowFor]
   );
 
-  // Composite = the prompts along the path from root to the selected node:
-  // global alone, global + subject, or global + subject + year.
+  // Composite = global + the selected subject×year cell. For the global node
+  // there's no cell, so it's just global.
   const composite = useMemo(() => {
     const parts = [contentFor('global', GLOBAL_KEY)];
-    if (sel.subject) parts.push(contentFor('subject', sel.subject));
-    if (sel.year) parts.push(contentFor('year', sel.year));
+    if (sel.scope === 'subject_year') parts.push(contentFor('subject_year', sel.scopeKey));
     return parts
       .map((c) => c.trim())
       .filter(Boolean)
       .join('\n\n');
-  }, [contentFor, sel.subject, sel.year]);
+  }, [contentFor, sel.scope, sel.scopeKey]);
 
   // A tier has unpublished changes when its draft (live for the open node)
   // differs from its latest published version — or it's never been published
@@ -720,11 +760,14 @@ function AgentPromptsPanel() {
         title: nodeTitle('Global', 'global', GLOBAL_KEY),
         key: 'global',
         children: SUBJECTS.map((s) => ({
-          title: nodeTitle(s.label, 'subject', s.key),
-          key: `subject:${s.key}`,
+          // Subject rows are just group headers now — the editable prompt is
+          // the subject×year cell below them.
+          title: s.label,
+          key: `group:${s.key}`,
+          selectable: false,
           children: YEARS.map((y) => ({
-            title: nodeTitle(y, 'year', y),
-            key: `year:${s.key}:${y}`,
+            title: nodeTitle(y, 'subject_year', subjectYearKey(s.key, y)),
+            key: `sy:${s.key}:${y}`,
             isLeaf: true
           }))
         }))
@@ -738,18 +781,15 @@ function AgentPromptsPanel() {
   const targetLabel =
     activeScope === 'global'
       ? 'Global prompt'
-      : activeScope === 'subject'
-        ? `Subject · ${subjectLabel(sel.subject)}`
-        : `Year · ${sel.year}`;
+      : `${subjectLabel(sel.subject)} · ${sel.year}`;
   const targetHint =
     activeScope === 'global'
       ? 'Applies to every turn — the agent role and product scope.'
-      : activeScope === 'subject'
-        ? 'Subject content, teaching tone, and any special format or symbol conventions.'
-        : 'Knowledge area / boundary for this year, shared across all subjects.';
-  const pathLabel = ['global', sel.subject && subjectLabel(sel.subject), sel.year]
-    .filter(Boolean)
-    .join(' + ');
+      : 'Content, teaching tone, notation, and the knowledge boundary for this subject at this year.';
+  const pathLabel =
+    activeScope === 'subject_year'
+      ? `global + ${subjectLabel(sel.subject)} · ${sel.year}`
+      : 'global';
 
   // All immutable versions for a (subject, year), newest first.
   const versionsFor = useCallback(
@@ -762,8 +802,8 @@ function AgentPromptsPanel() {
   // The latest published version (what tutor turns use).
   const publishedFor = useCallback((s, y) => versionsFor(s, y)[0] || null, [versionsFor]);
 
-  // A published composite is stale when any of its three source tiers was
-  // edited after the last refinement — the admin should re-publish.
+  // A published composite is stale when either source tier (global, or the
+  // subject×year cell) was edited after the last refinement — re-publish.
   const isStale = useCallback(
     (s, y) => {
       const pub = publishedFor(s, y);
@@ -771,19 +811,17 @@ function AgentPromptsPanel() {
       const refined = new Date(pub.refinedAt).getTime();
       return [
         rowFor('global', GLOBAL_KEY)?.updatedAt,
-        rowFor('subject', s)?.updatedAt,
-        rowFor('year', y)?.updatedAt
+        rowFor('subject_year', subjectYearKey(s, y))?.updatedAt
       ].some((t) => t && new Date(t).getTime() > refined);
     },
     [publishedFor, rowFor]
   );
 
-  // What Publish acts on, derived from the selected node: a year leaf → that
-  // one (subject, year); a subject → all its years; global → all 16 combos.
+  // What Publish acts on, derived from the selected node: a subject×year cell
+  // → that one (subject, year); the global node → all 16 cells.
   const publishTargets = useMemo(() => {
-    const subjects = sel.subject ? [sel.subject] : SUBJECTS.map((s) => s.key);
-    const years = sel.year ? [sel.year] : YEARS;
-    return subjects.flatMap((s) => years.map((y) => ({ subject: s, year: y })));
+    if (sel.subject && sel.year) return [{ subject: sel.subject, year: sel.year }];
+    return SUBJECTS.flatMap((s) => YEARS.map((y) => ({ subject: s.key, year: y })));
   }, [sel.subject, sel.year]);
 
   const doPublish = useCallback(async () => {
@@ -941,13 +979,14 @@ function AgentPromptsPanel() {
       )}
 
       <Paragraph style={{ color: palette.textMuted, marginTop: 0 }}>
-        Each turn Brain receives one composite prompt (<Text strong>global + subject + year</Text>).
-        Edit a tier on the left — changes autosave to a mutable draft in
-        realtime. The <Text strong>Diff</Text> tab compares the draft against
-        the last published version. <Text strong>Publish</Text> snapshots the source tier
-        drafts into immutable versions and runs an AI refinement that merges
-        them into a new composite version students receive. Unpublished
-        (subject, year) pairs fall back to the raw draft composition.
+        Each turn Brain receives one composite prompt (<Text strong>global + subject×year</Text>).
+        Edit the global prompt or a subject×year cell on the left — changes
+        autosave to a mutable draft in realtime. The <Text strong>Diff</Text> tab
+        compares the draft against the last published version.{' '}
+        <Text strong>Publish</Text> snapshots the source drafts into immutable
+        versions and runs an AI refinement that merges them into a new composite
+        version students receive. Unpublished cells fall back to the raw draft
+        composition.
       </Paragraph>
 
       {loading ? (
@@ -1108,6 +1147,200 @@ function AgentPromptsPanel() {
                   : [])
               ]}
             />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The two admin-editable analysis-report prompts (mirrors the API's 'report'
+// scope keys). BODY drives the main report generation; TITLE drives the short
+// report-name pass. Both are edited as raw drafts and used directly at
+// generation time — there's no publish/refine step like the tutor tiers.
+const REPORT_PROMPTS = [
+  {
+    key: 'body',
+    label: 'Report body',
+    hint: 'System prompt for the main analysis report. The user prompt and structured session data are appended at generation time.'
+  },
+  {
+    key: 'title',
+    label: 'Report title',
+    hint: 'System prompt for the short report-name pass that runs in parallel and names the report in the UI.'
+  }
+];
+
+// Editor for the analysis-report generation prompts. Unlike the tutor tiers,
+// these are draft-only: the report generator reads the current draft directly,
+// so edits take effect on the next report with no publish step. The two
+// placeholders {{subjectLabel}} and {{timespan}} are substituted with the
+// report's subject and time window at generation time.
+function ReportPromptsPanel() {
+  const [prompts, setPrompts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedKey, setSelectedKey] = useState('body');
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const rowRef = useRef(null);
+  const [areaHeight, setAreaHeight] = useState(560);
+  useLayoutEffect(() => {
+    function measure() {
+      const el = rowRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top;
+      setAreaHeight(
+        Math.max(MIN_EDITOR_HEIGHT, Math.floor(window.innerHeight - top - VIEWPORT_BOTTOM_GAP))
+      );
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [loading]);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await apiFetch('/api/admin/agent-prompts');
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+      // Only the draft rows (version == null) of the 'report' scope.
+      setPrompts(
+        (json.prompts || []).filter((p) => p.scope === 'report' && p.version == null)
+      );
+    } catch (e) {
+      setError(e.message || 'Failed to load report prompts');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const currentRow = useMemo(
+    () => prompts.find((p) => p.scopeKey === selectedKey) || null,
+    [prompts, selectedKey]
+  );
+
+  // Reset the draft to the DB copy whenever the selection changes or fresh
+  // data lands. Unsaved keystrokes are dropped on that switch.
+  useEffect(() => {
+    setDraft(currentRow?.content ?? '');
+  }, [currentRow]);
+
+  const dirty = currentRow != null && draft !== currentRow.content;
+
+  const save = useCallback(async () => {
+    setSaving(true);
+    try {
+      const res = await apiFetch(`/api/admin/agent-prompt/report/${selectedKey}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: draft })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+      const saved = json.prompt;
+      setPrompts((prev) => {
+        const isSame = (p) => p.scope === saved.scope && p.scopeKey === saved.scopeKey;
+        return prev.some(isSame) ? prev.map((p) => (isSame(p) ? saved : p)) : [...prev, saved];
+      });
+    } catch (e) {
+      message.error(e.message || 'Failed to save report prompt');
+    } finally {
+      setSaving(false);
+    }
+  }, [draft, selectedKey]);
+
+  // Realtime autosave: coalesce keystrokes into one PUT ~800ms after the admin
+  // stops typing. Switching prompts resets `draft` (dirty → false) and the
+  // cleanup clears the pending timer, so a half-typed edit never lands on the
+  // wrong prompt.
+  useEffect(() => {
+    if (!dirty || !draft.trim()) return undefined;
+    const handle = setTimeout(save, 800);
+    return () => clearTimeout(handle);
+  }, [dirty, draft, save]);
+
+  const active = REPORT_PROMPTS.find((p) => p.key === selectedKey) || REPORT_PROMPTS[0];
+
+  return (
+    <div>
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          message={error}
+          style={{ marginBottom: 16 }}
+          action={
+            <Button size="small" onClick={load}>
+              Retry
+            </Button>
+          }
+        />
+      )}
+
+      <Paragraph style={{ color: palette.textMuted, marginTop: 0 }}>
+        The analysis-report generator uses these two system prompts. Changes
+        autosave to a draft and take effect on the <Text strong>next report</Text>{' '}
+        — there's no publish step. Use the placeholders{' '}
+        <Text code>{'{{subjectLabel}}'}</Text> and <Text code>{'{{timespan}}'}</Text>{' '}
+        to inject the report's subject and time window; the user prompt and
+        structured session data are appended automatically at generation time.
+      </Paragraph>
+
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+          <Spin />
+        </div>
+      ) : (
+        <div ref={rowRef}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: 12,
+              marginBottom: 8
+            }}
+          >
+            <div>
+              <Segmented
+                value={selectedKey}
+                onChange={setSelectedKey}
+                options={REPORT_PROMPTS.map((p) => ({ label: p.label, value: p.key }))}
+              />
+              <div style={{ color: palette.textMuted, fontSize: 12, marginTop: 6 }}>
+                {active.hint}
+              </div>
+            </div>
+          </div>
+          <div data-color-mode="light">
+            <MDEditor
+              value={draft}
+              onChange={(value) => setDraft(value ?? '')}
+              height={Math.max(MIN_EDITOR_HEIGHT, areaHeight - COL_HEADER_H - EDITOR_FOOTER_H)}
+              preview="edit"
+              textareaProps={{
+                placeholder:
+                  'Write the report system prompt in Markdown — use {{subjectLabel}} and {{timespan}} for the runtime subject and window…'
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              marginTop: 12
+            }}
+          >
+            <SaveStatus saving={saving} dirty={dirty} empty={!draft.trim()} />
           </div>
         </div>
       )}
@@ -1349,6 +1582,11 @@ export default function AdminPage() {
                 key: 'prompts',
                 label: 'Agent prompts',
                 children: <AgentPromptsPanel />
+              },
+              {
+                key: 'report-prompts',
+                label: 'Report prompts',
+                children: <ReportPromptsPanel />
               }
             ]}
           />

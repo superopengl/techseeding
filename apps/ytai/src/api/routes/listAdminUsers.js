@@ -1,6 +1,12 @@
-import { desc, isNull, ne, or, sql } from 'drizzle-orm';
+import { desc, eq, isNull, ne, or, sql } from 'drizzle-orm';
 import db from '../db/index.js';
-import { sessionMessage, tutorSession, user } from '../db/schema.js';
+import {
+  sessionMessage,
+  subjectReport,
+  tutorSession,
+  user,
+  userProfile
+} from '../db/schema.js';
 
 // GET /api/admin/users
 //
@@ -14,21 +20,47 @@ import { sessionMessage, tutorSession, user } from '../db/schema.js';
 // role=admin, so this handler doesn't need to re-check.
 export default function listAdminUsers(fastify) {
   fastify.get('/api/admin/users', async () => {
-    // Last activity = the most recent tutor message the user sent, across all
-    // their sessions. It's the truest "when did this person last use the app"
-    // signal; createdAt only tells us when they signed up. Correlated scalar
-    // subquery so the outer SELECT stays a clean per-user row (no join fanout,
-    // no GROUP BY over every user column). Null for users who never tutored.
-    // Aliased tables (sm/ts) + an explicit "user".id correlation: this
-    // drizzle build renders bare column refs unqualified, so an unaliased
-    // subquery makes "id" / "user_id" ambiguous across the two joined tables.
-    const lastActivityAt = sql`(
-      SELECT MAX(sm.created_at)
-      FROM ${sessionMessage} sm
-      JOIN ${tutorSession} ts ON ts.id = sm.session_id
-      WHERE ts.user_id = "user".id
-    )`.as('last_activity_at');
+    // Per-user session stats, pre-aggregated in ONE pass over tutor_session
+    // (left-joined to its messages) and grouped by owner. This replaces the
+    // old per-row correlated subqueries: instead of re-running a scan for
+    // every user in the outer SELECT, Postgres builds each rollup once as a
+    // hash aggregate and hash-joins it to the user list.
+    //
+    //   sessionCount   = distinct sessions the user started (the left join to
+    //                    messages fans rows out, so count DISTINCT the session).
+    //   lastActivityAt = newest message across all their sessions — the truest
+    //                    "when did this person last use the app" signal.
+    // Backed by tutor_session_user_id_idx + session_message_session_id_idx.
+    const sessionStats = db()
+      .select({
+        userId: tutorSession.userId,
+        sessionCount: sql`count(distinct ${tutorSession.id})::int`.as(
+          'session_count'
+        ),
+        lastActivityAt: sql`max(${sessionMessage.createdAt})`.as(
+          'last_activity_at'
+        )
+      })
+      .from(tutorSession)
+      .leftJoin(sessionMessage, eq(sessionMessage.sessionId, tutorSession.id))
+      .groupBy(tutorSession.userId)
+      .as('session_stats');
 
+    // How many analysis (subject) reports each user has generated. Same
+    // single-pass hash aggregate; backed by subject_report_user_id_idx.
+    const reportStats = db()
+      .select({
+        userId: subjectReport.userId,
+        reportCount: sql`count(*)::int`.as('report_count')
+      })
+      .from(subjectReport)
+      .groupBy(subjectReport.userId)
+      .as('report_stats');
+
+    // One statement, four hash joins — no correlated per-row execution and no
+    // application-side N+1. The user's current school year comes from their
+    // 1:1 user_profile row (null when they never set one). Counts coalesce to
+    // 0 for users with no sessions/reports (the left join yields null).
     const rows = await db()
       .select({
         id: user.id,
@@ -36,10 +68,18 @@ export default function listAdminUsers(fastify) {
         email: user.email,
         picture: user.picture,
         role: user.role,
+        year: userProfile.year,
         createdAt: user.createdAt,
-        lastActivityAt
+        lastActivityAt: sessionStats.lastActivityAt,
+        sessionCount: sql`coalesce(${sessionStats.sessionCount}, 0)`.mapWith(
+          Number
+        ),
+        reportCount: sql`coalesce(${reportStats.reportCount}, 0)`.mapWith(Number)
       })
       .from(user)
+      .leftJoin(userProfile, eq(userProfile.userId, user.id))
+      .leftJoin(sessionStats, eq(sessionStats.userId, user.id))
+      .leftJoin(reportStats, eq(reportStats.userId, user.id))
       .where(
         or(ne(user.authProvider, 'local'), isNull(user.localLoginUserName))
       )

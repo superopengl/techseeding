@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { and, eq, max } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { compositePrompt } from '../db/schema.js';
-import { GLOBAL_KEY } from '../lib/agentPromptScope.js';
+import { GLOBAL_KEY, subjectYearKey } from '../lib/agentPromptScope.js';
 import { composeRawPrompt } from '../lib/loadCompositePrompt.js';
 import refineCompositePrompt from '../lib/refineCompositePrompt.js';
 import recordLlmUsage from '../lib/recordLlmUsage.js';
@@ -74,12 +74,12 @@ export default function publishCompositePrompt(fastify) {
 
     // Rows are immutable — every publish inserts a fresh version. The
     // next version is (current max for this subject+year) + 1. Publishing also
-    // snapshots the three source tier drafts into new immutable tier versions
-    // (when they've changed) so the tiers behind each composite are auditable.
+    // snapshots the two source tier drafts (global + this subject×year cell)
+    // into new immutable tier versions when they've changed, so the tiers
+    // behind each composite are auditable.
     const row = await withTx(async (tx) => {
       await snapshotAgentPromptVersion(tx, 'global', GLOBAL_KEY);
-      await snapshotAgentPromptVersion(tx, 'subject', subject);
-      await snapshotAgentPromptVersion(tx, 'year', year);
+      await snapshotAgentPromptVersion(tx, 'subject_year', subjectYearKey(subject, year));
 
       const [{ maxVersion } = {}] = await tx
         .select({ maxVersion: max(compositePrompt.version) })

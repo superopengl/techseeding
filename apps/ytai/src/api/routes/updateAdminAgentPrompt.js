@@ -17,12 +17,13 @@ const RETURNING = {
 // PUT /api/admin/agent-prompt/:scope/:scopeKey
 //   body: { content: string }
 //
-// Save the mutable DRAFT (version IS NULL) of one tier. The editor calls this
+// Save the mutable DRAFT (version IS NULL) of one prompt. The editor calls this
 // in realtime as the admin types, so it upserts the single draft row in place
 // — it never touches the immutable published versions (those are only created
-// by a composite publish). `scope` is 'global' | 'subject' | 'year';
-// `scopeKey` is 'global', a subject value, or a year value. Content is bounded
-// at 20k characters so an accidental paste can't blow the context.
+// by a composite publish). `scope`/`scopeKey` is one of: 'global'/'global', a
+// 'subject_year'/'<subject>:<year>' tutor cell, or a 'report'/'body'|'title'
+// analysis-report prompt. Content is bounded at 20k characters so an accidental
+// paste can't blow the context.
 //
 // Auth: /api/admin/* is gated to role=admin by the global onRequest hook.
 export default function updateAdminAgentPrompt(fastify) {
