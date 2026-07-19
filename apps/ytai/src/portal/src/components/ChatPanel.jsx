@@ -539,6 +539,7 @@ export default function ChatPanel({
               <Bubble
                 key={message.id}
                 message={message}
+                isNarrow={isNarrow}
                 isSpeaking={isThisSpeaking}
                 thinking={isStreamingTail && thinkingActive}
                 onReplay={
@@ -735,7 +736,7 @@ export default function ChatPanel({
   );
 }
 
-function Bubble({ message, onReplay, isSpeaking, thinking }) {
+function Bubble({ message, onReplay, isSpeaking, thinking, isNarrow }) {
   const isUser = message.role === 'user';
   if (!isUser && !message.content && !thinking) return null;
   // Read-aloud is the only per-bubble action — copy-to-clipboard was
@@ -766,7 +767,10 @@ function Bubble({ message, onReplay, isSpeaking, thinking }) {
           display: 'flex',
           alignItems: 'flex-end',
           gap: 4,
-          maxWidth: '78%'
+          // On narrow devices 78% wastes a lot of horizontal space and
+          // forces long tutor replies to wrap awkwardly — let bubbles run
+          // nearly full width there, keeping the tighter cap on wide panels.
+          maxWidth: isNarrow ? '92%' : '78%'
         }}
       >
         <div
