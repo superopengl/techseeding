@@ -1,30 +1,37 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { withTx } from '../db/index.js';
 import { agentPrompt } from '../db/schema.js';
-import isSubject from '../lib/tutorSubject.js';
-import { YEARS } from '../lib/year.js';
+import isValidScopeKey from '../lib/agentPromptScope.js';
 
 const MAX_PROMPT_LENGTH = 20000;
 
-// PUT /api/admin/agent-prompt/:year/:subject
+const RETURNING = {
+  id: agentPrompt.id,
+  scope: agentPrompt.scope,
+  scopeKey: agentPrompt.scopeKey,
+  version: agentPrompt.version,
+  content: agentPrompt.content,
+  updatedAt: agentPrompt.updatedAt
+};
+
+// PUT /api/admin/agent-prompt/:scope/:scopeKey
 //   body: { content: string }
 //
-// Update — or insert-if-missing — the (year, subject) system prompt that
-// gets injected after the hardcoded persona on every tutor turn. Content
-// is bounded at 20k characters so an accidental paste of a huge document
-// can't blow the model's context.
+// Save the mutable DRAFT (version IS NULL) of one tier. The editor calls this
+// in realtime as the admin types, so it upserts the single draft row in place
+// — it never touches the immutable published versions (those are only created
+// by a composite publish). `scope` is 'global' | 'subject' | 'year';
+// `scopeKey` is 'global', a subject value, or a year value. Content is bounded
+// at 20k characters so an accidental paste can't blow the context.
 //
 // Auth: /api/admin/* is gated to role=admin by the global onRequest hook.
 export default function updateAdminAgentPrompt(fastify) {
-  fastify.put('/api/admin/agent-prompt/:year/:subject', async (request, reply) => {
-    const { year, subject } = request.params;
+  fastify.put('/api/admin/agent-prompt/:scope/:scopeKey', async (request, reply) => {
+    const { scope, scopeKey } = request.params;
     const content = typeof request.body?.content === 'string' ? request.body.content : null;
 
-    if (!YEARS.includes(year)) {
-      return reply.code(400).send({ error: `Invalid year "${year}"` });
-    }
-    if (!isSubject(subject)) {
-      return reply.code(400).send({ error: `Invalid subject "${subject}"` });
+    if (!isValidScopeKey(scope, scopeKey)) {
+      return reply.code(400).send({ error: `Invalid prompt tier "${scope}/${scopeKey}"` });
     }
     if (content == null || content.trim().length === 0) {
       return reply.code(400).send({ error: 'content is required' });
@@ -40,7 +47,13 @@ export default function updateAdminAgentPrompt(fastify) {
       const [existing] = await tx
         .select({ id: agentPrompt.id })
         .from(agentPrompt)
-        .where(and(eq(agentPrompt.year, year), eq(agentPrompt.subject, subject)))
+        .where(
+          and(
+            eq(agentPrompt.scope, scope),
+            eq(agentPrompt.scopeKey, scopeKey),
+            isNull(agentPrompt.version)
+          )
+        )
         .limit(1);
 
       if (existing) {
@@ -48,26 +61,14 @@ export default function updateAdminAgentPrompt(fastify) {
           .update(agentPrompt)
           .set({ content, updatedAt: now })
           .where(eq(agentPrompt.id, existing.id))
-          .returning({
-            id: agentPrompt.id,
-            year: agentPrompt.year,
-            subject: agentPrompt.subject,
-            content: agentPrompt.content,
-            updatedAt: agentPrompt.updatedAt
-          });
+          .returning(RETURNING);
         return updated;
       }
 
       const [inserted] = await tx
         .insert(agentPrompt)
-        .values({ year, subject, content })
-        .returning({
-          id: agentPrompt.id,
-          year: agentPrompt.year,
-          subject: agentPrompt.subject,
-          content: agentPrompt.content,
-          updatedAt: agentPrompt.updatedAt
-        });
+        .values({ scope, scopeKey, version: null, content })
+        .returning(RETURNING);
       return inserted;
     });
 

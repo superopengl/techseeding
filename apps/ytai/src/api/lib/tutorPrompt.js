@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { ANNOTATION_COLOR_NAMES } from './annotationPalette.js';
-import loadAgentPrompt from './loadAgentPrompt.js';
+import loadCompositePrompt from './loadCompositePrompt.js';
 import isSubject, { DEFAULT_SUBJECT } from './tutorSubject.js';
 import { YEARS } from './year.js';
 
@@ -15,11 +15,10 @@ function loadPrompt(name) {
   return readFileSync(path.join(PROMPTS_DIR, name), 'utf8').trimEnd();
 }
 
-// Loaded once at module init — the persona (role + safety limits) and the
-// pace files stay builtin. Only the per-(year, subject) curriculum prompt
-// lives in the DB (see `loadAgentPrompt`), so admin edits to that layer
-// take effect on the next tutor turn without a server restart.
-const PERSONA = loadPrompt('tutorPersona.md');
+// Loaded once at module init — the pace files stay builtin. The editable
+// system-prompt stack (global + subject + year) lives in the DB (see
+// `loadAgentPrompt`), so admin edits to any tier take effect on the next
+// tutor turn without a server restart.
 const PACE_BY_LEVEL = {
   guided: loadPrompt('tutorPace.guided.md'),
   balanced: loadPrompt('tutorPace.balanced.md'),
@@ -48,11 +47,12 @@ export default async function tutorPrompt({
   const yearKey = YEARS.includes(year) ? year : DEFAULT_YEAR;
   const hasDoc = !!activeDoc && Array.isArray(activeDoc.pages) && activeDoc.pages.length > 0;
 
-  // Per-(year, subject) prompt is loaded from the DB on every turn so
-  // admin edits in `/admin` → Prompts take effect on the next message.
-  // The global persona above stays hardcoded — it carries the role +
-  // safety limits and must be non-editable.
-  const yearSubjectPrompt = await loadAgentPrompt(yearKey, subjectKey);
+  // The composite system prompt is loaded from the DB on every turn so admin
+  // edits take effect on the next message without a restart. It's the
+  // published, AI-refined merge of the three editable tiers (global + subject
+  // + year); when a (subject, year) hasn't been published yet the loader
+  // falls back to composing those tiers live.
+  const composite = await loadCompositePrompt(yearKey, subjectKey);
 
   // STATIC system messages — byte-identical across every turn in one
   // session (within a single active doc). This is the prefix we want
@@ -60,10 +60,7 @@ export default async function tutorPrompt({
   // per turn — viewingPage, used colors, annotated pages, pacing — must
   // NOT live in here; it goes in `turnPrompt` below and ships AFTER
   // history so the long stable prefix stays cacheable.
-  const messages = [
-    { role: 'system', content: PERSONA },
-    { role: 'system', content: yearSubjectPrompt }
-  ];
+  const messages = [{ role: 'system', content: composite }];
 
   if (hasDoc) {
     const pageCount = activeDoc.pages.length;

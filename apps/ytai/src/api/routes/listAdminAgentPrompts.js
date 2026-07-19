@@ -1,12 +1,14 @@
-import { asc } from 'drizzle-orm';
+import { asc, desc } from 'drizzle-orm';
 import db from '../db/index.js';
 import { agentPrompt } from '../db/schema.js';
 
 // GET /api/admin/agent-prompts
 //
-// List every stored (year, subject) prompt. There are 16 rows on a
-// seeded install (4 years × 4 subjects), so no pagination — the whole
-// grid is returned in one shot to drive the admin editor.
+// List every stored tier-prompt version across all (scope, scopeKey) combos.
+// Rows are immutable + append-only, so this is the full version history that
+// drives the admin editor: the latest version per tier is what's edited and
+// used, and the preview diffs the current version (or the unsaved draft)
+// against the previous one. Ordered newest-version-first within each tier.
 //
 // Auth: /api/admin/* is gated to role=admin by the global onRequest hook.
 export default function listAdminAgentPrompts(fastify) {
@@ -14,13 +16,18 @@ export default function listAdminAgentPrompts(fastify) {
     const rows = await db()
       .select({
         id: agentPrompt.id,
-        year: agentPrompt.year,
-        subject: agentPrompt.subject,
+        scope: agentPrompt.scope,
+        scopeKey: agentPrompt.scopeKey,
+        version: agentPrompt.version,
         content: agentPrompt.content,
         updatedAt: agentPrompt.updatedAt
       })
       .from(agentPrompt)
-      .orderBy(asc(agentPrompt.year), asc(agentPrompt.subject));
+      .orderBy(
+        asc(agentPrompt.scope),
+        asc(agentPrompt.scopeKey),
+        desc(agentPrompt.version)
+      );
 
     return { prompts: rows };
   });
