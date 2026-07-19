@@ -4,6 +4,7 @@ import './styles/clay.css';
 import './styles/tabs.css';
 import './styles/splitter.css';
 import './styles/select.css';
+import './styles/md-editor.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(

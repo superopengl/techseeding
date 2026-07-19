@@ -1,0 +1,12 @@
+/* Enlarge the font in the Markdown editor's editable panel (the textarea plus
+   its syntax-highlight <pre> overlay) so long agent prompts are comfortable to
+   read and edit. The input and the overlay must share the exact same font-size
+   and line-height, otherwise the highlight layer drifts out of alignment with
+   the caret. */
+.w-md-editor-text-input,
+.w-md-editor-text-pre,
+.w-md-editor-text-pre > code,
+.w-md-editor-text {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
