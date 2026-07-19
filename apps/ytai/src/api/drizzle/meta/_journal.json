@@ -218,6 +218,34 @@
       "when": 1782500000000,
       "tag": "0030_agent_prompt",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1782600000000,
+      "tag": "0031_composite_prompt",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1782700000000,
+      "tag": "0032_composite_prompt_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1782800000000,
+      "tag": "0033_agent_prompt_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1782900000000,
+      "tag": "0034_agent_prompt_drafts",
+      "breakpoints": true
     }
   ]
 }

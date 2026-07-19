@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   integer,
@@ -300,30 +301,85 @@ export const subjectReport = ytai.table(
   }
 );
 
-// Editable per-(year, subject) system prompt injected after the hardcoded
-// global persona when Brain runs a tutoring turn. The persona (role +
-// safety limits) lives in `src/api/prompts/tutorPersona.md` and stays
-// builtin; only this second layer — the curriculum-scoping, year-appropriate
-// tone guidance — is admin-editable. On boot, `seedAgentPrompts` upserts
-// one row per (year, subject) combination using the on-disk defaults from
-// `src/api/prompts/subjects/*.md` for any row that doesn't exist yet.
-// Rows are loaded on every tutor turn so admin edits take effect without
-// a server restart.
+// Admin-editable system-prompt stack, composed in three tiers on every
+// tutor turn. The final system prompt prepended to the conversation is
+// `global + subject + year`:
+//   - GLOBAL (one row): agent role + product scope, applied to every turn.
+//   - SUBJECT (one row per subject): content scope, teaching tone, and any
+//     special format / symbol conventions for that subject.
+//   - YEAR (one row per school year): the knowledge area / boundary for the
+//     year plus any extra tutoring constraints.
+//
+// `scope` is 'global' | 'subject' | 'year'; `scopeKey` is the sentinel
+// 'global' for the single global row, the subject value ('math'…) for
+// subject rows, or the year value ('Y3'…) for year rows.
+//
+// Each tier has exactly one mutable DRAFT row (`version` IS NULL) plus zero+
+// IMMUTABLE versioned rows (`version` = 1, 2, …). The prompt editor autosaves
+// in realtime into the draft row. Publishing a composite snapshots the source
+// tier drafts into new immutable tier versions (version = previous max + 1)
+// when they've changed, building an append-only history the admin UI diffs
+// against. On boot, `seedAgentPrompts` inserts the draft row per tier from the
+// on-disk defaults (prompts/tutorPersona.md, prompts/subjects/*.md,
+// prompts/years/*.md) for any tier that has no draft yet.
+//
+// Two partial unique indexes enforce the shape: at most one draft per tier,
+// and unique version numbers among the published rows.
 export const agentPrompt = ytai.table(
   'agent_prompt',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    year: text('year').notNull(),
-    subject: text('subject').notNull(),
+    scope: text('scope').notNull(),
+    scopeKey: text('scope_key').notNull(),
+    version: integer('version'),
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
   },
   (t) => ({
-    agentPromptYearSubjectUnique: uniqueIndex('agent_prompt_year_subject_uq').on(
-      t.year,
-      t.subject
-    )
+    agentPromptDraftUnique: uniqueIndex('agent_prompt_draft_uq')
+      .on(t.scope, t.scopeKey)
+      .where(sql`${t.version} is null`),
+    agentPromptScopeKeyVersionUnique: uniqueIndex('agent_prompt_scope_key_version_uq')
+      .on(t.scope, t.scopeKey, t.version)
+      .where(sql`${t.version} is not null`)
+  })
+);
+
+// Published, AI-refined composite system prompt per (subject, year). The
+// three editable tiers in `agent_prompt` (global + subject + year) are
+// composed and then run through a refinement pass — the "Publish" action in
+// the admin editor — that merges them into one coherent prompt. The result
+// is stored here, and tutor turns read THIS table so students get the
+// polished prompt, not the raw concatenation. When nothing is published for a
+// (subject, year), the runtime falls back to composing the tiers on the fly.
+//
+// Rows are IMMUTABLE and versioned: every publish inserts a new row with
+// `version` = previous max + 1 for that (subject, year), building an
+// append-only history. Tutor turns always read the highest `version`; the
+// admin UI diffs the current version (or the unpublished draft) against the
+// previous one. `sourceHash` is a sha256 of the raw composite the row was
+// refined from so a published prompt's origin is auditable.
+export const compositePrompt = ytai.table(
+  'composite_prompt',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    subject: text('subject').notNull(),
+    year: text('year').notNull(),
+    version: integer('version').notNull(),
+    content: text('content').notNull(),
+    sourceHash: text('source_hash'),
+    provider: text('provider'),
+    model: text('model'),
+    modelVersion: text('model_version'),
+    refinedAt: timestamp('refined_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+  },
+  (t) => ({
+    compositePromptSubjectYearVersionUnique: uniqueIndex(
+      'composite_prompt_subject_year_version_uq'
+    ).on(t.subject, t.year, t.version)
   })
 );
 
