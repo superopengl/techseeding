@@ -1,13 +1,11 @@
 {
   "button.cancel": "取消",
-  "button.submit": "提交",
-  "button.contact_us": "联系我们",
+  "button.submit": "发送消息",
+  "button.contact_us": "开始合作",
   "header.products": "产品",
-  "header.contact": "联系",
   "home.slogan": "与您的企业共同成长的技术伙伴",
   "home.catch_phrase": "为中小企业和初创公司设计、构建并扩展数字化解决方案",
   "section.services": "我们的服务",
-  "section.services.subtitle": "服务",
   "feature.title.ai": "AI 智能化",
   "feature.description.ai": "用 AI 为您的业务赋能。从智能客服和自动化工作流到定制 AI 集成，助您优化运营、提升客户体验。",
   "feature.title.website": "网站开发",
@@ -59,5 +57,13 @@
   "privacy.section.changes.title": "本政策的变更",
   "privacy.section.changes.content": "我们可能会因业务实践调整或法律法规要求而不时更新本隐私政策。更新内容将在本页发布，并附上修订后的\"最后更新\"日期。",
   "privacy.section.contact.title": "联系我们",
-  "privacy.section.contact.content": "如对本隐私政策有任何疑问，请通过本网站的联系表单与我们联系。"
+  "privacy.section.contact.content": "如对本隐私政策有任何疑问，请通过本网站的联系表单与我们联系。",
+  "home.location": "扎根悉尼的软件工作室，自 2019 年起。",
+  "section.services.intro": "从第一个落地页，到上线运行的 AI 功能。",
+  "section.products": "我们的自研产品",
+  "section.products.intro": "由我们自己设计、开发和运营。",
+  "product.kidplayai.tagline": "为 8–12+ 岁好奇孩子打造的趣味 AI 探索",
+  "product.yoututorai.tagline": "面向 3–12 年级学生的个性化 AI 辅导",
+  "product.open": "打开 {{name}}",
+  "section.stack": "我们常用的技术"
 }

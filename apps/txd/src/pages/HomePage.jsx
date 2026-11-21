@@ -1,629 +1,448 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import styled, { keyframes, css } from 'styled-components';
-import { Layout, Row, Col, Button, Tag } from 'antd';
-import HomeHeader from 'components/HomeHeader';
+import React, { useRef, useCallback } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { Layout } from 'antd';
+import HomeHeader, { headerHeight } from 'components/HomeHeader';
 import HomeFooter from 'components/HomeFooter';
-import { RiComputerLine } from "react-icons/ri";
-import { GoDeviceMobile } from "react-icons/go";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineWechat } from "react-icons/ai";
-import { GiMeshNetwork, GiTeamIdea } from "react-icons/gi";
 import ContactForm from 'components/ContactForm';
-import { Trans } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
-
-const { Content } = Layout;
-
-const auroraShift = keyframes`
-  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  33% { transform: translate(30px, -20px) rotate(120deg) scale(1.1); }
-  66% { transform: translate(-20px, 20px) rotate(240deg) scale(0.95); }
-  100% { transform: translate(0, 0) rotate(360deg) scale(1); }
-`;
-
-const subtleFloat = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-`;
-
-const fadeInUp = keyframes`
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-`;
+import { useTranslation } from 'react-i18next';
+import { products } from 'components/products';
+import SeedField from 'components/SeedField';
 
 const LayoutStyled = styled(Layout)`
-  margin: 0 auto;
-  background: transparent;
-  overflow-x: hidden;
+  background: var(--paper);
   min-height: 100vh;
-  position: relative;
 `;
 
-const ContentStyled = styled(Content)`
+const Wrap = styled.div`
+  max-width: var(--measure);
   margin: 0 auto;
-  width: 100%;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
 `;
 
 /* ─── Hero ─── */
 
-const HeroSection = styled.section`
+// Each word of the slogan settles at a heavier weight than the one before it,
+// so the headline itself "grows" from left to right.
+const grow = keyframes`
+  from { font-weight: 200; }
+  to { font-weight: var(--w); }
+`;
+
+const settle = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+`;
+
+const Hero = styled.section`
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
-  padding-top: 80px;
-  isolation: isolate;
-  background:
-    radial-gradient(ellipse 90% 70% at 50% 30%, rgba(56, 92, 188, 0.32) 0%, rgba(20, 26, 60, 0.18) 45%, transparent 75%),
-    linear-gradient(180deg, rgba(10, 16, 38, 0.7) 0%, rgba(8, 12, 28, 0.4) 60%, transparent 100%);
-
-  /* Soft fade into the next section */
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 120px;
-    background: linear-gradient(180deg, transparent 0%, #050510 100%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  background: var(--cobalt);
+  color: #fff;
+  padding-top: calc(${headerHeight}px + clamp(3rem, 10vh, 7rem));
+  padding-bottom: clamp(3rem, 8vh, 5.5rem);
 `;
 
-const AuroraBackground = styled.div`
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 0;
-
-  &::before, &::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    animation: ${auroraShift} 20s ease-in-out infinite;
-  }
-
-  &::before {
-    width: 720px;
-    height: 720px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 65%);
-    opacity: 0.55;
-    top: -22%;
-    left: -12%;
-  }
-
-  &::after {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #a855f7 0%, transparent 65%);
-    opacity: 0.5;
-    bottom: -12%;
-    right: -12%;
-    animation-delay: -7s;
-    animation-direction: reverse;
-  }
-`;
-
-const AuroraOrb = styled.div`
-  position: absolute;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  filter: blur(85px);
-  opacity: 0.32;
-  background: radial-gradient(circle, #22d3ee 0%, transparent 65%);
-  top: 28%;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: ${auroraShift} 25s ease-in-out infinite;
-  animation-delay: -12s;
-`;
-
-const Starfield = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255, 255, 255, 0.7), transparent 60%),
-    radial-gradient(1px 1px at 78% 22%, rgba(255, 255, 255, 0.55), transparent 60%),
-    radial-gradient(1.5px 1.5px at 32% 68%, rgba(255, 255, 255, 0.6), transparent 60%),
-    radial-gradient(1px 1px at 88% 72%, rgba(255, 255, 255, 0.5), transparent 60%),
-    radial-gradient(1px 1px at 55% 12%, rgba(255, 255, 255, 0.45), transparent 60%),
-    radial-gradient(1.5px 1.5px at 8% 84%, rgba(255, 255, 255, 0.55), transparent 60%),
-    radial-gradient(1px 1px at 65% 52%, rgba(255, 255, 255, 0.4), transparent 60%),
-    radial-gradient(1px 1px at 22% 38%, rgba(255, 255, 255, 0.5), transparent 60%),
-    radial-gradient(1.5px 1.5px at 92% 40%, rgba(255, 255, 255, 0.55), transparent 60%),
-    radial-gradient(1px 1px at 45% 88%, rgba(255, 255, 255, 0.4), transparent 60%);
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 30%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 30%, transparent 80%);
-`;
-
-const GridOverlay = styled.div`
-  position: absolute;
-  top: -15%;
-  left: -10%;
-  width: 120%;
-  height: 130%;
-  transform: rotate(-6deg);
-  transform-origin: center;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 96px 96px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 50%, transparent 100%);
-  z-index: 0;
-`;
-
-const BottomGridOverlay = styled.div`
-  position: absolute;
-  inset: -10% -8% -10% -8%;
-  transform: rotate(-6deg);
-  transform-origin: center;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
-  background-size: 96px 96px;
-  mask-image: linear-gradient(315deg, black 0%, rgba(0, 0, 0, 0.55) 18%, transparent 45%);
-  -webkit-mask-image: linear-gradient(315deg, black 0%, rgba(0, 0, 0, 0.55) 18%, transparent 45%);
-  pointer-events: none;
-  z-index: 0;
-`;
-
-const BottomBackdrop = styled.div`
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 900px;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-`;
-
-const HeroContent = styled.div`
+const Slogan = styled.h1`
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: ${fadeInUp} 1s cubic-bezier(0.16, 1, 0.3, 1) both;
-`;
+  margin: 0;
+  max-width: 13ch;
+  font-size: clamp(2.75rem, 8vw, 6.75rem);
+  font-variation-settings: 'opsz' 96;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: #fff;
 
-const HeroBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.02em;
-  margin-bottom: 1.5rem;
+  &:lang(zh) {
+    max-width: 9em;
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
 
   span {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #5dd894;
-    box-shadow: 0 0 8px #5dd894;
+    font-weight: var(--w);
+    animation: ${grow} 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 90ms + 150ms);
   }
 `;
 
-const HeroTitle = styled.h1`
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
+const HeroTop = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+  align-items: center;
+  gap: 2rem;
 
-  background: linear-gradient(160deg, #ffffff 0%, #94bfff 40%, #c4b5fd 60%, #ffffff 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-`;
-
-const HeroSubtitle = styled.p`
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.55);
-  text-align: center;
-  margin: 1rem 0 0 0;
-  letter-spacing: -0.01em;
-  line-height: 1.5;
-`;
-
-const ContactButton = styled(Button)`
-  && {
-    width: 100%;
-    max-width: 220px;
-    height: 48px !important;
-    margin-top: 2.5rem;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border: none;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 12px;
-      padding: 1px;
-      background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent, rgba(255,255,255,0.1));
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      -webkit-mask-composite: xor;
-      pointer-events: none;
-    }
-
-    &:hover {
-      background: linear-gradient(135deg, #4f8ff7, #9d6ff8);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-/* ─── Service Cards ─── */
-
-const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 1.75rem 1.5rem;
-  height: 100%;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+const HeroSeeds = styled.div`
   position: relative;
-  overflow: hidden;
+  z-index: 0;
 
-  &::before {
-    content: '';
+  @media (max-width: 900px) {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    top: 3.5rem;
+    right: -18vw;
+    width: 72vw;
+    opacity: 0.4;
+  }
+`;
+
+const HeroFoot = styled.div`
+  margin-top: clamp(2.5rem, 7vh, 4.5rem);
+  animation: ${settle} 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.9s both;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+`;
+
+const HeroLede = styled.div`
+  position: relative;
+  max-width: 36ch;
+
+  p {
+    margin: 0;
+    font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.92);
   }
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, ${props => props.$glowColor || '#5b9cf5'}10 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
+  p + p {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.65);
   }
+`;
+
+export const SproutButton = styled.button`
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--sprout);
+  padding: 0.95rem 1.6rem;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
 
   &:hover {
-    border-color: ${props => props.$glowColor || '#5b9cf5'}40;
-    transform: translateY(-4px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
-                0 0 40px ${props => props.$glowColor || '#5b9cf5'}12;
-
-    &::after {
-      opacity: 1;
-    }
-  }
-`;
-
-const CardIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-  background: ${props => props.$color || '#5b9cf5'}15;
-  color: ${props => props.$color || '#5b9cf5'};
-  transition: all 0.4s ease;
-  font-size: 24px;
-
-  ${GlassCard}:hover & {
-    background: ${props => props.$color || '#5b9cf5'}22;
-    box-shadow: 0 0 24px ${props => props.$color || '#5b9cf5'}30;
-  }
-`;
-
-const CardTitle = styled.h3`
-  font-weight: 600;
-  font-size: 1.15rem;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0 0 0.6rem 0;
-  letter-spacing: -0.02em;
-`;
-
-const CardDescription = styled.p`
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 0.85rem;
-  line-height: 1.65;
-  margin: 0;
-`;
-
-const StyledTag = styled(Tag)`
-  && {
-    border-radius: 6px;
-    margin: 2px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 0.7rem;
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-    letter-spacing: 0.01em;
-    padding: 1px 8px;
-  }
-`;
-
-/* ─── Sections ─── */
-
-const SectionBand = styled.div`
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-`;
-
-const ServicesBand = styled(SectionBand)`
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(99, 102, 241, 0.04) 50%, transparent 100%);
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    pointer-events: none;
-    z-index: -1;
+    background: #86ecc0;
   }
 
-  /* Floating orb on the left */
-  &::before {
-    width: 520px;
-    height: 520px;
-    top: 10%;
-    left: -180px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.16) 0%, transparent 65%);
-    filter: blur(60px);
-    animation: ${subtleFloat} 14s ease-in-out infinite;
+  &:active {
+    background: #3fcf8f;
   }
 
-  /* Dot grid texture on the right */
-  &::after {
-    inset: 0;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-    background-size: 28px 28px;
-    mask-image: radial-gradient(ellipse 60% 50% at 85% 30%, black 0%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 85% 30%, black 0%, transparent 70%);
+  &:focus-visible {
+    outline-color: #fff;
+  }
+
+  &:disabled {
+    cursor: progress;
     opacity: 0.6;
   }
 `;
 
-const ContactBand = styled(SectionBand)`
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(244, 114, 182, 0.035) 50%, transparent 100%);
+/* ─── Stack band ─── */
 
-  &::before,
-  &::after {
+const StackBand = styled.section`
+  background: var(--sprout);
+  color: var(--ink);
+  padding-top: clamp(1.75rem, 4vw, 2.75rem);
+  padding-bottom: clamp(1.75rem, 4vw, 2.75rem);
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--cobalt-deep);
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0;
+  }
+
+  li {
+    font-size: clamp(1.35rem, 3vw, 2.25rem);
+    font-weight: 720;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  li:not(:last-child)::after {
     content: '';
-    position: absolute;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /* Soft pink orb centered behind the contact card */
-  &::before {
-    width: 620px;
-    height: 420px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 0.3em;
+    height: 0.3em;
+    margin: 0 0.5em;
     border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(244, 114, 182, 0.14) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
-    filter: blur(70px);
-    animation: ${subtleFloat} 16s ease-in-out infinite;
-  }
-
-  /* Subtle horizontal scanlines */
-  &::after {
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 6px,
-      rgba(255, 255, 255, 0.018) 6px,
-      rgba(255, 255, 255, 0.018) 7px
-    );
-    mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
-    opacity: 0.7;
+    background: var(--cobalt);
   }
 `;
 
-const ServicesSection = styled.section`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 80px 1.5rem;
+/* ─── Shared section scaffolding ─── */
+
+const Section = styled.section`
+  padding-top: clamp(4rem, 10vw, 7.5rem);
+  padding-bottom: clamp(4rem, 10vw, 7.5rem);
+`;
+
+const SectionHead = styled.div`
+  h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: var(--cobalt);
+  }
+
+  p {
+    margin: 0.9rem 0 0;
+    max-width: 30ch;
+    color: var(--slate);
+  }
+`;
+
+/* ─── Services ─── */
+
+const ServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+
+  ${SectionHead} {
+    position: sticky;
+    top: calc(${headerHeight}px + 2rem);
+  }
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+
+    ${SectionHead} {
+      position: static;
+    }
+  }
+`;
+
+const ServiceSeeds = styled.div`
+  width: min(260px, 100%);
+  margin-top: 2.5rem;
+
+  @media (max-width: 820px) {
+    display: none;
+  }
+`;
+
+const ServiceList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+
+const Service = styled.li`
+  padding: 1.75rem 0 2rem;
+  border-top: 1px solid var(--rule);
+
+  &:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+    font-weight: 680;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0;
+    max-width: 62ch;
+    color: #34405a;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--cobalt);
+  }
+`;
+
+/* ─── Products ─── */
+
+const ProductsSection = styled(Section)`
+  padding-top: 0;
+`;
+
+const ProductGrid = styled.div`
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+`;
+
+const ProductLink = styled.a`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1.25rem;
+  align-items: center;
+  padding: 1.5rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--tint);
+  border: 2px solid transparent;
+  border-radius: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  img {
+    grid-row: span 2;
+    width: 96px;
+    height: 96px;
+    padding: 10px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 22px;
+  }
+
+  strong {
+    font-size: 1.4rem;
+    font-weight: 680;
+    letter-spacing: -0.015em;
+  }
+
+  span {
+    color: var(--slate);
+    line-height: 1.4;
+  }
+
+  em {
+    grid-column: 2;
+    margin-top: 0.6rem;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  &:hover em {
+    text-decoration-thickness: 2px;
+  }
+`;
+
+/* ─── Contact ─── */
+
+const ContactBand = styled.section`
   position: relative;
+  overflow: hidden;
+  background: var(--cobalt);
+  color: #fff;
+  padding-top: clamp(4rem, 10vw, 7rem);
+  padding-bottom: clamp(4rem, 10vw, 7rem);
 `;
 
-const ContactSection = styled.section`
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 80px 1.5rem;
+const ContactSeeds = styled.div`
+  position: absolute;
+  left: -4rem;
+  bottom: -6rem;
+  width: min(420px, 60vw);
+  opacity: 0.35;
+  transform: scaleY(-1);
+  pointer-events: none;
+`;
+
+const ContactGrid = styled.div`
   position: relative;
-`;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(2rem, 6vw, 6rem);
 
-const ContactPanel = styled.div`
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  padding: 48px 56px;
+  h2 {
+    margin: 0;
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #fff;
+  }
 
-  @media (max-width: 600px) {
-    padding: 32px 24px;
+  p {
+    margin: 1rem 0 0;
+    max-width: 32ch;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
   }
 `;
 
-const ContactPrompt = styled.p`
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.5;
-  text-align: center;
-  margin: 0 0 1.5rem 0;
-`;
+const stack = ['Node.js', 'TypeScript', 'React', 'Web app', 'Mobile', 'PostgreSQL', 'MongoDB', 'SQL Server', 'Docker', 'AWS', 'Azure', 'Agentic UI'];
 
-const SectionDivider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
-  margin: 0 auto;
-  max-width: 800px;
-`;
-
-const SectionLabel = styled.p`
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.7rem;
-  font-weight: 600;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-  color: #818cf8;
-  margin: 0 0 0.5rem 0;
-`;
-
-const SectionTitle = styled.h2`
-  text-align: center;
-  font-weight: 700;
-  font-size: 2.2rem;
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0 0 3.5rem 0;
-  letter-spacing: -0.04em;
-`;
-
-const tileSpanProps = {
-  xs: 24,
-  sm: 24,
-  md: 12,
-  lg: 8,
-  xl: 8,
-  xxl: 8,
+const productColors = {
+  kidplayai: { '--tint': '#dff3e6', '--accent': '#1f7a4a' },
+  yoututorai: { '--tint': '#e7e5f4', '--accent': '#4b4a8f' },
 };
 
-const iconSize = 24;
-
-const tileData = [
-  {
-    title: <Trans i18nKey="feature.title.ai" />,
-    tags: [
-      <Trans i18nKey="tag.ai_chatbot" />,
-      <Trans i18nKey="tag.ai_automation" />,
-      <Trans i18nKey="tag.ai_integration" />,
-    ],
-    content: <Trans i18nKey="feature.description.ai" />,
-    icon: <BsStars size={iconSize} />,
-    color: '#a78bfa',
-  },
-  {
-    title: <Trans i18nKey="feature.title.website" />,
-    tags: [
-      <Trans i18nKey="tag.portal" />,
-      <Trans i18nKey="tag.webapp" />,
-      <Trans i18nKey="tag.custom_design" />,
-    ],
-    content: <Trans i18nKey="feature.description.website" />,
-    icon: <RiComputerLine size={iconSize} />,
-    color: '#60a5fa',
-  },
-  {
-    title: <Trans i18nKey="feature.title.mobile" />,
-    tags: [
-      <Trans i18nKey="tag.app_dev" />,
-      <Trans i18nKey="tag.mobile_api" />,
-      <Trans i18nKey="tag.hosting" />,
-    ],
-    content: <Trans i18nKey="feature.description.mobile" />,
-    icon: <GoDeviceMobile size={iconSize} />,
-    color: '#f472b6',
-  },
-  {
-    title: <Trans i18nKey="feature.title.wechat" />,
-    tags: [
-      <Trans i18nKey="tag.wechat_mini" />,
-      <Trans i18nKey="tag.wechat_public" />,
-      <Trans i18nKey="tag.wechat_api" />,
-    ],
-    content: <Trans i18nKey="feature.description.wechat" />,
-    icon: <AiOutlineWechat size={iconSize} />,
-    color: '#34d399',
-  },
-  {
-    title: <Trans i18nKey="feature.title.digitizing" />,
-    tags: [
-      <Trans i18nKey="tag.free_quote" />,
-      <Trans i18nKey="tag.custom_solution" />,
-      <Trans i18nKey="tag.e_commerce" />,
-    ],
-    content: <Trans i18nKey="feature.description.digitizing" />,
-    icon: <GiMeshNetwork size={iconSize} />,
-    color: '#fbbf24',
-  },
-  {
-    title: <Trans i18nKey="feature.title.consulting" />,
-    tags: [
-      <Trans i18nKey="tag.full_stack" />,
-      <Trans i18nKey="tag.architecture" />,
-      <Trans i18nKey="tag.ba" />,
-    ],
-    content: <Trans i18nKey="feature.description.consulting" />,
-    icon: <GiTeamIdea size={iconSize} />,
-    color: '#2dd4bf',
-  },
+const serviceKeys = [
+  { key: 'ai', tags: ['ai_chatbot', 'ai_automation', 'ai_integration'] },
+  { key: 'website', tags: ['portal', 'webapp', 'custom_design'] },
+  { key: 'mobile', tags: ['app_dev', 'mobile_api', 'hosting'] },
+  { key: 'wechat', tags: ['wechat_mini', 'wechat_public', 'wechat_api'] },
+  { key: 'digitizing', tags: ['free_quote', 'custom_solution', 'e_commerce'] },
+  { key: 'consulting', tags: ['full_stack', 'architecture', 'ba'] },
 ];
 
-function useWindowSize() {
-  const [width, setWidth] = useState(window.innerWidth);
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  return width;
-}
+function GrowingSlogan({ text, lang }) {
+  // English grows word by word; Chinese has no spaces, so it grows per character.
+  const tokens = lang === 'zh' ? Array.from(text) : text.split(' ');
+  const joiner = lang === 'zh' ? '' : ' ';
+  const min = 260;
+  const max = 800;
+  const step = tokens.length > 1 ? (max - min) / (tokens.length - 1) : 0;
 
-const headerHeight = 56;
+  return (
+    <Slogan lang={lang} aria-label={text}>
+      {tokens.map((word, i) => (
+        <React.Fragment key={i}>
+          <span aria-hidden="true" style={{ '--w': Math.round(min + step * i), '--i': i }}>{word}</span>
+          {i < tokens.length - 1 && joiner}
+        </React.Fragment>
+      ))}
+    </Slogan>
+  );
+}
 
 function HomePage() {
   const contactFormRef = useRef(null);
-  const windowWidth = useWindowSize();
-  const [searchParams] = useSearchParams();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language?.startsWith('zh') ? 'zh' : 'en';
 
   const openContactForm = useCallback(() => {
     const section = document.getElementById('contact');
@@ -636,88 +455,96 @@ function HomePage() {
     }, 600);
   }, []);
 
-  const posterHeight = windowWidth < 576 ? 420 :
-    windowWidth < 992 ? 480 : 560;
-
-  const catchPhraseSize = windowWidth < 576 ? 32 :
-    windowWidth < 992 ? 44 : 56;
-
-  const origin = searchParams.get('origin');
-  const shouldShowContact = true || origin !== 'wechat-app';
-
   return (
     <LayoutStyled>
       <HomeHeader />
-      <ContentStyled>
-        <HeroSection id="home" style={{ minHeight: posterHeight }}>
-          <AuroraBackground />
-          <AuroraOrb />
-          <Starfield />
-          <GridOverlay />
-          <HeroContent>
-            <HeroBadge><span /> Available for new projects</HeroBadge>
-            <HeroTitle style={{ fontSize: catchPhraseSize, maxWidth: 800 }}>
-              <Trans i18nKey="home.slogan" />
-            </HeroTitle>
-            <HeroSubtitle style={{ fontSize: Math.max(catchPhraseSize * 0.32, 14), maxWidth: 520 }}>
-              <Trans i18nKey="home.catch_phrase" />
-            </HeroSubtitle>
-            {shouldShowContact && (
-              <ContactButton type="default" size="large" onClick={openContactForm}>
-                <Trans i18nKey="button.contact_us" />
-              </ContactButton>
-            )}
-          </HeroContent>
-        </HeroSection>
+      <main>
+        <Hero id="home">
+          <Wrap>
+            <HeroTop>
+              <GrowingSlogan text={t('home.slogan')} lang={lang} />
+              <HeroSeeds>
+                <SeedField animate />
+              </HeroSeeds>
+            </HeroTop>
+            <HeroFoot>
+              <HeroLede>
+                <p>{t('home.catch_phrase')}</p>
+                <p>{t('home.location')}</p>
+              </HeroLede>
+              <SproutButton type="button" onClick={openContactForm}>
+                {t('button.contact_us')}
+              </SproutButton>
+            </HeroFoot>
+          </Wrap>
+        </Hero>
 
-        <SectionDivider />
+        <StackBand aria-labelledby="stack-title">
+          <Wrap>
+            <h2 id="stack-title">{t('section.stack')}</h2>
+            <ul>
+              {stack.map((name) => <li key={name}>{name}</li>)}
+            </ul>
+          </Wrap>
+        </StackBand>
 
-        <ServicesBand>
-          <section id="services">
-            <ServicesSection>
-              <SectionLabel><Trans i18nKey="section.services.subtitle" /></SectionLabel>
-              <SectionTitle><Trans i18nKey="section.services" /></SectionTitle>
-              <Row gutter={[16, 16]}>
-                {tileData.map((t, i) => (
-                  <Col key={i} {...tileSpanProps}>
-                    <GlassCard $glowColor={t.color}>
-                      <CardIcon $color={t.color}>{t.icon}</CardIcon>
-                      <CardTitle>{t.title}</CardTitle>
-                      {t.tags && t.tags.length > 0 && (
-                        <div style={{ marginBottom: '0.6rem' }}>
-                          {t.tags.map((tag, j) => <StyledTag key={j}>{tag}</StyledTag>)}
-                        </div>
-                      )}
-                      <CardDescription>{t.content}</CardDescription>
-                    </GlassCard>
-                  </Col>
+        <Section id="services">
+          <Wrap>
+            <ServicesGrid>
+              <SectionHead>
+                <h2>{t('section.services')}</h2>
+                <p>{t('section.services.intro')}</p>
+                <ServiceSeeds>
+                  <SeedField cols={6} rows={5} seed={3} palette={{ base: '#0a3d91', light: '#3da0f5', ripe: '#1fa36b' }} />
+                </ServiceSeeds>
+              </SectionHead>
+              <ServiceList>
+                {serviceKeys.map(({ key, tags }) => (
+                  <Service key={key}>
+                    <h3>{t(`feature.title.${key}`)}</h3>
+                    <p>{t(`feature.description.${key}`)}</p>
+                    <small>{tags.map((tag) => t(`tag.${tag}`)).join(lang === 'zh' ? '、' : ', ')}</small>
+                  </Service>
                 ))}
-              </Row>
-            </ServicesSection>
-          </section>
-        </ServicesBand>
+              </ServiceList>
+            </ServicesGrid>
+          </Wrap>
+        </Section>
 
-        {shouldShowContact && (
-          <>
-            <SectionDivider />
-            <ContactBand>
-              <section id="contact">
-                <ContactSection>
-                  <SectionLabel><Trans i18nKey="header.contact" /></SectionLabel>
-                  <SectionTitle><Trans i18nKey="button.contact_us" /></SectionTitle>
-                  <ContactPanel>
-                    <ContactPrompt><Trans i18nKey="contact.title" /></ContactPrompt>
-                    <ContactForm ref={contactFormRef} showCancel={false} />
-                  </ContactPanel>
-                </ContactSection>
-              </section>
-            </ContactBand>
-          </>
-        )}
-      </ContentStyled>
-      <BottomBackdrop>
-        <BottomGridOverlay />
-      </BottomBackdrop>
+        <ProductsSection id="products">
+          <Wrap>
+            <SectionHead>
+              <h2>{t('section.products')}</h2>
+              <p>{t('section.products.intro')}</p>
+            </SectionHead>
+            <ProductGrid>
+              {products.map((p) => (
+                <ProductLink key={p.key} style={productColors[p.key]} href={p.url} target="_blank" rel="noopener noreferrer">
+                  <img src={p.logo} alt="" />
+                  <strong>{p.name}</strong>
+                  <span>{t(`product.${p.key}.tagline`)}</span>
+                  <em>{t('product.open', { name: p.name })}</em>
+                </ProductLink>
+              ))}
+            </ProductGrid>
+          </Wrap>
+        </ProductsSection>
+
+        <ContactBand id="contact">
+          <ContactSeeds>
+            <SeedField cols={8} rows={6} seed={21} palette={{ base: '#3da0f5', light: '#ffffff', ripe: '#3da0f5' }} />
+          </ContactSeeds>
+          <Wrap>
+            <ContactGrid>
+              <div>
+                <h2>{t('button.contact_us')}</h2>
+                <p>{t('contact.title')}</p>
+              </div>
+              <ContactForm ref={contactFormRef} showCancel={false} />
+            </ContactGrid>
+          </Wrap>
+        </ContactBand>
+      </main>
       <HomeFooter />
     </LayoutStyled>
   );

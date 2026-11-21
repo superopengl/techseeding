@@ -4,104 +4,104 @@ import styled from 'styled-components';
 import emailjs from '@emailjs/browser';
 import { Trans, useTranslation } from 'react-i18next';
 
+// Rendered on the cobalt contact band: white fields, sprout-green submit.
 const StyledForm = styled(Form)`
   .ant-form-item {
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
   }
 
   .ant-input,
   .ant-input-affix-wrapper,
   textarea.ant-input {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 10px !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+    background: #fff;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: 1rem;
 
     &::placeholder {
-      color: rgba(255, 255, 255, 0.25) !important;
+      color: #7a8496;
     }
 
     &:hover {
-      border-color: rgba(255, 255, 255, 0.15) !important;
+      border-color: transparent;
     }
 
     &:focus,
     &.ant-input-affix-wrapper-focused {
-      border-color: rgba(129, 140, 248, 0.5) !important;
-      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.1) !important;
+      border-color: var(--sprout);
+      box-shadow: none;
     }
   }
 
   .ant-input {
-    padding: 10px 14px;
+    padding: 0.75rem 1rem;
   }
 
   .ant-input-affix-wrapper {
-    padding: 0 14px;
+    padding: 0 1rem;
 
     .ant-input {
-      padding: 10px 0 !important;
-      border: none !important;
-      background: transparent !important;
-      box-shadow: none !important;
+      padding: 0.75rem 0;
+      border: 0;
     }
   }
 
   textarea.ant-input {
-    padding: 10px 14px;
     resize: none;
   }
 
-  .ant-input-clear-icon {
-    color: rgba(255, 255, 255, 0.2);
+  .ant-input-status-error,
+  .ant-input-affix-wrapper-status-error {
+    border-color: var(--sprout) !important;
+  }
 
-    &:hover {
-      color: rgba(255, 255, 255, 0.5);
-    }
+  .ant-form-item-explain-error {
+    margin-top: 0.35rem;
+    color: var(--sprout);
+    font-size: 0.9rem;
   }
 
   .ant-input-data-count {
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
   }
 `;
 
 const SubmitButton = styled(Button)`
   && {
-    height: 44px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border: none;
-    color: white;
-    transition: all 0.3s ease;
+    height: 52px;
+    padding: 0 2rem;
+    border: 0;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 650;
+    background: var(--sprout);
+    color: var(--ink);
+    box-shadow: none;
 
-    &:hover {
-      background: linear-gradient(135deg, #4f8ff7, #9d6ff8);
-      color: white;
-      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+    &:not(:disabled):hover {
+      background: #86ecc0;
+      color: var(--ink);
+    }
+
+    &:not(:disabled):active {
+      background: #3fcf8f;
     }
 
     &:disabled {
-      background: rgba(255, 255, 255, 0.06);
-      color: rgba(255, 255, 255, 0.2);
-      box-shadow: none;
+      background: var(--sprout);
+      color: var(--ink);
+      opacity: 0.6;
     }
   }
 `;
 
 const CancelButton = styled(Button)`
   && {
-    height: 36px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.35);
-    transition: color 0.2s ease;
+    color: rgba(255, 255, 255, 0.75);
 
     &:hover {
-      color: rgba(255, 255, 255, 0.7);
+      color: #fff;
     }
   }
 `;
@@ -183,12 +183,12 @@ const ContactForm = forwardRef(function ContactForm({ onDone, showCancel = true 
       <Form.Item name="message" rules={[{ required: true, message: t('contact.error.message'), whitespace: true, max: 1000 }]}>
         <Input.TextArea autoSize={{ minRows: 3 }} allowClear={true} maxLength={1000} disabled={sending} placeholder={t('contact.placeholder.message')} />
       </Form.Item>
-      <Form.Item style={{ marginBottom: 8 }}>
-        <SubmitButton block htmlType="submit" disabled={sending}><Trans i18nKey="button.submit" /></SubmitButton>
+      <Form.Item style={{ marginTop: 8, marginBottom: 0 }}>
+        <SubmitButton htmlType="submit" disabled={sending}><Trans i18nKey="button.submit" /></SubmitButton>
       </Form.Item>
       {showCancel && (
         <Form.Item style={{ marginBottom: 0 }}>
-          <CancelButton block type="link" onClick={onDone} disabled={sending}><Trans i18nKey="button.cancel" /></CancelButton>
+          <CancelButton type="link" onClick={onDone} disabled={sending}><Trans i18nKey="button.cancel" /></CancelButton>
         </Form.Item>
       )}
     </StyledForm>

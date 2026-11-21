@@ -1,230 +1,148 @@
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { Layout, Menu, Drawer, Button, Dropdown } from 'antd';
+import { Drawer, Dropdown } from 'antd';
 import { useMediaQuery } from 'react-responsive';
-import { MenuOutlined, DownOutlined } from '@ant-design/icons';
-import { MdLanguage, MdApps } from "react-icons/md";
+import { MenuOutlined, CloseOutlined, DownOutlined } from '@ant-design/icons';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { Trans } from 'react-i18next';
-import LangToggleButton from './LangToggleButton';
-import kidPlayAiLogo from 'images/logo-kidplayai.png';
-import youTutorAiLogo from 'images/logo-yoututorai.png';
+import { useTranslation } from 'react-i18next';
+import { products } from './products';
 
-const { Header } = Layout;
+export const headerHeight = 64;
 
-const HeaderStyled = styled(Header)`
+const HeaderStyled = styled.header`
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  width: 100%;
-  height: 56px;
-  line-height: 56px;
+  height: ${headerHeight}px;
+  background: var(--cobalt);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+`;
+
+const HeaderInner = styled.div`
+  max-width: var(--measure);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
   display: flex;
-  white-space: nowrap;
-  border: 0;
-  justify-content: space-between;
   align-items: center;
-  padding-left: 16px;
-  padding-right: 20px;
-  background: rgba(10, 15, 30, 0.6);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  justify-content: space-between;
+`;
+
+const HeaderLogo = styled(Link)`
+  display: flex;
+  align-items: center;
+
+  img {
+    height: 22px;
+    width: auto;
+  }
 `;
 
 const DesktopNav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 2rem;
 `;
 
-const NavLink = styled.a`
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  transition: color 0.2s ease;
+const NavItem = styled.button`
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0.25rem 0;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
-
-  &:hover {
-    color: #ffffff;
-  }
-`;
-
-const NavTrigger = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: color 0.2s ease;
+  gap: 0.4rem;
 
   &:hover {
-    color: #ffffff;
+    color: #fff;
   }
 
   .anticon {
-    font-size: 10px;
-    opacity: 0.6;
+    font-size: 0.65rem;
   }
 `;
 
-const ProductMenuItemLink = styled.a`
+const ProductItem = styled.a`
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 6px;
-  line-height: 1.2;
+  gap: 0.9rem;
+  padding: 0.5rem 0.25rem;
+  color: var(--ink);
+  text-decoration: none;
+
+  img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+
+  span {
+    display: block;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: var(--slate);
+    white-space: normal;
+  }
 `;
 
-const ProductLogo = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  object-fit: contain;
-  background: #ffffff;
-  padding: 4px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-`;
-
-const ProductTextBlock = styled.div`
+const DrawerBody = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-`;
+  gap: 2rem;
 
-const ProductName = styled.span`
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-`;
-
-const ProductTagline = styled.span`
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.65;
-  line-height: 1.35;
-  white-space: normal;
-`;
-
-const productDropdownStyles = {
-  root: { minWidth: 300 },
-};
-
-const productMenuStyle = {
-  padding: 6,
-};
-
-const productMenuItemStyle = {
-  height: 'auto',
-  lineHeight: 1.2,
-  padding: '4px 10px',
-};
-
-const productMenuItems = [
-  {
-    key: 'kidplayai',
-    style: productMenuItemStyle,
-    label: (
-      <ProductMenuItemLink href="https://kidplayai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
-        <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
-        <ProductTextBlock>
-          <ProductName>KidPlayAI</ProductName>
-          <ProductTagline>Playful AI adventures for curious kids, ages 8–12+</ProductTagline>
-        </ProductTextBlock>
-      </ProductMenuItemLink>
-    ),
-  },
-  {
-    key: 'yoututorai',
-    style: productMenuItemStyle,
-    label: (
-      <ProductMenuItemLink href="https://yoututorai.techseeding.com.au/" target="_blank" rel="noopener noreferrer">
-        <ProductLogo src={youTutorAiLogo} alt="YouTutorAI" />
-        <ProductTextBlock>
-          <ProductName>YouTutorAI</ProductName>
-          <ProductTagline>Personalized AI tutoring for students Y3–Y12</ProductTagline>
-        </ProductTextBlock>
-      </ProductMenuItemLink>
-    ),
-  },
-];
-
-const headerHeight = 56;
-
-const HeaderLogo = styled(Link)`
-  display: flex;
-  align-items: center;
-  height: ${headerHeight}px;
-`;
-
-const StyledDrawer = styled(Drawer)`
-  .ant-drawer-content {
-    background: rgba(15, 20, 40, 0.9) !important;
-    backdrop-filter: blur(40px) !important;
-    -webkit-backdrop-filter: blur(40px) !important;
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--slate);
   }
 
-  .ant-drawer-body {
-    padding: 1rem 0;
-  }
-
-  a {
-    color: rgba(255, 255, 255, 0.7) !important;
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: white !important;
-    }
-  }
-
-  .ant-menu {
-    background: transparent !important;
-    border: none !important;
-  }
-
-  .ant-menu-item {
-    color: rgba(255, 255, 255, 0.7) !important;
-    border-radius: 8px;
-    margin: 2px 8px;
-
-    &:hover, &:active, &.ant-menu-item-selected {
-      background: rgba(255, 255, 255, 0.06) !important;
-      color: white !important;
-    }
-  }
-
-  svg {
-    position: relative;
-    top: 2px;
-    margin-right: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
+  ${NavItem} {
+    color: var(--cobalt);
+    font-size: 1.05rem;
   }
 `;
 
-const LogoImg = styled.img`
-  height: 28px;
-  width: auto;
-  opacity: 0.9;
-  filter: brightness(1.1) sepia(1) hue-rotate(200deg) saturate(1.5);
-  transition: all 0.3s ease;
+function LangToggleButton({ onClick }) {
+  return (
+    <NavItem type="button" onClick={onClick} aria-label="Switch language / 切换语言">
+      EN / 简中
+    </NavItem>
+  );
+}
 
-  &:hover {
-    opacity: 1;
-    filter: brightness(1.3) sepia(1) hue-rotate(200deg) saturate(1.2);
-  }
-`;
+function ProductEntry({ product, onClick }) {
+  const { t } = useTranslation();
+  return (
+    <ProductItem href={product.url} target="_blank" rel="noopener noreferrer" onClick={onClick}>
+      <img src={product.logo} alt="" />
+      <div>
+        <strong>{product.name}</strong>
+        <span>{t(`product.${product.key}.tagline`)}</span>
+      </div>
+    </ProductItem>
+  );
+}
 
 function HomeHeader() {
-  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isDesktop = useMediaQuery({ minWidth: 801 });
 
   const toggleLanguage = useCallback(() => {
@@ -234,105 +152,56 @@ function HomeHeader() {
     window.location.reload();
   }, [searchParams, navigate]);
 
-  const mobileMenuItems = [
-    {
-      key: 'products',
-      icon: <MdApps />,
-      label: <Trans i18nKey="header.products" />,
-      children: [
-        {
-          key: 'kidplayai',
-          style: { height: 'auto', lineHeight: 1.2, padding: '8px 12px' },
-          label: (
-            <ProductMenuItemLink
-              href="https://kidplayai.techseeding.com.au/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setDrawerVisible(false)}
-            >
-              <ProductLogo src={kidPlayAiLogo} alt="KidPlayAI" />
-              <ProductTextBlock>
-                <ProductName>KidPlayAI</ProductName>
-                <ProductTagline>Playful AI adventures for curious kids, ages 8–12+</ProductTagline>
-              </ProductTextBlock>
-            </ProductMenuItemLink>
-          ),
-        },
-        {
-          key: 'yoututorai',
-          style: { height: 'auto', lineHeight: 1.2, padding: '8px 12px' },
-          label: (
-            <ProductMenuItemLink
-              href="https://yoututorai.techseeding.com.au/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setDrawerVisible(false)}
-            >
-              <ProductLogo src={youTutorAiLogo} alt="YouTutorAI" />
-              <ProductTextBlock>
-                <ProductName>YouTutorAI</ProductName>
-                <ProductTagline>Personalized AI tutoring for students Y3–Y12</ProductTagline>
-              </ProductTextBlock>
-            </ProductMenuItemLink>
-          ),
-        },
-      ],
-    },
-    {
-      key: 'lang',
-      icon: <MdLanguage />,
-      label: 'EN / 简中',
-      onClick: toggleLanguage,
-    },
-  ];
+  const productMenuItems = products.map((p) => ({
+    key: p.key,
+    label: <ProductEntry product={p} />,
+  }));
 
   return (
     <HeaderStyled>
-      <HeaderLogo to="/">
-        <LogoImg src="/logo-light.png" alt="TECHSEEDING LOGO" />
-      </HeaderLogo>
-      {isDesktop ? (
-        <DesktopNav>
-          <Dropdown
-            menu={{ items: productMenuItems, style: productMenuStyle }}
-            placement="bottom"
-            styles={productDropdownStyles}
-          >
-            <NavTrigger>
-              <Trans i18nKey="header.products" />
-              <DownOutlined />
-            </NavTrigger>
-          </Dropdown>
-          <LangToggleButton onClick={toggleLanguage} />
-        </DesktopNav>
-      ) : (
-        <>
-          <Button
-            type="text"
-            style={{ color: 'rgba(255,255,255,0.8)', fontSize: 18 }}
-            onClick={() => setDrawerVisible(true)}
-          >
-            <MenuOutlined />
-          </Button>
-          <StyledDrawer
-            placement="right"
-            closable={false}
-            onClose={() => setDrawerVisible(false)}
-            open={drawerVisible}
-            size={320}
-            styles={{ mask: { backdropFilter: 'blur(4px)', background: 'rgba(0,0,0,0.3)' } }}
-          >
-            <Menu
-              mode="inline"
-              inlineIndent={16}
-              style={{ border: 0 }}
-              items={mobileMenuItems}
-              openKeys={['products']}
-              expandIcon={() => null}
-            />
-          </StyledDrawer>
-        </>
-      )}
+      <HeaderInner>
+        <HeaderLogo to="/" aria-label="Techseeding home">
+          <img src="/logo-light.png" alt="Techseeding" />
+        </HeaderLogo>
+        {isDesktop ? (
+          <DesktopNav>
+            <Dropdown
+              menu={{ items: productMenuItems, style: { padding: 6 } }}
+              placement="bottomRight"
+              styles={{ root: { width: 340 } }}
+            >
+              <NavItem type="button">
+                {t('header.products')}
+                <DownOutlined />
+              </NavItem>
+            </Dropdown>
+            <LangToggleButton onClick={toggleLanguage} />
+          </DesktopNav>
+        ) : (
+          <>
+            <NavItem type="button" aria-label="Open menu" onClick={() => setDrawerOpen(true)} style={{ fontSize: 20 }}>
+              <MenuOutlined />
+            </NavItem>
+            <Drawer
+              placement="right"
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              size={320}
+              closeIcon={<CloseOutlined aria-label="Close menu" />}
+            >
+              <DrawerBody>
+                <div>
+                  <h2>{t('header.products')}</h2>
+                  {products.map((p) => (
+                    <ProductEntry key={p.key} product={p} onClick={() => setDrawerOpen(false)} />
+                  ))}
+                </div>
+                <LangToggleButton onClick={toggleLanguage} />
+              </DrawerBody>
+            </Drawer>
+          </>
+        )}
+      </HeaderInner>
     </HeaderStyled>
   );
 }
